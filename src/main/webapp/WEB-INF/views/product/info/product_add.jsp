@@ -1,0 +1,282 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>基本信息</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<%@ include file="../../../include/top.jsp"%>
+<%
+	String path = ctx;
+%>
+<link rel="stylesheet" type="text/css" href="<%=ctx %>/assets/css/ztree/zTreeStyle/zTreeStyle.css" />
+<script type="text/javascript" src="<%=ctx %>/assets/js/ztree/jquery.ztree.core-3.5.min.js"></script>
+<script type="text/javascript" src="<%=ctx %>/assets/js/ztree/jquery.ztree.excheck-3.5.min.js"></script>
+<script type="text/javascript" src="<%=ctx %>/assets/js/json2.js"></script>
+<script type="text/javascript" src="<%=ctx %>/assets/js/web-js/product/productInfo_add.js"></script>
+
+</head>
+<body>
+	 <div class="p_container" >
+	    <ul class="w_tab">
+	    	<li><a href="javascript:void(0)" class="selected">基本信息</a></li>
+	    	<%--<li><a href="javascript:changeTab()">行程列表</a></li>--%>
+	    	<li><a href="javascript:changeTab()">标签属性</a></li>
+	    	<li><a href="javascript:changeTab()">备注信息</a></li>
+	    	<%--<li><a href="javascript:changeTab()">价格设置</a></li>--%>
+	    	<li class="clear"></li>
+	    </ul>
+
+	    <div class="p_container_sub" id="tab1">
+	    	<form id="saveProdectInfoForm">
+	    	<p class="p_paragraph_title"><b>基本信息</b></p>
+	    	<dl class="p_paragraph_content">
+	    		<dd>
+	    			<div class="dd_left"><i class="red">* </i>编码</div> 
+	    			<div class="dd_right"><input type="text" name="productInfo.code" value="" class="IptText300" placeholder="若不填系统自动生成" ></div>
+					<div class="clear"></div>
+	    		</dd> 
+	    		<!-- <dd>
+	    			<div class="dd_left">产品类型</div> 
+	    			<div class="dd_right">
+	    				<label class="radio" for=""><input type="radio" checked="checked" name="productInfo.type" value="1">国内长线</label>&nbsp;&nbsp;&nbsp;
+						<label class="radio" for=""><input type="radio" name="productInfo.type" value="2">周边短线</label>
+						<label class="radio" for=""><input type="radio" name="productInfo.type" value="3">出境线路</label>
+	    			</div>
+					<div class="clear"></div>
+	    		</dd>  -->
+	    		<dd>
+	    			<div class="dd_left">产品来源</div> 
+	    			<div class="dd_right">
+	    				<label class="radio" for=""><input type="radio" checked="checked" name="productInfo.sourceType" value="0">自有</label>&nbsp;&nbsp;&nbsp;
+						<label class="radio" for=""><input type="radio" name="productInfo.sourceType" value="1">采购</label>
+	    			</div>
+					<div class="clear"></div>
+	    		</dd>
+	    		<dd>
+	    			<div class="dd_left">产品名称</div> 
+	    			<div class="dd_right">
+	    			<p class="pb-5">
+	    				<input type="hidden" name="productInfo.brandName" id="brandName" value="">
+	    			<select class="select160"  name="productInfo.brandId" id="brandId">
+		    			<option value="">选择品牌</option>
+		    			<c:forEach items="${brandList}" var="brand">
+								<option value="${brand.id }">${brand.value }</option>
+							</c:forEach>
+	    			</select><input type="text" id="txt_pcity" placeholder="产品名称" name="productInfo.nameCity" class="IptText300">
+	    				</p>
+						<p class="pb-5">
+						
+                       <!--  <input type="text" id="txt_pday" placeholder="n晚n天"  name="productInfo.nameDuration" class="IptText60">
+                        <input type="text" id="txt_ptraffic" name="productInfo.nameTravelMode" placeholder="长线交通" class="IptText60">
+                        <input type="text" id="txt_pstar" name="productInfo.nameStarLevel" placeholder="星级" class="IptText60">
+                        <input type="text" id="txt_ptype" name="productInfo.nameMode" placeholder="纯玩" class="IptText60">  <i class="grey">游</i> -->
+	    				</p>
+                        <p class="pb-5">
+	    				<!-- <label id="productHint"></label> -->
+                        </p>
+	    			</div>
+					<div class="clear"></div>
+	    		</dd> 
+	    		 <!--
+	    		<dd>
+	    			<div class="dd_left">产品后缀</div> 
+	    			<div class="dd_right"><input type="text" name="productInfo.nameBrief" value="" class="IptText300"><i class="grey ml-10">例：牛人爆款升级，最高减600.</i></div>
+					<div class="clear"></div>
+	    		</dd> 
+                <dd>
+	    			<div class="dd_left">排序</div> 
+	    			<div class="dd_right"><input type="text" name="productInfo.orderNum" value="" class="IptText300"><i class="grey ml-10">填写数字，数字越大，越在前面显示</i></div>
+					<div class="clear"></div>
+	    		</dd>
+	    		-->
+	    		<dd>
+	    			<div class="dd_left">操作计调</div> 
+	    			<div class="dd_right"><input type="text" name="productInfo.operatorName" readonly="readonly" id="operatorName" value="${operatorName}" class="IptText300">
+	    			<a href="javascript:void(0);" onclick="selectUser()">修改</a>
+	    			<input type="hidden" name="productInfo.operatorId" id="operatorId" value="${operatorId}" >
+	    			</div>
+					<div class="clear"></div>
+	    		</dd>
+	    		<%-- <dd>
+	    			<div class="dd_left">目的地</div> 
+	    			<div class="dd_right">
+	    				<select name="productInfo.destProvinceId" id="provinceCode">
+	    					<option value="">请选择省</option>
+	    					<c:forEach items="${allProvince}" var="province">
+								<option value="${province.id }">${province.name }</option>
+							</c:forEach>
+	    				</select>
+	    				<select name="productInfo.destCityId" id="cityCode" >
+	    					<option value="">请选择市</option>
+	    					
+	    				</select>
+	    				<input type="hidden" name="productInfo.destProvinceName" id="provinceVal" value="">
+	    				<input type="hidden" name="productInfo.destCityName" id="cityVal" value="">
+	    			</div>
+					<div class="clear"></div>
+	    		</dd> --%>
+	    	</dl>
+
+	    	<%-- <p class="p_paragraph_title"><b>负责人信息</b></p>
+            <dl class="p_paragraph_content">
+	    		<dd>
+	    			<div class="dd_left"><span class="btnTianjia"><i></i>&nbsp;&nbsp;</span></div> 
+	    			<div class="dd_right" style="width:80%">
+	    			<div class="mb-5">
+	    			<a href="#" onclick="selectUser()" class="button button-primary button-small">添加</a>
+	    			</div>
+                        <table cellspacing="0" cellpadding="0" class="w_table" > 
+		             <col width="15%" /><col width="15%" /><col width="15%" /><col width="15%" /><col width="15%" /><col width="15%" /><col width="10%" />
+		             <thead>
+		             	<tr>
+		             		<th>职务<i class="w_table_split"></i></th>
+		             		<th>姓名<i class="w_table_split"></i></th>
+		             		<th>手机<i class="w_table_split"></i></th>
+		             		<th>座机<i class="w_table_split"></i></th>
+		             		<th>传真<i class="w_table_split"></i></th>
+		             		
+		             		<th>操作</th>
+		             	</tr>
+		             </thead>
+		             <tbody id="addContacts">
+
+		             </tbody>
+	          		</table>
+	    			</div>
+					<div class="clear"></div>
+	    		</dd>
+            </dl>
+ --%>
+
+
+	    	<p class="p_paragraph_title"><b>其他</b></p>
+	    	<dl class="p_paragraph_content">
+	    		<dd>
+	    			<div class="dd_left">图片</div> 
+	    			<div class="dd_right addImg" >
+	    					 
+	    				</div>
+	    				<label onclick="selectImg(this, '#imgTemp')" class="ulImgBtn"></label>
+					<div class="clear"></div>
+	    		</dd> 
+	    		<dd>
+	    			<div class="dd_left">附件</div> 
+	    			<div class="dd_right addAttachment" ></div>
+                    <input type="button" onclick="selectAttachment(this, '#attTemp')" name="" value="附件" class="button button-primary button-small">
+                    <%--<i class="grey ml-10">还没有文件</i>--%>
+					<div class="clear"></div>
+	    		</dd>
+	    	</dl>
+	    	<%@ include file="product_route_add.jsp"%>
+	    		
+            <div class="Footer">
+            <dl class="p_paragraph_content">
+	    		<dd>
+	    			<div class="dd_left"></div> 
+	    			<div class="dd_right">
+            			<button  type="submit" class="button button-primary button-small">保存</button>
+            			<button  type="button" class="button button-primary button-small" id="returnBtn">关闭</button>
+					</div>
+				</dd>
+			</dl>
+		 	</div>
+            </form>	
+            <!-- 责任人模版 -->
+            <div style="display: none;">
+				<table>
+					<tbody id="contactsTemp" style="display: none">
+						<tr>
+						  <td><input  name="productContacts[$index].typeName" type="hidden" value="$typeName"/>$typeName</td>
+		                  <td><input  name="productContacts[$index].name" type="hidden" value="$name"/>$name</td>
+		                  <td><input  name="productContacts[$index].mobile" type="hidden" value="$mobile"/>$mobile</td>
+		                  <td><input  name="productContacts[$index].tel" type="hidden" value="$tel"/>$tel</td>
+		                  <td><input  name="productContacts[$index].fax" type="hidden" value="$fax"/>$fax</td>
+		                  <td><span class="btnDelete"><a href="javascript:void(0)" id="delcon" class="def">删除</a></span></td>
+		                  </tr>
+					</tbody>
+				</table>
+			</div>
+			
+			<!-- 图片模版
+			<div id="imgTemp" style="display: none">
+				<span class="ulImg">
+					<img src="$src" alt="$name"><i class="icon_del delImg" ></i>
+					<input type="hidden" name="productAttachments[$index].name" value="$name" />
+					<input type="hidden" name="productAttachments[$index].path" value="$path" />
+					<input type="hidden" name="productAttachments[$index].type" value="1" />
+				</span>
+			</div>
+
+            <div id="attTemp" style="display: none">
+				<span class="ulImg">
+					<img src="$src" alt="$name"><i class="icon_del delImg" ></i>
+					<input type="hidden" name="attachment.name" value="$name" />
+					<input type="hidden" name="attachment.path" value="$path" />
+					<input type="hidden" name="attachment.type" value="2" />
+				</span>
+            </div> 
+            -->
+	    </div>
+     
+        
+    </div>
+</body>
+<script type="text/html" id="imgTemp">
+<span class="ulImg">
+<img src="$src" alt="$name"><i class="icon_del delImg" style="display: none;" ></i>
+<input type="hidden" name="productAttachments[$index].name" value="$name" />
+<input type="hidden" name="productAttachments[$index].path" value="$path" />
+<input type="hidden" name="productAttachments[$index].type" value="1" />
+</span>
+</script>
+<script type="text/html" id="attTemp">
+<span class="ulImg">
+<img src="$src" alt="$name"><i class="icon_del delAtt" style="display: none;" ></i>
+<input type="hidden" name="attachments[$index].name" value="$name" />
+<input type="hidden" name="attachments[$index].path" value="$path" />
+<input type="hidden" name="attachments[$index].type" value="2" />
+</span>
+
+</script>
+<script type="text/javascript">
+var path = '<%=path%>';
+function selectUser(){
+	var win=0;
+	layer.open({
+		type : 2,
+		title : '选择人员',
+		shadeClose : true,
+		shade : 0.5,
+		area : [ '400px', '470px' ],
+		content : '../component/orgUserTree.htm',//单选地址为orgUserTree.htm，多选地址为
+		btn: ['确定', '取消'],
+		success:function(layero, index){
+			win = window[layero.find('iframe')[0]['name']];
+		},
+		yes: function(index){
+			//userArr返回的是user对象的数组，user包含属性：用户id(id),职位(pos)，名称（name），mobile（手机）,phone（电话）,fax（传真）
+			var userArr = win.getUserList();    				
+			if(userArr.length==0){
+				$.warn("请选择人员");
+				return false;
+			}
+			
+			//操作计调
+			
+				$("#operatorId").val(userArr[0].id);
+				$("#operatorName").val(userArr[0].name);
+			
+			//一般设定yes回调，必须进行手工关闭
+	        layer.close(index); 
+	    },cancel: function(index){
+	    	layer.close(index);
+	    }
+	});
+}
+</script>
+
+</html>

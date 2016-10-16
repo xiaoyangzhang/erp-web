@@ -1,0 +1,305 @@
+@media (min-width: 750px) {
+    .pop_opacity {
+        background-color: #000000;
+        opacity: 0.5;
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        z-index: 9;
+        top: 0px;
+        left: 0px;
+    }
+
+    .pop_Box {
+        text-align: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 99;
+        background: #fff;
+        padding: 0px;
+        width: 100%;
+    }
+
+    .pop_imgBox {
+        width: 81px;
+        height: 81px;
+        padding: 5px;
+        border: 1px solid #e7eff2;
+        margin-right: 30px;
+        margin-bottom: 20px;
+        vertical-align: middle;
+        position: relative;
+        box-shadow: 0px 0px 5px #c6cbcd;
+        float: left;
+        cursor: pointer;
+    }
+
+    .pop_imgBox:hover {
+        border: 1px solid #1B9AF7;
+    }
+
+    .pop_imgBox img {
+        width: 80px;
+        height: 80px;
+        border: 1px solid #e7eff2;
+        position: relative;
+        transition: transform 1s;
+    }
+
+    /*.ulImg img:hover{transform: rotate(-10deg);}*/
+    .pop_imgDelete {
+        width: 19px;
+        height: 19px;
+        display: inline-block;
+        background-image: url(../../img/pop_imgDelte.png);
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        cursor: pointer;
+    }
+
+    .pop_folder {
+        width: 97px;
+        height: 89px;
+        float: left;
+        margin-right: 30px;
+        margin-bottom: 20px;
+        background-color: #ffffff;
+    }
+
+    .pop_main {
+        background-color: #ffffff;
+        border-radius: 3px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .pop_uploadBox {
+        /*border-right:1px solid #e7eff1; */
+        padding: 30px 10px 30px 40px;
+        margin-left: 161px;
+        min-height: 300px; /*max-height: 500px;*/
+        overflow-y: auto;
+        height: 422px;
+    }
+
+    .pop_btnBox {
+        background-color: #fafafa;
+        text-align: center;
+        border-top: 1px solid #e7eff1;
+        border-bottom: 1px solid #e7eff1;
+        padding: 10px 40px;
+        margin-left: 161px;
+    }
+
+    .pop_btnBox span {
+        margin-right: 10px;
+    }
+
+    .pop_fanye {
+        text-align: center;
+        line-height: 30px;
+        border: 1px solid #e7eff1;
+        margin-top: 10px;
+    }
+
+    .pop_upload, .pop_upload:visited {
+        background-color: #f4da3f;
+        color: #333333;
+    }
+
+    .pop_upload:hover {
+        background-color: #f3e27b;
+        color: #333333;
+    }
+
+    .pop_treeBox {
+        background-color: #fafafa;
+        border-right: 1px solid #e7eff1;
+        width: 160px;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .pop_search {
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        margin-left: 5px;
+        background: url(../../img/pop_search.png) 100% 100%;
+        vertical-align: middle;
+    }
+
+    .pop_imgName {
+        width: 93px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        display: inline-block;
+        position: absolute;
+        bottom: -20px;
+        left: 0px;
+        font-weight: normal;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis
+    }
+
+}
+
+@media (max-width: 750px) {
+    .pop_opacity {
+        background-color: #000000;
+        opacity: 0.5;
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        z-index: 9;
+        top: 0px;
+        left: 0px;
+    }
+
+    .pop_Box {
+        text-align: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 99;
+        background: #fff;
+        padding: 0px;
+        width: 100%;
+    }
+
+    .pop_imgBox {
+        width: 81px;
+        height: 81px;
+        padding: 5px;
+        border: 1px solid #e7eff2;
+        margin-right: 30px;
+        margin-bottom: 20px;
+        vertical-align: middle;
+        position: relative;
+        box-shadow: 0px 0px 5px #c6cbcd;
+        float: left;
+        cursor: pointer;
+    }
+
+    .pop_imgBox:hover {
+        border: 1px solid #1B9AF7;
+    }
+
+    .pop_imgBox img {
+        width: 80px;
+        height: 80px;
+        border: 1px solid #e7eff2;
+        position: relative;
+        transition: transform 1s;
+    }
+
+    /*.ulImg img:hover{transform: rotate(-10deg);}*/
+    .pop_imgDelete {
+        width: 19px;
+        height: 19px;
+        display: inline-block;
+        background-image: url(../../img/pop_imgDelte.png);
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        cursor: pointer;
+    }
+
+    .pop_folder {
+        width: 97px;
+        height: 89px;
+        float: left;
+        margin-right: 30px;
+        margin-bottom: 20px;
+        background-color: #ffffff;
+    }
+
+    .pop_main {
+        background-color: #ffffff;
+        border-radius: 3px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .pop_uploadBox {
+        /*border-right:1px solid #e7eff1; */
+        padding: 30px 10px 30px 40px;
+        margin-left: 161px;
+        min-height: 150px; /*max-height: 500px;*/
+        overflow-y: auto;
+        height: 230px;
+    }
+
+    .pop_btnBox {
+        background-color: #fafafa;
+        text-align: center;
+        border-top: 1px solid #e7eff1;
+        border-bottom: 1px solid #e7eff1;
+        padding: 10px 40px;
+        margin-left: 161px;
+    }
+
+    .pop_btnBox span {
+        margin-right: 10px;
+    }
+
+    .pop_fanye {
+        text-align: center;
+        line-height: 30px;
+        border: 1px solid #e7eff1;
+        margin-top: 10px;
+    }
+
+    .pop_upload, .pop_upload:visited {
+        background-color: #f4da3f;
+        color: #333333;
+    }
+
+    .pop_upload:hover {
+        background-color: #f3e27b;
+        color: #333333;
+    }
+
+    .pop_treeBox {
+        background-color: #fafafa;
+        border-right: 1px solid #e7eff1;
+        width: 160px;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .pop_search {
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        margin-left: 5px;
+        background: url(../../img/pop_search.png) 100% 100%;
+        vertical-align: middle;
+    }
+
+    .pop_imgName {
+        width: 93px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        display: inline-block;
+        position: absolute;
+        bottom: -20px;
+        left: 0px;
+        font-weight: normal;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis
+    }
+
+}

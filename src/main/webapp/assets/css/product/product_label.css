@@ -1,0 +1,49 @@
+@media (min-width: 1100px) {
+    .w_biaoqianBox{margin: 14px 10px; border-left:1px solid #dbe4e6;border-top:1px solid #dbe4e6;}
+
+    .w_tableLabel{ width: 100%;}
+    .w_tableLabel tbody tr td{ border-right:1px solid #dbe4e6; border-bottom:1px solid #dbe4e6;}
+    .w_tableLabel tbody tr td:nth-child(1){background-color:#f8f7f8; text-align: center;}
+    .w_tableLabel tbody tr td:nth-child(2){padding:30px 0px 10px 50px;}
+    .w_tableLabel tbody tr:nth-child(odd){background-color:#fbfbfb;}
+
+    .w_lableBox span{ display: inline-block; width: 100px; height:20px; line-height: 20px;padding: 0px 0px 20px 0px; }
+    .w_lableBox span input{margin-right: 8px; vertical-align: middle;}
+
+    .w_btnSaveBox{ text-align: center;margin: 20px 0px;}
+    .btn_save{ width: 70px; height: 30px; line-height: 30px; text-align: center; color: #ffffff;background-color:#68c1e7; border-radius: 3px; border:none; margin: 0px auto; cursor: pointer;}
+
+    .w_remarksBox{ position: relative;}
+    .w_remarksMain{ margin: 0px 0px 0px 160px;}
+    .w_remarksMain dt{padding: 14px 0px 5px 5px;}
+    .w_textarea{ border: 1px solid #dbe4e6;border-radius: 3px; width: 1000px; min-height: 100px; padding:5px 10px; line-height: 20px;}
+    .w_textarea:focus{border-color: #66afe9; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6); outline: 0 none;}
+
+    .l_textarea{ border: 1px solid #dbe4e6;border-radius: 3px; width:96%; height: 70px; min-height:50px; padding:5px 10px; line-height: 20px;}
+    .l_textarea:focus{border-color: #66afe9; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6); outline: 0 none;}
+
+}
+@media (max-width: 1100px) {
+    .w_biaoqianBox{margin: 14px 10px; border-left:1px solid #dbe4e6;border-top:1px solid #dbe4e6;}
+
+    .w_tableLabel{ width: 100%;}
+    .w_tableLabel tbody tr td{ border-right:1px solid #dbe4e6; border-bottom:1px solid #dbe4e6;}
+    .w_tableLabel tbody tr td:nth-child(1){background-color:#f8f7f8; text-align: center;}
+    .w_tableLabel tbody tr td:nth-child(2){padding:30px 0px 10px 50px;}
+    .w_tableLabel tbody tr:nth-child(odd){background-color:#fbfbfb;}
+
+    .w_lableBox span{ display: inline-block; width: 100px; height:20px; line-height: 20px;padding: 0px 0px 20px 0px; }
+    .w_lableBox span input{margin-right: 8px; vertical-align: middle;}
+
+    .w_btnSaveBox{ text-align: center;margin: 20px 0px;}
+    .btn_save{ width: 70px; height: 30px; line-height: 30px; text-align: center; color: #ffffff;background-color:#68c1e7; border-radius: 3px; border:none; margin: 0px auto; cursor: pointer;}
+
+    .w_remarksBox{ position: relative;}
+    .w_remarksMain{ margin: 0px 0px 0px 160px;}
+    .w_remarksMain dt{padding: 14px 0px 5px 5px;}
+    .w_textarea{ border: 1px solid #dbe4e6;border-radius: 3px; width: 600px; min-height: 100px; padding:5px 10px; line-height: 20px;}
+    .w_textarea:focus{border-color: #66afe9; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6); outline: 0 none;}
+
+    .l_textarea{ border: 1px solid #dbe4e6;border-radius: 3px; width: 300px; height: 50px; min-height: 70px; padding:5px 10px; line-height: 20px;}
+    .l_textarea:focus{border-color: #66afe9; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6); outline: 0 none;}
+}

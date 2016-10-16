@@ -1,0 +1,65 @@
+@charset "utf-8";
+/*供应商-餐厅*/
+.restaurant{width: 1100px;margin: 50px auto 0;}
+.rest_summary p{line-height: 24px;}
+.rest_summary span.ch{font-size: 30px;}
+.rest_summary span.en{font-size: 18px;color: #999999;}
+.food_picture p{text-align: right;}
+
+.theme .foodtype,.service{overflow: hidden;}
+.theme .foodtype ul li{float: left;margin-right: 10px;padding: 3px 5px;border-radius: 3px; background: #fe6700;color: #FFFFFF;}
+.theme .service ul li{float: left;margin-right: 10px;padding: 0 5px;line-height: 22px; border-radius: 3px; background: #68C1E7;color: #FFFFFF;}
+
+.tips{overflow: hidden; height: 80px;background: #fffef1; border: 1px solid #E7EFF1;}
+.tips .tips_left{float: left; width: 80px;height: 100%;line-height: 80px; border-right: 1px solid #E7EFF1; text-align: center;}
+.tips .tips_right{float: left; width: 955px; padding: 5px 10px;}
+.tips .tips_right p{line-height: 1.8em;}
+
+.food_list{color: #666666;}
+.food_detail{overflow: hidden;border-bottom: 1px solid #e7eff1;}
+.food_detail img{float: left; width: 180px;height: 180px;}
+.food_detail .food_intro{float: left;width: 866px;height: 100px;}
+.food_detail .food_intro .food_name{font-size: 1.6em;}
+.food_detail .food_intro p{line-height: 1.8em;}
+.food_detail .food_intro .food_benefit{padding: 5px 10px; height: 100%;border: 1px solid #E7EFF1;border-radius: 3px;background: #f0fbff;}
+	/*评论区*/
+.comment{overflow: hidden;position: relative; color: #333333;border-bottom: 1px solid #E7EFF1;}
+.comment .head_portrait{float: left;text-align: center;}
+.comment .head_portrait img{width: 80px;height: 80px;}
+.comment .head_portrait .username{color: #68C1E7;font-size: 1.4em;}
+.comment .comment_detail{padding-left: 100px;}
+.comment .comment_detail .star{display: inline-block; width: 15px;height: 15px;}
+.comment .comment_detail .comment_time{display:inline;position: absolute;right: 0;}
+.comment .comment_detail .comment_content{line-height: 1.8em;height: auto;	min-height: 60px;} 
+.comment .comment_detail .comment_pic{display: inline-block;width: 69%;}
+.comment .comment_detail .pic{display: inline-block;margin-right: 10px; width: 50px;height: 50px;}
+.comment .comment_detail .interactive{display: inline-block;width: 30%;text-align: right;}
+		/*回复评论*/
+.comment_detail .reply_list{margin-top: 10px; padding: 0 15px 20px; border: solid 1px #F6F6F6;max-height: 420px;overflow: scroll;}
+.comment_detail .reply_list .reply{margin-top: 10px;border-bottom: solid 1px #F6F6F6;}
+.reply_list .reply .reply_portrait{.reply_list .reply .reply_portrait}
+.reply_list .reply .reply_portrait img{width: 40px;height: 40px;border-radius: 100%;}
+/*导游档案*/
+.list_head{border-bottom: 1px solid #E7EFF1;position: relative;}
+.list_head span{position: absolute;right: 0;bottom: 5px; color: #999999;}
+.guide_detail{border: 1px solid #E7EFF1; margin-bottom: 10px; padding: 10px 15px 20px;background: #FFFFFF;}
+.guide_detail .guide_butt{text-align: right;margin-bottom: 10px;}
+.guide_detail img.guide_portrait{float: left; width: 160px;height: 160px;border-radius: 100%;}
+.guide_detail .guide_info{float: left; margin-left: 10px;max-width: 560px;}
+.guide_detail .guide_info .guide_name{font-size: 20px;margin-right: 10px;color:#68C1E7;}
+.guide_detail .guide_info .rank{color: #FE6700;}
+.guide_detail img.star{display: inline-block; width: 13px;height: 13px;}
+.guide_detail .guide_tags ul li{float: left;margin-right: 10px;margin-bottom: 5px; padding: 3px 5px; border-radius: 3px; background: #fe6700;color: #FFFFFF;}
+.guide_detail .guide_msg p{display: inline-block;line-height: 2em;}
+
+.guide_detail .subBox{float: left; height: 160px;line-height: 160px;margin-right: 20px;}
+.rest_album{position: relative;display: inline-block; margin-right: 20px; width: 120px;padding: 10px; border: solid 1px #E7EFF1;box-shadow:0 0 5px #DDDDDD;}
+.rest_album .album_cover{width: 100px;height: 100px;background: url(../../img/pop_folder.png) repeat center;}
+.rest_album .newalbum{width: 100px;height: 100px;background: url(../../img/newalbumn.png) no-repeat center;}
+.rest_album .newalbum:hover{cursor: pointer;background: url(../../img/newalbum_hover.png) no-repeat center;}
+.rest_album .album_intro{}
+.rest_album .album_intro .album_name{float: left;font-size: 1.2em;color: #999999;}
+.rest_album .album_intro .album_num{float: right;color: #999999;}
+.img_list{position: relative; display:inline-block; width: 100px;height:100px;padding: 5px;margin-right: 20px;margin-bottom: 30px; border: solid 1px #E7EFF1;box-shadow: 0 0 5px #DDDDDD;}
+.img_list img{width: 100px;height: 100px;}
+.img_list .img_name{text-align: center;}

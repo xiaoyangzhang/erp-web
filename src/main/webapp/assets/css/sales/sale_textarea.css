@@ -1,0 +1,12 @@
+.w_textarea1{ border: 1px solid #dbe4e6;border-radius: 3px; width: 200px; min-height: 62px; padding:1px 1px; line-height: 20px;}
+.w_textarea1:focus{border-color: #66afe9; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6); outline: 0 none;}
+
+
+.w_table1{color: #333333; border: 1px solid #e7eff1; border-bottom: none; width: 100%;}
+.w_table1 thead tr th{height: 30px; text-align: center; background-color: #f4f5f6; background:url(../../img/tableHead_Bk.png) repeat-x;border-bottom: 1px solid #e7eff1;}
+.w_table1 tbody tr td{height: 30px; text-align: center; border-bottom: 1px solid #e7eff1;word-break: break-all;}
+.w_table1_split{background:url(../../img/tableHead_split.png); display: inline-block; width: 2px; height: 22px; position: absolute;right: 0px; bottom:0px;}
+.w_table1 tbody tr:nth-child(even){background-color:#fbfbfb;}
+.w_table1 tbody tr:hover{background-color:#fbfbec;}
+.Wdate{width: 80px;}
+.IptText301{ width: 150px; color: #333333;}

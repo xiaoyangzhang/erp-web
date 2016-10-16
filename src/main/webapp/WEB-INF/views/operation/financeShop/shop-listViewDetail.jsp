@@ -1,0 +1,112 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ include file="../../../include/path.jsp" %>
+
+          	<div class="in_tab mb-30">
+          		<p class="in_tab_title"><b>购物单</b></p>
+          		<form action="" id="bookingShopForm" method="post"></form>
+          		<table class="in_tab_body" border="1" cellspacing="0" cellpadding="0">
+          			<col width="5%" /><col width="10%" /><col width="10%" /><col width="8%" /><col width="10%" />
+ 					<col width="10%" /><col width="8%" /><col width="5%" /><col width="8%" /><col width="8%" /><col width="8%" /><col width="" />
+          			<tr>
+          				<th>序号</th>
+          				<th>订单号</th>
+          				<th>订单时间</th>
+          				<th>预订员</th>
+          				<th>购物店</th>
+          				<th>进店日期</th>
+          				<th>导游</th>
+          				<th>人数</th>
+          				<th>预计总消费</th>
+          				<th>实际总消费</th>
+          				<th>完成率</th>
+          				<th>操作</th>
+          			</tr>
+          			 <c:forEach items="${shopList}" var="shop" varStatus="status">
+	          			<tr>
+	          				<td>${status.count }</td>
+	          				<td>${shop.bookingNo }</td>
+	          				<td><fmt:formatDate value="${shop.bookingDate }" pattern="yyyy-MM-dd"/></td>
+	          				<td>${shop.userName }</td>
+	          				<td>${shop.supplierName }</td>
+	          				<td>${shop.shopDate }</td>
+	          				<td>${shop.guideName }</td>
+	          				<td>${shop.personNum }</td>
+	          				<td><fmt:formatNumber type="number"  value="${shop.personNum*shop.personBuyAvg }" pattern="#.##" /></td>
+	          				 <td><fmt:formatNumber type="number"  value="${shop.totalFace }" pattern="#.##" /></td>
+	          				<c:if test="${shop.personNum*shop.personBuyAvg=='0.0000'}">
+	          				<td><fmt:formatNumber type="number" value="0" pattern="0.00#" />%</td>
+	          				</c:if>
+	          				<c:if test="${shop.personNum*shop.personBuyAvg!='0.0000'}">
+	          				<td><fmt:formatNumber type="number" value="${(shop.totalFace/(shop.personNum*shop.personBuyAvg))*100 }" pattern="0.00#" />%</td> 
+	          				</c:if>
+	          				<td>
+	          				<c:if test="${shop.stateFinance ne 1 }">
+		          				<c:if test="${optMap['RESULT'] }"><a class="def" href=""></a>
+		          				<a class="def" href="javascript:void(0)" onclick="newWindow('修改消费','<%=staticPath %>/bookingFinanceShop/toFactShop.htm?id=${shop.id }&groupId=${groupId}')">修改</a>
+		          				</c:if>
+	          				</c:if>
+	          				<a class="def" href="javascript:void(0)" onclick="newWindow('查看消费','<%=staticPath %>/bookingFinanceShop/factShop.htm?id=${shop.id }&groupId=${groupId}')">查看</a>
+							<c:if test="${shop.stateFinance ne 1 }">
+							<a class="def" href="javascript:void(0)" onclick="del(${shop.id})">删除</a>
+							</c:if>
+	          				</td>
+	          				
+	          			</tr>
+	          			<c:set var="sum_expect" value="${sum_expect+shop.personNum*shop.personBuyAvg}" />
+	          			<c:set var="sum_actual" value="${sum_actual+shop.totalFace}" />
+	          			<c:set var="sum_person" value="${sum_person+shop.personNum }" />
+          			</c:forEach>
+          			<tr>
+          				<td colspan="7">合计：</td>
+          				
+          				<td>${sum_person }</td>
+          				<td> <fmt:formatNumber value="${sum_expect }" pattern="#.##" type="number"/>  </td>
+          				<td> <fmt:formatNumber value="${sum_actual }" pattern="#.##" type="number"/>  </td>
+          				<td></td>
+          				<td></td>
+          			</tr>
+          		</table>
+          		</form>
+          	</div>  		
+
+<script type="text/javascript">
+function del(bookingId){
+	var options={
+			url:"delShopAndDetail.do",
+			type:"post",
+			dataType:"json",
+			async:false,
+			data:{
+				bookingId:bookingId
+				
+			},
+			success:function(data){
+				if(data.success){
+					
+					$.success("删除成功",function(){
+						//$(obj).parent().parent().remove();
+						queryList($("input[name='page']").val(),$("input[name='pageSize']").val());
+					});
+					
+				}
+				else if(data.fail){
+					$.error("客人购物录入已有数据,删除失败！",function(){
+					});
+					
+				}
+				else{
+					$.error("删除失败");
+				}
+			},
+			error:function(){
+				$.error("服务器忙，请稍后再试");
+			}
+	};
+	$("#bookingShopForm").ajaxSubmit(options);
+}
+</script>
+		

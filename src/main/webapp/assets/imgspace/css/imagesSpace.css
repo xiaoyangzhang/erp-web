@@ -1,0 +1,141 @@
+@CHARSET "UTF-8";
+
+body, h1,h2, h3,h4,h5,h6, ul,ol, li, dl, dt, dd, form, input, strong, span, p, th, tr, td, label, img , i{ margin:0; padding:0; list-style:none; font-family:"微软雅黑"; color:#666;}
+body{ font-size: 12px;}
+a, a:link{ text-decoration:none; color: #135DBB; cursor: pointer;}
+a:hover{ text-decoration: underline;}
+a:active{ background:none; outline:none;}
+img{ border:none;}
+input{ outline:none; resize:none;}
+/* input::-ms-clear{display:none;} */
+.display_none{ display: none;}
+iframe{ float: right;}
+
+/*公用的列表没数据时的提示居中*/
+.center{text-align:center;}
+
+
+/*部门机构 弹框*/
+.grey_box.Branch1{ width: 250px; height: 170px;}
+.grey_box.Branch1 .info_box{ width: 340px; margin: auto; padding: 25px 0;}
+.grey_box.Branch1 .box_1{ width: 750px; margin: auto;}
+.grey_box.Branch1 .data_list .data_box span{ height: 35px; line-height: 35px;}
+.grey_box.Branch1 .data1{ width: 140px;}
+.grey_box.Branch1 .data2{ width: 260px;}
+.grey_box.Branch1 .data3{ width: 320px;}
+
+
+
+
+
+
+
+
+/* 颜色 */
+.color_red, .color_red *{ color: #ff0000;}
+.color_blue, .color_blue *{ color: #004ea1;}
+.color_green, .color_green *{ color:#00CC00;}
+.color_orange, .color_orange *{ color: #F08A12;}
+.color_666, .color_666 *{ color:#333;}
+.big_orange{color: #F08A12;font-size:20px;}
+
+
+/* 清除浮动 */
+.clear, .data_box, .info_box, ul, dl{ zoom:1}
+.clear:after, .data_box:after, .info_box:after, ul:after, dl:after{ content:''; display:block; clear:both;}
+
+/* 去除border */
+.no_border{ border: none !important;}
+.border{border:1px solid #ddd;}
+.border_top{border-top:1px solid #ddd;}
+.border_left{border-left:1px solid #ddd;}
+.border_right{border-right:1px solid #ddd;}
+.border_bottom{border-bottom:1px solid #ddd;}
+
+
+/* 星标记 */
+.star{ color: #FF0000; margin-left: 3px}
+
+/* 文本框 */
+input.text{ height: 24px; line-height:24px; border:1px solid #ddd; padding-left:5px;}
+
+
+/* 文本框禁用 */
+.text_disable{ background-color: #f7f7f7 !important;}
+
+/* 选项卡 */
+.tab_title{ width: 100%; height: 30px; border-bottom: 1px solid #dcdcdc; color: #666; position: relative;}
+.tab_title .titles{ height: 30px; position: absolute; bottom: 0;}
+.tab_title .title{ width: 98px; height: 29px; border: 1px solid #dcdcdc; border-bottom: none; text-align: center; line-height:29px; color: #666; float: left; cursor: pointer;}
+.tab_title .title.visited{  background-color: #fafafa; color:#333; height: 30px;}
+.tab_title .more{ font-size:12px; float: right; margin: 5px 40px 0 0;}
+
+/* 按钮.btn_gray_h30{ height: 30px; border: 1px solid #eee; background: url(../../images/trade/bnt_gray_h30.png) repeat-x; border-radius: 3px; -moz-border-radius: 3px; color:#333; cursor: pointer;} */
+.btn_yellow{ border: 1px solid #FF6401; background-color: #FF8700; border-radius: 3px;behavior: url(iecss3.htc) ; -moz-border-radius: 3px; color: #fff; cursor: pointer; }
+.btn_yellow:hover{ background-color: #FFA200;}
+
+.box332 .btns {
+  width: 80px;
+  height: 24px;
+}
+
+/* 禁用按钮 */
+.disabled, .disabled:hover{ border: 1px solid #E8E8E8; background:#f7f7f7; color: #666; cursor: default; }
+
+
+
+/* info_box */
+.info_box{ width: 100%; height: 24px;}
+.info_box .box_title{ height: 24px; line-height: 24px; text-align: right; float: left; padding-left: 20px;}
+.info_box .box_text{ height: 24px; line-height: 24px; float: left;}
+.info_box .box_text, .box_text{ position: relative;}
+.info_box .box_text .address_span{ float: left; position: relative;}
+.info_box .box_text .address_span .error{ left: 3px;}
+.info_box .box180{ width: 180px; float: left;}
+.info_box .box180 .box_title{ width: 80px;}
+.info_box .box180 .box_text{ width: 100px;}
+.info_box .box253{ width: 253px; float: left;}
+.info_box .box253 .box_title{ width: 90px;}
+.info_box .box253 .box_text{ width: 163px;}
+.info_box .box260{ width: 260px;margin-top: 20px;}
+.info_box .box260 .box_title{ width: 90px;}
+.info_box .box260 .box_text{ width: 170px;}
+.info_box .box285{ width: 285px; float: left;}
+.info_box .box285 .box_title{ width: 90px;}
+.info_box .box285 .box_text{ width: 195px;}
+.info_box .box310{ width: 310px; float: left;}
+.info_box .box310 .box_title{ width: 90px;}
+.info_box .box310 .box_text{ width: 220px;}
+
+.info_box .box998 .long_text{margin-left:6px; height:24px; line-height:24px; border:1px solid #DDD; float:left;}
+
+.info_box input.text, .info_box .text_address, .info_box .text_date, .info_box .text_website, .info_box .spinner, .info_box .word, .info_box .file-box{ float: left;}
+.info_box .unit{ float: left; margin-left: 3px;}
+.info_box .star{ height: 24px; line-height: 27px; float: left;}
+.info_box .btn input{ width: 80px; height: 26px; float: left;}
+.info_box .box260.btn1 .btn_yellow{ margin: 0 20px 0 60px; }
+.info_box .box332  .btn_yellow{ margin: 0 60px 0 70px; }
+
+/* 表格 */
+table{ border-collapse: collapse; margin: 0; background:#fff;}
+table td, table tr{ border: 1px solid #e8e8e8;}
+table th{ font-weight: normal;}
+
+
+
+
+/* 数据列表鼠标经过变色 */
+.data_list .data_box.hover{ background-color: #DDEEFF;}
+/*没有数据时的样式*/
+.no_data{ height: 60px; line-height: 60px; text-align:center}
+
+/*超出内容部分用省略号*/
+.txt_apostrophe{word-break:keep-all;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* 列表无数据样式*/
+.data_list .nodata{ width: 100%; height: 45px; line-height: 45px; text-align: center; color: #999999; font-size: 12px;}
+.data_list .nodata.height60{ height: 60px;}
+.last_line_long{ width:100%; border:1px solid #DDD;overflow: hidden;}
+
+/*普通查询*/
+.advanced_select{display:none;}

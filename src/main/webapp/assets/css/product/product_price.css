@@ -1,0 +1,22 @@
+﻿.priceCalandar_List {border-bottom:1px solid #e7eff1;overflow: hidden;  margin-bottom: 10px;  margin-left: 20px;}
+.priceCalandar_List li{ margin-right: 2px;  float: left; }
+.priceCalandar_List li a{display: block; text-align: center;   font-weight:bold; padding: 9px 13px}
+.priceCalandar_List li a:hover{ color:#68c1e7; }
+.priceCalandar_List li a.on{ color:#68c1e7; }
+.priceCalandar_List .li_year{border-right: :1px solid #68c1e7; cursor:default;}
+.priceCalandar_List .li_year .year{font-weight: bold; line-height: 41px; padding: 0 5px;}
+.priceCalandar_List .li_year .left{border:0px none ;background: url(img/jt01.png) no-repeat ; width: 16px; height: 17px; vertical-align: middle;}
+.priceCalandar_List .li_year .left:hover{background-image: url(img/jt01h.png); }
+.priceCalandar_List .li_year .right{border:0px none ;background: url(img/jt02.png) no-repeat; width: 16px; height: 17px; vertical-align: middle;}
+.priceCalandar_List .li_year .right:hover{background-image: url(img/jt02h.png); }
+
+
+/*库存设置*/
+.store-batch{float: left;}
+.batch{width: 300px;margin-left: 20px; border: 1px solid #ddd;}
+.batch .batch-title{margin: 10px 0 0 5px;font-size: 14px;}
+.batch .batch-week{margin-left: 20px;line-height: 2em;}
+.batch .batch-week span{display: inline-block; width: 60px;}
+.batch .batch-date{margin-left: 20px;line-height: 2em;}
+.batch .batch-date span{display: inline-block;width: 60px;}   	
+.store-tab{margin-left: 330px;padding: 0 10px;}

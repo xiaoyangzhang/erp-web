@@ -1,0 +1,28 @@
+.container{width: 1100px;margin:0 auto;padding-top:30px;}
+
+.brandsearch .brand{background: #F4F4F4;padding: 15px 10px;}
+.letter a{margin-right: 10px;}
+.letter a:hover{color: #F5DA3E;}
+
+.plist{overflow: hidden;}
+.plist ul li{float: left;}
+.plist ul li{color: #666666;background:#FFFFFF; display: block;margin:0 10px 10px 0; padding:5px 20px; text-align: center;border-radius: 15px;}
+.plist ul li:hover{background: #A5DE37; color: #333333;cursor: pointer;}
+.zhankai{background: url(img/zhankai.png) no-repeat  center right;}
+.shouqi{background: url(img/shouqi.png) no-repeat  center right;}
+
+.productlist{border-top:solid 1px #E7EFF1 ;}
+.productlist .pro{ overflow: hidden; margin: 25px 15px 0;padding-bottom: 25px; border-bottom: solid 1px #E7EFF1;}
+.productlist .pro img{float: left; padding: 5px; border: solid 1px #E7EFF1; width: 160px;height: 140px;}
+.productlist .pro .jieshao{margin-left:173px;}
+.productlist .pro .jieshao>a.button{float:right;margin-top:10px;}
+.productlist .pro h2 {font-size: 18px; }
+.productlist .pro h2 span{color: #e6ca26;}
+.productlist .pro .jieshao p a{padding-left: 20px;background: url(img/rili.png) no-repeat left center;} 
+.productlist .pro .jieshao p a:hover{text-decoration: underline;}
+
+.page{text-align: center;}
+.page .pagenum ul li{display: inline-block;margin-right: 10px;}
+.page .pagenum ul li a{display: block;padding: 8px 0;width: 30px; border: solid 1px #E7EFF1;border-radius: 3px;}
+.page .pagenum ul li a:hover{color: #fff;background: #68C1E7;}
+.page .pagenum ul li a.selected{color: #fff;background: #68C1E7;}

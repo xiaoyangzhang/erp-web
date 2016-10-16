@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="springContextHolder" class="com.yihg.erp.utils.SpringContextHolder" />
+       
+	<bean id="configBean" class="com.yihg.erp.utils.SysConfig">
+		<property name="imgServerUrl" value="http://img.yimayholiday.com/v1/tfs/"></property>
+        <property name="imgCutServerUrl" value="http://img.yimayholiday.com/v1/tfs/"></property>
+		<property name="imgWithWaterUrl" value="http://img.yimayholiday.com/v1/tfs/"></property>
+        <property name="images340Url" value="http://img.yimayholiday.com/v1/tfs/"></property>
+        <property name="images200Url" value="http://img.yimayholiday.com/v1/tfs/"></property>
+        <property name="tfsGwUrl" value="http://file.yimayholiday.com/filegw/file/upload"></property>
+	</bean>   
+	
+	<bean id="bizSettingCommon" class="com.yihg.erp.common.BizSettingCommon"></bean>    
+	<bean id="tfsUpload" class="com.yihg.erp.utils.TfsUpload">
+		<property name="sysConfig" ref="configBean"></property>
+	</bean>
+</beans>

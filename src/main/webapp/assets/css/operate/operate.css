@@ -1,0 +1,65 @@
+@charset "utf-8";
+/*计调管理-房*/
+td.serialnum{position: relative;}
+td.serialnum .serialnum_btn{position: absolute;width: 10px;height: 100%; left: 10px;top: -1px; background: url(img/s-shouqi.png) no-repeat center center;}
+td.serialnum .serialnum_btn2{position: absolute;width: 10px;height: 100%; left: 10px;top: -1px; background: url(img/s-zhankai.png) no-repeat center center;}
+td.serialnum .serialnum_btn:hover{cursor: pointer;}
+.in_tab{padding: 0 30px;color: #999999; line-height: 25px;}
+.in_tab .in_tab_title{padding: 5px 0px;  margin:12px 20px 5px 0;text-align: left;}
+.in_tab .in_tab_title b{color: #68C1E7;padding-left: 5px;border-left: solid 4px #68C1E7;}
+.in_tab .in_tab_body{width: 100%;border: 1px solid #cde4f7;}
+.in_tab .in_tab_body th{background: #e4f3ff;}
+.in_tab .in_tab_body tr td{border-bottom: 1px solid #cde4f7;background: #f8fcff;}
+/*新增订房*/
+	/*团组信息*/
+/* .dd_text{width: 900px;}
+.dd_text p{overflow: hidden;height: 50px;} 
+a.more{position: absolute;right: 10px;bottom: 0;}*/
+.dd_text{width: 900px;height: 50px;overflow: hidden;}
+.dd_text p{}
+.dd_more{padding-right: 15px;text-align: right;line-height: 15px;}
+	/*行程表格*/
+.tab_journey{}
+.tab_journey .td_journey{text-align: left;line-height: 2em;padding: 10px 20px;}
+.tab_journey .td_journey .img_traffic{width: 13px; height: 13px;}
+.tab_journey .td_journey .jingdian span{display: inline-block;background: #F4DA3F;border-radius: 10px;padding: 0 10px;margin-right: 10px;}
+.tab_journey .td_food{text-align: left;line-height: 2em;padding: 5px 5px 5px 10px;}
+/*房-打印预览*/
+.a4{position: relative; width: 794px;height: 1123px;margin: 20px auto;border: solid 1px #68C1E7;box-shadow: 0 0 10px #999999;}
+.a4 .a4_header{position: relative; padding: 5px 20px;border-bottom: solid 2px #68C1E7;}
+.a4 .a4_header img{float: left;}
+.a4 .a4_header p{color: #68C1E7;margin-left: 40px;}
+.a4 .a4_header p .a4_head{font-size: 18px;}
+.a4 .a4_header .a4_date{position: absolute;right: 20px;bottom: 5px; color: #999999;}
+.a4 .a4_tab{padding: 30px 20px; }
+.a4 .a4_tab .a4_msg{text-indent: 2em;margin-top: 30px;height: 100%;min-height: 150px;}
+.a4 .a4_sign{padding: 0 40px;overflow: hidden;line-height: 40px;}
+.a4 .a4_sign .sign_l,.sign_r{float: left;width: 50%;}
+.a4 .a4_footer{position: absolute;bottom: 0; border-top: solid 2px #a5a5a5;line-height: 1.5em;overflow: hidden;color: #666666;}
+.a4 .a4_footer .a4_footer_con{float: left;width: 396px; margin: 5px 0;}
+.a4 .a4_footer .a4_footer_l{border-right: solid 1px #666666;}
+.a4 .a4_footer .a4_footer_l,.a4_footer_r{padding: 0 20px 15px;position: relative;}
+.a4 .a4_footer .shuiyin{position: absolute;right: 20px;bottom: 20px;font-size: 20px;color: #DDDDDD;z-index: -1;}
+/*导游-新增*/
+.guide_new table tr td{line-height: 25px;}
+.guide_new input[type="text"]{ height: 20px; line-height: 20px;margin: 5px auto;}
+.g_textarea{margin: 5px auto; border: 1px solid #dbe4e6;border-radius: 3px; width: 300px; height: auto; padding:5px 10px; line-height: 20px;}
+/*新增报账单*/
+.con_box{overflow: hidden;}
+.con_box li{float: left;margin-left: 30px; width: 100px;height: 100px;border: solid 1px #E7EFF1;border-radius: 5px;text-align: center;}
+.con_box li a{display: block;}
+.con_box li p:nth-child(1){margin-top: 40px;}
+.money_count{ font-size: 14px;}
+
+.caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  vertical-align: middle;
+  border-top: 5px solid #353535;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  border-bottom: 0 dotted;
+}
+.dn{display:none;}

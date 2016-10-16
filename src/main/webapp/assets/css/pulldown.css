@@ -1,0 +1,70 @@
+.caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  vertical-align: middle;
+  border-top: 4px solid #353535;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  border-bottom: 0 dotted;
+}
+.tab-operate {
+  position: relative;
+  display: inline-block;
+}
+.tab-operate .btn-show {
+	display: inline-block;
+	height: 23px;
+	line-height: 23px;
+	padding: 0 8px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #eee;
+	font-size: 12px;	
+}
+.tab-operate a.btn-show:active{
+	background: #F6F6F6;
+	color: #999;
+	
+}
+.tab-operate .btn-hide {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 999;
+  float: left;
+  min-width: 90px;
+  white-space: nowrap;
+  padding: 5px 0;
+  margin: 0;
+  background-color: #fff;
+  border: 1px solid #CBCBCB;
+  border-radius: 4px;
+  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+}
+.tab-operate .btn-hide a {
+  display: block;
+  padding: 3px 10px;
+  clear: both;
+  line-height: 1.5;
+  color: #353535;
+  text-align: right;
+}
+.tab-operate .btn-hide a:hover {
+  background: #68CEE7;
+  color: #fff;
+}
+.tab-operate .btn-hide a.disabled {
+  color: #DDDDDD;
+}
+.tab-operate .btn-hide a.disabled:hover {
+  background: #fff;
+  cursor: default;
+}
+.open > .btn-hide {
+  display: block;
+}
+

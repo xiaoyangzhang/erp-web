@@ -1,0 +1,27 @@
+@media (min-width: 750px) {
+    .component_div {
+        float: left;
+        width: 700px;
+        height: 500px;
+    }
+
+    .component_right {
+        float: left;
+        width: 160px;
+        height: 500px;
+    }
+}
+
+@media (max-width: 750px) {
+    .component_div {
+        float: left;
+        width: 400px;
+        height: 200px;
+    }
+
+    .component_right {
+        float: left;
+        width: 100px;
+        height: 200px;
+    }
+}

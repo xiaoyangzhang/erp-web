@@ -1,0 +1,14 @@
+fieldset{display: inline-block; border: 1px solid #DBE4E6;}
+legend{color: #87ceeb;font-size: 13px; font-weight: bold;font-family: "微软雅黑";margin-left: 15px;}
+.zhong input{width: 72px;}
+.fl{float: left; width: 230px;height: 370px; margin-right: 12px; padding: 30px;}
+.fl p{display: inline-block;padding: 10px 15px;}
+.fc{float: left; width: 555px;height: 430px;margin-right: 12px;}
+.fc p{line-height: 40px;}
+.fc p span{display: inline-block; width: 40px;text-align: right;}
+.fcl{float: left;width: 225px; padding: 10px;}
+div.fcl{display: inline-block;float: left;}
+.fcr{margin-left: 20px;padding: 15px;}
+.fr{float: left; width: 220px;height: 390px; padding: 20px;}
+.fr p{margin: 20px;}
+input{width: 72px;}

@@ -1,0 +1,11 @@
+/* .PrintTool{border: 1px solid #d5d5d5; background-color:#f2f2f2; padding:1px;} */
+body {margin:0; padding:0; height:100%;background: #fff; font-family: Verdana, sans-serif, '宋体'; font-size:11pt;}
+div{ font-family:"宋体", sans-serif; font-size:11pt; } 
+
+.print{padding:3px 0; background: #E7EFF1;}
+.print-btngroup{text-align: center;}
+.print-btngroup input{border: 1px solid #E7EFF1;border-radius: 4px;background: #68CEE7; color: #FFFFFF; width:80px; line-height:25px;}	    	
+.print-btngroup input:hover{background: #75D2E8;}
+
+.bodys {font-family: '宋体';font-size:10pt !important;}
+.divs{ font-family: '宋体';font-size:10pt !important; } 

@@ -1,0 +1,117 @@
+﻿
+/* ------- This is the CSS Reset ------- */
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, 
+abbr, acronym, address, big, cite, code, del,
+dfn, em, img, ins, kbd, q, s, samp, small,
+strike, strong, sub, sup, tt, var, u, i, center,
+dl, dt, dd, ol, ul, li, fieldset, form, label,
+legend, table, caption, tbody, tfoot, thead, tr,
+th, td, article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup, menu,
+nav, output, ruby, section, summary, time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+
+/* ------- HTML5 display-role reset for older browsers ------- */
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after, q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+
+body {
+    background: #f8f8f8;
+    /*font-family: 'PT Sans', Helvetica, Arial, sans-serif;*/
+	font-family:"Microsoft YaHei","微软雅黑","Microsoft JhengHei","华文细黑",STHeiti,MingLiu;
+    text-align: center;
+    color: #fff;
+}
+
+.clear{ clear: both;}
+.page-container {
+    margin: 120px auto 0 auto;
+}
+
+
+form {
+
+}
+.loginBox{
+    position: relative;
+    width: 370px;
+    margin-left: 60%;
+    text-align: center;
+    border: 1px solid white;
+    border-radius: 3px;
+    background-color: rgba(180,180,180,0.7) ;
+}
+.loginBox .head{height: 36px;margin-top: 16px;}
+.loginBox .logo{width:30px; height: 30px;background: url(../../img/login/logo.png) no-repeat; border: 0 none;display: inline-block;}
+.loginBox h1 {
+		font-size: 20px;
+		font-weight: 500;
+		text-shadow: 0 1px 4px rgba(0,0,0,.2);
+		float: left;
+		height: 30px;
+		line-height: 31px;
+}
+.loginBox .row{margin: 10px 0;}
+.loginBox .row img{display: inline-block; width:26px; height: 26px;vertical-align: middle;}
+.loginBox .left{float: left;   margin: 0 10px 0 36px;}
+.loginBox .right{float:left; line-height: 26px; height: 26px; }
+.loginBox .rember{font-size: 12px;  text-align: left;  padding-left: 70px;}
+
+.inp_w1{width:200px; }
+.inp_w2{width:100px; }
+.input{height: 25px; line-height: 25px; padding: 0px 3px; border-radius: 3px; border:1px solid #e7eff1; box-shadow: 0 1px 3px #e7eff1 inset;transition:border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;}
+.input:focus{border-color: #66afe9; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6); outline: 0 none;}
+
+.btn {
+    cursor: pointer;
+    width: 296px;
+    height: 35px;
+    margin: 22px 0;
+    padding: 0;
+    background: #2ba3ff;
+    border: 0px;
+    font-family: 'PT Sans', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+ }
+.btn:hover {background: #1e92eb;}
+
+.ico_01{background: url(../../img/login/DL-01.png) no-repeat; width: 26px; height: 26px; border:0 none;}
+.ico_02{background: url(../../img/login/DL-02.png) no-repeat; width: 26px; height: 26px; border:0 none;}
+.ico_03{background: url(../../img/login/DL-03.png) no-repeat; width: 26px; height: 26px; border:0 none;}
+.ico_04{background: url(../../img/login/DL-04.png) no-repeat; width: 26px; height: 26px; border:0 none;}
+.ico_05{background: url(../../img/login/DL-05.png) no-repeat; width: 26px; height: 26px; border:0 none;display: inline-block; vertical-align: middle; cursor: pointer;}
+.ico_checkOk{background: url(../../img/login/check_ok.png) no-repeat; width: 20px; height: 20px; border:0 none;display: inline-block;vertical-align: middle;}
+.ico_checkUn{background: url(../../img/login/check_un.png) no-repeat; width: 20px; height: 20px; border:0 none;display: inline-block;vertical-align: middle;}
+.txtRemember{line-height: 20px;vertical-align: middle;}
+
+label.error{font-size:10px;margin-left:0px;width:auto;display:inline;color:red;font-style:italic;}
+.loginBox .hint{color: #ff0000;  padding: 4px 5px;  background-color: rgb(255,244,181);  border: 1px solid rgb(203,164,29);}

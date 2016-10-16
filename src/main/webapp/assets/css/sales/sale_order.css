@@ -1,0 +1,10 @@
+.order{width: 1098px; margin: 40px auto 0;border: solid 1px #E7EFF1;}
+.order .ordernum{padding: 20px 30px;background: #68C2E7;color: #FFFFFF;}
+.order .ordernum p.p1{font-size: 18px;font-weight: bold;}
+.order .ordernum p.p2{font-size: 16px;font-weight: bold;}
+.order .orderdetail{padding: 20px 10px 0;color: #333333;}
+.order .orderdetail dd{display: inline-block;width:500px ;}
+.order .p_paragraph_content a:hover{text-decoration: underline;}
+
+.p_container{margin: 0 auto;width: 1100px;}
+
