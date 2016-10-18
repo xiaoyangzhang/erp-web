@@ -51,6 +51,7 @@ import com.yihg.sys.api.PlatformOrgService;
 import com.yihg.sys.po.PlatformEmployeePo;
 import com.yihg.sys.po.PlatformOrgPo;
 import com.yihg.sys.po.SysBizBankAccount;
+import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -138,16 +139,19 @@ public class ProductInfoController extends BaseController {
 	private ProductGroupSupplierService groupSupplierService;
 	@Autowired
 	private ProductGroupSellerService sellerService;
-
-	/**
-	 * @author : xuzejun
-	 * @date : 2015年7月1日 下午3:10:12
-	 * @Description: 跳转至产品管理页面
-	 */
+	@Autowired
+	private ProductFacade productFacade;
+	
+	/** 
+	* created by zhangxiaoyang
+	* @date 2016年10月17日
+	* @Description:产品列表
+	* @param 
+	* @return String
+	* @throws 
+	*/
 	@RequestMapping(value = "/list.htm")
 	@RequiresPermissions(PermissionConstants.PRODUCT_LIST)
-	// public String toList( ModelMap model,ProductInfo productInfo,String
-	// name,Integer page) {
 	public String toList(HttpServletRequest request, ModelMap model,
 			ProductInfo productInfo) {
 		// 省市
@@ -156,14 +160,6 @@ public class ProductInfoController extends BaseController {
 		Integer bizId = WebUtils.getCurBizId(request);
 		List<DicInfo> brandList = dicService.getListByTypeCode(
 				BasicConstants.CPXL_PP, bizId);
-		/*
-		 * if(page==null){ page=1; } PageBean pageBean = new PageBean();
-		 * pageBean.setPageSize(Constants.PAGESIZE);
-		 * pageBean.setParameter(productInfo); pageBean.setPage(page); pageBean
-		 * = productInfoService.findProductInfos(pageBean, bizId,name,
-		 * productName);
-		 */
-		
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
@@ -172,7 +168,6 @@ public class ProductInfoController extends BaseController {
 		// model.addAttribute("allProvince", allProvince);
 		model.addAttribute("brandList", brandList);
 		model.addAttribute("state", productInfo.getState());
-		/* model.addAttribute("page", pageBean); */
 		return "product/product_list";
 	}
 
@@ -684,7 +679,7 @@ public class ProductInfoController extends BaseController {
 		parameters.put("productName", productName);
 		parameters.put("orgId", WebUtils.getCurUser(request).getOrgId());
 		parameters.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean = productInfoService.findProductInfos2(pageBean, parameters);
+		pageBean = productFacade.selectProductList(pageBean, parameters);
 
 		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
 		/*
