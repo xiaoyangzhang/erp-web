@@ -34,7 +34,6 @@ import com.yihg.product.api.ProductGroupPriceService;
 import com.yihg.product.api.ProductGroupService;
 import com.yihg.product.api.ProductGroupSupplierService;
 import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.api.ProductStockService;
 import com.yihg.product.po.ProductInfo;
 import com.yihg.supplier.constants.Constants;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
@@ -76,7 +75,6 @@ public class ProductPricePlusController extends BaseController {
 	private ProductGroupSupplierService groupSupplierService;
 	@Autowired
 	private ProductStockFacade productStockFacade;
-	
 	@Autowired
 	private ProductPricePlusFacade productPricePlusFacade;
 	@Autowired
@@ -324,6 +322,17 @@ public class ProductPricePlusController extends BaseController {
 		}
 		return errorJson("操作失败");
 	}
+	/**
+	 * 
+	 * 描述：产品库存跳转页面
+	 * @author liyong
+	 * 2016年10月19日 
+	 * @param request
+	 * @param model
+	 * @param condition查询的封装对象
+	 * @return
+	 * @throws ParseException
+	 */
 	@RequestMapping("/stockStatics.htm")
 	public String stockStatics(HttpServletRequest request, ModelMap model,
 			StockStaticCondition condition) throws ParseException{
@@ -345,6 +354,17 @@ public class ProductPricePlusController extends BaseController {
 		return "product/stock/stock-statics-plus";
 		
 	}
+	/**
+	 * 
+	 * 描述：产品库存查询 调用facade
+	 * @author liyong
+	 * 2016年10月19日 
+	 * @param request
+	 * @param model
+	 * @param condition 
+	 * @return 产品库存页面
+	 * @throws ParseException
+	 */
 	@RequestMapping("/stockStatics.do")
 	public String queryStockStatics(HttpServletRequest request, ModelMap model,
 			StockStaticCondition condition) throws ParseException {
