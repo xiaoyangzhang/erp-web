@@ -876,7 +876,7 @@ public class ProductInfoController extends BaseController {
 //			return productInfoService.updateProductInfo(info) == 1 ? successJson()
 //					: errorJson("操作失败！");
 //		}
-		ResultSupport result = productFacade.deleteProduct(info.getId(), info.getState());
+		ResultSupport result = productFacade.updateProductState(info.getId(), info.getState());
 		if (result.isSuccess()) {
 			return successJson();
 		}
