@@ -1244,8 +1244,8 @@ public class ProductInfoController extends BaseController {
 	}
 
 	/**
-	 * 产品权限树
-	 * 
+	 * 产品列表/权限
+	 * zhangxiaoyang
 	 * @param request
 	 * @param model
 	 * @return
@@ -1253,7 +1253,7 @@ public class ProductInfoController extends BaseController {
 	@RequestMapping("/rightTree.htm")
 	public String rightTree(HttpServletRequest request, ModelMap model,
 			Integer productId) {
-		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+		/*List<Map<String, String>> list = new ArrayList<Map<String, String>>();
 		List<PlatformOrgPo> orgList = orgService.getOrgTree(
 				WebUtils.getCurBizId(request), null);
 		List<ProductRight> rightList = productInfoService
@@ -1267,10 +1267,10 @@ public class ProductInfoController extends BaseController {
 		// 父节点集合
 		// Map<Integer,Boolean> parentMap = new HashMap<Integer,Boolean>();
 		if (orgList != null && orgList.size() > 0) {
-			/*
+			
 			 * for(PlatformOrgPo org : orgList){
 			 * parentMap.put(org.getParentId(), true); }
-			 */
+			 
 			for (PlatformOrgPo org : orgList) {
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("id", org.getOrgId() + "");
@@ -1278,21 +1278,30 @@ public class ProductInfoController extends BaseController {
 				map.put("name", org.getName());
 				map.put("open", "true");
 				// 如果当前节点是父节点，则不允许选择
-				/*
+				
 				 * if(parentMap.containsKey(org.getOrgId())){ map.put("nocheck",
 				 * "true"); }
-				 */
+				 
 				if (rightMap.containsKey(org.getOrgId())) {
 					map.put("checked", "true");
 				}
 				list.add(map);
 			}
-		}
-
-		model.addAttribute("orgJsonStr", JSON.toJSONString(list));
+		}*/
+		List<Map<String, String>> resultList = productFacade.getProductRight(productId, WebUtils.getCurBizId(request));
+		model.addAttribute("orgJsonStr", JSON.toJSONString(resultList));
 		return "/product/right/org-tree";
 	}
-
+	/**
+	 * 
+	* created by zhangxiaoyang
+	* @date 2016年10月19日
+	* @Description:产品列表权限设置
+	* @param 
+	* @return String
+	* @throws
+	 */
+	
 	@RequestMapping(value = "/saveRight.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String saveProductRight(HttpServletRequest request, ModelMap model,
@@ -1301,7 +1310,8 @@ public class ProductInfoController extends BaseController {
 		Set<Integer> orgIdSet = new HashSet<Integer>(orgIdList);
 		// 默认添加上自己的单位
 		orgIdSet.add(WebUtils.getCurUser(request).getOrgId());
-		productInfoService.saveProductRight(productId, orgIdSet);
+		//productInfoService.saveProductRight(productId, orgIdSet);
+		ResultSupport result = productFacade.setProductRight(productId, orgIdSet);
 		return successJson();
 	}
 
