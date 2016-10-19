@@ -931,8 +931,8 @@ public class ProductInfoController extends BaseController {
 	}
 
 	/**
-	 * 订单打印
-	 * 
+	 * 产品信息导出word
+	 * zhangxiaoyang
 	 * @param productId
 	 * @param request
 	 * @param response
@@ -943,10 +943,11 @@ public class ProductInfoController extends BaseController {
 		String path = "";
 		String fileName = "";
 		String productCode = "";
-		Map<String, Object> map = productInfoService
-				.findProductInfos(productId);
-		path = createProductInfo(preivew, request, productId, map);
-		ProductInfo productInfo = (ProductInfo) map.get("productInfo");
+//		Map<String, Object> map = productInfoService
+//				.findProductInfos(productId);
+		WebResult<Map<String, Object>> webResult = productFacade.toExportProduct(productId);
+		path = createProductInfo(preivew, request, productId, webResult.getValue());
+		ProductInfo productInfo = (ProductInfo) webResult.getValue().get("productInfo");
 		if (productInfo != null) {
 			productCode = productInfo.getCode();
 		}
@@ -1393,8 +1394,9 @@ public class ProductInfoController extends BaseController {
 	public String productInfoPreview(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model, Integer productId,
 			Integer preview) {
-		Map<String, Object> map = productInfoService
-				.findProductInfos(productId);
+//		Map<String, Object> map = productInfoService
+//				.findProductInfos(productId);
+		WebResult<Map<String, Object>> result = productFacade.toExportProduct(productId);
 		Map<String, Object> params1 = new HashMap<String, Object>();
 		/**
 		 * 第一个表格
@@ -1409,7 +1411,7 @@ public class ProductInfoController extends BaseController {
 		 */
 		Map<String, Object> map2 = new HashMap<String, Object>();
 
-		getProductInfo(preview, request, map, params1, map0, routeList, map2,
+		getProductInfo(preview, request, result.getValue(), params1, map0, routeList, map2,
 				null, "html");
 		model.addAttribute("productId", productId);
 		model.addAttribute("params1", params1);
