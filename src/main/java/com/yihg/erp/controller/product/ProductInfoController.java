@@ -99,6 +99,7 @@ import com.yihg.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.dal.product.vo.ProductInfoVo;
 import com.yimayhd.erpcenter.facade.query.ProductListParam;
 import com.yimayhd.erpcenter.facade.query.ProductSaveDTO;
+import com.yimayhd.erpcenter.facade.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.result.ToProductAddResult;
 import com.yimayhd.erpcenter.facade.result.WebResult;
 import com.yimayhd.erpcenter.facade.service.ProductFacade;
@@ -913,14 +914,20 @@ public class ProductInfoController extends BaseController {
 	@RequestMapping(value = "/upState.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String upState(ProductInfo info) {
-		List<ProductRoute> productRoutes = productRouteService
-				.findProductRouteByProductId(info.getId());
-		if (info.getState() != (byte) -1 && productRoutes.size() == 0) {
-			return errorJson("产品内无行程内容");
-		} else {
-			return productInfoService.updateProductInfo(info) == 1 ? successJson()
-					: errorJson("操作失败！");
+//		List<ProductRoute> productRoutes = productRouteService
+//				.findProductRouteByProductId(info.getId());
+//		if (info.getState() != (byte) -1 && productRoutes.size() == 0) {
+//			return errorJson("产品内无行程内容");
+//		} else {
+//			return productInfoService.updateProductInfo(info) == 1 ? successJson()
+//					: errorJson("操作失败！");
+//		}
+		ResultSupport result = productFacade.deleteProduct(info.getId(), info.getState());
+		if (result.isSuccess()) {
+			return successJson();
 		}
+		System.out.println("=============================="+JSON.toJSONString(result));
+		return errorJson(result.getResultMsg());
 	}
 
 	/**
@@ -1373,7 +1380,15 @@ public class ProductInfoController extends BaseController {
 		Gson gson = new Gson();
 		return gson.toJson(productRemark);
 	}
-
+	/**
+	 * 
+	* created by zhangxiaoyang
+	* @date 2016年10月19日
+	* @Description:产品列表/导出
+	* @param 
+	* @return String
+	* @throws
+	 */
 	@RequestMapping("productInfoPreview.htm")
 	public String productInfoPreview(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model, Integer productId,
