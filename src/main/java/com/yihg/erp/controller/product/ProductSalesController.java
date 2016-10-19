@@ -17,7 +17,6 @@ import com.yihg.product.api.ProductStockService;
 import com.yihg.product.po.PriceView;
 import com.yihg.product.po.ProductGroup;
 import com.yihg.product.po.ProductGroupSupplier;
-import com.yihg.product.po.ProductInfo;
 import com.yihg.product.po.ProductRemark;
 import com.yihg.product.po.ProductStock;
 import com.yihg.product.vo.ProductInfoVo;
@@ -35,6 +34,10 @@ import java.util.Set;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
+import com.yimayhd.erpcenter.facade.query.DetailDTO;
+import com.yimayhd.erpcenter.facade.result.DetailResult;
+import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +98,10 @@ public class ProductSalesController extends BaseController {
 	
 	@Autowired
 	private ProductFacade productFacade;
+
+
+	@Autowired
+	private ProductUpAndDownFrameFacade productUpAndDownFrameFacade;
 	/****************************************组团版********************************/
 	
 	@RequestMapping(value = "/list.htm")
@@ -142,19 +149,23 @@ public class ProductSalesController extends BaseController {
 	
 	@RequestMapping(value = "/detail.htm")
 	public String detail(HttpServletRequest request,Model model, @RequestParam Integer id) {
-        ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(id);
-        ProductRouteVo productRouteVo = productRouteService.findByProductId(id);
-		ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(id);
+        //ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(id);
+       // ProductRouteVo productRouteVo = productRouteService.findByProductId(id);
+		//ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(id);
         //List<ProductGroup> productGroups = productGroupService.selectProductGroups(id);
-		List<ProductGroup> productGroups = productGroupService.selectProductGroupsBySellerId(id,WebUtils.getCurUserId(request));
+		//List<ProductGroup> productGroups = productGroupService.selectProductGroupsBySellerId(id,WebUtils.getCurUserId(request));
 
-		model.addAttribute("productInfoVo", productInfoVo);
-        model.addAttribute("productRouteVo", productRouteVo);
-        model.addAttribute("productRemark", productRemark);
-        model.addAttribute("productGroupSuppliers", productGroups);
+		DetailDTO detailDTO = new DetailDTO();
+		detailDTO.setId(id);
+		DetailResult detailResult = productUpAndDownFrameFacade.detail(detailDTO);
+
+		model.addAttribute("productInfoVo", detailResult.getProductInfoVo());
+        model.addAttribute("productRouteVo", detailResult.getProductRouteVo());
+        model.addAttribute("productRemark", detailResult.getProductRemark());
+        model.addAttribute("productGroupSuppliers", detailResult.getProductGroups());
         model.addAttribute("config", config);
-        
-        ProductInfo info = productInfoVo.getProductInfo();
+
+		ProductInfo info = detailResult.getProductInfoVo().getProductInfo();
     	if(info.getObligate()==null){
     		info.setObligate(0);
     	}    	
@@ -319,10 +330,14 @@ public class ProductSalesController extends BaseController {
 //    	ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(id);
 //        ProductRouteVo productRouteVo = productRouteService.findByProductId(id);
 //		ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(id);
-    	ProductInfoResult result = productFacade.toProductPreview(id);
-		model.addAttribute("productInfoVo", result.getProductInfoVo());
-        model.addAttribute("productRouteVo", result.getProductRouteVo());
-        model.addAttribute("productRemark", result.getProductRemark());
+    //	ProductInfoResult result = productFacade.toProductPreview(id);
+
+		DetailDTO detailDTO = new DetailDTO();
+		detailDTO.setId(id);
+		DetailResult detailResult = productUpAndDownFrameFacade.detail(detailDTO);
+		model.addAttribute("productInfoVo", detailResult.getProductInfoVo());
+        model.addAttribute("productRouteVo", detailResult.getProductRouteVo());
+        model.addAttribute("productRemark", detailResult.getProductRemark());
         model.addAttribute("config", config);
         return "product/priceplus/product_detail";
     }
