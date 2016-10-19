@@ -78,7 +78,7 @@ public class ProductPricePlusController extends BaseController {
 	
 	@Autowired
 	private ProductPricePlusFacade productPricePlusFacade;
-	
+	@Autowired
 	private ProductCommonFacade productCommonFacade;
 	
 	@RequestMapping("list.htm")
