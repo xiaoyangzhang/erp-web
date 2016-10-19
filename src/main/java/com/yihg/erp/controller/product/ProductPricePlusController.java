@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
 import org.erpcenterFacade.common.client.query.BrandQueryDTO;
 import org.erpcenterFacade.common.client.result.BrandQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
@@ -22,24 +21,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
 import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
 import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.images.util.DateUtils;
 import com.yihg.mybatis.utility.PageBean;
 import com.yihg.product.api.ProductGroupPriceService;
 import com.yihg.product.api.ProductGroupService;
 import com.yihg.product.api.ProductGroupSupplierService;
 import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.po.ProductInfo;
 import com.yihg.supplier.constants.Constants;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
-import com.yimayhd.erpcenter.dal.basic.service.DicDal;
 import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
-import com.yimayhd.erpcenter.dal.product.po.ProductStock;
+import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
 import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
 import com.yimayhd.erpcenter.dal.product.vo.StockStaticCondition;
 import com.yimayhd.erpcenter.facade.query.ProductGroupSupplierDTO;
@@ -48,8 +42,10 @@ import com.yimayhd.erpcenter.facade.query.ProductSupplierConditionDTO;
 import com.yimayhd.erpcenter.facade.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.result.ToAddPriceGroupResult;
 import com.yimayhd.erpcenter.facade.result.ToSupplierListResult;
+import com.yimayhd.erpcenter.facade.service.ProductFacade;
 import com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade;
 import com.yimayhd.erpcenter.facade.service.ProductStockFacade;
+
 /**
  * @author : 葛进军
  * @date : 2015-12-14
@@ -66,8 +62,6 @@ public class ProductPricePlusController extends BaseController {
 	@Autowired
     private ProductGroupPriceService groupService;
 	@Autowired
-	private DicDal dicService;
-	@Autowired
 	private RegionService regionService;
 	@Autowired
 	private ProductInfoService productInfoService;
@@ -79,17 +73,23 @@ public class ProductPricePlusController extends BaseController {
 	private ProductPricePlusFacade productPricePlusFacade;
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
+	@Autowired
+	private ProductFacade productFacade;
 	
 	@RequestMapping("list.htm")
 	public String toList(HttpServletRequest request,ModelMap model,ProductInfo productInfo){
+		
 		//省市
         List<RegionInfo> allProvince = regionService.getAllProvince();
         //产品名称
         Integer bizId = WebUtils.getCurBizId(request);
-        List<DicInfo> brandList = dicService
-                .getListByTypeCode(BasicConstants.CPXL_PP,bizId);
+        
+        BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+        brandQueryDTO.setBizId(bizId);
+        BrandQueryResult result = productCommonFacade.brandQuery(brandQueryDTO);
+        
         model.addAttribute("allProvince",allProvince);
-        model.addAttribute("brandList", brandList);
+        model.addAttribute("brandList", result.getBrandList());
         model.addAttribute("state", productInfo.getState());
         return "product/priceplus/product_list_price";
 	}
@@ -100,8 +100,10 @@ public class ProductPricePlusController extends BaseController {
 		List<RegionInfo> allProvince = regionService.getAllProvince();
 		//产品名称
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> brandList = dicService
-				.getListByTypeCode(BasicConstants.CPXL_PP,bizId);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+        brandQueryDTO.setBizId(bizId);
+        BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
+        
 		if(page==null){
 			page=1;
 		}
@@ -133,7 +135,7 @@ public class ProductPricePlusController extends BaseController {
 			priceStateMap.put(info.getId(), state);
 		}
 		model.addAttribute("allProvince",allProvince);
-		model.addAttribute("brandList", brandList);
+		model.addAttribute("brandList", brandQueryResult.getBrandList());
 		model.addAttribute("page", pageBean);
 		model.addAttribute("pageNum", page);
 		model.addAttribute("priceStateMap", priceStateMap);
@@ -177,7 +179,6 @@ public class ProductPricePlusController extends BaseController {
 		ToSupplierListResult result = productPricePlusFacade.toSupplierList(conditionDTO);
 		
 		model.addAttribute("productId", condition.getProductId());
-		ProductInfo productInfo = productInfoService.findProductInfoById(condition.getProductId());
 		model.addAttribute("productName", result.getProductName());		
 		//model.addAttribute("groupId", groupId);
 		model.addAttribute("groupSuppliers", result.getGroupSuppliers());
@@ -276,15 +277,12 @@ public class ProductPricePlusController extends BaseController {
 	@RequestMapping("copyProduct.do")
 	@ResponseBody
 	public String copyProduct(HttpServletRequest request,HttpServletResponse response,ModelMap model,String data,Integer productId){
-		//获取要复制到的产品的id集合
-		List<ProductInfo> productInfos = JSON.parseArray(data, ProductInfo.class);
-		//获取要复制的产品下的组团社
-		try {
-			groupSupplierService.save(productInfos, productId);
-		} catch (Exception e) {
-			return errorJson("操作失败");
+		
+		ResultSupport result = productPricePlusFacade.copyProduct(data, productId);
+		if(result.isSuccess()){
+			return successJson();
 		}
-		return successJson();
+		return errorJson("操作失败");
 	}
 	
 	@RequestMapping("copyProductSuppliers.do")
