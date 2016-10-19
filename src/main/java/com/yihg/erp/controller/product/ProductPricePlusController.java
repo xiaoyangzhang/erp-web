@@ -34,6 +34,7 @@ import com.yihg.product.api.ProductGroupPriceService;
 import com.yihg.product.api.ProductGroupService;
 import com.yihg.product.api.ProductGroupSupplierService;
 import com.yihg.product.api.ProductInfoService;
+import com.yihg.product.api.ProductStockService;
 import com.yihg.product.po.ProductInfo;
 import com.yihg.supplier.constants.Constants;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
