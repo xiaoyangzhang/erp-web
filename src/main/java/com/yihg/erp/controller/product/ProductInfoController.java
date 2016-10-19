@@ -1,64 +1,34 @@
 package com.yihg.erp.controller.product;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.google.gson.Gson;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.RegionInfo;
-import com.yihg.erp.aop.RequiresPermissions;
-import com.yihg.erp.common.BizSettingCommon;
-import com.yihg.erp.contant.BizConfigConstant;
-import com.yihg.erp.contant.OpenPlatformConstannt;
-import com.yihg.erp.contant.PermissionConstants;
-import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.utils.DateUtils;
-import com.yihg.erp.utils.SysConfig;
-import com.yihg.erp.utils.WebUtils;
-import com.yihg.erp.utils.WordReporter;
-import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.po.BookingSupplier;
-import com.yihg.operation.po.BookingSupplierDetail;
-import com.yihg.product.api.ProductGroupSellerService;
-import com.yihg.product.api.ProductGroupService;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.api.ProductRemarkService;
-import com.yihg.product.api.ProductRouteService;
-import com.yihg.product.po.ProductGroup;
-import com.yihg.product.po.ProductGroupPrice;
-import com.yihg.product.po.ProductGroupSeller;
-import com.yihg.product.po.ProductGroupSupplier;
-import com.yihg.product.po.ProductInfo;
-import com.yihg.product.po.ProductRemark;
-import com.yihg.product.po.ProductRight;
-import com.yihg.product.po.ProductRoute;
-import com.yihg.product.vo.ProductGroupSupplierVo;
-import com.yihg.product.vo.ProductInfoVo;
-import com.yihg.product.vo.ProductRouteVo;
-import com.yihg.product.vo.StockStaticCondition;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupOrderPrice;
-import com.yihg.sales.po.GroupRoute;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.po.PlatformEmployeePo;
-import com.yihg.sys.po.PlatformOrgPo;
-import com.yihg.sys.po.SysBizBankAccount;
-import com.yimayhd.erpcenter.facade.service.ProductFacade;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -79,30 +49,53 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.Gson;
+import com.yihg.basic.api.DicService;
+import com.yihg.basic.api.RegionService;
+import com.yihg.basic.contants.BasicConstants;
+import com.yihg.basic.po.DicInfo;
+import com.yihg.basic.po.RegionInfo;
+import com.yihg.erp.aop.RequiresPermissions;
+import com.yihg.erp.common.BizSettingCommon;
+import com.yihg.erp.contant.BizConfigConstant;
+import com.yihg.erp.contant.OpenPlatformConstannt;
+import com.yihg.erp.contant.PermissionConstants;
+import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.utils.DateUtils;
+import com.yihg.erp.utils.SysConfig;
+import com.yihg.erp.utils.WebUtils;
+import com.yihg.erp.utils.WordReporter;
+import com.yihg.mybatis.utility.PageBean;
+import com.yihg.product.api.ProductGroupSellerService;
+import com.yihg.product.api.ProductGroupService;
+import com.yihg.product.api.ProductGroupSupplierService;
+import com.yihg.product.api.ProductInfoService;
+import com.yihg.product.api.ProductRemarkService;
+import com.yihg.product.api.ProductRouteService;
+import com.yihg.product.constants.Constants;
+import com.yihg.product.po.ProductGroup;
+import com.yihg.product.po.ProductGroupPrice;
+import com.yihg.product.po.ProductGroupSeller;
+import com.yihg.product.po.ProductGroupSupplier;
+import com.yihg.product.po.ProductInfo;
+import com.yihg.product.po.ProductRemark;
+import com.yihg.product.po.ProductRight;
+import com.yihg.product.po.ProductRoute;
+import com.yihg.product.vo.ProductGroupSupplierVo;
+import com.yihg.product.vo.ProductInfoVo;
+import com.yihg.product.vo.ProductRouteVo;
+import com.yihg.product.vo.StockStaticCondition;
+import com.yihg.sys.api.PlatformEmployeeService;
+import com.yihg.sys.api.PlatformOrgService;
+import com.yihg.sys.po.PlatformEmployeePo;
+import com.yihg.sys.po.PlatformOrgPo;
+import com.yimayhd.erpcenter.facade.query.ProductListParam;
+import com.yimayhd.erpcenter.facade.result.WebResult;
+import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author : xuzejun
@@ -141,7 +134,8 @@ public class ProductInfoController extends BaseController {
 	private ProductGroupSellerService sellerService;
 	@Autowired
 	private ProductFacade productFacade;
-	
+//	@Autowired
+//	private productf
 	/** 
 	* created by zhangxiaoyang
 	* @date 2016年10月17日
@@ -653,7 +647,7 @@ public class ProductInfoController extends BaseController {
 		} else {
 			pageBean.setPageSize(pageSize);
 		}
-		if (StringUtils.isBlank(productInfo.getOperatorIds())
+		/*if (StringUtils.isBlank(productInfo.getOperatorIds())
 				&& StringUtils.isNotBlank(productInfo.getOrgIds())) {
 			Set<Integer> set = new HashSet<Integer>();
 			String[] orgIdArr = productInfo.getOrgIds().split(",");
@@ -670,7 +664,8 @@ public class ProductInfoController extends BaseController {
 				productInfo.setOperatorIds(salesOperatorIds.substring(0,
 						salesOperatorIds.length() - 1));
 			}
-		}
+		}*/
+		
 		pageBean.setParameter(productInfo);
 		pageBean.setPage(page);
 		Map parameters = new HashMap();
@@ -679,7 +674,7 @@ public class ProductInfoController extends BaseController {
 		parameters.put("productName", productName);
 		parameters.put("orgId", WebUtils.getCurUser(request).getOrgId());
 		parameters.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean = productFacade.selectProductList(pageBean, parameters);
+		WebResult<PageBean<com.yimayhd.erpcenter.dal.product.po.ProductInfo>> webResult = productFacade.selectProductList(pageBean, parameters);
 
 		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
 		/*
@@ -690,7 +685,7 @@ public class ProductInfoController extends BaseController {
 		 */
 		model.addAttribute("allProvince", allProvince);
 		model.addAttribute("brandList", brandList);
-		model.addAttribute("page", pageBean);
+		model.addAttribute("page", webResult.getValue());
 		model.addAttribute("pageNum", page);
 		model.addAttribute("priceStateMap", priceStateMap);
 		model.addAttribute("priceMode", getPriceMode(request));
@@ -870,10 +865,15 @@ public class ProductInfoController extends BaseController {
 	// @RequiresPermissions(PermissionConstants.PRODUCT_LIST)
 	public String toEdit(HttpServletRequest request, Integer productId,
 			ModelMap model) {
-		ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(productId);
-		ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(productId);
+//		ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(productId);
+//		ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(productId);
+		ProductListParam param = new ProductListParam();
+		param.setBizId(WebUtils.getCurBizId(request));
+		param.setProductId(productId);
+		param.setTypeCode(BasicConstants.CPXL_PP);
+		com.yimayhd.erpcenter.dal.product.vo.ProductInfoVo productInfoVo = productFacade.getProductInfoVOById(param);
 		model.addAttribute("vo", productInfoVo);
-		model.addAttribute("productRemark", productRemark);
+		model.addAttribute("productRemark", productInfoVo.getProductRemark());
 		
 		// 省
 		// List<RegionInfo> allProvince = regionService.getAllProvince();
@@ -888,8 +888,8 @@ public class ProductInfoController extends BaseController {
 		 */
 
 		// 产品名称
-		List<DicInfo> brandList = dicService.getListByTypeCode(BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
-		model.addAttribute("brandList", brandList);
+		//List<DicInfo> brandList = dicService.getListByTypeCode(BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
+		model.addAttribute("brandList", productInfoVo.getBrandList());
 
 		PlatformEmployeePo curUser = WebUtils.getCurUser(request);
 		model.addAttribute("operatorId", curUser.getEmployeeId());
