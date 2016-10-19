@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.yihg.product.api.ProductRemarkService;
-import com.yihg.product.po.ProductRemark;
+import com.yimayhd.erpcenter.dal.product.po.ProductRemark;
+import com.yimayhd.erpcenter.facade.query.ProductRemarkDTO;
 import com.yimayhd.erpcenter.facade.result.ToProductRemarkResult;
 import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
@@ -41,7 +42,9 @@ public class ProductRemarkController {
     @RequestMapping(value = "/save.do", method = RequestMethod.POST)
     // @RequiresPermissions(PermissionConstants.PRODUCT_LIST)
     public String saveRemark(Model model, ProductRemark productRemark) {
-        productRemarkService.saveProductRemark(productRemark);
+    	ProductRemarkDTO productRemarkDTO = new ProductRemarkDTO();
+    	productRemarkDTO.setProductRemark(productRemark);
+    	boolean result = productFacade.saveProductRemark(productRemarkDTO);
         return "redirect:view.htm?productId=" + productRemark.getProductId();
     }
 }
