@@ -1,9 +1,6 @@
 package com.yihg.erp.controller.product;
 
-import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,14 +20,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.yihg.basic.api.DicService;
 import com.yihg.basic.api.RegionService;
 import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
 import com.yihg.basic.po.RegionInfo;
-import com.yihg.erp.aop.RequiresPermissions;
-import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.images.util.DateUtils;
@@ -39,17 +31,20 @@ import com.yihg.product.api.ProductGroupPriceService;
 import com.yihg.product.api.ProductGroupService;
 import com.yihg.product.api.ProductGroupSupplierService;
 import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.api.ProductStockService;
-import com.yihg.product.po.ProductGroup;
-import com.yihg.product.po.ProductGroupPrice;
-import com.yihg.product.po.ProductGroupSupplier;
 import com.yihg.product.po.ProductInfo;
-import com.yihg.product.po.ProductStock;
-import com.yihg.product.vo.PriceCopyVo;
-import com.yihg.product.vo.ProductPriceVo;
-import com.yihg.product.vo.ProductSupplierCondition;
-import com.yihg.product.vo.StockStaticCondition;
 import com.yihg.supplier.constants.Constants;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.basic.service.DicDal;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
+import com.yimayhd.erpcenter.dal.product.po.ProductStock;
+import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
+import com.yimayhd.erpcenter.dal.product.vo.StockStaticCondition;
+import com.yimayhd.erpcenter.facade.query.ProductGroupSupplierDTO;
+import com.yimayhd.erpcenter.facade.query.ProductSupplierConditionDTO;
+import com.yimayhd.erpcenter.facade.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.result.ToAddPriceGroupResult;
+import com.yimayhd.erpcenter.facade.result.ToSupplierListResult;
+import com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade;
 /**
  * @author : 葛进军
  * @date : 2015-12-14
@@ -66,7 +61,7 @@ public class ProductPricePlusController extends BaseController {
 	@Autowired
     private ProductGroupPriceService groupService;
 	@Autowired
-	private DicService dicService;
+	private DicDal dicService;
 	@Autowired
 	private RegionService regionService;
 	@Autowired
@@ -75,6 +70,9 @@ public class ProductPricePlusController extends BaseController {
 	private ProductGroupSupplierService groupSupplierService;
 	@Autowired
 	private ProductStockService stockService;
+	
+	@Autowired
+	private ProductPricePlusFacade productPricePlusFacade;
 	
 	@RequestMapping("list.htm")
 	public String toList(HttpServletRequest request,ModelMap model,ProductInfo productInfo){
@@ -168,13 +166,17 @@ public class ProductPricePlusController extends BaseController {
 	// @RequiresPermissions(value=PermissionConstants.PRODUCT_PRICE)
 	public String toSupplierList(ModelMap model,ProductSupplierCondition condition) {
 		
+		ProductSupplierConditionDTO conditionDTO = new ProductSupplierConditionDTO();
+		conditionDTO.setCondition(condition);
+		ToSupplierListResult result = productPricePlusFacade.toSupplierList(conditionDTO);
+		
 		model.addAttribute("productId", condition.getProductId());
 		ProductInfo productInfo = productInfoService.findProductInfoById(condition.getProductId());
-		model.addAttribute("productName", "【" +productInfo.getBrandName()+"】"+productInfo.getNameCity());		
+		model.addAttribute("productName", result.getProductName());		
 		//model.addAttribute("groupId", groupId);
-		model.addAttribute("groupSuppliers", groupSupplierService.selectSupplierList(condition));
+		model.addAttribute("groupSuppliers", result.getGroupSuppliers());
 		model.addAttribute("supplierName", condition.getSupplierName());
-		model.addAttribute("city", condition.getCity());
+		model.addAttribute("city", condition.getSupplierName());
 		return "product/priceplus/newSupplier";
 	}
 	/**
@@ -185,12 +187,12 @@ public class ProductPricePlusController extends BaseController {
 	@RequestMapping(value = "/supplierSave.do",method = RequestMethod.POST)
 	@ResponseBody
 	public String save(String data) {
-		List<ProductGroupSupplier> saveP = JSONArray.parseArray(data, ProductGroupSupplier.class);
-		if(saveP.size()==0){
+		
+		ResultSupport result = productPricePlusFacade.supplierSave(data);
+		if(result.isSuccess()){
 			return successJson();
 		}
-		return groupSupplierService.save(saveP) ==1?successJson():errorJson("操作失败！");
-		
+		return errorJson("操作失败！");
 	}
 	/**
 	 * 删除组团社
@@ -201,8 +203,14 @@ public class ProductPricePlusController extends BaseController {
 	@RequestMapping(value = "/delSupplier",method = RequestMethod.POST)
 	@ResponseBody
 	public String delSupplier(ProductGroupSupplier groupSupplier) {
-		//return groupSupplierService.update(groupSupplier)==1?successJson():errorJson("操作失败！");
-		return groupSupplierService.deleteByProductSupplierId(groupSupplier.getId()) == 1?successJson():errorJson("操作失败！");
+		
+		ProductGroupSupplierDTO productGroupSupplierDTO = new ProductGroupSupplierDTO();
+		productGroupSupplierDTO.setGroupSupplier(groupSupplier);
+		ResultSupport result = productPricePlusFacade.delSupplier(productGroupSupplierDTO);
+		if(result.isSuccess()){
+			return successJson();
+		}
+		return errorJson("操作失败！");
 	}
 	/**
 	 * 跳转到添加价格组页面
@@ -215,49 +223,39 @@ public class ProductPricePlusController extends BaseController {
 	 */
 	@RequestMapping("addPriceGroup.htm")
 	public String addPriceGroup(HttpServletRequest request,HttpServletResponse response,ModelMap model,Integer id){
-		List<ProductGroup> productGroups = productGroupService.selectProductGroupList(id);
-		ProductInfo productInfo = productInfoService.findProductInfoBySupplierId(id);
-		for (ProductGroup pGroup : productGroups) {
-			List<ProductGroupPrice> groupPrices = groupService.selectProductGroupPrices(pGroup.getId(), null, null);
-			pGroup.setGroupPrices(groupPrices);
-			//pGroup.setRowSpan(groupPrices.size());
-		}
-		model.addAttribute("productGroups", productGroups);
-		//try {
-			//groupSupplierService.
-		ProductGroupSupplier supplierInfo = groupSupplierService.selectgGroupSupplierById(id);
-			model.addAttribute("supplierName", supplierInfo.getSupplierName());
-			model.addAttribute("supplierId", supplierInfo.getSupplierId());
-//		} catch (UnsupportedEncodingException e) {
-//			e.printStackTrace();
-//		}
+		
+		ToAddPriceGroupResult addPriceGroupResult = productPricePlusFacade.addPriceGroup(id);
+		
+		model.addAttribute("productGroups", addPriceGroupResult.getProductGroups());
+		model.addAttribute("supplierName", addPriceGroupResult.getSupplierName());
+		model.addAttribute("supplierId", addPriceGroupResult.getSupplierId());
 		model.addAttribute("groupSupplierId", id);
-		model.addAttribute("productId",supplierInfo.getProductId());
-		model.addAttribute("brandName", productInfo.getBrandName());
-		model.addAttribute("productName", productInfo.getNameCity());
+		model.addAttribute("productId",addPriceGroupResult.getProductId());
+		model.addAttribute("brandName", addPriceGroupResult.getBrandName());
+		model.addAttribute("productName", addPriceGroupResult.getProductName());
 		return  "product/priceplus/newPrice";
 		
 	}
 	@RequestMapping("savePriceGroup.do")
 	@ResponseBody
 	public String savePriceGroup(HttpServletRequest request,HttpServletResponse response,ModelMap model,String productGroups,Integer groupSupplierId){
-		List<ProductGroup> GroupPrices = JSON.parseArray(productGroups, ProductGroup.class);
-		try {
-			productGroupService.save2(GroupPrices,groupSupplierId);
-		} catch (Exception e) {
-			return errorJson("保存失败");
-		}
-		return successJson();
 		
+		
+		ResultSupport result = productPricePlusFacade.savePriceGroup(productGroups, groupSupplierId);
+		if(result.isSuccess()){
+			return successJson();
+		}
+		return errorJson("保存失败");
 	}
 	
 	@RequestMapping(value="copyGroups.do",method=RequestMethod.POST)
 	@ResponseBody
 	public String copyGroup(ModelMap model,String groupIds,String destGroupSupplierIds){
-		List<Integer> groupIdList = JSON.parseArray(groupIds, Integer.class);
-		List<Integer> groupSupplierIdList = JSON.parseArray(destGroupSupplierIds, Integer.class);
-		productGroupService.copyGroups(groupIdList,groupSupplierIdList);
-		return successJson();
+		ResultSupport result = productPricePlusFacade.copyGroup(groupIds, destGroupSupplierIds);
+		if(result.isSuccess()){
+			return successJson();
+		}
+		return errorJson("操作失败");
 	}
 	
 	/**
@@ -286,15 +284,12 @@ public class ProductPricePlusController extends BaseController {
 	@RequestMapping("copyProductSuppliers.do")
 	@ResponseBody
 	public String copyProductSuppliers(HttpServletRequest request,HttpServletResponse response,ModelMap model,String data,Integer productId){
-		//获取要复制的组团社
-		List<Integer> productSupplierIdList = JSON.parseArray(data, Integer.class);		
-		//获取要复制的产品下的组团社
-		try {
-			groupSupplierService.copyProductSuppliersToTarget(productId, productSupplierIdList);
-		} catch (Exception e) {
-			return errorJson("操作失败");
+		
+		ResultSupport result = productPricePlusFacade.copyProductSuppliers(data, productId);
+		if(result.isSuccess()){
+			return successJson();
 		}
-		return successJson();
+		return errorJson("操作失败");
 	}
 	
 	@RequestMapping("editStock.htm")
@@ -306,30 +301,20 @@ public class ProductPricePlusController extends BaseController {
 	@RequestMapping(value="stockMonth.do",method=RequestMethod.POST)
 	@ResponseBody
 	public String stockMonth(ModelMap model,Integer productId,Integer year,Integer month){
-		String beginDateStr = year+"-"+(month<10 ? ("0"+month):(""+month))+"-01";
-    	String endDateStr = month==12 ? ((year+1)+"-01-01"):(year+"-"+(month<9 ? ("0"+(month+1)):(""+(month+1)))+"-01");    	
-    	Date startDate = DateUtils.parse(beginDateStr, "yyyy-MM-dd");
-    	Date endDate = DateUtils.parse(endDateStr,"yyyy-MM-dd");
-		List<ProductStock> list = stockService.getStocksByProductIdAndDateSpan(productId, startDate, endDate);
-		return successJson("data",JSON.toJSONString(list));
+		
+		String result = productPricePlusFacade.stockMonth(productId, year, month);
+		return successJson("data", result);
 	}
 	
 	@RequestMapping(value="saveStock.do",method=RequestMethod.POST)
 	@ResponseBody
 	public String saveStock(HttpServletRequest request,HttpServletResponse response,ModelMap model,Integer productId,String stockStr,Integer year,Integer month){
-		if(productId==null){
-			return errorJson("产品为空");
+		
+		ResultSupport result = productPricePlusFacade.saveStock(productId, stockStr, year, month);
+		if(result.isSuccess()){
+			return successJson();
 		}
-		if(StringUtils.isBlank(stockStr)){
-			return errorJson("数据为空");
-		}
-		String beginDateStr = year+"-"+(month<10 ? ("0"+month):(""+month))+"-01";
-    	String endDateStr = month==12 ? ((year+1)+"-01-01"):(year+"-"+(month<9 ? ("0"+(month+1)):(""+(month+1)))+"-01");    	
-    	Date startDate = DateUtils.parse(beginDateStr, "yyyy-MM-dd");
-    	Date endDate = DateUtils.parse(endDateStr,"yyyy-MM-dd");
-		List<ProductStock> stockList = JSON.parseArray(stockStr, ProductStock.class);
-		stockService.saveStock(productId,stockList,startDate,endDate);
-		return successJson();
+		return errorJson("操作失败");
 	}
 	@RequestMapping("/stockStatics.htm")
 	public String stockStatics(HttpServletRequest request, ModelMap model,
