@@ -864,7 +864,15 @@ public class ProductInfoController extends BaseController {
 		
 		return id > 0 ? successJson("id", id + "") : errorJson("操作失败！");
 	}
-
+	/**
+	 * 
+	* created by zhangxiaoyang
+	* @date 2016年10月19日
+	* @Description:产品上/下架，删除
+	* @param 
+	* @return String
+	* @throws
+	 */
 	@RequestMapping(value = "/upState.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String upState(ProductInfo info) {
