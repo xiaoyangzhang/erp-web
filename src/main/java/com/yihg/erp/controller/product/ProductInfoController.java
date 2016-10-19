@@ -24,6 +24,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.facade.query.ToSearchListStateDTO;
+import com.yimayhd.erpcenter.facade.result.ToSearchListStateResult;
 import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -712,9 +714,10 @@ public class ProductInfoController extends BaseController {
 			ProductInfo productInfo, String productName, String name,
 			Integer page, Integer pageSize) {
 		// 省市
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+	//	List<RegionInfo> allProvince = regionService.getAllProvince();
 		// 产品名称
 		Integer bizId = WebUtils.getCurBizId(request);
+		/**
 		List<DicInfo> brandList = dicService.getListByTypeCode(
 				BasicConstants.CPXL_PP, bizId);
 		if (page == null) {
@@ -755,17 +758,21 @@ public class ProductInfoController extends BaseController {
 		pageBean = productInfoService.findProductInfos(pageBean, parameters);
 
 		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
+*/
 		/*
 		 * for (Object product : pageBean.getResult()) { ProductInfo info =
 		 * (ProductInfo) product; Integer productId = info.getId(); String state
 		 * = productInfoService.getProductPriceState(productId);
 		 * priceStateMap.put(info.getId(), state); }
 		 */
-		model.addAttribute("allProvince", allProvince);
-		model.addAttribute("brandList", brandList);
-		model.addAttribute("page", pageBean);
+		ToSearchListStateDTO toSearchListStateDTO = new ToSearchListStateDTO();
+		toSearchListStateDTO.setBizId(bizId);
+		ToSearchListStateResult toSearchListStateResult = productUpAndDownFrameFacade.toSearchListState(toSearchListStateDTO);
+		model.addAttribute("allProvince", toSearchListStateResult.getAllProvince());
+		model.addAttribute("brandList", toSearchListStateResult.getBrandList());
+		model.addAttribute("page", toSearchListStateResult.getPageBean());
 		model.addAttribute("pageNum", page);
-		model.addAttribute("priceStateMap", priceStateMap);
+		model.addAttribute("priceStateMap", toSearchListStateResult.getPriceStateMap());
 		model.addAttribute("priceMode", getPriceMode(request));
 		return "product/product_list_table_state";
 	}
