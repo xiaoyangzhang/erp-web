@@ -483,6 +483,12 @@
 			<artifactId>erpcenterFacade-common-client</artifactId>
 			<version>0.0.6-SNAPSHOT</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterFacade-product-client</artifactId>
+			<version>0.0.6-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 </project>
