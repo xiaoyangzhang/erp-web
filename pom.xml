@@ -478,7 +478,7 @@
 			<version>4.5.1</version>
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-common-client</artifactId>
 			<version>0.0.6-SNAPSHOT</version>
@@ -488,7 +488,7 @@
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-product-client</artifactId>
 			<version>0.0.6-SNAPSHOT</version>
-		</dependency>
+		</dependency> -->
 	</dependencies>
 
 </project>

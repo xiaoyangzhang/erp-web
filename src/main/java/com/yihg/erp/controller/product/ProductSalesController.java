@@ -51,6 +51,7 @@ import com.yihg.images.util.DateUtils;
 import com.yihg.mybatis.utility.PageBean;
 import com.yihg.product.po.ProductSales;
 import com.yihg.supplier.constants.Constants;
+import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -91,6 +92,8 @@ public class ProductSalesController extends BaseController {
 	@Autowired
 	private SysConfig config;
 	
+	@Autowired
+	private ProductFacade productFacade;
 	/****************************************组团版********************************/
 	
 	@RequestMapping(value = "/list.htm")
