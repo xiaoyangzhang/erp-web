@@ -842,11 +842,15 @@ public class ProductInfoController extends BaseController {
 		return "product/info/product_edit";
 	}
 
-	/**
-	 * @author : xuzejun
-	 * @date : 2015年7月2日 下午3:24:28
-	 * @Description: 保存
-	 */
+	
+	/** 
+	* created by wangjun
+	* @date 2016年10月19日
+	* @Description:
+	* @param 
+	* @return String
+	* @throws 
+	*/
 	@RequestMapping(value = "/save.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String save(HttpServletRequest request, ProductInfoVo info, ProductRouteVo productRouteVo) {
