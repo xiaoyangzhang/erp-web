@@ -24,6 +24,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -146,6 +147,9 @@ public class ProductInfoController extends BaseController {
 	private ProductFacade productFacade;
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
+
+	@Autowired
+	private ProductUpAndDownFrameFacade productUpAndDownFrameFacade;
 	/** 
 	* created by zhangxiaoyang
 	* @date 2016年10月17日
@@ -220,8 +224,11 @@ public class ProductInfoController extends BaseController {
 		// List<RegionInfo> allProvince = regionService.getAllProvince();
 		// 产品名称
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> brandList = dicService.getListByTypeCode(
-				BasicConstants.CPXL_PP, bizId);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
+		//List<DicInfo> brandList = dicService.getListByTypeCode(
+		//		BasicConstants.CPXL_PP, bizId);
 		/*
 		 * if(page==null){ page=1; } PageBean pageBean = new PageBean();
 		 * pageBean.setPageSize(Constants.PAGESIZE);
@@ -230,12 +237,15 @@ public class ProductInfoController extends BaseController {
 		 * productName);
 		 */
 		// model.addAttribute("allProvince", allProvince);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult departmentTuneQueryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr",departmentTuneQueryResult.getOrgJsonStr());
+			//	orgService.getComponentOrgTreeJsonStr(bizId));
+		model.addAttribute("orgUserJsonStr",departmentTuneQueryResult.getOrgUserJsonStr());
+				//platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
 
-		model.addAttribute("brandList", brandList);
+		model.addAttribute("brandList", brandQueryResult.getBrandList());
 		model.addAttribute("state", productInfo.getState());
 		/* model.addAttribute("page", pageBean); */
 		return "product/product_list_state";
@@ -842,11 +852,15 @@ public class ProductInfoController extends BaseController {
 		return "product/info/product_edit";
 	}
 
-	/**
-	 * @author : xuzejun
-	 * @date : 2015年7月2日 下午3:24:28
-	 * @Description: 保存
-	 */
+	
+	/** 
+	* created by wangjun
+	* @date 2016年10月19日
+	* @Description:
+	* @param 
+	* @return String
+	* @throws 
+	*/
 	@RequestMapping(value = "/save.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String save(HttpServletRequest request, ProductInfoVo info, ProductRouteVo productRouteVo) {
@@ -860,7 +874,15 @@ public class ProductInfoController extends BaseController {
 		
 		return id > 0 ? successJson("id", id + "") : errorJson("操作失败！");
 	}
-
+	/**
+	 * 
+	* created by zhangxiaoyang
+	* @date 2016年10月19日
+	* @Description:产品上/下架，删除
+	* @param 
+	* @return String
+	* @throws
+	 */
 	@RequestMapping(value = "/upState.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String upState(ProductInfo info) {
@@ -872,7 +894,7 @@ public class ProductInfoController extends BaseController {
 //			return productInfoService.updateProductInfo(info) == 1 ? successJson()
 //					: errorJson("操作失败！");
 //		}
-		ResultSupport result = productFacade.deleteProduct(info.getId(), info.getState());
+		ResultSupport result = productFacade.updateProductState(info.getId(), info.getState());
 		if (result.isSuccess()) {
 			return successJson();
 		}
