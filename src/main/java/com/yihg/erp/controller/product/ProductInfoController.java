@@ -931,8 +931,8 @@ public class ProductInfoController extends BaseController {
 	}
 
 	/**
-	 * 订单打印
-	 * 
+	 * 产品信息导出word
+	 * zhangxiaoyang
 	 * @param productId
 	 * @param request
 	 * @param response
@@ -943,10 +943,11 @@ public class ProductInfoController extends BaseController {
 		String path = "";
 		String fileName = "";
 		String productCode = "";
-		Map<String, Object> map = productInfoService
-				.findProductInfos(productId);
-		path = createProductInfo(preivew, request, productId, map);
-		ProductInfo productInfo = (ProductInfo) map.get("productInfo");
+//		Map<String, Object> map = productInfoService
+//				.findProductInfos(productId);
+		WebResult<Map<String, Object>> webResult = productFacade.toExportProduct(productId);
+		path = createProductInfo(preivew, request, productId, webResult.getValue());
+		ProductInfo productInfo = (ProductInfo) webResult.getValue().get("productInfo");
 		if (productInfo != null) {
 			productCode = productInfo.getCode();
 		}
