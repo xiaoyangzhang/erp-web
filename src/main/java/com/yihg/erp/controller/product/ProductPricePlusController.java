@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,24 +18,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
 import com.yihg.basic.api.RegionService;
 import com.yihg.basic.contants.BasicConstants;
 import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.images.util.DateUtils;
 import com.yihg.mybatis.utility.PageBean;
 import com.yihg.product.api.ProductGroupPriceService;
 import com.yihg.product.api.ProductGroupService;
 import com.yihg.product.api.ProductGroupSupplierService;
 import com.yihg.product.api.ProductInfoService;
+import com.yihg.product.api.ProductStockService;
 import com.yihg.product.po.ProductInfo;
 import com.yihg.supplier.constants.Constants;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
 import com.yimayhd.erpcenter.dal.basic.service.DicDal;
 import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
-import com.yimayhd.erpcenter.dal.product.po.ProductStock;
 import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
 import com.yimayhd.erpcenter.dal.product.vo.StockStaticCondition;
 import com.yimayhd.erpcenter.facade.query.ProductGroupSupplierDTO;
@@ -270,15 +267,12 @@ public class ProductPricePlusController extends BaseController {
 	@RequestMapping("copyProduct.do")
 	@ResponseBody
 	public String copyProduct(HttpServletRequest request,HttpServletResponse response,ModelMap model,String data,Integer productId){
-		//获取要复制到的产品的id集合
-		List<ProductInfo> productInfos = JSON.parseArray(data, ProductInfo.class);
-		//获取要复制的产品下的组团社
-		try {
-			groupSupplierService.save(productInfos, productId);
-		} catch (Exception e) {
-			return errorJson("操作失败");
+		
+		ResultSupport result = productPricePlusFacade.copyProduct(data, productId);
+		if(result.isSuccess()){
+			return successJson();
 		}
-		return successJson();
+		return errorJson("操作失败");
 	}
 	
 	@RequestMapping("copyProductSuppliers.do")

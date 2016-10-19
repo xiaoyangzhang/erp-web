@@ -47,6 +47,7 @@ import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -97,7 +98,8 @@ import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
 import com.yihg.sys.po.PlatformEmployeePo;
 import com.yihg.sys.po.PlatformOrgPo;
-import com.yimayhd.erpcenter.facade.query.ProductListParam;
+import com.yimayhd.erpcenter.facade.query.ProductPriceListDTO;
+import com.yimayhd.erpcenter.facade.result.ProductPriceListResult;
 import com.yimayhd.erpcenter.facade.result.ToProductAddResult;
 import com.yimayhd.erpcenter.facade.result.WebResult;
 import com.yimayhd.erpcenter.facade.service.ProductFacade;
@@ -180,30 +182,25 @@ public class ProductInfoController extends BaseController {
 	// @RequiresPermissions(PermissionConstants.PRODUCT_PRICE)
 	// public String toList( ModelMap model,ProductInfo productInfo,String
 	// name,Integer page) {
-	public String toListPrice(HttpServletRequest request, ModelMap model,
-			ProductInfo productInfo) {
-		// 省市
-		// List<RegionInfo> allProvince = regionService.getAllProvince();
-		// 产品名称
+	public String toListPrice(HttpServletRequest request, ModelMap model, ProductInfo productInfo) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
 		List<DicInfo> brandList = dicService.getListByTypeCode(
 				BasicConstants.CPXL_PP, bizId);
-		/*
-		 * if(page==null){ page=1; } PageBean pageBean = new PageBean();
-		 * pageBean.setPageSize(Constants.PAGESIZE);
-		 * pageBean.setParameter(productInfo); pageBean.setPage(page); pageBean
-		 * = productInfoService.findProductInfos(pageBean, bizId,name,
-		 * productName);
-		 */
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
 
-		// model.addAttribute("allProvince", allProvince);
-		model.addAttribute("brandList", brandList);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		BrandQueryResult brandResult = productCommonFacade.brandQuery(brandQueryDTO);
+
+		model.addAttribute("brandList", brandResult.getBrandList());
 		model.addAttribute("state", productInfo.getState());
-		/* model.addAttribute("page", pageBean); */
 
 		return "product/product_list_price";
 	}
@@ -223,12 +220,8 @@ public class ProductInfoController extends BaseController {
 		// List<RegionInfo> allProvince = regionService.getAllProvince();
 		// 产品名称
 		Integer bizId = WebUtils.getCurBizId(request);
-		//List<DicInfo> brandList = dicService.getListByTypeCode(
-		//		BasicConstants.CPXL_PP, bizId);
-		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
-		brandQueryDTO.setBizId(bizId);
-		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
-
+		List<DicInfo> brandList = dicService.getListByTypeCode(
+				BasicConstants.CPXL_PP, bizId);
 		/*
 		 * if(page==null){ page=1; } PageBean pageBean = new PageBean();
 		 * pageBean.setPageSize(Constants.PAGESIZE);
@@ -237,15 +230,12 @@ public class ProductInfoController extends BaseController {
 		 * productName);
 		 */
 		// model.addAttribute("allProvince", allProvince);
-		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
-		departmentTuneQueryDTO.setBizId(bizId);
-		DepartmentTuneQueryResult departmentTuneQueryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
-		model.addAttribute("orgJsonStr",departmentTuneQueryResult.getOrgJsonStr());
-				//orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",departmentTuneQueryResult.getOrgUserJsonStr());
-						//platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		model.addAttribute("orgJsonStr",
+				orgService.getComponentOrgTreeJsonStr(bizId));
+		model.addAttribute("orgUserJsonStr",
+				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
 
-		model.addAttribute("brandList", brandQueryResult.getBrandList());
+		model.addAttribute("brandList", brandList);
 		model.addAttribute("state", productInfo.getState());
 		/* model.addAttribute("page", pageBean); */
 		return "product/product_list_state";
@@ -775,63 +765,25 @@ public class ProductInfoController extends BaseController {
 	public String toSearchListPrice(HttpServletRequest request, ModelMap model,
 			ProductInfo productInfo, String productName, String name,
 			Integer page, Integer pageSize) {
-		// 省市
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		// 产品名称
-		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> brandList = dicService.getListByTypeCode(
-				BasicConstants.CPXL_PP, bizId);
-		if (page == null) {
-			page = 1;
-		}
-		PageBean pageBean = new PageBean();
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
-		}
-		if (StringUtils.isBlank(productInfo.getOperatorIds())
-				&& StringUtils.isNotBlank(productInfo.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = productInfo.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				productInfo.setOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
-		// productInfo.set
-		pageBean.setParameter(productInfo);
-		pageBean.setPage(page);
-		Map parameters = new HashMap();
-		parameters.put("bizId", bizId);
-		parameters.put("name", name);
-		parameters.put("productName", productName);
-		parameters.put("orgId", WebUtils.getCurUser(request).getOrgId());
-		// parameters.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean = productInfoService.findProductInfos(pageBean, parameters);
-
-		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
-		/*
-		 * for (Object product : pageBean.getResult()) { ProductInfo info =
-		 * (ProductInfo) product; Integer productId = info.getId(); String state
-		 * = productInfoService.getProductPriceState(productId);
-		 * priceStateMap.put(info.getId(), state); }
-		 */
-		model.addAttribute("allProvince", allProvince);
-		model.addAttribute("brandList", brandList);
-		model.addAttribute("page", pageBean);
-		model.addAttribute("pageNum", page);
-		model.addAttribute("priceStateMap", priceStateMap);
-
+		
+		ProductPriceListDTO productPriceListDTO = new ProductPriceListDTO();
+		
+		com.yimayhd.erpcenter.dal.product.po.ProductInfo info = new com.yimayhd.erpcenter.dal.product.po.ProductInfo();
+		BeanUtils.copyProperties(productInfo, info);
+		info.setBizId(WebUtils.getCurBizId(request));
+		
+		productPriceListDTO.setProductInfo(info);
+		productPriceListDTO.setProductName(productName);
+		productPriceListDTO.setName(name);
+		productPriceListDTO.setPage(page);
+		productPriceListDTO.setPageSize(pageSize);
+		
+		ProductPriceListResult result = productFacade.productPriceList(productPriceListDTO);
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("brandList", result.getBrandList());
+		model.addAttribute("page", result.getPage());
+		model.addAttribute("pageNum", result.getPageNum());
+		model.addAttribute("priceStateMap", result.getPriceStateMap());
 		model.addAttribute("priceMode", getPriceMode(request));
 		return "product/product_list_table_price";
 	}
