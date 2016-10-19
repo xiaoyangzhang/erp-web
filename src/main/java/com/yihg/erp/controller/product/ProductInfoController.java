@@ -40,6 +40,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,8 +135,8 @@ public class ProductInfoController extends BaseController {
 	private ProductGroupSellerService sellerService;
 	@Autowired
 	private ProductFacade productFacade;
-//	@Autowired
-//	private productf
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
 	/** 
 	* created by zhangxiaoyang
 	* @date 2016年10月17日
@@ -665,7 +666,8 @@ public class ProductInfoController extends BaseController {
 						salesOperatorIds.length() - 1));
 			}
 		}*/
-		
+		productInfo.setOperatorIds(productCommonFacade.
+				setSaleOperatorIds(productInfo.getOperatorIds(), productInfo.getOrgIds(), bizId));
 		pageBean.setParameter(productInfo);
 		pageBean.setPage(page);
 		Map parameters = new HashMap();
