@@ -9,6 +9,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.erpcenterFacade.common.client.query.BrandQueryDTO;
+import org.erpcenterFacade.common.client.result.BrandQueryResult;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +31,6 @@ import com.yihg.product.api.ProductGroupPriceService;
 import com.yihg.product.api.ProductGroupService;
 import com.yihg.product.api.ProductGroupSupplierService;
 import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.api.ProductStockService;
 import com.yihg.product.po.ProductInfo;
 import com.yihg.supplier.constants.Constants;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
@@ -37,11 +39,13 @@ import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
 import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
 import com.yimayhd.erpcenter.dal.product.vo.StockStaticCondition;
 import com.yimayhd.erpcenter.facade.query.ProductGroupSupplierDTO;
+import com.yimayhd.erpcenter.facade.query.ProductStockStaticDto;
 import com.yimayhd.erpcenter.facade.query.ProductSupplierConditionDTO;
 import com.yimayhd.erpcenter.facade.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.result.ToAddPriceGroupResult;
 import com.yimayhd.erpcenter.facade.result.ToSupplierListResult;
 import com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade;
+import com.yimayhd.erpcenter.facade.service.ProductStockFacade;
 /**
  * @author : 葛进军
  * @date : 2015-12-14
@@ -66,10 +70,11 @@ public class ProductPricePlusController extends BaseController {
 	@Autowired
 	private ProductGroupSupplierService groupSupplierService;
 	@Autowired
-	private ProductStockService stockService;
-	
+	private ProductStockFacade productStockFacade;
 	@Autowired
 	private ProductPricePlusFacade productPricePlusFacade;
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
 	
 	@RequestMapping("list.htm")
 	public String toList(HttpServletRequest request,ModelMap model,ProductInfo productInfo){
@@ -310,6 +315,17 @@ public class ProductPricePlusController extends BaseController {
 		}
 		return errorJson("操作失败");
 	}
+	/**
+	 * 
+	 * 描述：产品库存跳转页面
+	 * @author liyong
+	 * 2016年10月19日 
+	 * @param request
+	 * @param model
+	 * @param condition查询的封装对象
+	 * @return
+	 * @throws ParseException
+	 */
 	@RequestMapping("/stockStatics.htm")
 	public String stockStatics(HttpServletRequest request, ModelMap model,
 			StockStaticCondition condition) throws ParseException{
@@ -321,12 +337,27 @@ public class ProductPricePlusController extends BaseController {
 						new Date(), 6), "yyyy-MM-dd");
 		model.addAttribute("groupDate", groupDate);
 		model.addAttribute("toGroupDate", toGroupDate);
-		List<DicInfo> brandList = dicService.getListByTypeCode(
-				BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
+		BrandQueryDTO dto  = new BrandQueryDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		BrandQueryResult brandResult = productCommonFacade.brandQuery(dto);
+//		List<DicInfo> brandList = dicService.getListByTypeCode(
+//				BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
+		List<DicInfo> brandList = brandResult.getBrandList();
 		model.addAttribute("brandList", brandList);
 		return "product/stock/stock-statics-plus";
 		
 	}
+	/**
+	 * 
+	 * 描述：产品库存查询 调用facade
+	 * @author liyong
+	 * 2016年10月19日 
+	 * @param request
+	 * @param model
+	 * @param condition 
+	 * @return 产品库存页面
+	 * @throws ParseException
+	 */
 	@RequestMapping("/stockStatics.do")
 	public String queryStockStatics(HttpServletRequest request, ModelMap model,
 			StockStaticCondition condition) throws ParseException {
@@ -339,7 +370,9 @@ public class ProductPricePlusController extends BaseController {
 		condition.setOrgId(WebUtils.getCurUser(request).getOrgId());
 		condition.setBizId(WebUtils.getCurBizId(request));
 		//PageBean page = productInfoService.getStockStaticsList(condition);
-		PageBean page=productInfoService.getStockStaticsList2(condition);
+		ProductStockStaticDto dto = new ProductStockStaticDto();
+				dto.setCondition(condition);
+		PageBean page=productStockFacade.getStockStaticsListNew(dto);
 		model.addAttribute("page", page);
 		return "product/stock/stock-statics-table-plus";
 	}

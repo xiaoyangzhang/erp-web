@@ -91,15 +91,17 @@ import com.yihg.product.po.ProductRemark;
 import com.yihg.product.po.ProductRight;
 import com.yihg.product.po.ProductRoute;
 import com.yihg.product.vo.ProductGroupSupplierVo;
-import com.yihg.product.vo.ProductInfoVo;
 import com.yihg.product.vo.ProductRouteVo;
 import com.yihg.product.vo.StockStaticCondition;
 import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
 import com.yihg.sys.po.PlatformEmployeePo;
 import com.yihg.sys.po.PlatformOrgPo;
+import com.yimayhd.erpcenter.dal.product.vo.ProductInfoVo;
 import com.yimayhd.erpcenter.facade.query.ProductPriceListDTO;
+import com.yimayhd.erpcenter.facade.query.ProductSaveDTO;
 import com.yimayhd.erpcenter.facade.result.ProductPriceListResult;
+import com.yimayhd.erpcenter.facade.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.result.ToProductAddResult;
 import com.yimayhd.erpcenter.facade.result.WebResult;
 import com.yimayhd.erpcenter.facade.service.ProductFacade;
@@ -189,8 +191,6 @@ public class ProductInfoController extends BaseController {
 		departmentTuneQueryDTO.setBizId(bizId);
 		
 		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
-		List<DicInfo> brandList = dicService.getListByTypeCode(
-				BasicConstants.CPXL_PP, bizId);
 
 		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
 		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
@@ -805,13 +805,9 @@ public class ProductInfoController extends BaseController {
 	@RequestMapping(value = "/add.htm")
 	// @RequiresPermissions(PermissionConstants.PRODUCT_ADD)
 	public String toAdd(HttpServletRequest request, ModelMap model) {
-		// 省市
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		// 产品名称
-		List<DicInfo> brandList = dicService.getListByTypeCode(
-				BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
-		model.addAttribute("allProvince", allProvince);
-		model.addAttribute("brandList", brandList);
+		ToProductAddResult result = productFacade.toProductAdd(BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("brandList", result.getBrandList());
 		model.addAttribute("config", config);
 		// 获取当前登录人的信息
 		PlatformEmployeePo curUser = WebUtils.getCurUser(request);
@@ -831,31 +827,10 @@ public class ProductInfoController extends BaseController {
 	// @RequiresPermissions(PermissionConstants.PRODUCT_LIST)
 	public String toEdit(HttpServletRequest request, Integer productId,
 			ModelMap model) {
-//		ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(productId);
-//		ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(productId);
-		/*ProductListParam param = new ProductListParam();
-		param.setBizId(WebUtils.getCurBizId(request));
-		param.setProductId(productId);
-		param.setTypeCode(BasicConstants.CPXL_PP);
-		com.yimayhd.erpcenter.dal.product.vo.ProductInfoVo productInfoVo = productFacade.toEditProductInfoVOById(param);*/
 		ToProductAddResult result = productFacade.toProductEdit(productId, BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
 		model.addAttribute("vo", result.getProductInfoVo());
 		model.addAttribute("productRemark", result.getProductRemark());
 		
-		// 省
-		// List<RegionInfo> allProvince = regionService.getAllProvince();
-		// 市
-		/*
-		 * if (productInfoVo.getProductInfo().getDestProvinceId() != null) {
-		 * List<RegionInfo> allCity = regionService
-		 * .getRegionById(productInfoVo.getProductInfo()
-		 * .getDestProvinceId().toString()); model.addAttribute("allCity",
-		 * allCity); }
-		 * model.addAttribute("allProvince", allProvince);
-		 */
-
-		// 产品名称
-		//List<DicInfo> brandList = dicService.getListByTypeCode(BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
 		model.addAttribute("brandList", result.getBrandList());
 
 		PlatformEmployeePo curUser = WebUtils.getCurUser(request);
@@ -875,23 +850,13 @@ public class ProductInfoController extends BaseController {
 	@RequestMapping(value = "/save.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String save(HttpServletRequest request, ProductInfoVo info, ProductRouteVo productRouteVo) {
-		if (info.getProductInfo().getId() == null) {
-			info.getProductInfo().setCreatorId(WebUtils.getCurUserId(request));
-			info.getProductInfo().setCreatorName(WebUtils.getCurUser(request).getName());
-			info.getProductInfo().setBizId(WebUtils.getCurBizId(request));
-			// 默认把自己单位加上
-			Set<Integer> orgIdSet = new HashSet<Integer>();
-			orgIdSet.add(WebUtils.getCurUser(request).getOrgId());
-			info.setOrgIdSet(orgIdSet);
-		}
-		int id = productInfoService.saveProductInfo(info,bizSettingCommon.getMyBizCode(request),dicService.getById(info.getProductInfo().getBrandId().toString()).getCode());
-		
-		if (info.getProductInfo().getId() == null) {
-			productRouteVo.setProductId(id);
-			productRouteService.saveProductRoute(productRouteVo);
-		}else{
-			productRouteService.editProductRoute(productRouteVo);
-		}
+		ProductSaveDTO productSaveDTO = new ProductSaveDTO();
+		productSaveDTO.setProductInfoVo(info);
+		productSaveDTO.setBizId(WebUtils.getCurBizId(request));
+		productSaveDTO.setCreateId(WebUtils.getCurUserId(request));
+		productSaveDTO.setCreateName(WebUtils.getCurUser(request).getName());
+		productSaveDTO.setBizCode(bizSettingCommon.getMyBizCode(request));
+		int id = productFacade.saveBasicInfo(productSaveDTO);
 		
 		return id > 0 ? successJson("id", id + "") : errorJson("操作失败！");
 	}
@@ -899,19 +864,25 @@ public class ProductInfoController extends BaseController {
 	@RequestMapping(value = "/upState.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String upState(ProductInfo info) {
-		List<ProductRoute> productRoutes = productRouteService
-				.findProductRouteByProductId(info.getId());
-		if (info.getState() != (byte) -1 && productRoutes.size() == 0) {
-			return errorJson("产品内无行程内容");
-		} else {
-			return productInfoService.updateProductInfo(info) == 1 ? successJson()
-					: errorJson("操作失败！");
+//		List<ProductRoute> productRoutes = productRouteService
+//				.findProductRouteByProductId(info.getId());
+//		if (info.getState() != (byte) -1 && productRoutes.size() == 0) {
+//			return errorJson("产品内无行程内容");
+//		} else {
+//			return productInfoService.updateProductInfo(info) == 1 ? successJson()
+//					: errorJson("操作失败！");
+//		}
+		ResultSupport result = productFacade.deleteProduct(info.getId(), info.getState());
+		if (result.isSuccess()) {
+			return successJson();
 		}
+		System.out.println("=============================="+JSON.toJSONString(result));
+		return errorJson(result.getResultMsg());
 	}
 
 	/**
-	 * 订单打印
-	 * 
+	 * 产品信息导出word
+	 * zhangxiaoyang
 	 * @param productId
 	 * @param request
 	 * @param response
@@ -922,10 +893,11 @@ public class ProductInfoController extends BaseController {
 		String path = "";
 		String fileName = "";
 		String productCode = "";
-		Map<String, Object> map = productInfoService
-				.findProductInfos(productId);
-		path = createProductInfo(preivew, request, productId, map);
-		ProductInfo productInfo = (ProductInfo) map.get("productInfo");
+//		Map<String, Object> map = productInfoService
+//				.findProductInfos(productId);
+		WebResult<Map<String, Object>> webResult = productFacade.toExportProduct(productId);
+		path = createProductInfo(preivew, request, productId, webResult.getValue());
+		ProductInfo productInfo = (ProductInfo) webResult.getValue().get("productInfo");
 		if (productInfo != null) {
 			productCode = productInfo.getCode();
 		}
@@ -1359,13 +1331,22 @@ public class ProductInfoController extends BaseController {
 		Gson gson = new Gson();
 		return gson.toJson(productRemark);
 	}
-
+	/**
+	 * 
+	* created by zhangxiaoyang
+	* @date 2016年10月19日
+	* @Description:产品列表/导出
+	* @param 
+	* @return String
+	* @throws
+	 */
 	@RequestMapping("productInfoPreview.htm")
 	public String productInfoPreview(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model, Integer productId,
 			Integer preview) {
-		Map<String, Object> map = productInfoService
-				.findProductInfos(productId);
+//		Map<String, Object> map = productInfoService
+//				.findProductInfos(productId);
+		WebResult<Map<String, Object>> result = productFacade.toExportProduct(productId);
 		Map<String, Object> params1 = new HashMap<String, Object>();
 		/**
 		 * 第一个表格
@@ -1380,7 +1361,7 @@ public class ProductInfoController extends BaseController {
 		 */
 		Map<String, Object> map2 = new HashMap<String, Object>();
 
-		getProductInfo(preview, request, map, params1, map0, routeList, map2,
+		getProductInfo(preview, request, result.getValue(), params1, map0, routeList, map2,
 				null, "html");
 		model.addAttribute("productId", productId);
 		model.addAttribute("params1", params1);
@@ -1399,8 +1380,7 @@ public class ProductInfoController extends BaseController {
 	public String productNameValidate(HttpServletRequest request,
 			ModelMap model, Integer productId, String code) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		boolean result = productInfoService.checkProductCodeExist(productId,
-				bizId, code);
+		boolean result = productFacade.codeValidate(bizId, productId, code);
 		if (!result) {
 			return successJson();
 
