@@ -12,7 +12,8 @@ import com.yihg.product.api.ProductTagService;
 import com.yihg.product.constants.Constants;
 import com.yihg.product.po.ProductTag;
 import com.yihg.product.vo.DictWithSelectInfoVo;
-import com.yihg.product.vo.ProductTagVo;
+import com.yimayhd.erpcenter.dal.product.vo.ProductTagVo;
+import com.yimayhd.erpcenter.facade.query.ProductTagDTO;
 import com.yimayhd.erpcenter.facade.result.ToProductTagResult;
 import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
@@ -227,9 +228,10 @@ public class ProductTagController extends BaseController{
     @RequestMapping(value = "/save.do", method = RequestMethod.POST)
     @ResponseBody
     public String saveTag(@RequestParam("productTagVo")String productTagJson){
-//        List<ProductTag> productTagList = JSONArray.parseArray(productTagVo, ProductTag.class);
-        ProductTagVo productTagVo = JSONObject.parseObject(productTagJson, ProductTagVo.class);
-        productTagService.saveProductTags(productTagVo);
+    	ProductTagVo productTagVo = JSONObject.parseObject(productTagJson, ProductTagVo.class);
+    	ProductTagDTO productTagDTO = new ProductTagDTO();
+    	productTagDTO.setProductTagVo(productTagVo);
+    	boolean result = productFacade.saveProductTags(productTagDTO);
         return successJson();
     }
 

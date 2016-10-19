@@ -15,6 +15,8 @@ import com.yihg.product.po.ProductRouteSupplier;
 import com.yihg.product.po.ProductRouteTraffic;
 import com.yihg.product.vo.ProductRouteDayVo;
 import com.yihg.product.vo.ProductRouteVo;
+import com.yimayhd.erpcenter.facade.result.GetProductRouteResult;
+import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -40,6 +42,8 @@ public class ProductRouteController extends BaseController{
     private ProductRemarkService remarkService;
     @Autowired
     private SysConfig config;
+    @Autowired
+    private ProductFacade productFacade;
 
 
     @RequestMapping(value = "/view.htm", method = RequestMethod.GET)
@@ -70,9 +74,8 @@ public class ProductRouteController extends BaseController{
     // @RequiresPermissions(PermissionConstants.PRODUCT_LIST)
     @ResponseBody
     public String editRoute(Model model, @RequestParam("productId") String productId) {
-
-        ProductRouteVo productRouteVo = productRouteService.findByProductId(Integer.valueOf(productId));
-        return JSON.toJSONString(productRouteVo);
+    	GetProductRouteResult result = productFacade.findProductRouteById(Integer.valueOf(productId));
+        return JSON.toJSONString(result.getProductRouteVo());
 
     }
 
