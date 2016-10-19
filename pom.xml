@@ -477,6 +477,12 @@
 			<artifactId>httpmime</artifactId>
 			<version>4.5.1</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterFacade-common-client</artifactId>
+			<version>0.0.6-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 </project>
