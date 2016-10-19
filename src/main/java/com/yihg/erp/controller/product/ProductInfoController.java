@@ -24,6 +24,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -146,6 +147,9 @@ public class ProductInfoController extends BaseController {
 	private ProductFacade productFacade;
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
+
+	@Autowired
+	private ProductUpAndDownFrameFacade productUpAndDownFrameFacade;
 	/** 
 	* created by zhangxiaoyang
 	* @date 2016年10月17日
@@ -220,8 +224,11 @@ public class ProductInfoController extends BaseController {
 		// List<RegionInfo> allProvince = regionService.getAllProvince();
 		// 产品名称
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> brandList = dicService.getListByTypeCode(
-				BasicConstants.CPXL_PP, bizId);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
+		//List<DicInfo> brandList = dicService.getListByTypeCode(
+		//		BasicConstants.CPXL_PP, bizId);
 		/*
 		 * if(page==null){ page=1; } PageBean pageBean = new PageBean();
 		 * pageBean.setPageSize(Constants.PAGESIZE);
@@ -230,12 +237,15 @@ public class ProductInfoController extends BaseController {
 		 * productName);
 		 */
 		// model.addAttribute("allProvince", allProvince);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult departmentTuneQueryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr",departmentTuneQueryResult.getOrgJsonStr());
+			//	orgService.getComponentOrgTreeJsonStr(bizId));
+		model.addAttribute("orgUserJsonStr",departmentTuneQueryResult.getOrgUserJsonStr());
+				//platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
 
-		model.addAttribute("brandList", brandList);
+		model.addAttribute("brandList", brandQueryResult.getBrandList());
 		model.addAttribute("state", productInfo.getState());
 		/* model.addAttribute("page", pageBean); */
 		return "product/product_list_state";
