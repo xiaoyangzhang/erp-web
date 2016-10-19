@@ -94,6 +94,7 @@ import com.yihg.sys.api.PlatformOrgService;
 import com.yihg.sys.po.PlatformEmployeePo;
 import com.yihg.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.facade.query.ProductListParam;
+import com.yimayhd.erpcenter.facade.result.ToProductAddResult;
 import com.yimayhd.erpcenter.facade.result.WebResult;
 import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
@@ -869,13 +870,14 @@ public class ProductInfoController extends BaseController {
 			ModelMap model) {
 //		ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(productId);
 //		ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(productId);
-		ProductListParam param = new ProductListParam();
+		/*ProductListParam param = new ProductListParam();
 		param.setBizId(WebUtils.getCurBizId(request));
 		param.setProductId(productId);
 		param.setTypeCode(BasicConstants.CPXL_PP);
-		com.yimayhd.erpcenter.dal.product.vo.ProductInfoVo productInfoVo = productFacade.getProductInfoVOById(param);
-		model.addAttribute("vo", productInfoVo);
-		model.addAttribute("productRemark", productInfoVo.getProductRemark());
+		com.yimayhd.erpcenter.dal.product.vo.ProductInfoVo productInfoVo = productFacade.toEditProductInfoVOById(param);*/
+		ToProductAddResult result = productFacade.toProductEdit(productId, BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
+		model.addAttribute("vo", result.getProductInfoVo());
+		model.addAttribute("productRemark", result.getProductRemark());
 		
 		// 省
 		// List<RegionInfo> allProvince = regionService.getAllProvince();
@@ -891,7 +893,7 @@ public class ProductInfoController extends BaseController {
 
 		// 产品名称
 		//List<DicInfo> brandList = dicService.getListByTypeCode(BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
-		model.addAttribute("brandList", productInfoVo.getBrandList());
+		model.addAttribute("brandList", result.getBrandList());
 
 		PlatformEmployeePo curUser = WebUtils.getCurUser(request);
 		model.addAttribute("operatorId", curUser.getEmployeeId());

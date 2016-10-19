@@ -301,7 +301,15 @@ public class ProductSalesController extends BaseController {
 		model.addAttribute("config", config);
 		return "product/sales/list_plus_view";
 	}
-    
+    /**
+     * 
+    * created by zhangxiaoyang
+    * @date 2016年10月19日
+    * @Description:产品列表/预览
+    * @param 
+    * @return String
+    * @throws
+     */
     @RequestMapping("info.htm")
     public String productInfo(ModelMap model, @RequestParam Integer id){
     	ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(id);
