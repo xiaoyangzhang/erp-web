@@ -51,6 +51,7 @@ import com.yihg.images.util.DateUtils;
 import com.yihg.mybatis.utility.PageBean;
 import com.yihg.product.po.ProductSales;
 import com.yihg.supplier.constants.Constants;
+import com.yimayhd.erpcenter.facade.result.ProductInfoResult;
 import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -315,12 +316,13 @@ public class ProductSalesController extends BaseController {
      */
     @RequestMapping("info.htm")
     public String productInfo(ModelMap model, @RequestParam Integer id){
-    	ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(id);
-        ProductRouteVo productRouteVo = productRouteService.findByProductId(id);
-		ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(id);
-		model.addAttribute("productInfoVo", productInfoVo);
-        model.addAttribute("productRouteVo", productRouteVo);
-        model.addAttribute("productRemark", productRemark);
+//    	ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(id);
+//        ProductRouteVo productRouteVo = productRouteService.findByProductId(id);
+//		ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(id);
+    	ProductInfoResult result = productFacade.toProductPreview(id);
+		model.addAttribute("productInfoVo", result.getProductInfoVo());
+        model.addAttribute("productRouteVo", result.getProductRouteVo());
+        model.addAttribute("productRemark", result.getProductRemark());
         model.addAttribute("config", config);
         return "product/priceplus/product_detail";
     }
