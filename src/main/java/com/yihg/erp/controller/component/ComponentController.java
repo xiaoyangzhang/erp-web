@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +95,8 @@ public class ComponentController extends BaseController {
 	private GroupOrderService groupOrderService;
 	@Autowired
 	private ProductStockService stockService;
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
 	
 	@RequestMapping("example.htm")
 	public String example(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,String type){	
@@ -162,11 +165,8 @@ public class ComponentController extends BaseController {
 	 */
 	@RequestMapping("orgUserTree.htm")
 	public String orgUserTree(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,String type,String expIds){	
-		if(StringUtils.isBlank(type)){
-			type = "single";
-		}
-		List<Map<String, String>> list = platformEmployeeService.getOrgUserTree(WebUtils.getCurBizId(request),null,type);
-		model.addAttribute("orgUserJsonStr", JSON.toJSONString(list));
+		List<Map<String, String>> result = productCommonFacade.orgUserTree(WebUtils.getCurBizId(request), type);
+		model.addAttribute("orgUserJsonStr", JSON.toJSONString(result));
 		model.addAttribute("expIds", expIds);		
 		if(type.equals("single")){
 			return "component/user/user_tree_single";
@@ -178,10 +178,7 @@ public class ComponentController extends BaseController {
 	@RequestMapping(value="orgUserTree.do",method=RequestMethod.POST)
 	@ResponseBody
 	public String queryOrgUserTree(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,String type,String name){	
-		if(StringUtils.isBlank(type)){
-			type = "single";
-		}
-		List<Map<String, String>> list = platformEmployeeService.getOrgUserTreeFuzzy(WebUtils.getCurBizId(request),name,type);
+		List<Map<String, String>> list = productCommonFacade.queryOrgUserTree(WebUtils.getCurBizId(request),name,type);
 		return successJson("orgUserJsonStr",JSON.toJSONString(list));
 	}
 	
