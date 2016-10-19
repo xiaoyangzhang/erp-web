@@ -13,7 +13,10 @@ import com.yihg.product.constants.Constants;
 import com.yihg.product.po.ProductTag;
 import com.yihg.product.vo.DictWithSelectInfoVo;
 import com.yihg.product.vo.ProductTagVo;
+import com.yimayhd.erpcenter.facade.result.ToProductTagResult;
+import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -53,12 +56,19 @@ public class ProductTagController extends BaseController{
 
     @Autowired
     private ProductTagService productTagService;
-
+    @Autowired
+    private ProductFacade productFacade;
     @RequestMapping(value = "/view.htm", method = RequestMethod.GET)
     // @RequiresPermissions(PermissionConstants.PRODUCT_LIST)
     public String viewTag(HttpServletRequest request,Model model, @RequestParam("productId") String productId) {
+    	
     	Integer bizId = WebUtils.getCurBizId(request);
-        List<DicInfo> lineThemeList = dicService.getListByTypeCode(PRODUCT_TAG_LINE_THEME,bizId);
+    	int id = 0;
+    	if (StringUtils.isNotBlank(productId)) {
+			id = Integer.parseInt(productId);
+		}
+        ToProductTagResult result = productFacade.toProductTags(id, bizId);
+    	/*List<DicInfo> lineThemeList = dicService.getListByTypeCode(PRODUCT_TAG_LINE_THEME,bizId);
         List<DicInfo> lineLevelList = dicService.getListByTypeCode(PRODUCT_TAG_LINE_LEVEL,bizId);
         List<DicInfo> attendMethodList = dicService.getListByTypeCode(PRODUCT_TAG_ATTEND_METHOD,bizId);
         List<DicInfo> hotelLevelList = dicService.getListByTypeCode(PRODUCT_TAG_HOTEL_LEVEL,bizId);
@@ -80,134 +90,134 @@ public class ProductTagController extends BaseController{
             }else{
                 selectedMap.get(productTag.getTagType()).add(productTag.getTagId());
             }
-        }
+        }*/
 
 
-        if(selectedMap.get(PRODUCT_TAG_LINE_THEME) != null){
-            List<DictWithSelectInfoVo> lineThemeListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : lineThemeList){
-                lineThemeListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_LINE_THEME).contains(dicInfo.getId())));
-            }
-            model.addAttribute("lineThemeList", lineThemeListPlus);
-        }else{
-            List<DictWithSelectInfoVo> lineThemeListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : lineThemeList){
-                lineThemeListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-            }
-            model.addAttribute("lineThemeList", lineThemeListPlus);
-        }
-
-        if(selectedMap.get(PRODUCT_TAG_LINE_LEVEL) != null){
-            List<DictWithSelectInfoVo> lineLevelListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : lineLevelList){
-                lineLevelListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_LINE_LEVEL).contains(dicInfo.getId())));
-            }
-            model.addAttribute("lineLevelList", lineLevelListPlus);
-        }else{
-            List<DictWithSelectInfoVo> lineLevelListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : lineLevelList){
-                lineLevelListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-            }
-            model.addAttribute("lineLevelList", lineLevelListPlus);
-        }
-
-        if(selectedMap.get(PRODUCT_TAG_ATTEND_METHOD) != null){
-            List<DictWithSelectInfoVo> attendMethodListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : attendMethodList){
-                attendMethodListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_ATTEND_METHOD).contains(dicInfo.getId())));
-            }
-            model.addAttribute("attendMethodList", attendMethodListPlus);
-        }else{
-            List<DictWithSelectInfoVo> attendMethodListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : attendMethodList){
-                attendMethodListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-            }
-            model.addAttribute("attendMethodList", attendMethodListPlus);
-        }
-
-        if(selectedMap.get(PRODUCT_TAG_HOTEL_LEVEL) != null){
-            List<DictWithSelectInfoVo> hotelLevelListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : hotelLevelList){
-                hotelLevelListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_HOTEL_LEVEL).contains(dicInfo.getId())));
-            }
-            model.addAttribute("hotelLevelList", hotelLevelListPlus);
-        }else{
-            List<DictWithSelectInfoVo> hotelLevelListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : hotelLevelList){
-                hotelLevelListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-            }
-            model.addAttribute("hotelLevelList", hotelLevelListPlus);
-        }
-
-        if(selectedMap.get(PRODUCT_TAG_DAYS_PERIOD) != null){
-            List<DictWithSelectInfoVo> daysPeriodListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : daysPeriodList){
-                daysPeriodListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_DAYS_PERIOD).contains(dicInfo.getId())));
-            }
-            model.addAttribute("daysPeriodList", daysPeriodListPlus);
-        }else{
-            List<DictWithSelectInfoVo> daysPeriodListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : daysPeriodList){
-                daysPeriodListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-            }
-            model.addAttribute("daysPeriodList", daysPeriodListPlus);
-        }
-        
-        if(selectedMap.get(PRODUCT_TAG_PRICE_RANGE) != null){
-            List<DictWithSelectInfoVo> priceRangeListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : priceRangeList){
-            	priceRangeListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_PRICE_RANGE).contains(dicInfo.getId())));
-            }
-            model.addAttribute("priceRangeList", priceRangeListPlus);
-        }else{
-            List<DictWithSelectInfoVo> priceRangeListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : priceRangeList){
-            	priceRangeListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-            }
-            model.addAttribute("priceRangeList", priceRangeListPlus);
-        }
+//        if(selectedMap.get(PRODUCT_TAG_LINE_THEME) != null){
+//            List<DictWithSelectInfoVo> lineThemeListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : lineThemeList){
+//                lineThemeListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_LINE_THEME).contains(dicInfo.getId())));
+//            }
+            model.addAttribute("lineThemeList", result.getLineThemeListPlus());
+//        }else{
+//            List<DictWithSelectInfoVo> lineThemeListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : lineThemeList){
+//                lineThemeListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
+//            }
+          //  model.addAttribute("lineThemeList", lineThemeListPlus);
+//        }
+//
+//        if(selectedMap.get(PRODUCT_TAG_LINE_LEVEL) != null){
+//            List<DictWithSelectInfoVo> lineLevelListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : lineLevelList){
+//                lineLevelListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_LINE_LEVEL).contains(dicInfo.getId())));
+//            }
+          //  model.addAttribute("lineLevelList", lineLevelListPlus);
+//        }else{
+//            List<DictWithSelectInfoVo> lineLevelListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : lineLevelList){
+//                lineLevelListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
+//            }
+            model.addAttribute("lineLevelList", result.getLineLevelListPlus());
+//        }
+//
+//        if(selectedMap.get(PRODUCT_TAG_ATTEND_METHOD) != null){
+//            List<DictWithSelectInfoVo> attendMethodListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : attendMethodList){
+//                attendMethodListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_ATTEND_METHOD).contains(dicInfo.getId())));
+//            }
+            model.addAttribute("attendMethodList", result.getAttendMethodListPlus());
+//        }else{
+//            List<DictWithSelectInfoVo> attendMethodListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : attendMethodList){
+//                attendMethodListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
+//            }
+//            model.addAttribute("attendMethodList", attendMethodListPlus);
+//        }
+//
+//        if(selectedMap.get(PRODUCT_TAG_HOTEL_LEVEL) != null){
+//            List<DictWithSelectInfoVo> hotelLevelListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : hotelLevelList){
+//                hotelLevelListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_HOTEL_LEVEL).contains(dicInfo.getId())));
+//            }
+            model.addAttribute("hotelLevelList", result.getHotelLevelListPlus());
+//        }else{
+//            List<DictWithSelectInfoVo> hotelLevelListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : hotelLevelList){
+//                hotelLevelListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
+//            }
+//            model.addAttribute("hotelLevelList", hotelLevelListPlus);
+//        }
+//
+//        if(selectedMap.get(PRODUCT_TAG_DAYS_PERIOD) != null){
+//            List<DictWithSelectInfoVo> daysPeriodListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : daysPeriodList){
+//                daysPeriodListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_DAYS_PERIOD).contains(dicInfo.getId())));
+//            }
+            model.addAttribute("daysPeriodList", result.getDaysPeriodListPlus());
+//        }else{
+//            List<DictWithSelectInfoVo> daysPeriodListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : daysPeriodList){
+//                daysPeriodListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
+//            }
+//            model.addAttribute("daysPeriodList", daysPeriodListPlus);
+//        }
+//        
+//        if(selectedMap.get(PRODUCT_TAG_PRICE_RANGE) != null){
+//            List<DictWithSelectInfoVo> priceRangeListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : priceRangeList){
+//            	priceRangeListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_PRICE_RANGE).contains(dicInfo.getId())));
+//            }
+            model.addAttribute("priceRangeList", result.getPriceRangeListPlus());
+//        }else{
+//            List<DictWithSelectInfoVo> priceRangeListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : priceRangeList){
+//            	priceRangeListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
+//            }
+//            model.addAttribute("priceRangeList", priceRangeListPlus);
+//        }
+//       
+//        if(selectedMap.get(PRODUCT_TAG_EXIT_DESTINATION) != null){
+//            List<DictWithSelectInfoVo> exitDestinationListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : exitDestinationList){
+//            	exitDestinationListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_EXIT_DESTINATION).contains(dicInfo.getId())));
+//            }
+            model.addAttribute("exitDestinationList", result.getExitDestinationListPlus());
+//        }else{
+//            List<DictWithSelectInfoVo> exitDestinationListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : exitDestinationList){
+//            	exitDestinationListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
+//            }
+//            model.addAttribute("exitDestinationList", exitDestinationListPlus);
+       // }
        
-        if(selectedMap.get(PRODUCT_TAG_EXIT_DESTINATION) != null){
-            List<DictWithSelectInfoVo> exitDestinationListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : exitDestinationList){
-            	exitDestinationListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_EXIT_DESTINATION).contains(dicInfo.getId())));
-            }
-            model.addAttribute("exitDestinationList", exitDestinationListPlus);
-        }else{
-            List<DictWithSelectInfoVo> exitDestinationListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : exitDestinationList){
-            	exitDestinationListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-            }
-            model.addAttribute("exitDestinationList", exitDestinationListPlus);
-        }
-       
-        if(selectedMap.get(PRODUCT_TAG_DOMESTIC_DESTINATION) != null){
-            List<DictWithSelectInfoVo> domesticDestinationListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : domesticDestinationList){
-            	domesticDestinationListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_DOMESTIC_DESTINATION).contains(dicInfo.getId())));
-            }
-            model.addAttribute("domesticDestinationList", domesticDestinationListPlus);
-        }else{
-            List<DictWithSelectInfoVo> domesticDestinationListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : domesticDestinationList){
-            	domesticDestinationListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-            }
-            model.addAttribute("domesticDestinationList", domesticDestinationListPlus);
-        }
-        
-        if(selectedMap.get(PRODUCT_TAG_TYPE) != null){
-            List<DictWithSelectInfoVo> typeListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : typeList){
-            	typeListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_TYPE).contains(dicInfo.getId())));
-            }
-            model.addAttribute("typeList", typeListPlus);
-        }else{
-            List<DictWithSelectInfoVo> typeListPlus = new ArrayList<DictWithSelectInfoVo>();
-            for(DicInfo dicInfo : typeList){
-            	typeListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-            }
-            model.addAttribute("typeList", typeListPlus);
-        }
+//        if(selectedMap.get(PRODUCT_TAG_DOMESTIC_DESTINATION) != null){
+//            List<DictWithSelectInfoVo> domesticDestinationListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : domesticDestinationList){
+//            	domesticDestinationListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_DOMESTIC_DESTINATION).contains(dicInfo.getId())));
+//            }
+            model.addAttribute("domesticDestinationList", result.getDomesticDestinationListPlus());
+//        }else{
+//            List<DictWithSelectInfoVo> domesticDestinationListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : domesticDestinationList){
+//            	domesticDestinationListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
+//            }
+//            model.addAttribute("domesticDestinationList", domesticDestinationListPlus);
+//        }
+//        
+//        if(selectedMap.get(PRODUCT_TAG_TYPE) != null){
+//            List<DictWithSelectInfoVo> typeListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : typeList){
+//            	typeListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_TYPE).contains(dicInfo.getId())));
+//            }
+            model.addAttribute("typeList", result.getTypeListPlus());
+//        }else{
+//            List<DictWithSelectInfoVo> typeListPlus = new ArrayList<DictWithSelectInfoVo>();
+//            for(DicInfo dicInfo : typeList){
+//            	typeListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
+//            }
+//            model.addAttribute("typeList", typeListPlus);
+//        }
         
 
         model.addAttribute("productId", productId);
