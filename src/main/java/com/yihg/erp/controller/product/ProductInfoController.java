@@ -780,6 +780,10 @@ public class ProductInfoController extends BaseController {
 		BeanUtils.copyProperties(productInfo, info);
 		toSearchListStateDTO.setProductInfo(info);
 		toSearchListStateDTO.setBizId(bizId);
+		toSearchListStateDTO.setPage(page);
+		toSearchListStateDTO.setPageSize(pageSize);
+		toSearchListStateDTO.setName(name);
+		toSearchListStateDTO.setProductName(productName);
 		ToSearchListStateResult toSearchListStateResult = productUpAndDownFrameFacade.toSearchListState(toSearchListStateDTO);
 		model.addAttribute("allProvince", toSearchListStateResult.getAllProvince());
 		model.addAttribute("brandList", toSearchListStateResult.getBrandList());
