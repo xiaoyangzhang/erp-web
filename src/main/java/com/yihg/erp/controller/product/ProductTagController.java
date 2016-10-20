@@ -45,159 +45,17 @@ public class ProductTagController extends BaseController{
     	if (StringUtils.isNotBlank(productId)) {
 			id = Integer.parseInt(productId);
 		}
-        ToProductTagResult result = productFacade.toProductTags(id, bizId);
-        System.out.println(result);
-    	/*List<DicInfo> lineThemeList = dicService.getListByTypeCode(PRODUCT_TAG_LINE_THEME,bizId);
-        List<DicInfo> lineLevelList = dicService.getListByTypeCode(PRODUCT_TAG_LINE_LEVEL,bizId);
-        List<DicInfo> attendMethodList = dicService.getListByTypeCode(PRODUCT_TAG_ATTEND_METHOD,bizId);
-        List<DicInfo> hotelLevelList = dicService.getListByTypeCode(PRODUCT_TAG_HOTEL_LEVEL,bizId);
-        List<DicInfo> daysPeriodList = dicService.getListByTypeCode(PRODUCT_TAG_DAYS_PERIOD,bizId);
-        
-        List<DicInfo> priceRangeList = dicService.getListByTypeCode(PRODUCT_TAG_PRICE_RANGE,bizId);
-        List<DicInfo> exitDestinationList = dicService.getListByTypeCode(PRODUCT_TAG_EXIT_DESTINATION,bizId);
-        List<DicInfo> domesticDestinationList = dicService.getListByTypeCode(PRODUCT_TAG_DOMESTIC_DESTINATION,bizId);
-        List<DicInfo> typeList = dicService.getListByTypeCode(PRODUCT_TAG_TYPE,bizId);
-        ProductTagVo productTagVo = productTagService.findProductTagsByProductId(Integer.valueOf(productId));
-
-
-        Map<String, List<Integer>> selectedMap = new HashMap<String, List<Integer>>();
-        for(ProductTag productTag : productTagVo.getProductTags()){
-            if(selectedMap.get(productTag.getTagType()) == null){
-                List<Integer> tagList = new ArrayList<Integer>();
-                tagList.add(productTag.getTagId());
-                selectedMap.put(productTag.getTagType(), tagList);
-            }else{
-                selectedMap.get(productTag.getTagType()).add(productTag.getTagId());
-            }
-        }*/
-
-
-//        if(selectedMap.get(PRODUCT_TAG_LINE_THEME) != null){
-//            List<DictWithSelectInfoVo> lineThemeListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : lineThemeList){
-//                lineThemeListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_LINE_THEME).contains(dicInfo.getId())));
-//            }
-            model.addAttribute("lineThemeList", result.getLineThemeListPlus());
-//        }else{
-//            List<DictWithSelectInfoVo> lineThemeListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : lineThemeList){
-//                lineThemeListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-//            }
-          //  model.addAttribute("lineThemeList", lineThemeListPlus);
-//        }
-//
-//        if(selectedMap.get(PRODUCT_TAG_LINE_LEVEL) != null){
-//            List<DictWithSelectInfoVo> lineLevelListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : lineLevelList){
-//                lineLevelListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_LINE_LEVEL).contains(dicInfo.getId())));
-//            }
-          //  model.addAttribute("lineLevelList", lineLevelListPlus);
-//        }else{
-//            List<DictWithSelectInfoVo> lineLevelListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : lineLevelList){
-//                lineLevelListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-//            }
-            model.addAttribute("lineLevelList", result.getLineLevelListPlus());
-//        }
-//
-//        if(selectedMap.get(PRODUCT_TAG_ATTEND_METHOD) != null){
-//            List<DictWithSelectInfoVo> attendMethodListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : attendMethodList){
-//                attendMethodListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_ATTEND_METHOD).contains(dicInfo.getId())));
-//            }
-            model.addAttribute("attendMethodList", result.getAttendMethodListPlus());
-//        }else{
-//            List<DictWithSelectInfoVo> attendMethodListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : attendMethodList){
-//                attendMethodListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-//            }
-//            model.addAttribute("attendMethodList", attendMethodListPlus);
-//        }
-//
-//        if(selectedMap.get(PRODUCT_TAG_HOTEL_LEVEL) != null){
-//            List<DictWithSelectInfoVo> hotelLevelListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : hotelLevelList){
-//                hotelLevelListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_HOTEL_LEVEL).contains(dicInfo.getId())));
-//            }
-            model.addAttribute("hotelLevelList", result.getHotelLevelListPlus());
-//        }else{
-//            List<DictWithSelectInfoVo> hotelLevelListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : hotelLevelList){
-//                hotelLevelListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-//            }
-//            model.addAttribute("hotelLevelList", hotelLevelListPlus);
-//        }
-//
-//        if(selectedMap.get(PRODUCT_TAG_DAYS_PERIOD) != null){
-//            List<DictWithSelectInfoVo> daysPeriodListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : daysPeriodList){
-//                daysPeriodListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_DAYS_PERIOD).contains(dicInfo.getId())));
-//            }
-            model.addAttribute("daysPeriodList", result.getDaysPeriodListPlus());
-//        }else{
-//            List<DictWithSelectInfoVo> daysPeriodListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : daysPeriodList){
-//                daysPeriodListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-//            }
-//            model.addAttribute("daysPeriodList", daysPeriodListPlus);
-//        }
-//        
-//        if(selectedMap.get(PRODUCT_TAG_PRICE_RANGE) != null){
-//            List<DictWithSelectInfoVo> priceRangeListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : priceRangeList){
-//            	priceRangeListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_PRICE_RANGE).contains(dicInfo.getId())));
-//            }
-            model.addAttribute("priceRangeList", result.getPriceRangeListPlus());
-//        }else{
-//            List<DictWithSelectInfoVo> priceRangeListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : priceRangeList){
-//            	priceRangeListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-//            }
-//            model.addAttribute("priceRangeList", priceRangeListPlus);
-//        }
-//       
-//        if(selectedMap.get(PRODUCT_TAG_EXIT_DESTINATION) != null){
-//            List<DictWithSelectInfoVo> exitDestinationListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : exitDestinationList){
-//            	exitDestinationListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_EXIT_DESTINATION).contains(dicInfo.getId())));
-//            }
-            model.addAttribute("exitDestinationList", result.getExitDestinationListPlus());
-//        }else{
-//            List<DictWithSelectInfoVo> exitDestinationListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : exitDestinationList){
-//            	exitDestinationListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-//            }
-//            model.addAttribute("exitDestinationList", exitDestinationListPlus);
-       // }
-       
-//        if(selectedMap.get(PRODUCT_TAG_DOMESTIC_DESTINATION) != null){
-//            List<DictWithSelectInfoVo> domesticDestinationListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : domesticDestinationList){
-//            	domesticDestinationListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_DOMESTIC_DESTINATION).contains(dicInfo.getId())));
-//            }
-            model.addAttribute("domesticDestinationList", result.getDomesticDestinationListPlus());
-//        }else{
-//            List<DictWithSelectInfoVo> domesticDestinationListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : domesticDestinationList){
-//            	domesticDestinationListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-//            }
-//            model.addAttribute("domesticDestinationList", domesticDestinationListPlus);
-//        }
-//        
-//        if(selectedMap.get(PRODUCT_TAG_TYPE) != null){
-//            List<DictWithSelectInfoVo> typeListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : typeList){
-//            	typeListPlus.add(new DictWithSelectInfoVo(dicInfo, selectedMap.get(PRODUCT_TAG_TYPE).contains(dicInfo.getId())));
-//            }
-            model.addAttribute("typeList", result.getTypeListPlus());
-//        }else{
-//            List<DictWithSelectInfoVo> typeListPlus = new ArrayList<DictWithSelectInfoVo>();
-//            for(DicInfo dicInfo : typeList){
-//            	typeListPlus.add(new DictWithSelectInfoVo(dicInfo, false));
-//            }
-//            model.addAttribute("typeList", typeListPlus);
-//        }
-        
+		ToProductTagResult result = productFacade.toProductTags(id, bizId);
+    	
+        model.addAttribute("lineThemeList", result.getLineThemeListPlus());
+        model.addAttribute("lineLevelList", result.getLineLevelListPlus());
+        model.addAttribute("attendMethodList", result.getAttendMethodListPlus());
+        model.addAttribute("hotelLevelList", result.getHotelLevelListPlus());
+        model.addAttribute("daysPeriodList", result.getDaysPeriodListPlus());
+        model.addAttribute("priceRangeList", result.getPriceRangeListPlus());
+        model.addAttribute("exitDestinationList", result.getExitDestinationListPlus());
+        model.addAttribute("domesticDestinationList", result.getDomesticDestinationListPlus());
+        model.addAttribute("typeList", result.getTypeListPlus());
 
         model.addAttribute("productId", productId);
         return "product/tag/product_tag";
