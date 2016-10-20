@@ -298,6 +298,9 @@
 	<dubbo:reference id="productCommonFacade"
 		interface="org.erpcenterFacade.common.client.service.ProductCommonFacade" owner="wj" version="1.0.0.test"
 		timeout="8000" />
+	<dubbo:reference id="sysLoginFacade"
+		interface="com.yimayhd.erpcenter.facade.sys.service.SysLoginFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
 		
 		
 </beans>

@@ -11,9 +11,11 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.alibaba.fastjson.JSONObject;
 import com.yihg.erp.contant.SecurityConstant;
 import com.yihg.sys.api.PlatformSessionService;
 import com.yihg.sys.po.PlatformEmployeePo;
@@ -133,7 +135,15 @@ public class WebUtils {
     		}
     	}
 		return null;*/
-		return (UserSession)request.getAttribute("userSession");
+		
+		//TODO 后续统一替换成新的代码模式 liyong
+		com.yimayhd.erpcenter.dal.sys.po.UserSession uss =(com.yimayhd.erpcenter.dal.sys.po.UserSession)request.getAttribute("userSession");
+		if(uss != null){
+			String json = JSONObject.toJSONString(uss);
+			return JSONObject.parseObject(json, UserSession.class);
+		}else{
+			return null;
+		}
 	}	
 	
 	public static String getBizConfigValue(HttpServletRequest request,String key){

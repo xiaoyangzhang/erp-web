@@ -494,6 +494,17 @@
 			<artifactId>erpcenterDAL-product-client</artifactId>
 			<version>0.0.6-SNAPSHOT</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterFacade-sys-client</artifactId>
+			<version>0.0.6-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterDAL-sys-client</artifactId>
+			<version>0.0.6-SNAPSHOT</version>
+		</dependency>
 
 	</dependencies>
 

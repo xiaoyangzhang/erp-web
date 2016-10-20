@@ -1,21 +1,16 @@
 package com.yihg.erp.controller.sys.security;
 
-import com.alibaba.fastjson.JSON;
-import com.yihg.erp.contant.SecurityConstant;
-import com.yihg.erp.contant.SysConfigConstant;
-import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.utils.MD5Util;
-import com.yihg.erp.utils.WebUtils;
-/*import com.yihg.queue.api.IMsgSender;
-import com.yihg.queue.constants.MsgQueueNameConstant;
-import com.yihg.queue.po.SendResult;*/
-import com.yihg.sys.api.*;
-import com.yihg.sys.po.*;
-import com.yihg.sys.vo.MenuOptVo;
+import java.util.Date;
+import java.util.UUID;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -24,36 +19,42 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
-import javax.annotation.Resource;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import com.yihg.erp.contant.SecurityConstant;
+import com.yihg.erp.contant.SysConfigConstant;
+import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.utils.MD5Util;
+import com.yihg.erp.utils.WebUtils;
+import com.yimayhd.erpcenter.dal.sys.po.LoginLogPo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
+import com.yimayhd.erpcenter.dal.sys.po.UserSession;
+import com.yimayhd.erpcenter.facade.sys.query.UserSessionDTO;
+import com.yimayhd.erpcenter.facade.sys.result.PlatformEmployeeResult;
+import com.yimayhd.erpcenter.facade.sys.result.SysBizInfoResult;
+import com.yimayhd.erpcenter.facade.sys.result.UserSessionResult;
+import com.yimayhd.erpcenter.facade.sys.service.SysLoginFacade;
 
 
 @Controller
 @RequestMapping("/")
 public class LoginController extends BaseController {
 	static Logger logger = LoggerFactory.getLogger(LoginController.class);
+//	@Autowired
+//	private PlatformEmployeeService platformEmployeeService;
+//	@Autowired
+//	private PlatformRoleService platformRoleService;
+//	@Autowired
+//	private PlatformOrgService platformOrgService;
+//	@Autowired
+//	private PlatformMenuService platformMenuService;
+//	@Autowired
+//	private PlatformSessionService platformSessionService;
+//	@Autowired
+//	private SysBizInfoService bizInfoService; 
+//	@Autowired
+//	private SysBizConfigService sysBizConfigService;
 	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private PlatformRoleService platformRoleService;
-	@Autowired
-	private PlatformOrgService platformOrgService;
-	@Autowired
-	private PlatformMenuService platformMenuService;
-	@Autowired
-	private PlatformSessionService platformSessionService;
-	@Autowired
-	private SysBizInfoService bizInfoService; 
-	@Autowired
-	private SysBizConfigService sysBizConfigService;
+	private SysLoginFacade sysLoginFacade;
 	//@Resource
 	//private IMsgSender msgSender;
 	
@@ -100,50 +101,57 @@ public class LoginController extends BaseController {
 			return "redirect:login.htm";
 		}
 		
-		SysBizInfo curBizInfo = bizInfoService.getBizInfoByCode(code);
-		if(curBizInfo == null){
+		SysBizInfoResult curBizInfoResult = sysLoginFacade.getBizInfoByCode(code);
+		if(curBizInfoResult == null){
 			attrModel.addFlashAttribute("loginName", loginName);
 			attrModel.addFlashAttribute("code", code);
 			attrModel.addFlashAttribute("errMsg", "当前企业编码不存在！");
 			return "redirect:login.htm"; 
 		}	
-		
+		SysBizInfo curBizInfo = new SysBizInfo();
+		BeanUtils.copyProperties(curBizInfoResult, curBizInfo);
 		//PlatformEmployeePo platformEmployeePo = platformEmployeeService.getEmployeeByLoginName(loginName);
-		PlatformEmployeePo platformEmployeePo = platformEmployeeService.getEmployeeByBizIdAndLoginName(curBizInfo.getId(), loginName);
-		if(platformEmployeePo!=null){
+		PlatformEmployeeResult platformEmployeeResult = sysLoginFacade.getEmployeeByBizIdAndLoginName(curBizInfo.getId(), loginName);
+		if(platformEmployeeResult!=null){
+			PlatformEmployeePo platformEmployeePo = new PlatformEmployeePo();
+			BeanUtils.copyProperties(platformEmployeeResult, platformEmployeePo);
 			if(MD5Util.authenticatePassword(platformEmployeePo.getPassword(), password)){
 				//int sysId = SysServiceSingleton.getPlatformSysPo().getSysId();
 				int bizId = curBizInfo.getId(); //WebUtils.getCurBizId(request);
 				UserSession userSession = new UserSession();
-				userSession.setEmployeeId(platformEmployeePo.getEmployeeId());
-				userSession.setLoginName(platformEmployeePo.getLoginName());
-				userSession.setName(platformEmployeePo.getName());
-				userSession.setIsSuper(platformEmployeePo.getIsSuper());
-				userSession.setEmployeeInfo(platformEmployeePo);
-				userSession.setBizInfo(curBizInfo);				
+					
 				
-				//List<PlatformOrgPo> orgList = platformOrgService.getOrgList(bizId, platformEmployeePo.getOrgId(),platformEmployeePo.getIsSuper());
-				PlatformOrgPo orgInfo = platformOrgService.getOrgInfo(bizId,platformEmployeePo.getOrgId());
-				List<PlatformRolePo> roleList = platformRoleService.getRoleList(bizId, platformEmployeePo.getEmployeeId(),platformEmployeePo.getIsSuper());
-				List<PlatformMenuPo> menuList = platformMenuService.getMenuList(bizId, roleList,platformEmployeePo.getIsSuper());
-				MenuOptVo menuOptVo = platformMenuService.getOptMaps(bizId, roleList,platformEmployeePo.getIsSuper());
-				//操作权限的编码
-				//Map<String,Map<String,Boolean>> optMap = menuOptVo.getMenuOptMap();
-				//Set<Integer> userIdSet = platformEmployeeService.getUserIdListByOrgId(bizId, platformEmployeePo.getOrgId());
-				Set<Integer> userIdSet = platformEmployeeService.getDataRightListByUserId(bizId,platformEmployeePo.getEmployeeId());
+//				//List<PlatformOrgPo> orgList = platformOrgService.getOrgList(bizId, platformEmployeePo.getOrgId(),platformEmployeePo.getIsSuper());
+//				PlatformOrgPo orgInfo = platformOrgService.getOrgInfo(bizId,platformEmployeePo.getOrgId());
+//				List<PlatformRolePo> roleList = platformRoleService.getRoleList(bizId, platformEmployeePo.getEmployeeId(),platformEmployeePo.getIsSuper());
+//				List<PlatformMenuPo> menuList = platformMenuService.getMenuList(bizId, roleList,platformEmployeePo.getIsSuper());
+//				MenuOptVo menuOptVo = platformMenuService.getOptMaps(bizId, roleList,platformEmployeePo.getIsSuper());
+//				//操作权限的编码
+//				//Map<String,Map<String,Boolean>> optMap = menuOptVo.getMenuOptMap();
+//				//Set<Integer> userIdSet = platformEmployeeService.getUserIdListByOrgId(bizId, platformEmployeePo.getOrgId());
+//				Set<Integer> userIdSet = platformEmployeeService.getDataRightListByUserId(bizId,platformEmployeePo.getEmployeeId());
+//				
+//				userSession.setMenuOptMap(menuOptVo.getMenuOptMap());
+//				userSession.setOptMap(menuOptVo.getOptMap());
+//				//userSession.setOrgList(orgList);
+//				userSession.setOrgInfo(orgInfo);
+//				userSession.setRoleList(roleList);
+//				userSession.setMenuList(menuList);
+//				//model.addAttribute("userSession", userSession);
+//				userSession.setDataUserIdSet(userIdSet);
+//				
+//				//添加配置
+//				Map<String,String> bizConfigMap = sysBizConfigService.getConfigMapByBizId(bizId);
+//				userSession.setBizConfigMap(bizConfigMap);		
 				
-				userSession.setMenuOptMap(menuOptVo.getMenuOptMap());
-				userSession.setOptMap(menuOptVo.getOptMap());
-				//userSession.setOrgList(orgList);
-				userSession.setOrgInfo(orgInfo);
-				userSession.setRoleList(roleList);
-				userSession.setMenuList(menuList);
-				//model.addAttribute("userSession", userSession);
-				userSession.setDataUserIdSet(userIdSet);
-				
-				//添加配置
-				Map<String,String> bizConfigMap = sysBizConfigService.getConfigMapByBizId(bizId);
-				userSession.setBizConfigMap(bizConfigMap);				
+				UserSessionResult userSessionResult = sysLoginFacade.getUserSessionResult(bizId, platformEmployeePo.getOrgId(), platformEmployeePo.getEmployeeId(), platformEmployeePo.getIsSuper());
+				userSessionResult.setEmployeeId(platformEmployeePo.getEmployeeId());
+				userSessionResult.setLoginName(platformEmployeePo.getLoginName());
+				userSessionResult.setName(platformEmployeePo.getName());
+				userSessionResult.setIsSuper(platformEmployeePo.getIsSuper());
+				userSessionResult.setEmployeeInfo(platformEmployeePo);
+				userSessionResult.setBizInfo(curBizInfo);
+				BeanUtils.copyProperties(userSessionResult, userSession);//把userSession相关的信息拷贝到userSession中
 				
 				String uuid = UUID.randomUUID().toString(); 
 				String sessionId = uuid.substring(0,8)+uuid.substring(9,13)+uuid.substring(14,18)+uuid.substring(19,23)+uuid.substring(24); 
@@ -155,7 +163,9 @@ public class LoginController extends BaseController {
 			    
 //				  String s = UUID.randomUUID().toString(); 
 //			        return s.substring(0,8)+s.substring(9,13)+s.substring(14,18)+s.substring(19,23)+s.substring(24); 
-				platformSessionService.setUserSession(sessionId, SysConfigConstant.SESSION_TIMEOUT_SECONDS, userSession);
+			    UserSessionDTO userSessionDTO = new UserSessionDTO();
+			    userSessionDTO.setUserSession(userSession);
+			    sysLoginFacade.setUserSession(sessionId, SysConfigConstant.SESSION_TIMEOUT_SECONDS, userSessionDTO);
 				
 				//addLoginLog(request,platformEmployeePo);
 				
@@ -194,7 +204,7 @@ public class LoginController extends BaseController {
 	@RequestMapping(value="logout.htm")
 	public String logout(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,String po){
 		String sessionId = WebUtils.getSessionId(request);				
-		platformSessionService.delUserSession(sessionId);
+		sysLoginFacade.delUserSession(sessionId);
 		return "redirect:login.htm";
 	}
 	

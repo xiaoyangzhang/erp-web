@@ -5,13 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletRequest;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -21,9 +20,11 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.contant.SysConfigConstant;
-import com.yihg.sys.api.PlatformSessionService;
 import com.yihg.sys.po.PlatformMenuPo;
-import com.yihg.sys.po.UserSession;
+import com.yimayhd.erpcenter.dal.sys.po.UserSession;
+import com.yimayhd.erpcenter.facade.sys.query.UserSessionDTO;
+import com.yimayhd.erpcenter.facade.sys.result.UserSessionResult;
+import com.yimayhd.erpcenter.facade.sys.service.SysLoginFacade;
 
 public class AuthenticationInterceptor implements HandlerInterceptor {
 	private static final Logger logger = LoggerFactory
@@ -32,9 +33,10 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 	private List<String> excludedUrls;
 	private List<String> noAuthorityUrls;
 
+//	@Autowired
+//	private PlatformSessionService platformSessionService;
 	@Autowired
-	private PlatformSessionService platformSessionService;
-
+	private SysLoginFacade sysLoginFacade;
 	public void setExcludedUrls(List<String> excludedUrls) {
 		this.excludedUrls = excludedUrls;
 	}
@@ -57,12 +59,16 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 			return false;
 		}
 
-		UserSession userSession = platformSessionService.getUserSession(sessionId);
-		if (userSession == null) {
+		UserSessionResult userSessionReuslt = sysLoginFacade.getUserSession(sessionId);
+		if (userSessionReuslt == null) {
 			response.sendRedirect(request.getContextPath() + "/login.htm");
 			return false;
 		} else {
-			platformSessionService.setUserSession(sessionId, SysConfigConstant.SESSION_TIMEOUT_SECONDS, userSession);
+			UserSession userSession = new UserSession();
+			BeanUtils.copyProperties(userSessionReuslt, userSession);
+			UserSessionDTO userSessionDTO= new UserSessionDTO();
+			userSessionDTO.setUserSession(userSession);
+			sysLoginFacade.setUserSession(sessionId, SysConfigConstant.SESSION_TIMEOUT_SECONDS, userSessionDTO);
 			//request中可以直接使用的
 			request.setAttribute("userSession", userSession);
 			// 管理员默认有所有权限
