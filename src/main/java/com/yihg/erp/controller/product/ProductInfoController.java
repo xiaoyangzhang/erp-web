@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.yimayhd.erpcenter.facade.query.ToSearchListStateDTO;
 import com.yimayhd.erpcenter.facade.result.ToSearchListStateResult;
 import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -47,6 +48,7 @@ import org.erpcenterFacade.common.client.query.BrandQueryDTO;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
 import org.erpcenterFacade.common.client.result.BrandQueryResult;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.result.RegionResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,15 +170,22 @@ public class ProductInfoController extends BaseController {
 		// List<RegionInfo> allProvince = regionService.getAllProvince();
 		// 产品名称
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> brandList = dicService.getListByTypeCode(
+		/*List<DicInfo> brandList = dicService.getListByTypeCode(
 				BasicConstants.CPXL_PP, bizId);
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-
+				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));*/
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
 		// model.addAttribute("allProvince", allProvince);
-		model.addAttribute("brandList", brandList);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		BrandQueryResult brandResult = productCommonFacade.brandQuery(brandQueryDTO);
+		model.addAttribute("brandList", brandResult.getBrandList());
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", result.getOrgUserJsonStr());
 		model.addAttribute("state", productInfo.getState());
 		return "product/product_list";
 	}
@@ -648,11 +657,15 @@ public class ProductInfoController extends BaseController {
 			ProductInfo productInfo, String productName, String name,
 			Integer page, Integer pageSize) {
 		// 省市
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+		//List<RegionInfo> allProvince = regionService.getAllProvince();
+		RegionResult regionResult = productCommonFacade.queryProvinces();
 		// 产品名称
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> brandList = dicService.getListByTypeCode(
-				BasicConstants.CPXL_PP, bizId);
+//		List<DicInfo> brandList = dicService.getListByTypeCode(
+//				BasicConstants.CPXL_PP, bizId);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
 		if (page == null) {
 			page = 1;
 		}
@@ -699,8 +712,8 @@ public class ProductInfoController extends BaseController {
 		 * = productInfoService.getProductPriceState(productId);
 		 * priceStateMap.put(info.getId(), state); }
 		 */
-		model.addAttribute("allProvince", allProvince);
-		model.addAttribute("brandList", brandList);
+		model.addAttribute("allProvince", regionResult.getRegionList());
+		model.addAttribute("brandList", brandQueryResult.getBrandList());
 		model.addAttribute("page", webResult.getValue());
 		model.addAttribute("pageNum", page);
 		model.addAttribute("priceStateMap", priceStateMap);
@@ -792,8 +805,12 @@ public class ProductInfoController extends BaseController {
 		productPriceListDTO.setProductInfo(info);
 		productPriceListDTO.setProductName(productName);
 		productPriceListDTO.setName(name);
-		productPriceListDTO.setPage(page);
-		productPriceListDTO.setPageSize(pageSize);
+		if(page != null){
+			productPriceListDTO.setPage(page.intValue());
+		}
+		if(pageSize != null){
+			productPriceListDTO.setPageSize(pageSize.intValue());
+		}
 		
 		ProductPriceListResult result = productFacade.productPriceList(productPriceListDTO);
 		model.addAttribute("allProvince", result.getAllProvince());

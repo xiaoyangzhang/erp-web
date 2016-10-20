@@ -274,7 +274,7 @@ public class ProductSalesController extends BaseController {
     	List<ProductGroup> productGroups = productGroupService.selectProductGroupsBySellerId(productId,WebUtils.getCurUserId(request));
     	model.addAttribute("productGroupSuppliers", productGroups);
     	model.addAttribute("productId",productId);
-    	com.yihg.product.po.ProductInfo info = productInfoService.findProductInfoById(productId);
+    	com.yihg.product.po.ProductInfo  info = productInfoService.findProductInfoById(productId);
     	if(info.getObligate()==null){
     		info.setObligate(0);
     	}    	
@@ -331,6 +331,10 @@ public class ProductSalesController extends BaseController {
 //        ProductRouteVo productRouteVo = productRouteService.findByProductId(id);
 //		ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(id);
     	ProductInfoResult result = productFacade.toProductPreview(id);
+
+//		DetailDTO detailDTO = new DetailDTO();
+//		detailDTO.setId(id);
+//		DetailResult detailResult = productUpAndDownFrameFacade.detail(detailDTO);
 		model.addAttribute("productInfoVo", result.getProductInfoVo());
         model.addAttribute("productRouteVo", result.getProductRouteVo());
         model.addAttribute("productRemark", result.getProductRemark());
