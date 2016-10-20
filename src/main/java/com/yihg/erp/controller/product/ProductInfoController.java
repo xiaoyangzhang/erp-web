@@ -24,10 +24,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.yimayhd.erpcenter.facade.query.ToSearchListStateDTO;
-import com.yimayhd.erpcenter.facade.result.ToSearchListStateResult;
-import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -784,6 +780,10 @@ public class ProductInfoController extends BaseController {
 		BeanUtils.copyProperties(productInfo, info);
 		toSearchListStateDTO.setProductInfo(info);
 		toSearchListStateDTO.setBizId(bizId);
+		toSearchListStateDTO.setPage(page);
+		toSearchListStateDTO.setPageSize(pageSize);
+		toSearchListStateDTO.setName(name);
+		toSearchListStateDTO.setProductName(productName);
 		ToSearchListStateResult toSearchListStateResult = productUpAndDownFrameFacade.toSearchListState(toSearchListStateDTO);
 		model.addAttribute("allProvince", toSearchListStateResult.getAllProvince());
 		model.addAttribute("brandList", toSearchListStateResult.getBrandList());
@@ -1455,58 +1455,11 @@ public class ProductInfoController extends BaseController {
 	}
 
 	@RequestMapping("productPricePreview.htm")
-	public String productPricePreview(HttpServletRequest request,
-			HttpServletResponse response, ModelMap model, String productIds) {
-		// List<ProductInfo> productInfoList = JSONArray.parseArray(productIds,
-		// ProductInfo.class);
-		String[] productIdArr = productIds.split(",");
-		// List<Map<ProductInfo, List<ProductGroupSupplier>>>
-		// productPriceList=new
-		// ArrayList<Map<ProductInfo,List<ProductGroupSupplier>>>();
-		List<ProductGroupSupplierVo> productPriceList = new ArrayList<ProductGroupSupplierVo>();
-		for (String id : productIdArr) {
-			// Map<ProductInfo, List<ProductGroupSupplier>> productPriceMap=new
-			// HashMap<ProductInfo, List<ProductGroupSupplier>>();
-			ProductGroupSupplierVo supplierVo = new ProductGroupSupplierVo();
-			ProductInfo product = productInfoService.findProductByIdAndBizId(
-					Integer.parseInt(id), WebUtils.getCurBizId(request));
-			List<ProductGroupSupplier> productPriceInfoList = groupSupplierService
-					.getProductPriceInfoList(Integer.parseInt(id));
-			if (productPriceInfoList != null && productPriceInfoList.size() > 0) {
-				int rowSpan = 0;
-				for (ProductGroupSupplier supplier : productPriceInfoList) {
-					// rowSpan += (supplier.getRowSpan()==null?0:
-					// supplier.getRowSpan());
-					List<ProductGroup> productGroupList = supplier
-							.getProductGroupList();
-					if (productGroupList != null && productGroupList.size() > 0) {
-						int rowSpan2 = 0;
-						// supplier.setRowSpan(productGroupList.size());
-						for (ProductGroup productGroup : productGroupList) {
-							productGroup.setRowSpan(productGroup
-									.getGroupPrices() == null ? 0
-									: productGroup.getGroupPrices().size());
-							// productGroup.getGroupPrices();
-							rowSpan2 += (productGroup.getGroupPrices() == null ? 0
-									: productGroup.getGroupPrices().size());
-							rowSpan += (productGroup.getGroupPrices() == null ? 0
-									: productGroup.getGroupPrices().size());
-
-						}
-						supplier.setRowSpan(rowSpan2);
-					}
-				}
-
-				product.setRowSpan(rowSpan);
-			}
-			supplierVo.setProductInfo(product);
-			supplierVo.setProductGroupSupplierList(productPriceInfoList);
-			// List<ProductGroupSupplier> productPriceInfoList =
-			// groupSupplierService.getProductPriceInfoList(Integer.parseInt(id));
-			// productPriceMap.put(product, null);
-			// productPriceList.add(productPriceMap);
-			productPriceList.add(supplierVo);
-		}
+	public String productPricePreview(HttpServletRequest request,HttpServletResponse response, ModelMap model, String productIds) {
+		
+		
+		List<com.yimayhd.erpcenter.dal.product.vo.ProductGroupSupplierVo> productPriceList = productFacade.productPricePreview(WebUtils.getCurBizId(request), productIds);
+		
 		model.addAttribute("productPriceList", productPriceList);
 		// String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", bizSettingCommon.getMyBizLogo(request));
@@ -1520,51 +1473,8 @@ public class ProductInfoController extends BaseController {
 	@RequestMapping("exportExcel.do")
 	public void exportExcel(HttpServletRequest request,
 			HttpServletResponse response, String productIds) {
-		String[] productIdArr = productIds.split(",");
-		List<ProductGroupSupplierVo> productPriceList = new ArrayList<ProductGroupSupplierVo>();
-		for (String id : productIdArr) {
-			// Map<ProductInfo, List<ProductGroupSupplier>> productPriceMap=new
-			// HashMap<ProductInfo, List<ProductGroupSupplier>>();
-			ProductGroupSupplierVo supplierVo = new ProductGroupSupplierVo();
-			ProductInfo product = productInfoService.findProductByIdAndBizId(
-					Integer.parseInt(id), WebUtils.getCurBizId(request));
-			List<ProductGroupSupplier> productPriceInfoList = groupSupplierService
-					.getProductPriceInfoList(Integer.parseInt(id));
-			if (productPriceInfoList != null && productPriceInfoList.size() > 0) {
-				int rowSpan = 0;
-				for (ProductGroupSupplier supplier : productPriceInfoList) {
-					// rowSpan += (supplier.getRowSpan()==null?0:
-					// supplier.getRowSpan());
-					List<ProductGroup> productGroupList = supplier
-							.getProductGroupList();
-					if (productGroupList != null && productGroupList.size() > 0) {
-						int rowSpan2 = 0;
-						// supplier.setRowSpan(productGroupList.size());
-						for (ProductGroup productGroup : productGroupList) {
-							productGroup.setRowSpan(productGroup
-									.getGroupPrices() == null ? 0
-									: productGroup.getGroupPrices().size());
-							// productGroup.getGroupPrices();
-							rowSpan2 += (productGroup.getGroupPrices() == null ? 0
-									: productGroup.getGroupPrices().size());
-							rowSpan += (productGroup.getGroupPrices() == null ? 0
-									: productGroup.getGroupPrices().size());
+		List<com.yimayhd.erpcenter.dal.product.vo.ProductGroupSupplierVo> productPriceList = productFacade.productPricePreview(WebUtils.getCurBizId(request), productIds);
 
-						}
-						supplier.setRowSpan(rowSpan2);
-					}
-				}
-
-				product.setRowSpan(rowSpan);
-			}
-			supplierVo.setProductInfo(product);
-			supplierVo.setProductGroupSupplierList(productPriceInfoList);
-			// List<ProductGroupSupplier> productPriceInfoList =
-			// groupSupplierService.getProductPriceInfoList(Integer.parseInt(id));
-			// productPriceMap.put(product, null);
-			// productPriceList.add(productPriceMap);
-			productPriceList.add(supplierVo);
-		}
 		String path = "";
 		// BigDecimal total = new BigDecimal(0);
 		// BigDecimal totalNum = new BigDecimal(0);
@@ -1610,7 +1520,7 @@ public class ProductInfoController extends BaseController {
 			Float sumCostChild = 0.0f;
 			Float sumSettlementAdult = 0.0f;
 			Float sumSettlementChild = 0.0f;
-			for (ProductGroupSupplierVo supplier : productPriceList) {
+			for (com.yimayhd.erpcenter.dal.product.vo.ProductGroupSupplierVo supplier : productPriceList) {
 				int priceSizeTotal = 0;
 				if (supplier.getProductGroupSupplierList() == null
 						|| supplier.getProductGroupSupplierList().size() == 0) {
@@ -1653,8 +1563,7 @@ public class ProductInfoController extends BaseController {
 					index++;
 					priceSizeTotal += 1;
 				} else {
-					for (ProductGroupSupplier gSupplier : supplier
-							.getProductGroupSupplierList()) {
+					for (com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier gSupplier : supplier.getProductGroupSupplierList()) {
 
 						int priceSizeSupplier = 0;
 						if (gSupplier.getProductGroupList() == null
@@ -1709,7 +1618,7 @@ public class ProductInfoController extends BaseController {
 							// totalNum+=detail.getItemNum();
 							// totalNumMinus += detail.getItemNumMinus();
 						} else {
-							for (ProductGroup group : gSupplier
+							for (com.yimayhd.erpcenter.dal.product.po.ProductGroup group : gSupplier
 									.getProductGroupList()) {
 
 								if (group.getGroupPrices() == null
@@ -1767,7 +1676,7 @@ public class ProductInfoController extends BaseController {
 											.getProductGroupList().size();
 									priceSizeGroup += 1;
 								} else {
-									for (ProductGroupPrice price : group
+									for (com.yimayhd.erpcenter.dal.product.po.ProductGroupPrice price : group
 											.getGroupPrices()) {
 
 										row = sheet.createRow(index + 3);
