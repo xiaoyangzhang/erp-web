@@ -792,8 +792,12 @@ public class ProductInfoController extends BaseController {
 		productPriceListDTO.setProductInfo(info);
 		productPriceListDTO.setProductName(productName);
 		productPriceListDTO.setName(name);
-		productPriceListDTO.setPage(page);
-		productPriceListDTO.setPageSize(pageSize);
+		if(page != null){
+			productPriceListDTO.setPage(page.intValue());
+		}
+		if(pageSize != null){
+			productPriceListDTO.setPageSize(pageSize.intValue());
+		}
 		
 		ProductPriceListResult result = productFacade.productPriceList(productPriceListDTO);
 		model.addAttribute("allProvince", result.getAllProvince());
