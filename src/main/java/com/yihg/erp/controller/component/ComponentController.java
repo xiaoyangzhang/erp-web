@@ -64,6 +64,9 @@ import com.yihg.supplier.po.SupplierInfo;
 import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
 import com.yihg.sys.po.PlatformOrgPo;
+import com.yimayhd.erpcenter.facade.query.ComponentProductListDTO;
+import com.yimayhd.erpcenter.facade.result.ComponentProductListResult;
+import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
 @Controller
 @RequestMapping("/component")
@@ -98,6 +101,8 @@ public class ComponentController extends BaseController {
 	private ProductStockService stockService;
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
+	@Autowired
+	private ProductFacade productFacade;
 	
 	@RequestMapping("example.htm")
 	public String example(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,String type){	
@@ -411,7 +416,6 @@ public class ComponentController extends BaseController {
 		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
 		brandQueryDTO.setBizId(bizId);
 		
-        
         BrandQueryResult brandResult = productCommonFacade.brandQuery(brandQueryDTO);;
         List<com.yimayhd.erpcenter.dal.basic.po.DicInfo> brandList = brandResult.getBrandList();
         
@@ -424,43 +428,22 @@ public class ComponentController extends BaseController {
 	}
 	@RequestMapping("productList.do")
 	public String productQueryList(HttpServletRequest request,HttpServletResponse response,ModelMap model,ProductInfo productInfo,String productName, Integer page,Integer pageSize){
-		PageBean pageBean = new PageBean();
-		if (page==null) {
-			page=1;
-		}
-		if(pageSize==null){
-			pageBean.setPageSize(Constants.PAGESIZE);
-		}else{
-			pageBean.setPageSize(pageSize);
-		}
-
-		pageBean.setParameter(productInfo);
-		pageBean.setPage(page);
-		Map parameters=new HashMap();
-		parameters.put("bizId", WebUtils.getCurBizId(request));
-		parameters.put("name", null);
-		parameters.put("productName", productName);
-		parameters.put("orgId", WebUtils.getCurUser(request).getOrgId());
-		parameters.put("set", WebUtils.getDataUserIdSet(request));
-	
-		pageBean = productInfoService.findProductInfos(pageBean, parameters);
-
-		//pageBean = productInfoService.findProductInfos(pageBean, WebUtils.getCurBizId(request),null, productName,WebUtils.getCurUser(request).getOrgId());
-
-//		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
-//		for(Object product : pageBean.getResult()){
-//			ProductInfo info = (ProductInfo) product;
-//			Integer productId = info.getId();
-//			String state = productInfoService.getProductPriceState(productId);
-//			priceStateMap.put(info.getId(), state);
-//		}
-		//model.addAttribute("allProvince",allProvince);
-		//model.addAttribute("brandList", brandList);
-		model.addAttribute("page", pageBean);
-		model.addAttribute("pageNum", page);
-		//model.addAttribute("priceStateMap", priceStateMap);
-		return "component/product/product-list-single-table";
 		
+		ComponentProductListDTO componentProductListDTO = new ComponentProductListDTO();
+		com.yimayhd.erpcenter.dal.product.po.ProductInfo info = new com.yimayhd.erpcenter.dal.product.po.ProductInfo();
+		org.springframework.beans.BeanUtils.copyProperties(productInfo, info);
+		info.setBizId(WebUtils.getCurBizId(request));
+		componentProductListDTO.setProductInfo(info);
+		
+		componentProductListDTO.setName(null);
+		componentProductListDTO.setProductName(productName);
+		componentProductListDTO.setOrgId(WebUtils.getCurUser(request).getOrgId());
+		componentProductListDTO.setSet(WebUtils.getDataUserIdSet(request));
+		ComponentProductListResult result = productFacade.componentProductQueryList(componentProductListDTO);
+		
+		model.addAttribute("page", result.getPage());
+		model.addAttribute("pageNum", result.getPageNum());
+		return "component/product/product-list-single-table";
 	}
 	
 	@RequestMapping(value="/productSupplierList.htm")
