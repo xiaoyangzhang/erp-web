@@ -274,7 +274,7 @@ public class ProductSalesController extends BaseController {
     	List<ProductGroup> productGroups = productGroupService.selectProductGroupsBySellerId(productId,WebUtils.getCurUserId(request));
     	model.addAttribute("productGroupSuppliers", productGroups);
     	model.addAttribute("productId",productId);
-    	ProductInfo info = productInfoService.findProductInfoById(productId);
+    	com.yihg.product.po.ProductInfo info = productInfoService.findProductInfoById(productId);
     	if(info.getObligate()==null){
     		info.setObligate(0);
     	}    	
