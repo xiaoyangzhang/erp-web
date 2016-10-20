@@ -284,19 +284,19 @@
 		version="1.0.0" owner="ge"/> -->
 		
 	<dubbo:reference id="productFacade"
-		interface="com.yimayhd.erpcenter.facade.service.ProductFacade" owner="wj" version="1.0.0.test"
+		interface="com.yimayhd.erpcenter.facade.service.ProductFacade" owner="wj" version="1.0.0.testwj"
 		timeout="8000" />
 	<dubbo:reference id="productPricePlusFacade"
-		interface="com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade" owner="wj" version="1.0.0.test"
+		interface="com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade" owner="wj" version="1.0.0.testwj"
 		timeout="8000" />
 	<dubbo:reference id="productStockFacade"
-		interface="com.yimayhd.erpcenter.facade.service.ProductStockFacade" owner="wj" version="1.0.0.test"
+		interface="com.yimayhd.erpcenter.facade.service.ProductStockFacade" owner="wj" version="1.0.0.testwj"
 		timeout="8000" />
 	<dubbo:reference id="productUpAndDownFrameFacade"
-		interface="com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade" owner="wj" version="1.0.0.test"
+		interface="com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade" owner="wj" version="1.0.0.testwj"
 		timeout="8000" />
 	<dubbo:reference id="productCommonFacade"
-		interface="org.erpcenterFacade.common.client.service.ProductCommonFacade" owner="wj" version="1.0.0.test"
+		interface="org.erpcenterFacade.common.client.service.ProductCommonFacade" owner="wj" version="1.0.0.testwj"
 		timeout="8000" />
 		
 		

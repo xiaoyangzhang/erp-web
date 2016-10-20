@@ -24,6 +24,10 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.facade.query.ToSearchListStateDTO;
+import com.yimayhd.erpcenter.facade.result.ToSearchListStateResult;
+import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -91,12 +95,12 @@ import com.yihg.product.po.ProductInfo;
 import com.yihg.product.po.ProductRemark;
 import com.yihg.product.po.ProductRoute;
 import com.yihg.product.vo.ProductGroupSupplierVo;
-import com.yihg.product.vo.ProductRouteVo;
 import com.yihg.product.vo.StockStaticCondition;
 import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
 import com.yihg.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.dal.product.vo.ProductInfoVo;
+import com.yimayhd.erpcenter.dal.product.vo.ProductRouteVo;
 import com.yimayhd.erpcenter.facade.query.ProductPriceListDTO;
 import com.yimayhd.erpcenter.facade.query.ProductSaveDTO;
 import com.yimayhd.erpcenter.facade.query.ToSearchListStateDTO;
@@ -889,11 +893,16 @@ public class ProductInfoController extends BaseController {
 	@ResponseBody
 	public String save(HttpServletRequest request, ProductInfoVo info, ProductRouteVo productRouteVo) {
 		ProductSaveDTO productSaveDTO = new ProductSaveDTO();
+		// 默认把自己单位加上
+		Set<Integer> orgIdSet = new HashSet<Integer>();
+		orgIdSet.add(WebUtils.getCurUser(request).getOrgId());
+		info.setOrgIdSet(orgIdSet);
 		productSaveDTO.setProductInfoVo(info);
 		productSaveDTO.setBizId(WebUtils.getCurBizId(request));
 		productSaveDTO.setCreateId(WebUtils.getCurUserId(request));
 		productSaveDTO.setCreateName(WebUtils.getCurUser(request).getName());
 		productSaveDTO.setBizCode(bizSettingCommon.getMyBizCode(request));
+		productSaveDTO.setProductRouteVo(productRouteVo);
 		int id = productFacade.saveBasicInfo(productSaveDTO);
 		
 		return id > 0 ? successJson("id", id + "") : errorJson("操作失败！");
