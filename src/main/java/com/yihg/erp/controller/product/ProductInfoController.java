@@ -24,10 +24,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.yimayhd.erpcenter.facade.query.ToSearchListStateDTO;
-import com.yimayhd.erpcenter.facade.result.ToSearchListStateResult;
-import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -93,7 +89,6 @@ import com.yihg.product.po.ProductGroupSeller;
 import com.yihg.product.po.ProductGroupSupplier;
 import com.yihg.product.po.ProductInfo;
 import com.yihg.product.po.ProductRemark;
-import com.yihg.product.po.ProductRight;
 import com.yihg.product.po.ProductRoute;
 import com.yihg.product.vo.ProductGroupSupplierVo;
 import com.yihg.product.vo.ProductRouteVo;
@@ -101,15 +96,17 @@ import com.yihg.product.vo.StockStaticCondition;
 import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
 import com.yihg.sys.po.PlatformEmployeePo;
-import com.yihg.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.dal.product.vo.ProductInfoVo;
 import com.yimayhd.erpcenter.facade.query.ProductPriceListDTO;
 import com.yimayhd.erpcenter.facade.query.ProductSaveDTO;
+import com.yimayhd.erpcenter.facade.query.ToSearchListStateDTO;
 import com.yimayhd.erpcenter.facade.result.ProductPriceListResult;
 import com.yimayhd.erpcenter.facade.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.result.ToProductAddResult;
+import com.yimayhd.erpcenter.facade.result.ToSearchListStateResult;
 import com.yimayhd.erpcenter.facade.result.WebResult;
 import com.yimayhd.erpcenter.facade.service.ProductFacade;
+import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
 
 
 /**
@@ -779,6 +776,9 @@ public class ProductInfoController extends BaseController {
 		 * priceStateMap.put(info.getId(), state); }
 		 */
 		ToSearchListStateDTO toSearchListStateDTO = new ToSearchListStateDTO();
+		com.yimayhd.erpcenter.dal.product.po.ProductInfo info = new com.yimayhd.erpcenter.dal.product.po.ProductInfo();
+		BeanUtils.copyProperties(productInfo, info);
+		toSearchListStateDTO.setProductInfo(info);
 		toSearchListStateDTO.setBizId(bizId);
 		ToSearchListStateResult toSearchListStateResult = productUpAndDownFrameFacade.toSearchListState(toSearchListStateDTO);
 		model.addAttribute("allProvince", toSearchListStateResult.getAllProvince());
