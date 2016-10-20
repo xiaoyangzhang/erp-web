@@ -330,14 +330,14 @@ public class ProductSalesController extends BaseController {
 //    	ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(id);
 //        ProductRouteVo productRouteVo = productRouteService.findByProductId(id);
 //		ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(id);
-    //	ProductInfoResult result = productFacade.toProductPreview(id);
+    	ProductInfoResult result = productFacade.toProductPreview(id);
 
-		DetailDTO detailDTO = new DetailDTO();
-		detailDTO.setId(id);
-		DetailResult detailResult = productUpAndDownFrameFacade.detail(detailDTO);
-		model.addAttribute("productInfoVo", detailResult.getProductInfoVo());
-        model.addAttribute("productRouteVo", detailResult.getProductRouteVo());
-        model.addAttribute("productRemark", detailResult.getProductRemark());
+//		DetailDTO detailDTO = new DetailDTO();
+//		detailDTO.setId(id);
+//		DetailResult detailResult = productUpAndDownFrameFacade.detail(detailDTO);
+		model.addAttribute("productInfoVo", result.getProductInfoVo());
+        model.addAttribute("productRouteVo", result.getProductRouteVo());
+        model.addAttribute("productRemark", result.getProductRemark());
         model.addAttribute("config", config);
         return "product/priceplus/product_detail";
     }

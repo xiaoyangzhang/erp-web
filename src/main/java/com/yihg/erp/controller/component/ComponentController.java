@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.erpcenterFacade.common.client.query.BrandQueryDTO;
+import org.erpcenterFacade.common.client.result.BrandQueryResult;
+import org.erpcenterFacade.common.client.result.RegionResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +36,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.yihg.basic.api.DicService;
 import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
 import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.controller.images.utils.DateUtil;
@@ -216,7 +217,10 @@ public class ComponentController extends BaseController {
 	@RequestMapping("supplierList.htm")
 	public String supplierList(HttpServletRequest request,HttpServletResponse reponse, ModelMap model,
 			SupplierInfo supplierInfo,String type){
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+				
+		RegionResult provinceResult = productCommonFacade.queryProvinces();
+		List<com.yimayhd.erpcenter.dal.basic.po.RegionInfo> allProvince = provinceResult.getRegionList();
+		
 		model.addAttribute("allProvince", allProvince);
 		// 根据供应商类型查询当前登录商家所属的供应商
 		model.addAttribute("supplierInfo", supplierInfo);
@@ -402,9 +406,15 @@ public class ComponentController extends BaseController {
 		 //省市
         //List<RegionInfo> allProvince = regionService.getAllProvince();
         //产品名称
-        Integer bizId = WebUtils.getCurBizId(request);
-        List<DicInfo> brandList = dicService
-                .getListByTypeCode(BasicConstants.CPXL_PP,bizId);
+		
+		Integer bizId = WebUtils.getCurBizId(request);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		
+        
+        BrandQueryResult brandResult = productCommonFacade.brandQuery(brandQueryDTO);;
+        List<com.yimayhd.erpcenter.dal.basic.po.DicInfo> brandList = brandResult.getBrandList();
+        
        //model.addAttribute("allProvince",allProvince);
         model.addAttribute("brandList", brandList);
         model.addAttribute("state", productInfo.getState());
