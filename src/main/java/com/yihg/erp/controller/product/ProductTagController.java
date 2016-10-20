@@ -1,48 +1,25 @@
 package com.yihg.erp.controller.product;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.erp.aop.RequiresPermissions;
-import com.yihg.erp.contant.PermissionConstants;
-import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.utils.WebUtils;
-import com.yihg.product.api.ProductTagService;
-import com.yihg.product.constants.Constants;
-import com.yihg.product.po.ProductTag;
-import com.yihg.product.vo.DictWithSelectInfoVo;
-import com.yimayhd.erpcenter.dal.product.vo.ProductTagVo;
-import com.yimayhd.erpcenter.facade.query.ProductTagDTO;
-import com.yimayhd.erpcenter.facade.result.ToProductTagResult;
-import com.yimayhd.erpcenter.facade.service.ProductFacade;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import static com.yihg.product.constants.Constants.PRODUCT_TAG_ATTEND_METHOD;
-import static com.yihg.product.constants.Constants.PRODUCT_TAG_DAYS_PERIOD;
-import static com.yihg.product.constants.Constants.PRODUCT_TAG_HOTEL_LEVEL;
-import static com.yihg.product.constants.Constants.PRODUCT_TAG_LINE_LEVEL;
-import static com.yihg.product.constants.Constants.PRODUCT_TAG_LINE_THEME;
-import static com.yihg.product.constants.Constants.PRODUCT_TAG_PRICE_RANGE;
-import static com.yihg.product.constants.Constants.PRODUCT_TAG_EXIT_DESTINATION;
-import static com.yihg.product.constants.Constants.PRODUCT_TAG_DOMESTIC_DESTINATION;
-import static com.yihg.product.constants.Constants.PRODUCT_TAG_TYPE;
+import com.alibaba.fastjson.JSONObject;
+import com.yihg.basic.api.DicService;
+import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.utils.WebUtils;
+import com.yihg.product.api.ProductTagService;
+import com.yimayhd.erpcenter.dal.product.vo.ProductTagVo;
+import com.yimayhd.erpcenter.facade.query.ProductTagDTO;
+import com.yimayhd.erpcenter.facade.result.ToProductTagResult;
+import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
 /**
  * Created by ZhengZiyu on 2015/7/2.
@@ -63,12 +40,13 @@ public class ProductTagController extends BaseController{
     // @RequiresPermissions(PermissionConstants.PRODUCT_LIST)
     public String viewTag(HttpServletRequest request,Model model, @RequestParam("productId") String productId) {
     	
-    	Integer bizId = WebUtils.getCurBizId(request);
+    	int bizId = WebUtils.getCurBizId(request);
     	int id = 0;
     	if (StringUtils.isNotBlank(productId)) {
 			id = Integer.parseInt(productId);
 		}
         ToProductTagResult result = productFacade.toProductTags(id, bizId);
+        System.out.println(result);
     	/*List<DicInfo> lineThemeList = dicService.getListByTypeCode(PRODUCT_TAG_LINE_THEME,bizId);
         List<DicInfo> lineLevelList = dicService.getListByTypeCode(PRODUCT_TAG_LINE_LEVEL,bizId);
         List<DicInfo> attendMethodList = dicService.getListByTypeCode(PRODUCT_TAG_ATTEND_METHOD,bizId);

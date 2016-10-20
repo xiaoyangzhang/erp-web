@@ -165,6 +165,9 @@ public class ComponentController extends BaseController {
 	 */
 	@RequestMapping("orgUserTree.htm")
 	public String orgUserTree(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,String type,String expIds){	
+		if(StringUtils.isBlank(type)){
+			type = "single";
+		}
 		List<Map<String, String>> result = productCommonFacade.orgUserTree(WebUtils.getCurBizId(request), type);
 		model.addAttribute("orgUserJsonStr", JSON.toJSONString(result));
 		model.addAttribute("expIds", expIds);		
