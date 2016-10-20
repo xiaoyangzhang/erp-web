@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.csource.upload.UploadFileUtil;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -67,6 +68,8 @@ public class ImagesSpaceController extends BaseController{
 	private SysConfig sysConfig;
 	@Autowired
 	private TfsUpload tfsUpload;
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
 	
 	@RequestMapping("/images/v_home")
 	public String toIndex(HttpServletRequest request,ImgSpace imgSpace,Model model){
@@ -385,7 +388,7 @@ public class ImagesSpaceController extends BaseController{
 		
 		if(!StringUtils.isEmpty(parentId)){
 			model.addAttribute("parentId", parentId);
-			ImgSpace imgSpace = this.imgSpaceServie.findImgSpaceById(Integer.parseInt(parentId));
+			com.yimayhd.erpcenter.dal.basic.po.ImgSpace imgSpace = productCommonFacade.toUploadPage(Integer.parseInt(parentId));
 			if(null!=imgSpace){				
 				model.addAttribute("location", imgSpace.getImgName());
 			}

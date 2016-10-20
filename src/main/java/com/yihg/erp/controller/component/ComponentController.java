@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.erpcenterFacade.common.client.query.BrandQueryDTO;
+import org.erpcenterFacade.common.client.result.BrandQueryResult;
+import org.erpcenterFacade.common.client.result.RegionResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +36,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.yihg.basic.api.DicService;
 import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
 import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.controller.images.utils.DateUtil;
@@ -63,6 +64,9 @@ import com.yihg.supplier.po.SupplierInfo;
 import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
 import com.yihg.sys.po.PlatformOrgPo;
+import com.yimayhd.erpcenter.facade.query.ComponentProductListDTO;
+import com.yimayhd.erpcenter.facade.result.ComponentProductListResult;
+import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
 @Controller
 @RequestMapping("/component")
@@ -97,6 +101,8 @@ public class ComponentController extends BaseController {
 	private ProductStockService stockService;
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
+	@Autowired
+	private ProductFacade productFacade;
 	
 	@RequestMapping("example.htm")
 	public String example(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,String type){	
@@ -165,6 +171,9 @@ public class ComponentController extends BaseController {
 	 */
 	@RequestMapping("orgUserTree.htm")
 	public String orgUserTree(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,String type,String expIds){	
+		if(StringUtils.isBlank(type)){
+			type = "single";
+		}
 		List<Map<String, String>> result = productCommonFacade.orgUserTree(WebUtils.getCurBizId(request), type);
 		model.addAttribute("orgUserJsonStr", JSON.toJSONString(result));
 		model.addAttribute("expIds", expIds);		
@@ -213,7 +222,10 @@ public class ComponentController extends BaseController {
 	@RequestMapping("supplierList.htm")
 	public String supplierList(HttpServletRequest request,HttpServletResponse reponse, ModelMap model,
 			SupplierInfo supplierInfo,String type){
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+				
+		RegionResult provinceResult = productCommonFacade.queryProvinces();
+		List<com.yimayhd.erpcenter.dal.basic.po.RegionInfo> allProvince = provinceResult.getRegionList();
+		
 		model.addAttribute("allProvince", allProvince);
 		// 根据供应商类型查询当前登录商家所属的供应商
 		model.addAttribute("supplierInfo", supplierInfo);
@@ -399,9 +411,14 @@ public class ComponentController extends BaseController {
 		 //省市
         //List<RegionInfo> allProvince = regionService.getAllProvince();
         //产品名称
-        Integer bizId = WebUtils.getCurBizId(request);
-        List<DicInfo> brandList = dicService
-                .getListByTypeCode(BasicConstants.CPXL_PP,bizId);
+		
+		Integer bizId = WebUtils.getCurBizId(request);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		
+        BrandQueryResult brandResult = productCommonFacade.brandQuery(brandQueryDTO);;
+        List<com.yimayhd.erpcenter.dal.basic.po.DicInfo> brandList = brandResult.getBrandList();
+        
        //model.addAttribute("allProvince",allProvince);
         model.addAttribute("brandList", brandList);
         model.addAttribute("state", productInfo.getState());
@@ -411,43 +428,22 @@ public class ComponentController extends BaseController {
 	}
 	@RequestMapping("productList.do")
 	public String productQueryList(HttpServletRequest request,HttpServletResponse response,ModelMap model,ProductInfo productInfo,String productName, Integer page,Integer pageSize){
-		PageBean pageBean = new PageBean();
-		if (page==null) {
-			page=1;
-		}
-		if(pageSize==null){
-			pageBean.setPageSize(Constants.PAGESIZE);
-		}else{
-			pageBean.setPageSize(pageSize);
-		}
-
-		pageBean.setParameter(productInfo);
-		pageBean.setPage(page);
-		Map parameters=new HashMap();
-		parameters.put("bizId", WebUtils.getCurBizId(request));
-		parameters.put("name", null);
-		parameters.put("productName", productName);
-		parameters.put("orgId", WebUtils.getCurUser(request).getOrgId());
-		parameters.put("set", WebUtils.getDataUserIdSet(request));
-	
-		pageBean = productInfoService.findProductInfos(pageBean, parameters);
-
-		//pageBean = productInfoService.findProductInfos(pageBean, WebUtils.getCurBizId(request),null, productName,WebUtils.getCurUser(request).getOrgId());
-
-//		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
-//		for(Object product : pageBean.getResult()){
-//			ProductInfo info = (ProductInfo) product;
-//			Integer productId = info.getId();
-//			String state = productInfoService.getProductPriceState(productId);
-//			priceStateMap.put(info.getId(), state);
-//		}
-		//model.addAttribute("allProvince",allProvince);
-		//model.addAttribute("brandList", brandList);
-		model.addAttribute("page", pageBean);
-		model.addAttribute("pageNum", page);
-		//model.addAttribute("priceStateMap", priceStateMap);
-		return "component/product/product-list-single-table";
 		
+		ComponentProductListDTO componentProductListDTO = new ComponentProductListDTO();
+		com.yimayhd.erpcenter.dal.product.po.ProductInfo info = new com.yimayhd.erpcenter.dal.product.po.ProductInfo();
+		org.springframework.beans.BeanUtils.copyProperties(productInfo, info);
+		info.setBizId(WebUtils.getCurBizId(request));
+		componentProductListDTO.setProductInfo(info);
+		
+		componentProductListDTO.setName(null);
+		componentProductListDTO.setProductName(productName);
+		componentProductListDTO.setOrgId(WebUtils.getCurUser(request).getOrgId());
+		componentProductListDTO.setSet(WebUtils.getDataUserIdSet(request));
+		ComponentProductListResult result = productFacade.componentProductQueryList(componentProductListDTO);
+		
+		model.addAttribute("page", result.getPage());
+		model.addAttribute("pageNum", result.getPageNum());
+		return "component/product/product-list-single-table";
 	}
 	
 	@RequestMapping(value="/productSupplierList.htm")
