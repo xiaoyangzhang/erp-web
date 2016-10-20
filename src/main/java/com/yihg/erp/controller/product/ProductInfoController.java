@@ -943,7 +943,7 @@ public class ProductInfoController extends BaseController {
 //				.findProductInfos(productId);
 		WebResult<Map<String, Object>> webResult = productFacade.toExportProduct(productId);
 		path = createProductInfo(preivew, request, productId, webResult.getValue());
-		ProductInfo productInfo = (ProductInfo) webResult.getValue().get("productInfo");
+		com.yimayhd.erpcenter.dal.product.po.ProductInfo productInfo = (com.yimayhd.erpcenter.dal.product.po.ProductInfo) webResult.getValue().get("productInfo");
 		if (productInfo != null) {
 			productCode = productInfo.getCode();
 		}
@@ -1062,13 +1062,13 @@ public class ProductInfoController extends BaseController {
 			String type) {
 		PlatformEmployeePo employeePo = WebUtils.getCurUser(request);
 
-		ProductInfo productInfo = (ProductInfo) map.get("productInfo");
-		ProductRemark productRemark = (ProductRemark) map.get("productRemark");
+		com.yimayhd.erpcenter.dal.product.po.ProductInfo productInfo = (com.yimayhd.erpcenter.dal.product.po.ProductInfo) map.get("productInfo");
+		com.yimayhd.erpcenter.dal.product.po.ProductRemark productRemark = (com.yimayhd.erpcenter.dal.product.po.ProductRemark) map.get("productRemark");
 		if (productRemark == null) {
-			productRemark = new ProductRemark();
+			productRemark = new com.yimayhd.erpcenter.dal.product.po.ProductRemark();
 		}
 		@SuppressWarnings("unchecked")
-		List<ProductRoute> productRouteList = (List<ProductRoute>) map
+		List<com.yimayhd.erpcenter.dal.product.po.ProductRoute> productRouteList = (List<com.yimayhd.erpcenter.dal.product.po.ProductRoute>) map
 				.get("productRoutes");
 
 		// request);
