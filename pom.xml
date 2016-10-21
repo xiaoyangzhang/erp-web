@@ -8,10 +8,10 @@
 		<version>1.0.0</version>
 		<relativePath></relativePath>
 	</parent>
-	<artifactId>yihg-erp-web</artifactId>
+	<artifactId>erp-web</artifactId>
 	<packaging>war</packaging>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>yihg-erp-web Maven Webapp</name>
+	<name>erp-web Maven Webapp</name>
 	<url>http://maven.apache.org</url>
 
 	<!-- <profiles> <profile> <id>dev</id> <activation> <activeByDefault>true</activeByDefault> 
@@ -482,7 +482,7 @@
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-common-client</artifactId>
 			<version>0.0.6-SNAPSHOT</version>
-		</dependency>
+		</dependency> 
 
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
