@@ -186,7 +186,84 @@ public class ProductInfoController extends BaseController {
 		model.addAttribute("state", productInfo.getState());
 		return "product/product_list";
 	}
+	/**
+	 * 
+	* created by zhangxiaoyang
+	* @date 2016年10月20日
+	* @Description:产品列表数据
+	* @param 
+	* @return String
+	* @throws
+	 */
+	@RequestMapping(value = "/productList.do")
+	@RequiresPermissions(PermissionConstants.PRODUCT_LIST)
+	public String toSearchList(HttpServletRequest request, ModelMap model,
+			ProductInfo productInfo, String productName, String name,
+			Integer page, Integer pageSize) {
+		// 省市
+		//List<RegionInfo> allProvince = regionService.getAllProvince();
+		RegionResult regionResult = productCommonFacade.queryProvinces();
+		// 产品名称
+		Integer bizId = WebUtils.getCurBizId(request);
+//		List<DicInfo> brandList = dicService.getListByTypeCode(
+//				BasicConstants.CPXL_PP, bizId);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
+		if (page == null) {
+			page = 1;
+		}
+		PageBean pageBean = new PageBean();
+		if (pageSize == null) {
+			pageBean.setPageSize(Constants.PAGESIZE);
+		} else {
+			pageBean.setPageSize(pageSize);
+		}
+		/*if (StringUtils.isBlank(productInfo.getOperatorIds())
+				&& StringUtils.isNotBlank(productInfo.getOrgIds())) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = productInfo.getOrgIds().split(",");
+			for (String orgIdStr : orgIdArr) {
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = platformEmployeeService.getUserIdListByOrgIdList(
+					WebUtils.getCurBizId(request), set);
+			String salesOperatorIds = "";
+			for (Integer usrId : set) {
+				salesOperatorIds += usrId + ",";
+			}
+			if (!salesOperatorIds.equals("")) {
+				productInfo.setOperatorIds(salesOperatorIds.substring(0,
+						salesOperatorIds.length() - 1));
+			}
+		}*/
+		productInfo.setOperatorIds(productCommonFacade.
+				setSaleOperatorIds(productInfo.getOperatorIds(), productInfo.getOrgIds(), bizId));
+		pageBean.setParameter(productInfo);
+		pageBean.setPage(page);
+		Map parameters = new HashMap();
+		parameters.put("bizId", bizId);
+		parameters.put("name", name);
+		parameters.put("productName", productName);
+		parameters.put("orgId", WebUtils.getCurUser(request).getOrgId());
+		parameters.put("set", WebUtils.getDataUserIdSet(request));
+		WebResult<PageBean<com.yimayhd.erpcenter.dal.product.po.ProductInfo>> webResult = productFacade.selectProductList(pageBean, parameters);
 
+		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
+		/*
+		 * for (Object product : pageBean.getResult()) { ProductInfo info =
+		 * (ProductInfo) product; Integer productId = info.getId(); String state
+		 * = productInfoService.getProductPriceState(productId);
+		 * priceStateMap.put(info.getId(), state); }
+		 */
+		model.addAttribute("allProvince", regionResult.getRegionList());
+		model.addAttribute("brandList", brandQueryResult.getBrandList());
+		model.addAttribute("page", webResult.getValue());
+		model.addAttribute("pageNum", page);
+		model.addAttribute("priceStateMap", priceStateMap);
+		model.addAttribute("priceMode", getPriceMode(request));
+		return "product/product_list_table";
+	}
 	/**
 	 * @author : xuzejun
 	 * @date : 2015年7月1日 下午3:10:12
@@ -648,75 +725,7 @@ public class ProductInfoController extends BaseController {
 	}
 	
 	
-	@RequestMapping(value = "/productList.do")
-	@RequiresPermissions(PermissionConstants.PRODUCT_LIST)
-	public String toSearchList(HttpServletRequest request, ModelMap model,
-			ProductInfo productInfo, String productName, String name,
-			Integer page, Integer pageSize) {
-		// 省市
-		//List<RegionInfo> allProvince = regionService.getAllProvince();
-		RegionResult regionResult = productCommonFacade.queryProvinces();
-		// 产品名称
-		Integer bizId = WebUtils.getCurBizId(request);
-//		List<DicInfo> brandList = dicService.getListByTypeCode(
-//				BasicConstants.CPXL_PP, bizId);
-		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
-		brandQueryDTO.setBizId(bizId);
-		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
-		if (page == null) {
-			page = 1;
-		}
-		PageBean pageBean = new PageBean();
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
-		}
-		/*if (StringUtils.isBlank(productInfo.getOperatorIds())
-				&& StringUtils.isNotBlank(productInfo.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = productInfo.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				productInfo.setOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}*/
-		productInfo.setOperatorIds(productCommonFacade.
-				setSaleOperatorIds(productInfo.getOperatorIds(), productInfo.getOrgIds(), bizId));
-		pageBean.setParameter(productInfo);
-		pageBean.setPage(page);
-		Map parameters = new HashMap();
-		parameters.put("bizId", bizId);
-		parameters.put("name", name);
-		parameters.put("productName", productName);
-		parameters.put("orgId", WebUtils.getCurUser(request).getOrgId());
-		parameters.put("set", WebUtils.getDataUserIdSet(request));
-		WebResult<PageBean<com.yimayhd.erpcenter.dal.product.po.ProductInfo>> webResult = productFacade.selectProductList(pageBean, parameters);
-
-		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
-		/*
-		 * for (Object product : pageBean.getResult()) { ProductInfo info =
-		 * (ProductInfo) product; Integer productId = info.getId(); String state
-		 * = productInfoService.getProductPriceState(productId);
-		 * priceStateMap.put(info.getId(), state); }
-		 */
-		model.addAttribute("allProvince", regionResult.getRegionList());
-		model.addAttribute("brandList", brandQueryResult.getBrandList());
-		model.addAttribute("page", webResult.getValue());
-		model.addAttribute("pageNum", page);
-		model.addAttribute("priceStateMap", priceStateMap);
-		model.addAttribute("priceMode", getPriceMode(request));
-		return "product/product_list_table";
-	}
+	
 
 	@RequestMapping(value = "/productStateList.do")
 	@RequiresPermissions(PermissionConstants.PRODUCT_SHELF)
