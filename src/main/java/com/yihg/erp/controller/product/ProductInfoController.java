@@ -787,12 +787,14 @@ public class ProductInfoController extends BaseController {
 		ToSearchListStateDTO toSearchListStateDTO = new ToSearchListStateDTO();
 		com.yimayhd.erpcenter.dal.product.po.ProductInfo info = new com.yimayhd.erpcenter.dal.product.po.ProductInfo();
 		BeanUtils.copyProperties(productInfo, info);
+		info.setBizId(bizId);
 		toSearchListStateDTO.setProductInfo(info);
 		toSearchListStateDTO.setBizId(bizId);
 		toSearchListStateDTO.setPage(page);
 		toSearchListStateDTO.setPageSize(pageSize);
 		toSearchListStateDTO.setName(name);
 		toSearchListStateDTO.setProductName(productName);
+		toSearchListStateDTO.setOrgId(WebUtils.getCurUser(request).getOrgId());
 		ToSearchListStateResult toSearchListStateResult = productUpAndDownFrameFacade.toSearchListState(toSearchListStateDTO);
 		model.addAttribute("allProvince", toSearchListStateResult.getAllProvince());
 		model.addAttribute("brandList", toSearchListStateResult.getBrandList());
@@ -815,14 +817,20 @@ public class ProductInfoController extends BaseController {
 		BeanUtils.copyProperties(productInfo, info);
 		info.setBizId(WebUtils.getCurBizId(request));
 		
+		
 		productPriceListDTO.setProductInfo(info);
 		productPriceListDTO.setProductName(productName);
 		productPriceListDTO.setName(name);
+		productPriceListDTO.setOrgId(WebUtils.getCurUser(request).getOrgId());
 		if(page != null){
 			productPriceListDTO.setPage(page.intValue());
+		}else{
+			productPriceListDTO.setPage(0);
 		}
 		if(pageSize != null){
 			productPriceListDTO.setPageSize(pageSize.intValue());
+		}else{
+			productPriceListDTO.setPageSize(0);
 		}
 		
 		ProductPriceListResult result = productFacade.productPriceList(productPriceListDTO);
