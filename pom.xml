@@ -481,7 +481,7 @@
 		 <dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-common-client</artifactId>
-			<version></version>
+			<version>0.0.7-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
