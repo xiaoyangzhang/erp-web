@@ -87,7 +87,7 @@
 		<updateReleaseInfo>true</updateReleaseInfo>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<facade-product-client.version>0.0.6-SNAPSHOT</facade-product-client.version>
-		<facade-common-client.version>0.0.7-SNAPSHOT</facade-common-client.version>
+		<facade-common-client.version>0.0.6-SNAPSHOT</facade-common-client.version>
 	</properties>
 
 	<dependencies>
@@ -481,29 +481,29 @@
 		 <dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-common-client</artifactId>
-			<version></version>
+			<version>0.0.6-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-product-client</artifactId>
-			<version>0.0.7-SNAPSHOT</version>
+			<version>0.0.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterDAL-product-client</artifactId>
-			<version>0.0.7-SNAPSHOT</version>
+			<version>0.0.6-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-sys-client</artifactId>
-			<version>0.0.7-SNAPSHOT</version>
+			<version>0.0.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterDAL-sys-client</artifactId>
-			<version>0.0.7-SNAPSHOT</version>
+			<version>0.0.6-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>
