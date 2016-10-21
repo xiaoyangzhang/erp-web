@@ -52,7 +52,9 @@ public class ImageComponentController extends BaseController  {
 	public String imgList(HttpServletRequest request,@RequestParam("imgId")Integer imgId,String name, String sortFileds,String order,Model model){
 		List<ImgSpace> result = productCommonFacade.imgList(WebUtils.getCurBizId(request), imgId, name, sortFileds, order);
 		model.addAttribute("list", result);
-		
+		//显示图片的小图和原图的服务器地址
+		model.addAttribute("images_source", config.getImgServerUrl());
+		model.addAttribute("images_200", config.getImages200Url());
 		return "component/images/image-list";
 	}
 }
