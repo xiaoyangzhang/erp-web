@@ -276,6 +276,7 @@ public class ProductPricePlusController extends BaseController {
 	 */
 	@RequestMapping("copyProduct.do")
 	@ResponseBody
+	@Deprecated
 	public String copyProduct(HttpServletRequest request,HttpServletResponse response,ModelMap model,String data,Integer productId){
 		
 		ResultSupport result = productPricePlusFacade.copyProduct(data, productId);
