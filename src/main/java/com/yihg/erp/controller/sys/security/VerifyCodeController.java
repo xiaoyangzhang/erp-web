@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.util.Random;
 
 import javax.imageio.ImageIO;

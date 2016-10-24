@@ -136,13 +136,13 @@ import com.yihg.supplier.po.SupplierGuide;
 import com.yihg.supplier.po.SupplierImg;
 import com.yihg.supplier.po.SupplierImgType;
 import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
 import com.yihg.sys.api.SysBizBankAccountService;
-import com.yihg.sys.po.PlatformEmployeePo;
 import com.yihg.sys.po.SysBizBankAccount;
 import com.yihg.travel.api.TravelHistoryRouteService;
 import com.yihg.travel.po.TravelHistoryRoute;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 
 @Controller
 @RequestMapping(value = "/tourGroup")
@@ -181,7 +181,8 @@ public class TourGroupController extends BaseController {
 	@Autowired
 	private DicService dicService;
 	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
+	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
+//	private sysPlatformEmployeeFacade sysPlatformEmployeeFacade;
 
 	@Autowired
 	private PlatformOrgService orgService;
@@ -227,7 +228,7 @@ public class TourGroupController extends BaseController {
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
 		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
+		model.addAttribute("orgUserJsonStr", sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
 	}
 	/**
 	 * 变更团
@@ -419,7 +420,7 @@ public class TourGroupController extends BaseController {
 
 		List<Customer> customerList = new ArrayList<Customer>();
 
-		// PlatformEmployeePo user = platformEmployeeService
+		// PlatformEmployeePo user = sysPlatformEmployeeFacade
 		// .findByEmployeeId(tourGroup.getOperatorId());
 		// Customer ct = new Customer();
 		// ct.setName(user.getName());
@@ -1241,11 +1242,11 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
 		return "sales/tourGroup/groupList";
 	}
 
@@ -1289,7 +1290,7 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
 
 		return url;
 	}
@@ -1313,7 +1314,7 @@ public class TourGroupController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
 					WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
@@ -1575,8 +1576,8 @@ public class TourGroupController extends BaseController {
 		map0.put("contact_fax", groupOrder.getContactFax());
 		// 发件方信息（定制团显示为销售）
 		// 销售计调的组织机构信息
-		PlatformEmployeePo employee = platformEmployeeService
-				.findByEmployeeId(groupOrder.getSaleOperatorId());
+		PlatformEmployeePo employee = sysPlatformEmployeeFacade
+				.findByEmployeeId(groupOrder.getSaleOperatorId()).getPlatformEmployeePo();
 		map0.put("company", orgService.findByOrgId(employee.getOrgId())
 				.getName()); // 当前单位
 		map0.put("user_name", employee.getName());
@@ -1956,8 +1957,8 @@ public class TourGroupController extends BaseController {
 		SupplierInfo supplier = supplierService.selectBySupplierId(groupOrder
 				.getSupplierId());
 
-		PlatformEmployeePo employee = platformEmployeeService
-				.findByEmployeeId(groupOrder.getSaleOperatorId());
+		PlatformEmployeePo employee = sysPlatformEmployeeFacade
+				.findByEmployeeId(groupOrder.getSaleOperatorId()).getPlatformEmployeePo();
 
 		String realPath = request.getSession().getServletContext()
 				.getRealPath("/template/sales_confirm_noRoute.docx");
@@ -2588,7 +2589,7 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
 		model.addAttribute("bizId",bizId) ;
 		return "sales/profit/profitQuery";
 	}
@@ -2618,7 +2619,7 @@ public class TourGroupController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
 					WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
@@ -2670,7 +2671,7 @@ public class TourGroupController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
 					WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
@@ -2711,7 +2712,7 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
 		return "sales/profit/profitQueryByTour";
 	}
 
@@ -2733,7 +2734,7 @@ public class TourGroupController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
 					WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
@@ -3120,8 +3121,8 @@ public class TourGroupController extends BaseController {
 		SupplierInfo supplier = supplierService.selectBySupplierId(groupOrder
 				.getSupplierId());
 
-		PlatformEmployeePo employee = platformEmployeeService
-				.findByEmployeeId(groupOrder.getSaleOperatorId());
+		PlatformEmployeePo employee = sysPlatformEmployeeFacade
+				.findByEmployeeId(groupOrder.getSaleOperatorId()).getPlatformEmployeePo();
 
 		List<GroupOrderGuest> guests = groupOrderGuestService
 				.selectByOrderId(orderId);
@@ -3267,8 +3268,8 @@ public class TourGroupController extends BaseController {
 		SupplierInfo supplier = supplierService.selectBySupplierId(groupOrder
 				.getSupplierId());
 
-		PlatformEmployeePo employee = platformEmployeeService
-				.findByEmployeeId(groupOrder.getSaleOperatorId());
+		PlatformEmployeePo employee = sysPlatformEmployeeFacade
+				.findByEmployeeId(groupOrder.getSaleOperatorId()).getPlatformEmployeePo();
 
 		List<GroupOrderGuest> guests = groupOrderGuestService
 				.selectByOrderId(orderId);
@@ -3326,8 +3327,8 @@ public class TourGroupController extends BaseController {
 			Integer groupId, Integer supplierId, Model model) {
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		TourGroup tour = tourGroupService.selectByPrimaryKey(groupId);
-		PlatformEmployeePo po = platformEmployeeService
-				.findByEmployeeId(WebUtils.getCurUserId(request));
+		PlatformEmployeePo po = sysPlatformEmployeeFacade
+				.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
 		po.setOrgName(orgService.findByOrgId(po.getOrgId()).getName());
 		List<GroupOrder> suppliers = groupOrderService
 				.selectSupplierByGroupId(groupId);
@@ -3449,8 +3450,8 @@ public class TourGroupController extends BaseController {
 			Integer groupId, Integer supplierId, Model model) {
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		TourGroup tour = tourGroupService.selectByPrimaryKey(groupId);
-		PlatformEmployeePo po = platformEmployeeService
-				.findByEmployeeId(WebUtils.getCurUserId(request));
+		PlatformEmployeePo po = sysPlatformEmployeeFacade
+				.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
 		po.setOrgName(orgService.findByOrgId(po.getOrgId()).getName());
 		List<GroupOrder> suppliers = groupOrderService
 				.selectSupplierByGroupId(groupId);
@@ -3561,8 +3562,8 @@ public class TourGroupController extends BaseController {
 				+ "/download/" + System.currentTimeMillis() + ".doc";
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		TourGroup tour = tourGroupService.selectByPrimaryKey(groupId);
-		PlatformEmployeePo po = platformEmployeeService
-				.findByEmployeeId(WebUtils.getCurUserId(request));
+		PlatformEmployeePo po = sysPlatformEmployeeFacade
+				.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
 		po.setOrgName(orgService.findByOrgId(po.getOrgId()).getName());
 		List<GroupOrder> suppliers = groupOrderService
 				.selectSupplierByGroupId(groupId);
@@ -3677,8 +3678,8 @@ public class TourGroupController extends BaseController {
 			map0.put("contact_fax", supplier.getContactFax());
 			// 发件方信息（定制团显示为销售）
 			// 销售计调的组织机构信息
-			PlatformEmployeePo employee = platformEmployeeService
-					.findByEmployeeId(WebUtils.getCurUserId(request));
+			PlatformEmployeePo employee = sysPlatformEmployeeFacade
+					.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
 			map0.put("company", orgService.findByOrgId(employee.getOrgId())
 					.getName()); // 当前单位
 			map0.put("user_name", employee.getName());
@@ -3893,7 +3894,7 @@ public class TourGroupController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
 					WebUtils.getCurBizId(request), set);
 			String operatorIds = "";
 			for (Integer usrId : set) {

@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -29,7 +28,6 @@ import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.product.api.TrafficResProductService;
 import com.yihg.product.api.TrafficResService;
 import com.yihg.product.constants.Constants.TRAFFICRES_STOCK_ACTION;
 import com.yihg.product.po.TrafficResStocklog;
@@ -40,8 +38,8 @@ import com.yihg.sales.po.GroupOrder;
 import com.yihg.sales.po.TourGroup;
 import com.yihg.sales.vo.MergeGroupOrderVO;
 import com.yihg.supplier.constants.Constants;
-import com.yihg.sys.po.PlatformEmployeePo;
-import com.yihg.sys.po.UserSession;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.UserSession;
 
 @Controller
 @RequestMapping("/resOrder")

@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,9 +26,6 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.yihg.supplier.api.*;
-import com.yihg.supplier.po.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -37,7 +33,6 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.Region;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,21 +85,25 @@ import com.yihg.sales.api.TourGroupService;
 import com.yihg.sales.po.FinanceBillDetail;
 import com.yihg.sales.po.GroupOrder;
 import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupOrderPrice;
-import com.yihg.sales.po.GroupOrderPrintPo;
-import com.yihg.sales.po.GroupOrderTransport;
 import com.yihg.sales.po.GroupRequirement;
 import com.yihg.sales.po.GroupRoute;
 import com.yihg.sales.po.TourGroup;
 import com.yihg.sales.vo.GroupRouteDayVO;
 import com.yihg.sales.vo.GroupRouteVO;
 import com.yihg.sales.vo.TourGroupVO;
+import com.yihg.supplier.api.ContractService;
+import com.yihg.supplier.api.SupplierImgService;
+import com.yihg.supplier.api.SupplierItemService;
+import com.yihg.supplier.api.SupplierService;
 import com.yihg.supplier.constants.Constants;
-import com.yihg.sys.api.PlatformEmployeeService;
+import com.yihg.supplier.po.SupplierContract;
+import com.yihg.supplier.po.SupplierContractPrice;
+import com.yihg.supplier.po.SupplierInfo;
+import com.yihg.supplier.po.SupplierItem;
 import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.po.PlatformEmployeePo;
-import com.yihg.sys.po.SysBizInfo;
-import com.yihg.sys.po.SysDataRight;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 
 @Controller
 @RequestMapping("/booking")
@@ -145,7 +144,8 @@ public class BookingSupplierController extends BaseController {
 	@Autowired
 	private SupplierItemService itemService;
 	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
+	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
+//	private PlatformEmployeeService platformEmployeeService;
 	@Autowired
 	private FinanceGuideService financeGuideService;
 	@Autowired
@@ -164,7 +164,7 @@ public class BookingSupplierController extends BaseController {
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
 		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
+		model.addAttribute("orgUserJsonStr", sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
 	}
 
 	@RequestMapping("/hotelList.htm")
@@ -340,7 +340,7 @@ public class BookingSupplierController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -773,11 +773,11 @@ public class BookingSupplierController extends BaseController {
 		/**
 		 * 发件方信息 --当前登陆人信息
 		 */
-		PlatformEmployeePo employee = platformEmployeeService.findByEmployeeId(WebUtils.getCurUserId(request));
+		PlatformEmployeePo employee = sysPlatformEmployeeFacade.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
 		model.addAttribute("user_tel", employee.getMobile());
 		
 		//团操作计调
-		PlatformEmployeePo ee = platformEmployeeService.findByEmployeeId(tg.getOperatorId());
+		PlatformEmployeePo ee = sysPlatformEmployeeFacade.findByEmployeeId(tg.getOperatorId()).getPlatformEmployeePo();
 		model.addAttribute("company", orgService.findByOrgId(ee.getOrgId()).getName()); // 当前单位
 		model.addAttribute("user_name", ee.getName());
 		model.addAttribute("user_fax", ee.getFax());
@@ -879,9 +879,9 @@ public class BookingSupplierController extends BaseController {
 		}
 		Map<String, Object> map0 = new HashMap<String, Object>();
 		// 当前登陆人
-		PlatformEmployeePo employee = platformEmployeeService.findByEmployeeId(WebUtils.getCurUserId(request));
+		PlatformEmployeePo employee = sysPlatformEmployeeFacade.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
 		//团操作计调
-		PlatformEmployeePo ee = platformEmployeeService.findByEmployeeId(group.getOperatorId());
+		PlatformEmployeePo ee = sysPlatformEmployeeFacade.findByEmployeeId(group.getOperatorId()).getPlatformEmployeePo();
 		map0.put("company", orgService.findByOrgId(ee.getOrgId()).getName()); // 当前单位
 		map0.put("user_name", ee.getName());
 		map0.put("user_fax", ee.getFax());
@@ -1230,7 +1230,7 @@ public class BookingSupplierController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -1316,7 +1316,7 @@ public class BookingSupplierController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -1372,7 +1372,7 @@ public class BookingSupplierController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -1422,7 +1422,7 @@ public class BookingSupplierController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -1477,7 +1477,7 @@ public class BookingSupplierController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -1532,7 +1532,7 @@ public class BookingSupplierController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -1587,7 +1587,7 @@ public class BookingSupplierController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -1642,7 +1642,7 @@ public class BookingSupplierController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -1697,7 +1697,7 @@ public class BookingSupplierController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -1752,7 +1752,7 @@ public class BookingSupplierController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -1931,7 +1931,7 @@ public class BookingSupplierController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -2635,7 +2635,7 @@ public class BookingSupplierController extends BaseController {
 	@RequestMapping("searchName.htm")
 	@ResponseBody
 	public String searchName(HttpServletRequest request, HttpServletResponse reponse, String userName) {
-		List<PlatformEmployeePo> employee = platformEmployeeService.getEmployeeListByName(WebUtils.getCurBizId(request), userName);
+		List<PlatformEmployeePo> employee = sysPlatformEmployeeFacade.getEmployeeListByName(WebUtils.getCurBizId(request), userName).getPlatformEmployeePos();
 		return JSON.toJSONString(employee);
 		
 	}

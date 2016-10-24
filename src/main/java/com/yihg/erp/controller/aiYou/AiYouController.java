@@ -2,13 +2,10 @@ package com.yihg.erp.controller.aiYou;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.net.URLDecoder;
-import java.security.MessageDigest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +13,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.yihg.erp.common.AiYouOpBillDetailBean;
-import com.yihg.product.api.ProductRouteService;
-import com.yihg.product.po.ProductRoute;
-import com.yihg.sales.po.GroupOrderPrice;
-import com.yihg.sales.po.GroupRoute;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -54,6 +45,7 @@ import com.yihg.basic.contants.BasicConstants;
 import com.yihg.basic.po.DicInfo;
 import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.common.AiYouBean;
+import com.yihg.erp.common.AiYouOpBillDetailBean;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.common.Tourist;
 import com.yihg.erp.controller.BaseController;
@@ -64,19 +56,23 @@ import com.yihg.erp.utils.WebUtils;
 import com.yihg.product.api.ProductGroupSupplierService;
 import com.yihg.product.api.ProductInfoService;
 import com.yihg.product.api.ProductRemarkService;
+import com.yihg.product.api.ProductRouteService;
 import com.yihg.product.api.ProductStockService;
 import com.yihg.product.po.ProductGroupSupplier;
 import com.yihg.product.po.ProductInfo;
 import com.yihg.product.po.ProductRemark;
+import com.yihg.product.po.ProductRoute;
 import com.yihg.sales.api.FitOrderService;
 import com.yihg.sales.api.GroupOrderService;
 import com.yihg.sales.po.GroupOrder;
 import com.yihg.sales.po.GroupOrderGuest;
+import com.yihg.sales.po.GroupOrderPrice;
+import com.yihg.sales.po.GroupRoute;
 import com.yihg.sales.vo.FitOrderVO;
 import com.yihg.supplier.api.SupplierService;
 import com.yihg.supplier.constants.Constants;
 import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 
 @Controller
 @RequestMapping(value = "/aiyou")

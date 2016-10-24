@@ -50,7 +50,6 @@ import com.yihg.operation.api.BookingSupplierDetailService;
 import com.yihg.operation.api.BookingSupplierService;
 import com.yihg.operation.po.BookingSupplier;
 import com.yihg.operation.po.BookingSupplierDetail;
-import com.yihg.supplier.constants.Constants;
 import com.yihg.sales.api.GroupOrderGuestService;
 import com.yihg.sales.api.GroupOrderService;
 import com.yihg.sales.api.GroupOrderTransportService;
@@ -60,10 +59,11 @@ import com.yihg.sales.po.GroupOrderGuest;
 import com.yihg.sales.po.GroupOrderTransport;
 import com.yihg.sales.po.TourGroup;
 import com.yihg.supplier.api.SupplierService;
+import com.yihg.supplier.constants.Constants;
 import com.yihg.supplier.po.SupplierInfo;
 import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 
 @Controller
 @RequestMapping("/airticket/request")

@@ -9,7 +9,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
@@ -27,17 +25,15 @@ import com.google.gson.JsonObject;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.contant.PathPrefixConstant;
 import com.yihg.erp.contant.PermissionConstants;
-import com.yihg.erp.contant.SecurityConstant;
-import com.yihg.erp.utils.SysServiceSingleton;
 import com.yihg.erp.utils.ResultWebUtils;
+import com.yihg.erp.utils.SysServiceSingleton;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.sys.api.PlatformMenuService;
-import com.yihg.sys.api.PlatformRoleService;
-import com.yihg.sys.api.PlatformSessionService;
-import com.yihg.sys.po.AdditionalParameters;
-import com.yihg.sys.po.PlatformMenuPo;
-import com.yihg.sys.po.PlatformRoleMenuLinkPo;
-import com.yihg.sys.po.UserSession;
+import com.yimayhd.erpcenter.dal.sys.po.AdditionalParameters;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformMenuPo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformRoleMenuLinkPo;
+import com.yimayhd.erpcenter.facade.sys.query.PlatformMenuPoDTO;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformMenuFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformRoleFacade;
 
 /**
  * @author : zhangchao
@@ -49,11 +45,9 @@ import com.yihg.sys.po.UserSession;
 public class PlatFormMenuController {
 
 	@Autowired
-	private PlatformMenuService platformMenuService;
+	private SysPlatformMenuFacade sysPlatformMenuFacade;
 	@Autowired
-	private PlatformRoleService platformRoleService;
-	@Autowired
-	private PlatformSessionService platformSessionService;
+	private SysPlatformRoleFacade sysPlatformRoleFacade;
 	/**
 	 * @author : zhangchao
 	 * @date : 2015年5月26日 下午1:20:41
@@ -71,7 +65,7 @@ public class PlatFormMenuController {
 		root.setBizId(curBizId);
 		root.setMenuId(0);;
 		root.setName("根目录");		
-		List<PlatformMenuPo> menuListByBizId = platformMenuService.getMenuListByBizId(curBizId, rootId);
+		List<PlatformMenuPo> menuListByBizId = sysPlatformMenuFacade.getMenuListByBizId(curBizId, rootId).getPlatformMenuPos();
 		menuListByBizId.add(root);
 		//String items = new Gson().toJson(itemList);
 		String jsonBizs = new Gson().toJson(menuListByBizId);
@@ -94,14 +88,14 @@ public class PlatFormMenuController {
 			id = 0;
 		}
 		List<PlatformMenuPo> itemList = new ArrayList<PlatformMenuPo>();
-		List<PlatformMenuPo> menulList = platformMenuService
-				.getPlatformMenuListBysysIdAndParentId(sysId, id);
+		List<PlatformMenuPo> menulList = sysPlatformMenuFacade
+				.getPlatformMenuListBysysIdAndParentId(sysId, id).getPlatformMenuPos();
 		if (null != menulList && menulList.size() > 0) {
 			for (PlatformMenuPo menu : menulList) {
 				PlatformMenuPo item = new PlatformMenuPo();
-				int child_count = platformMenuService
+				int child_count = sysPlatformMenuFacade
 						.getPlatformMenuListBysysIdAndParentId(sysId,
-								menu.getMenuId()).size();
+								menu.getMenuId()).getPlatformMenuPos().size();
 				item.setName(menu.getName());
 				item.setMenuId(menu.getMenuId());
 				if (child_count > 0) {
@@ -134,11 +128,11 @@ public class PlatFormMenuController {
 	
 	public List<PlatformMenuPo> menuList(int sysId,int parentid){
 		List<PlatformMenuPo> itemList = new ArrayList<PlatformMenuPo>();
-		List<PlatformMenuPo> menulList = platformMenuService.getAllMenuList(sysId, parentid);
+		List<PlatformMenuPo> menulList = sysPlatformMenuFacade.getAllMenuList(sysId, parentid).getPlatformMenuPos();
 		if (null != menulList && menulList.size() > 0) {
 			for (PlatformMenuPo menu : menulList) {
 				PlatformMenuPo item = new PlatformMenuPo();
-				int child_count = platformMenuService.getAllMenuList(sysId,menu.getMenuId()).size();
+				int child_count = sysPlatformMenuFacade.getAllMenuList(sysId,menu.getMenuId()).getPlatformMenuPos().size();
 				item.setParentId(parentid);
 				item.setName(menu.getName());
 				item.setMenuId(menu.getMenuId());
@@ -168,7 +162,7 @@ public class PlatFormMenuController {
 	@RequestMapping(value = "/getMenu")
 	@RequiresPermissions(PermissionConstants.SYS_RES)
 	public String getOrg(Integer menuId, ModelMap model) {
-		PlatformMenuPo platformMenuPo = platformMenuService
+		PlatformMenuPo platformMenuPo = sysPlatformMenuFacade
 				.getPlatformMenuMenuId(menuId);
 		model.addAttribute("platformMenuPo", platformMenuPo);
 		return PathPrefixConstant.SYSTEM_MENU_PREFIX+"menu_edit";
@@ -198,7 +192,9 @@ public class PlatFormMenuController {
 	public String saveMenu(PlatformMenuPo platformMenu,
 			HttpServletRequest request, HttpServletResponse response) {
 		Map<Object, Object> mapMsg = new HashMap<Object, Object>();
-		int temp = platformMenuService.addPlatformMenu(platformMenu);
+		PlatformMenuPoDTO dto = new PlatformMenuPoDTO();
+		dto.setPlatformMenuPo(platformMenu);
+		int temp = sysPlatformMenuFacade.addPlatformMenu(dto);
 		if (temp > 0) {
 			mapMsg.put("error", 0);
 		} else {
@@ -227,12 +223,12 @@ public class PlatFormMenuController {
 	@ResponseBody
 	@RequestMapping("/delMenu")
 	public String delMenu(String menuId) {
-		List<PlatformRoleMenuLinkPo> tempList = platformRoleService
-				.findPlatformRoleMenuLinkPoByMenuId(menuId);
-		List<PlatformMenuPo> menuPos = platformMenuService
+		List<PlatformRoleMenuLinkPo> tempList = sysPlatformRoleFacade
+				.findPlatformRoleMenuLinkPoByMenuId(menuId).getPlatformRoleMenuLinkPos();
+		List<PlatformMenuPo> menuPos = sysPlatformMenuFacade
 				.getPlatformMenuListBysysIdAndParentId(SysServiceSingleton
 						.getPlatformSysPo().getSysId(), Integer
-						.parseInt(menuId));
+						.parseInt(menuId)).getPlatformMenuPos();
 		if (tempList.size() > 0) {
 			JsonObject json = new JsonObject();
 			json.addProperty("error", true);
@@ -244,7 +240,7 @@ public class PlatFormMenuController {
 			json.addProperty("msg", "删除失败,请先删除子级菜单!");
 			return json.toString();
 		} else {
-			int temp = platformMenuService.deletePlatformMenuByMenuId(Integer
+			int temp = sysPlatformMenuFacade.deletePlatformMenuByMenuId(Integer
 					.parseInt(menuId));
 			return temp > 0 ? ResultWebUtils.successJson() : ResultWebUtils
 					.errorJson("删除失败");
@@ -263,7 +259,7 @@ public class PlatFormMenuController {
 			@RequestParam(defaultValue="")String menuName, 
 			@RequestParam(defaultValue="0")int exceptMenuId,
 			HttpServletRequest request, HttpServletResponse response, ModelMap model){
-		List<PlatformMenuPo> list = platformMenuService.getMenuList(parentMenuId, menuName, exceptMenuId);
+		List<PlatformMenuPo> list = sysPlatformMenuFacade.getMenuList(parentMenuId, menuName, exceptMenuId).getPlatformMenuPos();
 		if(list.size()==0){
 			return ResultWebUtils.successJson();
 		}else{

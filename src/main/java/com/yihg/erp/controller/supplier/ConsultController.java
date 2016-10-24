@@ -1,11 +1,7 @@
 package com.yihg.erp.controller.supplier;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javassist.expr.NewArray;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,7 +23,7 @@ import com.yihg.supplier.api.ConsultService;
 import com.yihg.supplier.constants.Constants;
 import com.yihg.supplier.po.GuestConsult;
 import com.yihg.supplier.po.GuestConsultFollow;
-import com.yihg.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 @Controller
 @RequestMapping("/consult")
 public class ConsultController extends BaseController {

@@ -13,7 +13,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -38,13 +37,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.annotation.JSONField;
 import com.google.gson.Gson;
 import com.yihg.airticket.api.AirTicketRequestService;
 import com.yihg.basic.api.DicService;
 import com.yihg.basic.api.RegionService;
 import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.exception.ClientException;
 import com.yihg.basic.po.DicInfo;
 import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.aop.RequiresPermissions;
@@ -54,7 +51,6 @@ import com.yihg.erp.common.MergeGroupUtils;
 import com.yihg.erp.contant.BizConfigConstant;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.controller.sys.sysConfig.sysConfigController;
 import com.yihg.erp.utils.DateUtils;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
@@ -67,7 +63,6 @@ import com.yihg.operation.api.BookingShopService;
 import com.yihg.operation.api.BookingSupplierDetailService;
 import com.yihg.operation.api.BookingSupplierService;
 import com.yihg.operation.po.BookingDelivery;
-import com.yihg.operation.po.BookingDeliveryPrice;
 import com.yihg.operation.po.BookingGuide;
 import com.yihg.operation.po.BookingShop;
 import com.yihg.operation.po.BookingSupplier;
@@ -123,9 +118,9 @@ import com.yihg.supplier.constants.Constants;
 import com.yihg.supplier.po.SupplierContactMan;
 import com.yihg.supplier.po.SupplierGuide;
 import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 
 @Controller
 @RequestMapping(value = "/groupOrder")
@@ -150,7 +145,8 @@ public class GroupOrderController extends BaseController {
 	@Autowired
 	private GroupRequirementService groupRequirementService;
 	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
+	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
+//	private PlatformEmployeeService platformEmployeeService;
 	@Autowired
 	private SupplierService supplierService;
 	@Autowired
@@ -261,7 +257,7 @@ public class GroupOrderController extends BaseController {
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
 		return "sales/fitOrder/productOrdersList";
 	}
 	/**
@@ -287,7 +283,7 @@ public class GroupOrderController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
 					WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
@@ -396,7 +392,7 @@ public class GroupOrderController extends BaseController {
 	public String toDeliveryPriceList(HttpServletRequest request,Model model){
 		Integer bizId = WebUtils.getCurBizId(request);
 		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		model.addAttribute("orgUserJsonStr", sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
 		List<DicInfo> lysfxmList = dicService.getListByTypeCode(
 				BasicConstants.GYXX_LYSFXM, bizId);
 		model.addAttribute("lysfxmList", lysfxmList);
@@ -413,7 +409,7 @@ public class GroupOrderController extends BaseController {
 			for(String orgIdStr : orgIdArr){
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds="";
 			for(Integer usrId : set){
 				salesOperatorIds+=usrId+",";
@@ -482,7 +478,7 @@ public class GroupOrderController extends BaseController {
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
 		return "sales/orderLock/orderLockList";
 	}
 
@@ -526,7 +522,7 @@ public class GroupOrderController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
 					WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
@@ -1145,7 +1141,7 @@ public class GroupOrderController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
 					WebUtils.getCurBizId(request), set);
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
@@ -1251,7 +1247,7 @@ public class GroupOrderController extends BaseController {
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
 		return "sales/groupOrder/notGroupList";
 	}
 
@@ -1400,7 +1396,7 @@ public class GroupOrderController extends BaseController {
 //			for (String orgIdStr : orgIdArr) {
 //				set.add(Integer.valueOf(orgIdStr));
 //			}
-//			set = platformEmployeeService.getUserIdListByOrgIdList(
+//			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
 //					WebUtils.getCurBizId(request), set);
 //			String salesOperatorIds = "";
 //			for (Integer usrId : set) {
@@ -1488,7 +1484,7 @@ public class GroupOrderController extends BaseController {
 //		model.addAttribute("orgJsonStr",
 //				orgService.getComponentOrgTreeJsonStr(bizId));
 //		model.addAttribute("orgUserJsonStr",
-//				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+//				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
 //		return "sales/groupOrder/yesGroupList";
 //	}
 
@@ -1853,12 +1849,12 @@ public class GroupOrderController extends BaseController {
 		GroupOrder groupOrder = groupOrderService.findById(id);
 		groupOrder.setStateFinance(1);
 		model.addAttribute("groupOrder", groupOrder);
-		PlatformEmployeePo saleEmployeePo = platformEmployeeService
-				.findByEmployeeId(groupOrder.getSaleOperatorId());
+		PlatformEmployeePo saleEmployeePo = sysPlatformEmployeeFacade
+				.findByEmployeeId(groupOrder.getSaleOperatorId()).getPlatformEmployeePo();
 		model.addAttribute("saleEmployeePo", saleEmployeePo);
 
-		PlatformEmployeePo operaEmployeePo = platformEmployeeService
-				.findByEmployeeId(groupOrder.getOperatorId());
+		PlatformEmployeePo operaEmployeePo = sysPlatformEmployeeFacade
+				.findByEmployeeId(groupOrder.getOperatorId()).getPlatformEmployeePo();
 		model.addAttribute("operaEmployeePo", operaEmployeePo);
 		ProductInfo productInfo = productInfoService
 				.findProductInfoById(groupOrder.getProductId());
@@ -1956,12 +1952,12 @@ public class GroupOrderController extends BaseController {
 				.findProductInfoById(groupOrder.getProductId());
 		model.addAttribute("productInfo", productInfo);
 
-		PlatformEmployeePo saleEmployeePo = platformEmployeeService
-				.findByEmployeeId(groupOrder.getSaleOperatorId());
+		PlatformEmployeePo saleEmployeePo = sysPlatformEmployeeFacade
+				.findByEmployeeId(groupOrder.getSaleOperatorId()).getPlatformEmployeePo();
 		model.addAttribute("saleEmployeePo", saleEmployeePo);
 
-		PlatformEmployeePo operaEmployeePo = platformEmployeeService
-				.findByEmployeeId(groupOrder.getOperatorId());
+		PlatformEmployeePo operaEmployeePo = sysPlatformEmployeeFacade
+				.findByEmployeeId(groupOrder.getOperatorId()).getPlatformEmployeePo();
 		model.addAttribute("operaEmployeePo", operaEmployeePo);
 
 		SupplierInfo supplierInfo = supplierService
@@ -2112,8 +2108,8 @@ public class GroupOrderController extends BaseController {
 			HttpServletResponse reponse, ModelMap model, Integer employeeId,
 			Integer id, Integer num) {
 
-		PlatformEmployeePo platformEmployeePo = platformEmployeeService
-				.findByEmployeeId(employeeId);
+		PlatformEmployeePo platformEmployeePo = sysPlatformEmployeeFacade
+				.findByEmployeeId(employeeId).getPlatformEmployeePo();
 
 		GroupOrder groupOrder = groupOrderService.findById(id);
 		if (num == 1) {
@@ -3961,7 +3957,7 @@ public class GroupOrderController extends BaseController {
 
 		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
 		model.addAttribute("tourGroup", tourGroup);
-		model.addAttribute("operatorMobile",platformEmployeeService.findByEmployeeId(tourGroup.getOperatorId()).getMobile());
+		model.addAttribute("operatorMobile",sysPlatformEmployeeFacade.findByEmployeeId(tourGroup.getOperatorId()).getPlatformEmployeePo().getMobile());
 		// 查询导游信息
 		List<BookingGuide> guides = bookingGuideService
 				.selectGuidesByGroupId(groupId);
@@ -4103,7 +4099,7 @@ public class GroupOrderController extends BaseController {
 		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
 		model.addAttribute("tourGroup", tourGroup);
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
-		model.addAttribute("operatorMobile",platformEmployeeService.findByEmployeeId(tourGroup.getOperatorId()).getMobile());
+		model.addAttribute("operatorMobile",sysPlatformEmployeeFacade.findByEmployeeId(tourGroup.getOperatorId()).getPlatformEmployeePo().getMobile());
 		//改1
 		/**
 		 * 获取全陪，定制团一个团对应一个订单
@@ -4331,7 +4327,7 @@ public class GroupOrderController extends BaseController {
 
 		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
 		model.addAttribute("tourGroup", tourGroup);
-		model.addAttribute("operatormobile", platformEmployeeService.findByEmployeeId(tourGroup.getOperatorId()).getMobile());
+		model.addAttribute("operatormobile", sysPlatformEmployeeFacade.findByEmployeeId(tourGroup.getOperatorId()).getPlatformEmployeePo().getMobile());
 		List<BookingGuide> guides = bookingGuideService
 				.selectGuidesByGroupId(groupId);
 		String guideString = "";

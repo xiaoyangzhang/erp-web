@@ -17,24 +17,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.util.TypeUtils;
-import com.yihg.supplier.api.SupplierService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierBankaccount;
-import com.yihg.supplier.po.SupplierBill;
-import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.supplier.vo.SupplierVO;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.api.PlatformRoleService;
-import com.yihg.sys.api.PlatformSessionService;
-import com.yihg.sys.api.SysBizBankAccountService;
-import com.yihg.sys.api.SysBizInfoService;
 import com.yihg.basic.api.DicService;
 import com.yihg.basic.contants.BasicConstants;
 import com.yihg.basic.exception.ClientException;
@@ -44,20 +29,26 @@ import com.yihg.erp.contant.PathPrefixConstant;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.contant.SysConfigConstant;
 import com.yihg.erp.controller.BaseController;
-import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.po.BookingSupplier;
-import com.yihg.sys.po.PlatformEmployeePo;
-import com.yihg.sys.po.PlatformMenuPo;
-import com.yihg.sys.po.PlatformOrgPo;
-import com.yihg.sys.po.PlatformRoleMenuLinkPo;
-import com.yihg.sys.po.PlatformRolePo;
-import com.yihg.sys.po.SysBizBankAccount;
-import com.yihg.sys.po.SysBizInfo;
-import com.yihg.sys.po.SysDataRight;
-import com.yihg.sys.po.UserSession;
-import com.yihg.erp.utils.ResultWebUtils;
-import com.yihg.erp.utils.SysServiceSingleton;
 import com.yihg.erp.utils.WebUtils;
+import com.yihg.mybatis.utility.PageBean;
+import com.yihg.supplier.constants.Constants;
+import com.yihg.sys.api.PlatformSessionService;
+import com.yihg.sys.api.SysBizBankAccountService;
+import com.yihg.sys.api.SysBizInfoService;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformRolePo;
+import com.yimayhd.erpcenter.dal.sys.po.UserSession;
+import com.yimayhd.erpcenter.facade.sys.query.PlatformEmployeePoDTO;
+import com.yimayhd.erpcenter.facade.sys.query.UserSessionDTO;
+import com.yimayhd.erpcenter.facade.sys.result.PlatformEmployeePoResult;
+import com.yimayhd.erpcenter.facade.sys.result.PlatformOrgPoListResult;
+import com.yimayhd.erpcenter.facade.sys.result.PlatformOrgPoResult;
+import com.yimayhd.erpcenter.facade.sys.result.PlatformRolePoListResult;
+import com.yimayhd.erpcenter.facade.sys.service.SysLoginFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformRoleFacade;
 
 
 @Controller
@@ -67,19 +58,23 @@ public class EmployeeController extends BaseController{
 	private static final Logger LOG = LoggerFactory
 			.getLogger(EmployeeController.class);
 	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
+	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
+//	private PlatformEmployeeService platformEmployeeService;
 	@Autowired
-	private PlatformOrgService orgService;
+	private SysPlatformOrgFacade sysPlatformOrgFacade;
+//	private PlatformOrgService orgService;
 	
 	@Autowired
-	private PlatformRoleService platformRoleService;
-	private SysBizBankAccountService bankAccountService;
+	private SysPlatformRoleFacade sysPlatformRoleFacade;
+//	private PlatformRoleService platformRoleService;
+//	private SysBizBankAccountService bankAccountService;
 	@Autowired
 	private DicService dicService;
 	@Autowired
 	private SysBizInfoService bizInfoService;
 	@Autowired
-	private PlatformSessionService platformSessionService;
+	private SysLoginFacade sysLoginFacade;
+//	private PlatformSessionService platformSessionService;
 	
 	@RequestMapping(value="listEmployee")
 	@RequiresPermissions(PermissionConstants.SYS_USER)
@@ -92,7 +87,9 @@ public class EmployeeController extends BaseController{
 			p.setPageSize(Constants.PAGESIZE);
 		}
 		p.setBizId(WebUtils.getCurBizId(request));
-		PageBean employeeList = platformEmployeeService.getEmployeeList(p, p.getPage());
+		PlatformEmployeePoDTO dto = new PlatformEmployeePoDTO();
+		dto.setPlatformEmployeePo(p);
+		PageBean employeeList = sysPlatformEmployeeFacade.getEmployeeList(dto, p.getPage());
 		modelMap.addAttribute("empList", employeeList);
 		modelMap.addAttribute("p",p);
         return PathPrefixConstant.SYSTEM_EMPLOYEE_PREFIX+"employee_index";
@@ -105,11 +102,13 @@ public class EmployeeController extends BaseController{
 		Integer bizId = WebUtils.getCurBizId(request);
 		//查询组织机构树
 		ArrayList<Map<Object, Object>> maps = new ArrayList<Map<Object,Object>>();
-		List<PlatformOrgPo> orgTree = orgService.getOrgTree(bizId, null);
+		PlatformOrgPoListResult orgTreeResult = sysPlatformOrgFacade.getOrgTree(bizId, null);
+		List<PlatformOrgPo> orgTree = orgTreeResult.getPlatformOrgPos();
 	
 		for(PlatformOrgPo org : orgTree){
 			//查询此组织机构下面是否有子菜单
-			List<PlatformOrgPo> orgTreeChildre = orgService.getOrgTree(bizId, org.getOrgId());
+			PlatformOrgPoListResult orgTreeResultChildre = sysPlatformOrgFacade.getOrgTree(bizId, org.getOrgId());
+			List<PlatformOrgPo> orgTreeChildre = orgTreeResultChildre.getPlatformOrgPos();
 			int child_count = orgTreeChildre.size();
 			Map<Object, Object> map = new HashMap<Object, Object>();
 			//封装一级
@@ -139,8 +138,10 @@ public class EmployeeController extends BaseController{
 		PlatformEmployeePo empPo  = null;
 		if(employeeId!=null){
 			//查询用户关联的角色，回显角色数据
-			List<PlatformRolePo> roles = platformRoleService.getRoleList(bizId, Integer.valueOf(employeeId), 0);
-			empPo= platformEmployeeService.findByEmployeeId(Integer.valueOf(employeeId));	
+			PlatformRolePoListResult rolesR = sysPlatformRoleFacade.getRoleList(bizId, Integer.valueOf(employeeId), 0);
+			List<PlatformRolePo> roles = rolesR.getPlatformRolePos();
+			PlatformEmployeePoResult poResult  = sysPlatformEmployeeFacade.findByEmployeeId(Integer.valueOf(employeeId));	
+			empPo = poResult.getPlatformEmployeePo();
 			empPo.setBizId(bizId);
 			modelMap.addAttribute("roles", roles);
 			
@@ -153,11 +154,13 @@ public class EmployeeController extends BaseController{
 			empPo.setStatus(1);
 			empPo.setIsSuper(0);
 		}
-		PlatformOrgPo orgPo = orgService.findByOrgId(orgId);		
+		PlatformOrgPoResult orgPoResult = sysPlatformOrgFacade.findByOrgId(orgId);	
+		PlatformOrgPo orgPo = orgPoResult.getPlatformOrgPo();
 		String orgName = "";		
 		if(orgPo!=null){
 			if( !orgPo.getParentId().equals(0)){
-				PlatformOrgPo parOrgPo = orgService.findByOrgId(orgPo.getParentId());
+				PlatformOrgPoResult paPlatformOrgPoResult = sysPlatformOrgFacade.findByOrgId(orgPo.getParentId());
+				PlatformOrgPo parOrgPo = paPlatformOrgPoResult.getPlatformOrgPo();
 				orgName+=parOrgPo.getName()+"->";
 			}
 			orgName+=orgPo.getName();
@@ -172,7 +175,8 @@ public class EmployeeController extends BaseController{
 		//String orgJsonStr = JSON.toJSONString(maps);
 		
 		//角色列表
-		List<PlatformRolePo> roleList = platformRoleService.getRoleList(bizId, null, 1);
+		PlatformRolePoListResult rolePoListResult = sysPlatformRoleFacade.getRoleList(bizId, null, 1);
+		List<PlatformRolePo> roleList = rolePoListResult.getPlatformRolePos();
 		modelMap.addAttribute("roleList", roleList);
 		modelMap.addAttribute("bizId", bizId);
 		modelMap.addAttribute("empPo", empPo);
@@ -197,7 +201,9 @@ public class EmployeeController extends BaseController{
 		po.setRole(roleIdsList);
 		System.out.println("kaokaokao");
 		try {
-			platformEmployeeService.saveEmployee(po,WebUtils.getCurBizId(request));
+			PlatformEmployeePoDTO dto = new PlatformEmployeePoDTO();
+			dto.setPlatformEmployeePo(po);
+			sysPlatformEmployeeFacade.saveEmployee(dto,WebUtils.getCurBizId(request));
 		}catch (ClientException ce){
 			return errorJson(ce.getMessage());
 		}
@@ -209,14 +215,15 @@ public class EmployeeController extends BaseController{
 	@RequestMapping(value="delEmployee")
 	@ResponseBody
 	public String delEmp(Integer employeeId){
-		return platformEmployeeService.deleteByEmployeeId(employeeId)> 0 ?successJson() :errorJson("操作失败");
+		return sysPlatformEmployeeFacade.deleteByEmployeeId(employeeId)> 0 ?successJson() :errorJson("操作失败");
 	}
 	
 	@RequestMapping(value="resetPwd.htm")
 	//@RequiresPermissions(PermissionConstants.SYS_USER)
 	public String resetPassword(HttpServletRequest request,ModelMap model){
 		Integer id = NumberUtils.toInt(request.getParameter("id"),0);
-		PlatformEmployeePo user = platformEmployeeService.findByEmployeeId(id);
+		PlatformEmployeePoResult usEmployeePoResult = sysPlatformEmployeeFacade.findByEmployeeId(id);
+		PlatformEmployeePo user = usEmployeePoResult.getPlatformEmployeePo();
 		model.addAttribute("user", user);
 		return PathPrefixConstant.SYSTEM_EMPLOYEE_PREFIX+"resetPassword";
 	}
@@ -229,7 +236,9 @@ public class EmployeeController extends BaseController{
 	@RequestMapping(value="updatePass")
 	@ResponseBody
 	public String updatePass(PlatformEmployeePo po){
-		return platformEmployeeService.updateEmployee(po)> 0 ?successJson() :errorJson("操作失败");
+		PlatformEmployeePoDTO dto = new PlatformEmployeePoDTO();
+		dto.setPlatformEmployeePo(po);
+		return sysPlatformEmployeeFacade.updateEmployee(dto)> 0 ?successJson() :errorJson("操作失败");
 	}
 	/**
 	 * 验证用户名唯一性
@@ -246,7 +255,7 @@ public class EmployeeController extends BaseController{
 			String loginName, 
 			Integer employeeId,
 			HttpServletRequest request, HttpServletResponse response, Integer bizId){
-		int result = platformEmployeeService.getEmployeeList(loginName,employeeId,bizId);
+		int result = sysPlatformEmployeeFacade.getEmployeeList(loginName,employeeId,bizId);
 		if(result==0){
 			return "true";
 		}else{
@@ -259,7 +268,7 @@ public class EmployeeController extends BaseController{
 	public String saveOrgUser(HttpServletRequest request,HttpServletResponse reponse,String type,String userArr,Integer employeeId){
 		//List<PlatformEmployeePo> employeeList = JSON.parseArray(userArr, PlatformEmployeePo.class);
 		List<Map> list = JSON.parseArray(userArr, Map.class);
-		platformEmployeeService.saveDataRight(list,employeeId);		
+		sysPlatformEmployeeFacade.saveDataRight(list,employeeId);		
 		return successJson();
 		
 	}
@@ -277,7 +286,7 @@ public class EmployeeController extends BaseController{
 		/*if(StringUtils.isBlank(type)){
 			type = "single";
 		}
-		List<Map<String, String>> list = platformEmployeeService.getOrgUserDateRightTree(WebUtils.getCurBizId(request),null,type,employeeId);
+		List<Map<String, String>> list = sysPlatformEmployeeFacade.getOrgUserDateRightTree(WebUtils.getCurBizId(request),null,type,employeeId);
 		model.addAttribute("orgUserJsonStr", JSON.toJSONString(list));
 		model.addAttribute("employeeId", employeeId);
 		if(type.equals("single")){
@@ -300,7 +309,7 @@ public class EmployeeController extends BaseController{
 	@RequestMapping("orgUserDateRightTree.htm")
 	public String orgUserDateRightTree(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,Integer employeeId){
 		
-		List<Map<String, String>> list = platformEmployeeService.getOrgUserDateRightTree(WebUtils.getCurBizId(request),null,"multi",employeeId);
+		List<Map<String, String>> list = sysPlatformEmployeeFacade.getOrgUserDateRightTree(WebUtils.getCurBizId(request),null,"multi",employeeId);
 		model.addAttribute("orgUserJsonStr", JSON.toJSONString(list));
 		model.addAttribute("employeeId", employeeId);
 		return PathPrefixConstant.SYSTEM_EMPLOYEE_PREFIX+"org_user_data_right_tree";
@@ -309,7 +318,7 @@ public class EmployeeController extends BaseController{
 	@RequestMapping("orgUserDateRightTreeReverse.htm")
 	public String orgUserDateRightTreeReverse(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,Integer employeeId){
 		
-		List<Map<String, String>> list = platformEmployeeService.getOrgUserDateRightTreeByByViewUsrId(WebUtils.getCurBizId(request),null,"multi",employeeId);
+		List<Map<String, String>> list = sysPlatformEmployeeFacade.getOrgUserDateRightTreeByByViewUsrId(WebUtils.getCurBizId(request),null,"multi",employeeId);
 		model.addAttribute("orgUserJsonStr", JSON.toJSONString(list));
 		model.addAttribute("employeeId", employeeId);
 		return PathPrefixConstant.SYSTEM_EMPLOYEE_PREFIX+"user_data_right_tree_reverse";
@@ -323,7 +332,8 @@ public class EmployeeController extends BaseController{
 		String orgName = "";		
 		if(orgPo!=null){
 			if( !orgPo.getParentId().equals(0)){
-				PlatformOrgPo parOrgPo = orgService.findByOrgId(orgPo.getParentId());
+				PlatformOrgPoResult platformOrgPoResult = sysPlatformOrgFacade.findByOrgId(orgPo.getParentId());
+				PlatformOrgPo parOrgPo = platformOrgPoResult.getPlatformOrgPo();
 				orgName+=parOrgPo.getName()+"->";
 			}
 			orgName+=orgPo.getName();
@@ -356,7 +366,9 @@ public class EmployeeController extends BaseController{
 			if(po.getQqCode()==null){
 				po.setQqCode("");
 			}
-			platformEmployeeService.updateEmployee(po);
+			PlatformEmployeePoDTO dto = new PlatformEmployeePoDTO();
+			dto.setPlatformEmployeePo(po);
+			sysPlatformEmployeeFacade.updateEmployee(dto);
 			//更新缓存里用户的档案信息
 			UserSession userSession = WebUtils.getCurrentUserSession(request);
 			userSession.setName(po.getName());
@@ -370,7 +382,9 @@ public class EmployeeController extends BaseController{
 			sessionEmployeePo.setQqCode(po.getQqCode());
 			sessionEmployeePo.setGender(po.getGender());		
 			//更新缓存和session里的数据
-			platformSessionService.setUserSession(WebUtils.getSessionId(request), SysConfigConstant.SESSION_TIMEOUT_SECONDS, userSession);
+			UserSessionDTO userSessionDTO = new UserSessionDTO();
+			userSessionDTO.setUserSession(userSession);
+			sysLoginFacade.setUserSession(WebUtils.getSessionId(request), SysConfigConstant.SESSION_TIMEOUT_SECONDS, userSessionDTO);
 			request.setAttribute("userSession", userSession);
 		}catch (ClientException ce){
 			return errorJson(ce.getMessage());
