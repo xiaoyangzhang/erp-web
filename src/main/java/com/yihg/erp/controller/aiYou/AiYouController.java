@@ -1,19 +1,35 @@
 package com.yihg.erp.controller.aiYou;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.net.URLDecoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.alibaba.dubbo.common.json.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.yihg.basic.api.DicService;
+import com.yihg.basic.api.RegionService;
+import com.yihg.basic.contants.BasicConstants;
+import com.yihg.basic.po.DicInfo;
+import com.yihg.basic.po.RegionInfo;
+import com.yihg.erp.common.AiYouOpBillDetailBean;
+import com.yihg.erp.common.BizSettingCommon;
+import com.yihg.erp.common.Tourist;
+import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.utils.DateUtils;
+import com.yihg.erp.utils.MD5Util;
+import com.yihg.erp.utils.SysConfig;
+import com.yihg.erp.utils.WebUtils;
+import com.yihg.product.api.*;
+import com.yihg.product.po.ProductGroupSupplier;
+import com.yihg.product.po.ProductInfo;
+import com.yihg.product.po.ProductRemark;
+import com.yihg.product.po.ProductRoute;
+import com.yihg.supplier.api.SupplierService;
+import com.yihg.supplier.constants.Constants;
+import com.yihg.supplier.po.SupplierInfo;
+import com.yimayhd.erpcenter.biz.sales.client.service.sales.GroupOrderBiz;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.*;
+import com.yimayhd.erpcenter.dal.sales.client.sales.service.FitOrderDal;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.FitOrderVO;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.facade.sales.result.ListResultSupport;
+import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -37,42 +53,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.dubbo.common.json.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.RegionInfo;
-import com.yihg.erp.common.AiYouBean;
-import com.yihg.erp.common.AiYouOpBillDetailBean;
-import com.yihg.erp.common.BizSettingCommon;
-import com.yihg.erp.common.Tourist;
-import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.utils.DateUtils;
-import com.yihg.erp.utils.MD5Util;
-import com.yihg.erp.utils.SysConfig;
-import com.yihg.erp.utils.WebUtils;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.api.ProductRemarkService;
-import com.yihg.product.api.ProductRouteService;
-import com.yihg.product.api.ProductStockService;
-import com.yihg.product.po.ProductGroupSupplier;
-import com.yihg.product.po.ProductInfo;
-import com.yihg.product.po.ProductRemark;
-import com.yihg.product.po.ProductRoute;
-import com.yihg.sales.api.FitOrderService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupOrderPrice;
-import com.yihg.sales.po.GroupRoute;
-import com.yihg.sales.vo.FitOrderVO;
-import com.yihg.supplier.api.SupplierService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierInfo;
-import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Controller
 @RequestMapping(value = "/aiyou")
@@ -89,11 +77,13 @@ public class AiYouController extends BaseController {
     @Autowired
     private ProductStockService productStockService;
     @Autowired
-    private GroupOrderService groupOrderService;
+    private GroupOrderBiz groupOrderBiz;
+    @Autowired
+    private GroupOrderFacade groupOrderFacade;
     @Autowired
     private SysConfig config;
     @Autowired
-    private FitOrderService fitOrderService;
+    private FitOrderDal fitOrderDal;
     @Autowired
     private SupplierService supplierService;
     @Autowired
@@ -206,57 +196,13 @@ public class AiYouController extends BaseController {
             endDate = DateUtils.getMonthFirstDay();
         }
 
-        // 访问爱游系统 (yihg-aiyou-api[数据查询系统])
-        CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
-        // 访问地址
-        HttpPost httpPost = new HttpPost(Constants.AIYOU_API_URL + "/opBill/orderList.do");
-        // 访问参数
-        List<NameValuePair> nameValuePairList = new
-                ArrayList<NameValuePair>();
-        nameValuePairList.add(new BasicNameValuePair("dbType", port));
-        nameValuePairList.add(new BasicNameValuePair("code", code));
-        nameValuePairList.add(new BasicNameValuePair("startDate",
-                startDate));
-        nameValuePairList.add(new BasicNameValuePair("endDate", endDate));
-        nameValuePairList.add(new BasicNameValuePair("groupNum", groupNum));
+        Integer bizId = WebUtils.getCurBizId(request);
 
-        httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairList));
-
-        CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpPost);
-
-        String orderString = "";
-        try {
-            HttpEntity httpEntity = closeableHttpResponse.getEntity();
-
-            orderString = EntityUtils.toString(httpEntity);
-        } finally {
-            closeableHttpResponse.close();
+        List<AiYouBean> aiyouOrderList = Collections.emptyList();
+        ListResultSupport<AiYouBean> resultSupport = groupOrderFacade.getAiYourOrders(code, port, startDate, endDate, groupNum, bizId);
+        if(resultSupport!=null && resultSupport.isSuccess()){
+            aiyouOrderList = resultSupport.getValues();
         }
-
-        List<AiYouBean> aiYouBeans = JSONArray.parseArray(orderString, AiYouBean.class);
-        List<AiYouBean> aiyouOrderList = new ArrayList<AiYouBean>();
-        if (aiYouBeans != null && aiYouBeans.size() > 0) {
-            List<GroupOrder> orders = groupOrderService.selectAiYouOrders(WebUtils.getCurBizId(request), startDate,
-                    endDate);
-            for (AiYouBean aiYouBean : aiYouBeans) {
-                aiYouBean.setSupplierCode(port);
-                String yyyy = aiYouBean.getGroup_num().substring(0, 4);
-                String MM = aiYouBean.getGroup_num().substring(4, 6);
-                String dd = aiYouBean.getGroup_num().substring(6, 8);
-                aiYouBean.setDate(yyyy + "-" + MM + "-" + dd);
-                if (orders != null && orders.size() > 0) {
-                    for (GroupOrder groupOrder : orders) {
-                        if (aiYouBean.getGroup_id().equals(groupOrder.getAiyouGroupId())) {
-                            aiYouBean.setIsImport(1);
-                            break;
-                        }
-                    }
-                }
-            }
-            aiyouOrderList.addAll(aiYouBeans);
-        }
-
-        httpPost.abort();
 
         model.addAttribute("code", code);
         model.addAttribute("port", port);
@@ -505,7 +451,7 @@ public class AiYouController extends BaseController {
         }
         httpPost.abort();
 
-        Integer groupOrderId = groupOrderService.saveAiYouDataToGroupOrder(groupOrderList);
+        Integer groupOrderId = groupOrderBiz.saveAiYouDataToGroupOrder(groupOrderList);
         if (groupOrderId > 0) {
             return successJson("msg", "数据导入成功！");
         } else {
@@ -662,13 +608,13 @@ public class AiYouController extends BaseController {
         Integer oldNum = 0;
         try {
             if (fitOrderVO.getGroupOrder().getId() != null) {
-                FitOrderVO vo = fitOrderService.selectFitOrderVOById(fitOrderVO.getGroupOrder().getId());
+                FitOrderVO vo = fitOrderDal.selectFitOrderVOById(fitOrderVO.getGroupOrder().getId());
 
                 oldNum = vo.getGroupOrder().getNumAdult() + vo.getGroupOrder().getNumChild();
             }
             fitOrderVO.getGroupOrder().setOrderNo(settingCommon.getMyBizCode(request));
             ProductInfo productInfo = productInfoService.findProductInfoById(fitOrderVO.getGroupOrder().getProductId());
-            orderId = fitOrderService.saveOrUpdateFitOrderInfo(fitOrderVO, WebUtils.getCurUserId(request),
+            orderId = fitOrderDal.saveOrUpdateFitOrderInfo(fitOrderVO, WebUtils.getCurUserId(request),
                     WebUtils.getCurUser(request).getName(), productInfo.getOperatorId(), productInfo.getOperatorName(),
                     WebUtils.getCurBizId(request), settingCommon.getMyBizCode(request), false);
         } catch (ParseException e) {
@@ -687,7 +633,6 @@ public class AiYouController extends BaseController {
     /**
      * 根据产品ID和日期获取库存
      *
-     * @param id
      * @param date
      * @return
      * @throws ParseException
