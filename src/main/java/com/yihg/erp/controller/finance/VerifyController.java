@@ -45,7 +45,7 @@ import com.yihg.sales.vo.TourGroupVO;
 import com.yihg.supplier.constants.Constants;
 import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 
 /**
  * 对账管理

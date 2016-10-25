@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,15 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -52,11 +41,9 @@ import com.yihg.basic.util.NumberUtil;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.contant.BizConfigConstant;
-import com.yihg.erp.contant.OpenPlatformConstannt;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.controller.images.utils.DateUtil;
-import com.yihg.erp.utils.MD5Util;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
@@ -69,20 +56,14 @@ import com.yihg.operation.api.BookingSupplierService;
 import com.yihg.operation.po.BookingDelivery;
 import com.yihg.operation.po.BookingDeliveryOrder;
 import com.yihg.operation.po.BookingDeliveryPrice;
-import com.yihg.operation.po.BookingDeliveryRoute;
 import com.yihg.operation.po.BookingGuide;
-import com.yihg.operation.po.BookingSupplier;
 import com.yihg.operation.po.BookingSupplierDetail;
-import com.yihg.operation.vo.BookingDeliveryStatics;
-import com.yihg.operation.vo.BookingGroup;
 import com.yihg.sales.api.GroupOrderGuestService;
 import com.yihg.sales.api.GroupOrderService;
 import com.yihg.sales.api.GroupOrderTransportService;
 import com.yihg.sales.api.GroupRequirementService;
 import com.yihg.sales.api.GroupRouteService;
 import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.AssistantGroupOrderGuest;
-import com.yihg.sales.po.AssistantGroupRoute;
 import com.yihg.sales.po.GroupOrder;
 import com.yihg.sales.po.GroupOrderGuest;
 import com.yihg.sales.po.GroupOrderPrintPo;
@@ -90,23 +71,15 @@ import com.yihg.sales.po.GroupOrderTransport;
 import com.yihg.sales.po.GroupRequirement;
 import com.yihg.sales.po.GroupRoute;
 import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.po.TransferOrder;
-import com.yihg.sales.po.TransferOrderFamily;
-import com.yihg.sales.po.TransferOrderGuest;
-import com.yihg.sales.po.TransferOrderPrice;
-import com.yihg.sales.po.TransferOrderRoute;
-import com.yihg.sales.vo.AssistantGroupVO;
-import com.yihg.sales.vo.GroupRouteVO;
 import com.yihg.sales.vo.TourGroupVO;
-import com.yihg.sales.vo.TransferOrderVO;
 import com.yihg.supplier.api.SupplierImgService;
 import com.yihg.supplier.api.SupplierService;
 import com.yihg.supplier.constants.Constants;
 import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.po.PlatformEmployeePo;
-import com.yihg.sys.po.SysBizInfo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 
 @Controller
 @RequestMapping("/booking")
@@ -147,12 +120,13 @@ public class BookingDeliveryController extends BaseController {
     @Autowired
     private PlatformOrgService orgService;
     @Autowired
-    private PlatformEmployeeService platformEmployeeService;
+    private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
+//    private PlatformEmployeeService platformEmployeeService;
     
     @ModelAttribute
     public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
         model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
-        model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
+        model.addAttribute("orgUserJsonStr", sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
     }
     
     @RequestMapping("toDeliveryPriceList.htm")
@@ -182,7 +156,7 @@ public class BookingDeliveryController extends BaseController {
             for (String orgIdStr : orgIdArr) {
                 set.add(Integer.valueOf(orgIdStr));
             }
-            set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+            set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
             String salesOperatorIds = "";
             for (Integer usrId : set) {
                 salesOperatorIds += usrId + ",";
@@ -235,7 +209,7 @@ public class BookingDeliveryController extends BaseController {
             for (String orgIdStr : orgIdArr) {
                 set.add(Integer.valueOf(orgIdStr));
             }
-            set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+            set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
             String salesOperatorIds = "";
             for (Integer usrId : set) {
                 salesOperatorIds += usrId + ",";
@@ -668,7 +642,8 @@ public class BookingDeliveryController extends BaseController {
     private PlatformEmployeePo getDeliveryBrokerUserInfo(HttpServletRequest request) {
         String userId = WebUtils.getBizConfigValue(request, BizConfigConstant.DELIVERY_BROKER_USER);
         if (StringUtils.isNotEmpty(userId)) {
-            return platformEmployeeService.findByEmployeeId(TypeUtils.castToInt(userId));
+            return sysPlatformEmployeeFacade.findByEmployeeId(TypeUtils.castToInt(userId)).getPlatformEmployeePo();
+            
         }
         return null;
     }

@@ -26,7 +26,6 @@ import com.yihg.basic.api.RegionService;
 import com.yihg.basic.contants.BasicConstants;
 import com.yihg.basic.po.DicInfo;
 import com.yihg.basic.po.RegionInfo;
-import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
@@ -41,16 +40,14 @@ import com.yihg.sales.api.TourGroupService;
 import com.yihg.sales.po.GroupOrder;
 import com.yihg.sales.po.GroupOrderGuest;
 import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.FitOrderVO;
 import com.yihg.sales.vo.MergeGroupOrderVO;
 import com.yihg.sales.vo.SpecialGroupOrderVO;
 import com.yihg.supplier.constants.Constants;
 import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.po.UserSession;
 import com.yihg.taobao.api.TaobaoOrderService;
 import com.yihg.taobao.po.PlatTaobaoTrade;
-import com.yihg.taobao.po.TaobaoOrder;
+import com.yimayhd.erpcenter.dal.sys.po.UserSession;
 
 /**
  * Created by zhoum on 2016/8/10.

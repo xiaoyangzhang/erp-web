@@ -5,36 +5,20 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang.StringUtils;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.yihg.basic.contants.BasicConstants.LOG_ACTION;
 import com.yihg.basic.po.LogOperator;
 import com.yihg.basic.util.LogFieldUtil;
-import com.yihg.erp.contant.SecurityConstant;
 import com.yihg.sales.po.GroupOrder;
 import com.yihg.sales.po.GroupOrderGuest;
 import com.yihg.sales.po.GroupOrderPrice;
 import com.yihg.sales.po.GroupOrderTransport;
 import com.yihg.sales.po.GroupRoute;
 import com.yihg.sales.vo.GroupRouteDayVO;
-import com.yihg.sales.vo.SpecialGroupOrderVO;
-import com.yihg.sys.api.PlatformSessionService;
-import com.yihg.sys.po.PlatformEmployeePo;
-import com.yihg.sys.po.PlatformOrgPo;
-import com.yihg.sys.po.SysBizInfo;
-import com.yihg.sys.po.UserSession;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 
 /**
  * 保存数据时，产生日志处理

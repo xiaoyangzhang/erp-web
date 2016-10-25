@@ -45,10 +45,10 @@ import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.ExcelReporter;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.supplier.constants.Constants;
 import com.yihg.supplier.api.SupplierService;
+import com.yihg.supplier.constants.Constants;
 import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 
 
 @Controller

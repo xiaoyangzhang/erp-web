@@ -17,13 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javassist.expr.NewArray;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import net.rubyeye.xmemcached.utils.ByteUtils;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -85,7 +81,7 @@ import com.yihg.supplier.po.SupplierGuide;
 import com.yihg.supplier.po.SupplierInfo;
 import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.po.UserSession;
+import com.yimayhd.erpcenter.dal.sys.po.UserSession;
 /**
  * @author : xuzejun
  * @date : 2015年7月25日 下午2:31:01

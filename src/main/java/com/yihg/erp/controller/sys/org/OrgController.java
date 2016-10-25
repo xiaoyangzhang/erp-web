@@ -24,14 +24,14 @@ import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.contant.PathPrefixConstant;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.utils.SysConfig;
-import com.yihg.erp.utils.SysServiceSingleton;
 import com.yihg.erp.utils.ResultWebUtils;
+import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.po.AdditionalParameters;
-import com.yihg.sys.po.PlatformOrgPo;
-import com.yihg.sys.po.PlatformRolePo;
+import com.yimayhd.erpcenter.dal.sys.po.AdditionalParameters;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
+import com.yimayhd.erpcenter.facade.sys.query.PlatformOrgPoDTO;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
+
 
 @Controller
 @RequestMapping("/org")
@@ -40,7 +40,8 @@ public class OrgController extends BaseController{
 			.getLogger(OrgController.class);
 	
 	@Autowired
-	private PlatformOrgService platformOrgService;
+	private SysPlatformOrgFacade sysPlatformOrgFacade;
+//	private PlatformOrgService platformOrgService;
 	@Autowired
 	private SysConfig config;
 	@RequestMapping(value="treeIndex")
@@ -52,11 +53,11 @@ public class OrgController extends BaseController{
 		Integer bizId = WebUtils.getCurBizId(request);
 		//查询组织机构树
 		ArrayList<Map<Object, Object>> maps = new ArrayList<Map<Object,Object>>();
-		List<PlatformOrgPo> orgTree = platformOrgService.getOrgTree(bizId, null);
+		List<PlatformOrgPo> orgTree = sysPlatformOrgFacade.getOrgTree(bizId, null).getPlatformOrgPos();
 	
 		for(PlatformOrgPo org : orgTree){
 			//查询此组织机构下面是否有子菜单
-			List<PlatformOrgPo> orgTreeChildre = platformOrgService.getOrgTree(bizId, org.getOrgId());
+			List<PlatformOrgPo> orgTreeChildre = sysPlatformOrgFacade.getOrgTree(bizId, org.getOrgId()).getPlatformOrgPos();
 			int child_count = orgTreeChildre.size();
 			Map<Object, Object> map = new HashMap<Object, Object>();
 			//封装一级
@@ -87,11 +88,11 @@ public class OrgController extends BaseController{
 		}
 		List<PlatformOrgPo> itemList = new ArrayList<PlatformOrgPo>();
 		//int sysId = SysServiceSingleton.getPlatformSysPo().getSysId();
-		List<PlatformOrgPo> orglList = platformOrgService.findByPid(id,null);
+		List<PlatformOrgPo> orglList = sysPlatformOrgFacade.findByPid(id,null).getPlatformOrgPos();
 		if (null != orglList && orglList.size() > 0) {
 			for (PlatformOrgPo org : orglList) {
 				PlatformOrgPo item = new PlatformOrgPo();
-				int child_count = platformOrgService.findByPid(org.getOrgId(),null).size();
+				int child_count = sysPlatformOrgFacade.findByPid(org.getOrgId(),null).getPlatformOrgPos().size();
 				item.setName(org.getName());
 				item.setOrgId(org.getOrgId());
 				if (child_count > 0) {
@@ -114,7 +115,7 @@ public class OrgController extends BaseController{
 	@RequestMapping(value="getOrg")
 	@RequiresPermissions(PermissionConstants.SYS_ORG)
 	public String getOrg(Integer orgId,ModelMap model){
-		PlatformOrgPo platformOrgPo = platformOrgService.findByOrgId(orgId);
+		PlatformOrgPo platformOrgPo = sysPlatformOrgFacade.findByOrgId(orgId).getPlatformOrgPo();
 		model.addAttribute("org",platformOrgPo);
 		model.addAttribute("config", config);
 		return PathPrefixConstant.SYSTEM_ORG_PREFIX+"org_edit";
@@ -161,7 +162,9 @@ public class OrgController extends BaseController{
 				break;
 			}
 		}*/	
-		int orgId = platformOrgService.saveOrg(po);
+		PlatformOrgPoDTO dto = new PlatformOrgPoDTO();
+		dto.setPlatformOrgPo(po);
+		int orgId = sysPlatformOrgFacade.saveOrg(dto);
 		return orgId> 0 ?successJson("orgId",orgId+"") :errorJson("操作失败");
 		
 		
@@ -172,9 +175,9 @@ public class OrgController extends BaseController{
 	@ResponseBody
 	public String delOrg(Integer orgId,HttpServletRequest request)
 	{
-		List<PlatformOrgPo> orgTreeChildre = platformOrgService.getOrgTree(WebUtils.getCurBizId(request), orgId);
+		List<PlatformOrgPo> orgTreeChildre = sysPlatformOrgFacade.getOrgTree(WebUtils.getCurBizId(request), orgId).getPlatformOrgPos();
 		if(orgTreeChildre==null||orgTreeChildre.size()==0){
-			return platformOrgService.delOrg(orgId)> 0 ?successJson() :errorJson("删除失败");
+			return sysPlatformOrgFacade.delOrg(orgId)> 0 ?successJson() :errorJson("删除失败");
 		}else{
 			return errorJson("删除失败,存在下级");
 		}   
@@ -191,7 +194,7 @@ public class OrgController extends BaseController{
 			@RequestParam(defaultValue="")String orgName, 
 			@RequestParam(defaultValue="0")int exceptOrgId,
 			HttpServletRequest request, HttpServletResponse response, ModelMap model){
-		List<PlatformOrgPo> list = platformOrgService.getOrgList(orgName, exceptOrgId);
+		List<PlatformOrgPo> list = sysPlatformOrgFacade.getOrgList(orgName, exceptOrgId).getPlatformOrgPos();
 		if(list.size()==0){
 			return ResultWebUtils.successJson();
 		}else{

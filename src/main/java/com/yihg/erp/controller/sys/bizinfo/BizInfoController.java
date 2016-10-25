@@ -19,28 +19,35 @@ import com.yihg.basic.po.DicInfo;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.sys.api.SysBizBankAccountService;
-import com.yihg.sys.api.SysBizInfoService;
-import com.yihg.sys.po.SysBizBankAccount;
-import com.yihg.sys.po.SysBizInfo;
+import com.yimayhd.erpcenter.dal.sys.po.SysBizBankAccount;
+import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
+import com.yimayhd.erpcenter.facade.sys.query.SysBizBankAccountDTO;
+import com.yimayhd.erpcenter.facade.sys.query.SysBizInfoDTO;
+import com.yimayhd.erpcenter.facade.sys.result.SysBizBankAccountListResult;
+import com.yimayhd.erpcenter.facade.sys.result.SysBizBankAccountResult;
+import com.yimayhd.erpcenter.facade.sys.result.SysBizInfoFacadeResult;
+import com.yimayhd.erpcenter.facade.sys.service.SysBizBankAccountFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysBizInfoFacade;
 
 @Controller
 @RequestMapping("bizinfo")
 public class BizInfoController extends BaseController{
 
 	@Autowired
-	private SysBizBankAccountService bankAccountService;
+	private SysBizBankAccountFacade sysBizBankAccountFacade;
+	
 	@Autowired
 	private DicService dicService;
 	@Autowired
-	private SysBizInfoService bizInfoService;
+	private SysBizInfoFacade bizInfoFacade;
 	@Autowired
 	private SysConfig config;
 	@RequestMapping("getSysBankInfo.do")
 	@ResponseBody
 	public String getSysBankInfo(HttpServletRequest request,
 			HttpServletResponse reponse,Integer id,ModelMap model){
-		SysBizBankAccount bankInfo = bankAccountService.getBankInfo(id);
+		SysBizBankAccountResult bankInfoResult = sysBizBankAccountFacade.getBankInfo(id);
+		SysBizBankAccount bankInfo = bankInfoResult.getSysBizBankAccount();
 		List<DicInfo> bankList = dicService
 				.getListByTypeCode(BasicConstants.SUPPLIER_BANK);
 		model.addAttribute("bankList", bankList);
@@ -57,8 +64,10 @@ public class BizInfoController extends BaseController{
 	public String configEmployee(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<SysBizBankAccount> sysBankaccountList = bankAccountService.getListByBizId(bizId);
-		SysBizInfo sysBizInfo = bizInfoService.selectByPrimaryKey(bizId);
+		SysBizBankAccountListResult sysBankaccountListResult = sysBizBankAccountFacade.getListByBizId(bizId);
+		List<SysBizBankAccount> sysBankaccountList = sysBankaccountListResult.getSysBizBankAccounts();
+		SysBizInfoFacadeResult sysBizInfoResult = bizInfoFacade.selectByPrimaryKey(bizId);
+		SysBizInfo sysBizInfo = sysBizInfoResult.getSysBizInfo();
 		model.addAttribute("bizId", bizId);
 		model.addAttribute("bankaccountList", sysBankaccountList);
 		if (sysBizInfo.getLogo()!=null) {
@@ -87,7 +96,9 @@ public class BizInfoController extends BaseController{
 		SysBizInfo biz=new SysBizInfo();
 		biz.setId(bizId);
 		biz.setLogo(jsonArr.getJSONObject(0).getString("path"));
-		bizInfoService.updateSysBizInfo(biz);
+		SysBizInfoDTO dto = new SysBizInfoDTO();
+		dto.setSysBizInfo(biz);
+		bizInfoFacade.updateSysBizInfo(dto);
 		return successJson();
 	}
 	/**
@@ -101,10 +112,14 @@ public class BizInfoController extends BaseController{
 			HttpServletResponse reponse,SysBizBankAccount bankAccount){
 		if(bankAccount.getId()==null){
 		bankAccount.setBizId(WebUtils.getCurBizId(request));
-		bankAccountService.addSysBizBankAccount(bankAccount);
+		SysBizBankAccountDTO dto = new SysBizBankAccountDTO();
+		dto.setSysBizBankAccount(bankAccount);
+		sysBizBankAccountFacade.addSysBizBankAccount(dto);
 		}
 		else{
-			bankAccountService.updateSysBizBankAccount(bankAccount);
+			SysBizBankAccountDTO dto = new SysBizBankAccountDTO();
+			dto.setSysBizBankAccount(bankAccount);
+			sysBizBankAccountFacade.updateSysBizBankAccount(dto);
 		}
 		return "redirect:configBizInfo";
 	}
@@ -120,7 +135,7 @@ public class BizInfoController extends BaseController{
 	
 	public String delBank(HttpServletRequest request,
 			HttpServletResponse reponse,Integer id){
-		bankAccountService.delBankAccount(id);
+		sysBizBankAccountFacade.delBankAccount(id);
 		return "redirect:configBizInfo";
 	}
 }
