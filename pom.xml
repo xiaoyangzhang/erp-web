@@ -312,7 +312,7 @@
 			</exclusions>
 		</dependency>
 
-		<!-- -->
+		<!-- 
 		<dependency>
 			<groupId>com.yihg</groupId>
 			<artifactId>yihg-erp-supplier-api</artifactId>
@@ -347,7 +347,7 @@
 			<artifactId>yihg-travel-base-api</artifactId>
 			<version>${yihg-travel-base-api.version}</version>
 		</dependency>
-
+	    -->
 		<dependency>
 			<groupId>com.yihg</groupId>
 			<artifactId>yihg-travel-customer-api</artifactId>
