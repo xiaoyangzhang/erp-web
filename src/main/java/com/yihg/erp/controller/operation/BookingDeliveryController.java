@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.erpcenterFacade.common.client.service.SaleCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,12 +32,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
 import com.yihg.basic.exception.ClientException;
-import com.yihg.basic.po.DicInfo;
 import com.yihg.basic.util.NumberUtil;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
@@ -75,10 +73,14 @@ import com.yihg.sales.vo.TourGroupVO;
 import com.yihg.supplier.api.SupplierImgService;
 import com.yihg.supplier.api.SupplierService;
 import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierInfo;
 import com.yihg.sys.api.PlatformOrgService;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
+import com.yimayhd.erpcenter.facade.sales.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.sales.result.WebResult;
+import com.yimayhd.erpcenter.facade.sales.result.operation.BookingDeliveryResult;
+import com.yimayhd.erpcenter.facade.sales.service.BookingDeliveryFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 
 @Controller
 @RequestMapping("/booking")
@@ -120,8 +122,10 @@ public class BookingDeliveryController extends BaseController {
     private PlatformOrgService orgService;
     @Autowired
     private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
-//    private PlatformEmployeeService platformEmployeeService;
-    
+    @Autowired
+    private BookingDeliveryFacade bookingDeliveryFacade;
+    @Autowired
+    private SaleCommonFacade saleCommonFacade;
     @ModelAttribute
     public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
         model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
@@ -241,14 +245,14 @@ public class BookingDeliveryController extends BaseController {
     @RequestMapping("deliveryBookingList.htm")
     @RequiresPermissions(PermissionConstants.JDGL_ANGENCY)
     public String deliveryOrderList(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer gid) {
-        List<BookingDelivery> list = deliveryService.getDeliveryListByGroupId(gid);
-        if (list != null && list.size() > 0) {
-            for (BookingDelivery delivery : list) {
-                delivery.setPriceList(bookingDeliveryPriceService.getPriceListByBookingId(delivery.getId()));
-            }
-        }
-        
-        model.addAttribute("list", list);
+//        List<BookingDelivery> list = deliveryService.getDeliveryListByGroupId(gid);
+//        if (list != null && list.size() > 0) {
+//            for (BookingDelivery delivery : list) {
+//                delivery.setPriceList(bookingDeliveryPriceService.getPriceListByBookingId(delivery.getId()));
+//            }
+//        }
+        BookingDeliveryResult result = bookingDeliveryFacade.getDeliveryBookingDetailList(gid);
+        model.addAttribute("list", result.getBookingDeliveries());
         model.addAttribute("deliverBroker", getDeliveryBrokerUser(request));
         return "/operation/delivery/delivery-booking-list";
     }
@@ -266,16 +270,16 @@ public class BookingDeliveryController extends BaseController {
     @RequestMapping("groupDeliveryBookingList.htm")
     @RequiresPermissions(PermissionConstants.JDGL_YDAP)
     public String groupDeliveryBookingList(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer gid) {
-        List<BookingDelivery> list = deliveryService.getDeliveryListByGroupId(gid);
-        if (list != null && list.size() > 0) {
-            for (BookingDelivery delivery : list) {
-                delivery.setPriceList(bookingDeliveryPriceService.getPriceListByBookingId(delivery.getId()));
-            }
-        }
-        
-        model.addAttribute("list", list);
+//        List<BookingDelivery> list = deliveryService.getDeliveryListByGroupId(gid);
+//        if (list != null && list.size() > 0) {
+//            for (BookingDelivery delivery : list) {
+//                delivery.setPriceList(bookingDeliveryPriceService.getPriceListByBookingId(delivery.getId()));
+//            }
+//        }
+        BookingDeliveryResult result = bookingDeliveryFacade.getDeliveryBookingArrangeList(gid);
+        model.addAttribute("list", result.getBookingDeliveries());
         model.addAttribute("groupId", gid);
-        model.addAttribute("groupCanEdit", tourGroupService.checkGroupCanEdit(gid));
+        model.addAttribute("groupCanEdit", result.isGroupCanEdit());
         model.addAttribute("deliverBroker", getDeliveryBrokerUser(request));
         return "/operation/delivery/group-delivery-booking-list";
     }
@@ -298,69 +302,68 @@ public class BookingDeliveryController extends BaseController {
     
     private void loadAngencyInfo(HttpServletRequest request, ModelMap model, Integer gid, Integer bid) {
         int bizId = WebUtils.getCurBizId(request);
-        List<DicInfo> typeList = dicService
-                .getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
-        model.addAttribute("typeList", typeList);
-        
-        TourGroup groupInfo = tourGroupService.selectByPrimaryKey(gid);
-        List<GroupRoute> routeList = routeService.selectByGroupId(gid);
-        if (groupInfo.getGroupMode() < 1) {
-            List<GroupOrder> orderList = orderService.selectOrderByGroupId(gid);
-            if (orderList != null && orderList.size() > 0) {
-                for (GroupOrder order : orderList) {
-                    SupplierInfo supplierInfo = supplierSerivce.selectBySupplierId(order.getSupplierId());
-                    if (supplierInfo != null) {
-                        order.setSupplierName(supplierInfo.getNameFull());
-                    }
-                }
-            }
-            model.addAttribute("orderList", orderList);
-        }
-        model.addAttribute("group", groupInfo);
+//        List<DicInfo> typeList = dicService
+//                .getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
+        model.addAttribute("typeList", saleCommonFacade.getDeliveryItemList(bizId));
+        BookingDeliveryResult result = bookingDeliveryFacade.getDeliveryEditInfo(gid, bid);
+//        TourGroup groupInfo = tourGroupService.selectByPrimaryKey(gid);
+//        List<GroupRoute> routeList = routeService.selectByGroupId(gid);
+//        if (groupInfo.getGroupMode() < 1) {
+//            List<GroupOrder> orderList = orderService.selectOrderByGroupId(gid);
+//            if (orderList != null && orderList.size() > 0) {
+//                for (GroupOrder order : orderList) {
+//                    SupplierInfo supplierInfo = supplierSerivce.selectBySupplierId(order.getSupplierId());
+//                    if (supplierInfo != null) {
+//                        order.setSupplierName(supplierInfo.getNameFull());
+//                    }
+//                }
+//            }
+            model.addAttribute("orderList", result.getGroupOrders());
+//        }
+        model.addAttribute("group", result.getTourGroup());
         /*if(groupInfo!=null && routeList!=null){
             for(GroupRoute route : routeList){
 				route.setGroupDate(DateUtils.addDays(groupInfo.getDateStart(), route.getDayNum()));
 			}
 		}*/
-        model.addAttribute("routeList", routeList);
-        if (bid != null) {
-            BookingDelivery delivery = deliveryService.getBookingInfoById(bid);
-            model.addAttribute("booking", delivery);
-        }
+        model.addAttribute("routeList", result.getGroupRoutes());
+//        if (bid != null) {
+//            BookingDelivery delivery = deliveryService.getBookingInfoById(bid);
+            model.addAttribute("booking", result.getBookingDelivery());
+//        }
     }
     
     /**
-     * @param request
-     * @param response
-     * @param model
-     * @param booking
-     * @return
+     * 
+    * created by zhangxiaoyang
+    * @date 2016年10月25日
+    * @Description:保存地接计调订单
+    * @param 
+    * @return String
+    * @throws
      */
     @RequestMapping(value = "saveBooking.do", method = RequestMethod.POST)
     @ResponseBody
-    public String saveBooking(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            ModelMap model,
+    public String saveBooking( HttpServletRequest request, HttpServletResponse response, ModelMap model,
             String booking) {
-        BookingDelivery bookingDelivery = JSON.parseObject(booking, BookingDelivery.class);
-        if (!tourGroupService.checkGroupCanEdit(bookingDelivery.getGroupId())) {
-            return errorJson("该团已审核或封存，不允许修改该信息");
-        }
-        if (bookingDelivery.getId() == null) {
-            PlatformEmployeePo userInfo = WebUtils.getCurUser(request);
-            bookingDelivery.setUserId(userInfo.getEmployeeId());
-            bookingDelivery.setUserName(userInfo.getName());
-            bookingDelivery.setStateBooking(0);
-            bookingDelivery.setStateFinance(0);
-            bookingDelivery.setBookingDate(new Date());
-            bookingDelivery.setCreateTime(System.currentTimeMillis());
-        }
-        int id = deliveryService.saveBooking(bookingDelivery);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("groupId", bookingDelivery.getGroupId());
-        map.put("bookingId", id);
-        
+//        BookingDelivery bookingDelivery = JSON.parseObject(booking, BookingDelivery.class);
+//        if (!tourGroupService.checkGroupCanEdit(bookingDelivery.getGroupId())) {
+//            return errorJson("该团已审核或封存，不允许修改该信息");
+//        }
+//        if (bookingDelivery.getId() == null) {
+//            PlatformEmployeePo userInfo = WebUtils.getCurUser(request);
+//            bookingDelivery.setUserId(userInfo.getEmployeeId());
+//            bookingDelivery.setUserName(userInfo.getName());
+//            bookingDelivery.setStateBooking(0);
+//            bookingDelivery.setStateFinance(0);
+//            bookingDelivery.setBookingDate(new Date());
+//            bookingDelivery.setCreateTime(System.currentTimeMillis());
+//        }
+//        int id = deliveryService.saveBooking(bookingDelivery);
+//        Map<String, Object> map = new HashMap<String, Object>();
+//        map.put("groupId", bookingDelivery.getGroupId());
+//        map.put("bookingId", id);
+        WebResult<Map<String, Object>> result = bookingDeliveryFacade.saveDeliveryBooking(booking, WebUtils.getCurUser(request));
         // 推送信息给接口中心
 //        List<GroupOrder> groupOrder = orderService
 //                .selectOrderByGroupId(bookingDelivery.getGroupId());
@@ -609,27 +612,45 @@ public class BookingDeliveryController extends BaseController {
 //            return errorJson("推送信息失败,请检查客人信息是否正确");
 //        }
         
-        return successJson(map);
+        return successJson(result.getValue());
     }
-    
+    /**
+     * 
+    * created by zhangxiaoyang
+    * @date 2016年10月25日
+    * @Description:
+    * @param 
+    * @return String
+    * @throws
+     */
     @RequestMapping(value = "agencyConfirm.do", method = RequestMethod.POST)
     @ResponseBody
     public String agencyConfirm(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer id) {
-        deliveryService.angencyConfirm(id);
+        //deliveryService.angencyConfirm(id);
+    	ResultSupport result = bookingDeliveryFacade.angencyConfirm(id);
         return successJson();
     }
-    
+    /**
+     * 
+    * created by zhangxiaoyang
+    * @date 2016年10月25日
+    * @Description:
+    * @param 
+    * @return String
+    * @throws
+     */
     @RequestMapping(value = "agencyDelele.do", method = RequestMethod.POST)
     @ResponseBody
     public String agencyDelele(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer id) {
         try {
-            deliveryService.angencyDelete(id);
+            //deliveryService.angencyDelete(id);
+        	ResultSupport result = bookingDeliveryFacade.angencyDelete(id);
             return successJson();
         } catch (ClientException ex) {
             return errorJson(ex.getMessage());
         }
     }
-    
+    //TODO 待抽取
     private String getDeliveryBrokerUser(HttpServletRequest request) {
         String userId = WebUtils.getBizConfigValue(request, BizConfigConstant.DELIVERY_BROKER_USER);
         if (StringUtils.isNotEmpty(userId)) {
@@ -646,6 +667,15 @@ public class BookingDeliveryController extends BaseController {
         }
         return null;
     }
+    /**
+     * 
+    * created by zhangxiaoyang
+    * @date 2016年10月25日
+    * @Description:打印地接订单
+    * @param 
+    * @return String
+    * @throws
+     */
     
     @RequestMapping(value = "deliveryExport.do")
     public String deliveryExport(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer bookingId, Integer type, Integer preview) {

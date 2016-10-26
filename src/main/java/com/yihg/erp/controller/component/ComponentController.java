@@ -17,6 +17,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.facade.sales.result.ContactManListResult;
+import com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.erpcenterFacade.common.client.query.BrandQueryDTO;
@@ -103,6 +105,8 @@ public class ComponentController extends BaseController {
 	private ProductCommonFacade productCommonFacade;
 	@Autowired
 	private ProductFacade productFacade;
+	@Autowired
+	private TeamGroupFacade teamGroupFacade;
 	
 	@RequestMapping("example.htm")
 	public String example(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,String type){	
@@ -293,9 +297,11 @@ public class ComponentController extends BaseController {
 		if(StringUtils.isNotBlank(supplierId)){
 			id = NumberUtils.toInt(supplierId, 0);
 		}
-		List<SupplierContactMan> list = supplierService
-				.selectPrivateManBySupplierId(WebUtils.getCurBizId(request), id);
-		model.addAttribute("manList", list);
+		/*List<SupplierContactMan> list = supplierService
+				.selectPrivateManBySupplierId(WebUtils.getCurBizId(request), id);*/
+		Integer curBizId = WebUtils.getCurBizId(request);
+		ContactManListResult contactManListResult = teamGroupFacade.contactManList(curBizId, id);
+		model.addAttribute("manList", contactManListResult.getManList());
 		model.addAttribute("supplierId", id);		
 		return "component/supplier/contact-man-list-single";
 	}
