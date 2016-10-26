@@ -88,7 +88,6 @@ import com.yihg.operation.po.BookingSupplierDetail;
 import com.yihg.operation.vo.BookingGroup;
 import com.yihg.operation.vo.GroupBookingInfo;
 import com.yihg.operation.vo.PaymentExportVO;
-import com.yihg.operation.vo.QueryGuideShop;
 import com.yihg.operation.vo.QueryShopInfo;
 import com.yihg.product.api.ProductGroupPriceService;
 import com.yihg.query.api.QueryService;
@@ -118,6 +117,11 @@ import com.yihg.sys.api.SysBizBankAccountService;
 import com.yihg.sys.po.PlatformEmployeePo;
 import com.yihg.sys.po.PlatformOrgPo;
 import com.yihg.sys.po.SysBizBankAccount;
+import com.yimayhd.erpcenter.dal.sales.client.operation.vo.QueryGuideShop;
+import com.yimayhd.erpcenter.facade.sales.query.BookingShopListDTO;
+import com.yimayhd.erpcenter.facade.sales.result.GuestShopListResult;
+import com.yimayhd.erpcenter.facade.sales.result.GuestShopResult;
+import com.yimayhd.erpcenter.facade.sales.service.BookingShopFacade;
 
 @Controller
 @RequestMapping("/query")
@@ -163,6 +167,8 @@ public class QueryController extends BaseController {
 	private ProductGroupPriceService groupPriceService;
 	@Autowired
 	private BookingGuideService bookingGuideService;
+	@Autowired
+	private BookingShopFacade bookingShopFacade;
 
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model,
@@ -1706,12 +1712,9 @@ public class QueryController extends BaseController {
 	 */
 	@RequestMapping(value = "/guestShopList.htm")
 	public String toGuestShopList(HttpServletRequest request, ModelMap model) {
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> sourceTypeList = dicService.getListByTypeCode(
-				Constants.GUEST_SOURCE_TYPE, bizId);
-		model.addAttribute("sourceTypeList", sourceTypeList);
+		GuestShopListResult result = bookingShopFacade.toGuestShopList(WebUtils.getCurBizId(request));
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("sourceTypeList", result.getSourceTypeList());
 		// getOrgAndUserTreeJsonStr(model, bizId);
 		return "queries/shop/guestShop-list";
 	}
@@ -1719,43 +1722,16 @@ public class QueryController extends BaseController {
 	@RequestMapping(value = "/guestShopList.do")
 	public String guestShopList(ModelMap model, QueryGuideShop shop,
 			HttpServletRequest request, TourGroupVO groupVo) {
-		PageBean pageBean = new PageBean();
-		if (shop.getPage() == null) {
-			shop.setPage(1);
-		}
-		if (shop.getPageSize() == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(shop.getPageSize());
-		}
-		shop.setBizId(WebUtils.getCurBizId(request));
-		Map paramters = WebUtils.getQueryParamters(request);
-		if (StringUtils.isBlank(groupVo.getSaleOperatorIds())
-				&& StringUtils.isNotBlank(groupVo.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = groupVo.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				shop.setSaleOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-				// paramters.put("saleOperatorIds",
-				// salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		pageBean.setParameter(shop);
-		pageBean.setPage(shop.getPage());
-		pageBean = bookingShopService.getGuideShop(pageBean,
-				WebUtils.getDataUserIdSet(request));
-		model.addAttribute("shoppingDataState", shop.getShoppingDataState());
-		model.addAttribute("page", pageBean);
+		BookingShopListDTO bookingShopListDTO = new BookingShopListDTO();
+		bookingShopListDTO.setBizId(WebUtils.getCurBizId(request));
+		bookingShopListDTO.setQueryGuideShop(shop);
+		bookingShopListDTO.setOrgIds(groupVo.getOrgIds());
+		bookingShopListDTO.setSaleOperatorIds(groupVo.getSaleOperatorIds());
+		bookingShopListDTO.setDataUserIds(WebUtils.getDataUserIdSet(request));
+		GuestShopResult result = bookingShopFacade.guestShopList(bookingShopListDTO);
+		
+		model.addAttribute("shoppingDataState", result.getShoppingDataState());
+		model.addAttribute("page", result.getPageBean());
 		return "queries/shop/guestShop-listView";
 	}
 
