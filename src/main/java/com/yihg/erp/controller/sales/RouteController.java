@@ -67,7 +67,8 @@ public class RouteController extends BaseController {
 	private ProductRouteService productRouteService;
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
-
+	@Autowired
+	private TeamGroupFacade teamGroupFacade;
 	
 	/**
 	 * 获取用餐列表
