@@ -76,6 +76,10 @@ import com.yihg.supplier.po.SupplierInfo;
 import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
 import com.yihg.sys.po.PlatformOrgPo;
+import com.yimayhd.erpcenter.facade.sales.query.BookingShopDTO;
+import com.yimayhd.erpcenter.facade.sales.result.LoadBookingShopInfoResult;
+import com.yimayhd.erpcenter.facade.sales.result.LoadShopInfoResult;
+import com.yimayhd.erpcenter.facade.sales.service.BookingShopFacade;
 /**
  * @author : xuzejun
  * @date : 2015年7月25日 下午2:31:01
@@ -110,6 +114,8 @@ public class BookingShopController extends BaseController {
 	private PlatformOrgService orgService;
 	@Autowired
 	private PlatformEmployeeService platformEmployeeService;
+	@Autowired
+	private BookingShopFacade bookingShopFacade;
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
 		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
@@ -251,14 +257,15 @@ public class BookingShopController extends BaseController {
 	}
 	
 	private String loadBookingShopInfo(ModelMap model,Integer groupId,Integer type){
-		List<BookingShop> shoplist = bookingShopService.getShopListByGroupId(groupId);
+		LoadBookingShopInfoResult result = bookingShopFacade.loadBookingShopInfo(groupId);
+		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop> shoplist = result.getBookingShops();
 		model.addAttribute("shoplist", shoplist);
 		model.addAttribute("groupId", groupId);
 		if(type==1){
 			return "operation/shop/alltoShop-list";
 		}else{
 			model.addAttribute("view", 1);
-			TourGroupPriceAndPersons tourGroupInfo = tourGroupService.selectTourGroupInfo(groupId);
+			com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroupPriceAndPersons tourGroupInfo = result.getTourGroupPriceAndPersons();
 			tourGroupInfo.setProfit(tourGroupInfo.getIncomeIncome()-tourGroupInfo.getCostTotalPrice());
 			tourGroupInfo.setTotalProfit(tourGroupInfo.getProfit()/tourGroupInfo.getTotalAdult());
 			model.addAttribute("tourGroupInfo", tourGroupInfo);
@@ -310,24 +317,14 @@ public class BookingShopController extends BaseController {
 	
 	private String loadShopInfo(ModelMap model,Integer groupId,Integer id){
 		model.addAttribute("groupId", groupId);
-		//TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
-		if(id!=null){
-			BookingShop shop = bookingShopService.selectByPrimaryKey(id);
-			model.addAttribute("shop", shop);
-			
-			int count = shopDetailDeployService.getCountByShopId(id);
-			BigDecimal total = shopDetailDeployService.getSumBuyTotalByBookingId(id);
-			List<BookingShopDetail> lists = shopDetailService.getShopDetailListByBookingId(id);
-			if(!((count>0 && (total.compareTo(BigDecimal.ZERO))!=0) || lists.size()>0)){
-				model.addAttribute("isEdit", "edit");
-			}
-		}else{
-			model.addAttribute("isEdit", "edit");
-		}
-		//查询导游列表
-		List<BookingGuide> guides = bookingGuideService.selectGuidesByGroupId(groupId);
-		model.addAttribute("guides", guides);
-		//model.addAttribute("tourGroup", tourGroup);
+		BookingShopDTO bookingShopDTO = new BookingShopDTO();
+		bookingShopDTO.setGroupId(groupId);
+		bookingShopDTO.setShopId(id);
+		LoadShopInfoResult result = bookingShopFacade.loadShopInfo(bookingShopDTO);
+		
+		model.addAttribute("shop", result.getBookingShop());
+		model.addAttribute("isEdit", result.getIsEdit());
+		model.addAttribute("guides", result.getBookingGuides());
 		return "operation/shop/edit-shop";
 	}
 	
