@@ -331,6 +331,9 @@
 	<dubbo:reference id="sysSettleApplyFacade"
 		interface="com.yimayhd.erpcenter.facade.sys.service.SysSettleApplyFacade" owner="ly" version="1.0.0.test"
 		timeout="8000" />
+	<dubbo:reference id="bookingShopFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.BookingShopFacade" owner="wj" version="1.0.0.test"
+		timeout="8000" />
 		
 		
 </beans>

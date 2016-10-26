@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
+import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -52,7 +55,6 @@ import com.yihg.sales.api.GroupOrderService;
 import com.yihg.sales.api.TourGroupService;
 import com.yihg.sales.po.GroupOrder;
 import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.TourGroup;
 import com.yihg.sales.po.TourGroupPriceAndPersons;
 import com.yihg.sales.vo.TourGroupVO;
 import com.yihg.supplier.api.SupplierService;
@@ -60,6 +62,12 @@ import com.yihg.supplier.constants.Constants;
 import com.yihg.supplier.po.SupplierInfo;
 import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.facade.sales.query.BookingShopDTO;
+import com.yimayhd.erpcenter.facade.sales.query.BookingShopDetailDeployDTO;
+import com.yimayhd.erpcenter.facade.sales.query.BookingShopListDTO;
+import com.yimayhd.erpcenter.facade.sales.result.ToFactShopResult;
+import com.yimayhd.erpcenter.facade.sales.service.BookingShopFacade;
 /**
  * @author : xuzejun
  * @date : 2015年7月25日 下午2:31:01
@@ -96,6 +104,10 @@ public class BookingGuestShopController extends BaseController {
 	private PlatformEmployeeService platformEmployeeService;
 	@Autowired
 	private PlatformOrgService orgService;
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
+	@Autowired
+	private BookingShopFacade bookingShopFacade;
 	/**
 	 * @author : xuzejun
 	 * @date : 2015年7月25日 下午2:31:01
@@ -105,8 +117,11 @@ public class BookingGuestShopController extends BaseController {
 	@RequiresPermissions(PermissionConstants.JDGL_GUESTSHOPPING)
 	public String toList(ModelMap model,HttpServletRequest request) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult departmentTuneQueryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", departmentTuneQueryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", departmentTuneQueryResult.getOrgUserJsonStr());
 		
 		return "operation/guestShop/shop-list";
 	}
@@ -114,45 +129,13 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/bookingShopList.do")
 	@RequiresPermissions(PermissionConstants.JDGL_GUESTSHOPPING)
 	public String bookingShopList(HttpServletRequest request, ModelMap model,TourGroup group,TourGroupVO groupVo) {
-		PageBean pageBean = new PageBean();
-		if(group.getPage()==null){
-			group.setPage(1);
-		}
-		if(group.getPageSize()==null){
-			pageBean.setPageSize(Constants.PAGESIZE);
-		}else{
-			pageBean.setPageSize(group.getPageSize());
-		}
-		Map paramters = WebUtils.getQueryParamters(request);
-		if(StringUtils.isBlank(groupVo.getSaleOperatorIds()) && StringUtils.isNotBlank(groupVo.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = groupVo.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-				//paramters.put("saleOperatorIds", salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		pageBean.setParameter(group);
-		pageBean.setPage(group.getPage());
-		
-		pageBean = tourGroupService.selectBookingShopListPage(pageBean, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
-		/*fillData(pageBean.getResult());
-		if (pageBean.getResult()!=null&&pageBean.getResult().size()>0) {
-			for (BookingGroup bGroup : (List<BookingGroup>) pageBean.getResult()) {
-				
-				List<GroupOrder> gOrders = groupOrderService
-						.selectOrderByGroupId(bGroup.getGroupId());
-				bGroup.setGroupOrderList(gOrders);
-			}
-		}*/
+		BookingShopListDTO bookingShopListDTO = new BookingShopListDTO();
+		bookingShopListDTO.setGroup(group);
+		bookingShopListDTO.setBizId(WebUtils.getCurBizId(request));
+		bookingShopListDTO.setOrgIds(groupVo.getOrgIds());
+		bookingShopListDTO.setSaleOperatorIds(groupVo.getSaleOperatorIds());
+		bookingShopListDTO.setIds(WebUtils.getDataUserIdSet(request));
+		PageBean pageBean = bookingShopFacade.bookingShopList(bookingShopListDTO);
 		model.addAttribute("page", pageBean);
 		return "operation/guestShop/shop-listView";
 	}
@@ -186,9 +169,9 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/shopDetailList.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_GUESTSHOPPING)
 	public String shopDetailList( ModelMap model,Integer groupId) {
-		List<BookingShop> bookingShops=bookingShopService.getShopListByGroupId(groupId);
+		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop> bookingShops = bookingShopFacade.shopDetailList(groupId);
 		BigDecimal count=new BigDecimal(0);
-		for (BookingShop bookingShop : bookingShops) {
+		for (com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop bookingShop : bookingShops) {
 			if(bookingShop.getTotalMoney()!=null){
 				count=count.add(bookingShop.getTotalMoney());
 			}
@@ -307,16 +290,13 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/toFactShop.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_GUESTSHOPPING)
 	public String toFactShop(Integer id,Integer groupId,ModelMap model) {
-	
-		BookingShop shop =bookingShopService.selectByPrimaryKey(id);
-		//查询实际消费返款列表
-		//List<BookingShopDetail> shopDetails =shopDetailService.getShopDetailListByBookingId(id);
-		//查询分摊
-		List<BookingShopDetailDeploy> detailDeploys = selectShopDetail(id,
-				groupId);
+		BookingShopDTO bookingShopDTO = new BookingShopDTO();
+		bookingShopDTO.setShopId(id);
+		bookingShopDTO.setGroupId(groupId);
+		ToFactShopResult result = bookingShopFacade.toFactShop(bookingShopDTO);
 		model.addAttribute("id", id);
-		model.addAttribute("detailDeploys", detailDeploys);
-		model.addAttribute("shop", shop);
+		model.addAttribute("detailDeploys", result.getDetailDeploys());
+		model.addAttribute("shop", result.getShop());
 		return "operation/guestShop/factShopView";
 	}
 
@@ -503,19 +483,20 @@ public class BookingGuestShopController extends BaseController {
 	 */
 	@RequestMapping(value = "/saveDeploy.do")
 	@ResponseBody
-	public String saveShopDetail(BookingShopDetailDeployVO deployVO) {
-		return shopDetailDeployService.insertSelective(deployVO)>0?successJson():errorJson("操作失败！");
+	public String saveShopDetail(com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingShopDetailDeployVO deployVO) {
+		BookingShopDetailDeployDTO bookingShopDetailDeployDTO = new BookingShopDetailDeployDTO();
+		bookingShopDetailDeployDTO.setBookingShopDetailDeployVO(deployVO);
+		int result = bookingShopFacade.saveDeploy(bookingShopDetailDeployDTO);
+		return result>0?successJson():errorJson("操作失败！");
 	}
 	
 	@RequestMapping("delBookingShop.do")
 	@ResponseBody
 	public String delBookingShop(Integer bookingId){
-		//shopDetailService.deleteByBookingId(bookingId);
-		//bookingShopService.deleteByPrimaryKey(bookingId);
 		if(bookingId==null){
 			return errorJson("请选择要删除的购物数据");
 		}
-		int result = shopDetailDeployService.deleteByShopId(bookingId);
+		int result = bookingShopFacade.delBookingShop(bookingId);
 		if(result>0){
 			return successJson();			
 		}
@@ -523,21 +504,13 @@ public class BookingGuestShopController extends BaseController {
 	}
 	@RequestMapping("toEditShop.htm")
 	public String toAddShop(Integer groupId,HttpServletRequest request,HttpServletResponse response,ModelMap model){
-		//List<BookingShop> bookingShops = bookingShopService.getShopListByGroupId(groupId);
-		//
-		//List<GroupOrder> groupOrders = groupOrderService.selectOrderByGroupId(groupId);
 		model.addAttribute("groupId", groupId);
-		//TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);		
-		List<Map<String, Object>> bookingGroups = groupOrderService.getGroupInfoByGroupId(groupId, WebUtils.getCurBizId(request));
-		if(bookingGroups!=null && bookingGroups.size()>0){
-			for(Map<String, Object> map : bookingGroups){				
-				Integer orderId =TypeUtils.castToInt(map.get("orderId"));
-				List<Map<String, Object>> bookingShops = bookingShopService.getBookingShops(groupId, orderId);				
-				map.put("deploys", bookingShops);
-			}
-		}
+		BookingShopDTO bookingShopDTO = new BookingShopDTO();
+		bookingShopDTO.setGroupId(groupId);
+		bookingShopDTO.setBizId(WebUtils.getCurBizId(request));
+		List<Map<String, Object>> result = bookingShopFacade.toEditShop(bookingShopDTO);
 		
-		model.addAttribute("bookingGroups", bookingGroups);		
+		model.addAttribute("bookingGroups", result);		
 		return "operation/guestShop/editShop";
 		
 	}
@@ -545,10 +518,7 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/saveDeploys.do")
 	@ResponseBody
 	public String saveShopDetails(String shopDetails) {
-		List<BookingShopDetailDeploy> shopDetails2 = JSON.parseArray(shopDetails, BookingShopDetailDeploy.class);
-		BookingShopDetailDeployVO	deployVO=new BookingShopDetailDeployVO();
-		deployVO.setDetail(shopDetails2);
-		shopDetailDeployService.updateBookingShopDetailDeploy(deployVO);
+		bookingShopFacade.saveShopDetails(shopDetails);
 		return successJson();
 	}
 	/*
