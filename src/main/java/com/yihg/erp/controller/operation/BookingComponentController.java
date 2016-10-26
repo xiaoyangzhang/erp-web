@@ -307,9 +307,10 @@ public class BookingComponentController extends BaseController {
 		model.addAttribute("config", config);
 		model.addAttribute("page", page);
 		model.addAttribute("supplierCar", supplierCar);
-		List<DicInfo> list = dicService
-				.getListByTypeCode(Constants.FLEET_TYPE_CODE);
-		model.addAttribute("carType", list);
+//		List<DicInfo> list = dicService
+//				.getListByTypeCode(Constants.FLEET_TYPE_CODE);
+		List<com.yimayhd.erpcenter.dal.basic.po.DicInfo> carTypeList = saleCommonFacade.getCarListByTypeCode();
+		model.addAttribute("carType", carTypeList);
 		return "/operation/supplier/car/supplierCarList";
 	}
 	
