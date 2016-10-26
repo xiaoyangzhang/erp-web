@@ -177,6 +177,7 @@ public class FitGroupController extends BaseController {
 		
 	}
 
+	//合团
 	@RequestMapping(value = "toSecImpNotGroupList.htm")
 	@RequiresPermissions(PermissionConstants.SALE_SK_ORDER)
 	public String toSecImpNotGroupList(HttpServletRequest request,
