@@ -134,7 +134,7 @@ public class BookingGuestShopController extends BaseController {
 		bookingShopListDTO.setBizId(WebUtils.getCurBizId(request));
 		bookingShopListDTO.setOrgIds(groupVo.getOrgIds());
 		bookingShopListDTO.setSaleOperatorIds(groupVo.getSaleOperatorIds());
-		bookingShopListDTO.setIds(WebUtils.getDataUserIdSet(request));
+		bookingShopListDTO.setDataUserIds(WebUtils.getDataUserIdSet(request));
 		PageBean pageBean = bookingShopFacade.bookingShopList(bookingShopListDTO);
 		model.addAttribute("page", pageBean);
 		return "operation/guestShop/shop-listView";

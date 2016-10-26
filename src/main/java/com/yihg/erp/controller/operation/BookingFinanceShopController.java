@@ -22,6 +22,9 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
+
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -35,6 +38,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xmlbeans.impl.xb.xsdschema.Public;
+import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
+import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -135,6 +141,8 @@ public class BookingFinanceShopController extends BaseController {
 	private PlatformEmployeeService platformEmployeeService;
 	@Autowired
     private ContractService contractService;
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
 	
 	/**
 	 * @author : xuzejun
@@ -145,10 +153,13 @@ public class BookingFinanceShopController extends BaseController {
 	@RequiresPermissions(PermissionConstants.CWGL_FINANCESHOPPING)
 	public String toList(HttpServletRequest request,ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
 		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
+				result.getOrgJsonStr());
 		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+				result.getOrgUserJsonStr());
 		return "operation/financeShop/shop-list";
 	}
 	
