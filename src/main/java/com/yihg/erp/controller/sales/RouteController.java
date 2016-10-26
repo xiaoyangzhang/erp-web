@@ -9,6 +9,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.erpcenterFacade.common.client.query.BrandQueryDTO;
+import org.erpcenterFacade.common.client.result.BrandQueryResult;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +61,9 @@ public class RouteController extends BaseController {
 	private SysConfig config;
 	@Autowired
 	private ProductRouteService productRouteService;
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
+
 	
 	/**
 	 * 获取用餐列表
@@ -94,8 +100,11 @@ public class RouteController extends BaseController {
 		//List<RegionInfo> allProvince = regionService.getAllProvince();
 		//产品名称
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> brandList = dicService
-				.getListByTypeCode(BasicConstants.CPXL_PP,bizId);
+		//List<DicInfo> brandList = dicService
+		//		.getListByTypeCode(BasicConstants.CPXL_PP,bizId);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
 		if(page==null){
 			page=1;
 		}
@@ -114,7 +123,7 @@ public class RouteController extends BaseController {
 
 		//pageBean = productInfoService.findProductInfos(pageBean, bizId,name, productName,WebUtils.getCurUser(request).getOrgId());
 		//model.addAttribute("allProvince",allProvince);
-		model.addAttribute("brandList", brandList);
+		model.addAttribute("brandList", brandQueryResult.getBrandList());
 		model.addAttribute("state", productInfo.getState());
 		//model.addAttribute("page", pageBean);
 		log.info("跳转到产品查询列表页面");
