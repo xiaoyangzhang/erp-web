@@ -32,7 +32,6 @@ import com.yimayhd.erpcenter.facade.sales.result.FitGroupInfoQueryResult;
 import com.yimayhd.erpcenter.facade.sales.result.FitTotalSKGroupQueryResult;
 import com.yimayhd.erpcenter.facade.sales.result.FitUpdateStateResult;
 import com.yimayhd.erpcenter.facade.sales.service.FitGroupFacade;
-import com.yimayhd.erpcenter.facade.sales.service.GroupQueryPrintFacade;
 
 @Controller
 @RequestMapping(value = "/fitGroup")
