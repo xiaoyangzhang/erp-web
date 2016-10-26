@@ -125,7 +125,7 @@ import com.yimayhd.erpcenter.facade.sales.query.ToOrderLockTableDTO;
 import com.yimayhd.erpcenter.facade.sales.result.FitUpdateStateResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockListResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockTableResult;
-import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
+import com.yimayhd.erpcenter.facade.sales.service.GroupOrderLockFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 
 @Controller
@@ -211,7 +211,7 @@ public class GroupOrderController extends BaseController {
 	private ProductCommonFacade productCommonFacade;
 	
 	@Autowired
-	private GroupOrderFacade groupOrderFacade;
+	private GroupOrderLockFacade groupOrderLockFacade;
 
 	
 	/**
@@ -456,7 +456,7 @@ public class GroupOrderController extends BaseController {
 //			return errorJson("服务器忙！");
 //		}
 		
-		FitUpdateStateResult result = groupOrderFacade.updateOrderLockState(orderId, orderLockState);
+		FitUpdateStateResult result = groupOrderLockFacade.updateOrderLockState(orderId, orderLockState);
 		if(result.isSuccess()){
 			Map<String, Object> map = new HashMap<String, Object>() ;
 			map.put("orderLockState", orderLockState) ;
@@ -504,7 +504,7 @@ public class GroupOrderController extends BaseController {
 //		return "sales/orderLock/orderLockList";
 		
 		Integer bizId = WebUtils.getCurBizId(request);
-		ToOrderLockListResult toOrderLockListResult=groupOrderFacade.toOrderLockList(bizId);
+		ToOrderLockListResult toOrderLockListResult=groupOrderLockFacade.toOrderLockList(bizId);
 		
 		model.addAttribute("allProvince", toOrderLockListResult.getAllProvince());
 		model.addAttribute("orgJsonStr",toOrderLockListResult.getOrgJsonStr());
@@ -579,7 +579,7 @@ public class GroupOrderController extends BaseController {
 		orderLockTableDTO.setOrder(order);
 		orderLockTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 		
-		ToOrderLockTableResult toOrderLockTableResult=groupOrderFacade.toOrderLockTable(orderLockTableDTO);
+		ToOrderLockTableResult toOrderLockTableResult=groupOrderLockFacade.toOrderLockTable(orderLockTableDTO);
 		model.addAttribute("totalPb", toOrderLockTableResult.getTotalPb());
 		model.addAttribute("page", toOrderLockTableResult.getPageBean());
 		model.addAttribute("orders", toOrderLockTableResult.getPageBean().getResult());
