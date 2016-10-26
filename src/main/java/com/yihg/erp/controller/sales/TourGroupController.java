@@ -153,7 +153,7 @@ import com.yimayhd.erpcenter.facade.sales.result.ProfitQueryByTourResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockListResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToProfitQueryTableResult;
 import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
-import com.yimayhd.erpcenter.facade.sales.service.TourGroupProfitFacade;
+import com.yimayhd.erpcenter.facade.sales.service.GroupProfitFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 
 @Controller
@@ -239,7 +239,7 @@ public class TourGroupController extends BaseController {
 	private FinanceService financeService;
 	
 	@Autowired
-	private TourGroupProfitFacade  tourGroupProfitFacade;
+	private GroupProfitFacade  tourGroupProfitFacade;
 	
 	@Autowired
 	private GroupOrderFacade groupOrderFacade;

@@ -26,7 +26,7 @@ import com.yihg.sales.api.GroupOrderService;
 import com.yihg.sales.po.GroupOrderPrice;
 import com.yihg.sales.vo.CostIncome;
 import com.yimayhd.erpcenter.facade.sales.query.ToAddProfitChangeDTO;
-import com.yimayhd.erpcenter.facade.sales.service.TourGroupProfitFacade;
+import com.yimayhd.erpcenter.facade.sales.service.GroupProfitFacade;
 
 @Controller
 @RequestMapping(value = "/costItem")
@@ -44,7 +44,7 @@ public class CostItemController extends BaseController {
 	private DicService dicService ;
 	
 	@Autowired
-	private TourGroupProfitFacade tourGroupProfitFacade;
+	private GroupProfitFacade tourGroupProfitFacade;
 	
 	@RequestMapping(value="/toSaveCostIncome",method=RequestMethod.POST)
 	@ResponseBody
