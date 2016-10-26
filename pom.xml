@@ -363,6 +363,11 @@
 			  <artifactId>erpcenterFacade-common-client</artifactId>
 			  <version>${facade-common-client.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.yimayhd.erpresource</groupId>
+			  <artifactId>erpresourceDAL-client</artifactId>
+			  <version>0.0.8-SNAPSHOT</version>
+		</dependency>
  
 
 
