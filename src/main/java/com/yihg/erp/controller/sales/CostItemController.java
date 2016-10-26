@@ -19,13 +19,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.sales.api.GroupOrderPriceService;
 import com.yihg.sales.api.GroupOrderService;
 import com.yihg.sales.po.GroupOrderPrice;
 import com.yihg.sales.vo.CostIncome;
+import com.yimayhd.erpcenter.facade.sales.query.ToAddProfitChangeDTO;
+import com.yimayhd.erpcenter.facade.sales.service.TourGroupProfitFacade;
 
 @Controller
 @RequestMapping(value = "/costItem")
@@ -41,6 +42,9 @@ public class CostItemController extends BaseController {
 	
 	@Autowired
 	private DicService dicService ;
+	
+	@Autowired
+	private TourGroupProfitFacade tourGroupProfitFacade;
 	
 	@RequestMapping(value="/toSaveCostIncome",method=RequestMethod.POST)
 	@ResponseBody
@@ -116,21 +120,32 @@ public class CostItemController extends BaseController {
 	@RequestMapping(value = "toAddProfitChange.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String toAddProfitChange(BigDecimal price,Integer id,HttpServletRequest request){
-		GroupOrderPrice gop = new GroupOrderPrice() ;
-		gop.setOrderId(id);
-		gop.setMode(1);
-		gop.setRowState(1);
-		gop.setPriceLockState(0);
-		gop.setTotalPrice(price.doubleValue());
-		gop.setItemName("其他");
-		gop.setItemId(153);
-		gop.setCreateTime(new Date().getTime());
-		gop.setCreatorId(WebUtils.getCurUserId(request));
-		gop.setCreatorName(WebUtils.getCurUser(request).getName());
-		gop.setUnitPrice(price.doubleValue());
-		gop.setNumTimes(new Double(1));
-		gop.setNumPerson(new Double(1));
-		groupOrderPriceService.insertSelective(gop) ;
+		
+//		GroupOrderPrice gop = new GroupOrderPrice() ;
+//		gop.setOrderId(id);
+//		gop.setMode(1);
+//		gop.setRowState(1);
+//		gop.setPriceLockState(0);
+//		gop.setTotalPrice(price.doubleValue());
+//		gop.setItemName("其他");
+//		gop.setItemId(153);
+//		gop.setCreateTime(new Date().getTime());
+//		gop.setCreatorId(WebUtils.getCurUserId(request));
+//		gop.setCreatorName(WebUtils.getCurUser(request).getName());
+//		gop.setUnitPrice(price.doubleValue());
+//		gop.setNumTimes(new Double(1));
+//		gop.setNumPerson(new Double(1));
+//		groupOrderPriceService.insertSelective(gop) ;
+		
+		ToAddProfitChangeDTO profitChangeDTO=new ToAddProfitChangeDTO();
+		
+		profitChangeDTO.setId(id);
+		profitChangeDTO.setCreatorId(WebUtils.getCurUserId(request));
+		profitChangeDTO.setCreatorName(WebUtils.getCurUser(request).getName());
+		profitChangeDTO.setPrice(price);
+		
+		tourGroupProfitFacade.toAddProfitChange(profitChangeDTO);
+		
 		return successJson() ;
 	}
 }

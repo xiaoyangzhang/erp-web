@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +95,6 @@ import com.yihg.sales.api.GroupRequirementService;
 import com.yihg.sales.api.GroupRouteService;
 import com.yihg.sales.api.TourGroupService;
 import com.yihg.sales.po.GroupGuidePrintPo;
-import com.yihg.sales.po.GroupOrder;
 import com.yihg.sales.po.GroupOrderGuest;
 import com.yihg.sales.po.GroupOrderPrice;
 import com.yihg.sales.po.GroupOrderPrintPo;
@@ -119,7 +119,13 @@ import com.yihg.supplier.po.SupplierContactMan;
 import com.yihg.supplier.po.SupplierGuide;
 import com.yihg.supplier.po.SupplierInfo;
 import com.yihg.sys.api.PlatformOrgService;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.facade.sales.query.ToOrderLockTableDTO;
+import com.yimayhd.erpcenter.facade.sales.result.FitUpdateStateResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockListResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockTableResult;
+import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 
 @Controller
@@ -200,6 +206,12 @@ public class GroupOrderController extends BaseController {
 	
 	@Autowired
 	private SupplierService supplierInfoService ;
+	
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
+	
+	@Autowired
+	private GroupOrderFacade groupOrderFacade;
 
 	
 	/**
@@ -435,35 +447,45 @@ public class GroupOrderController extends BaseController {
 	@RequestMapping(value = "/updateOrderLockState.do")
 	@ResponseBody
 	public String updateOrderLockState(Integer orderId,Integer orderLockState) {
-		int i = groupOrderService.updateOrderLockState(orderId, orderLockState);
-		Map<String, Object> map = new HashMap<String, Object>() ;
-		map.put("orderLockState", orderLockState) ;
-		if(i==1){
+//		int i = groupOrderService.updateOrderLockState(orderId, orderLockState);
+//		Map<String, Object> map = new HashMap<String, Object>() ;
+//		map.put("orderLockState", orderLockState) ;
+//		if(i==1){
+//			return successJson(map);
+//		}else{
+//			return errorJson("服务器忙！");
+//		}
+		
+		FitUpdateStateResult result = groupOrderFacade.updateOrderLockState(orderId, orderLockState);
+		if(result.isSuccess()){
+			Map<String, Object> map = new HashMap<String, Object>() ;
+			map.put("orderLockState", orderLockState) ;
 			return successJson(map);
 		}else{
-			return errorJson("服务器忙！");
+			return errorJson(result.getError());
 		}
-		
 	}
-	/**
-	 * 更新订单锁单状态
-	 * @param request
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping(value = "/batchUpdateOrderLockState.do")
-	@ResponseBody
-	public String batchUpdateOrderLockState(Integer orderId,Integer orderLockState) {
-		int i = groupOrderService.updateOrderLockState(orderId, orderLockState);
-		Map<String, Object> map = new HashMap<String, Object>() ;
-		map.put("orderLockState", orderLockState) ;
-		if(i==1){
-			return successJson(map);
-		}else{
-			return errorJson("服务器忙！");
-		}
-		
-	}
+	
+//	//FIXME 这批量咋处理的？？
+//	/**
+//	 * 更新订单锁单状态
+//	 * @param request
+//	 * @param model
+//	 * @return
+//	 */
+//	@RequestMapping(value = "/batchUpdateOrderLockState.do")
+//	@ResponseBody
+//	public String batchUpdateOrderLockState(Integer orderId,Integer orderLockState) {
+//		int i = groupOrderService.updateOrderLockState(orderId, orderLockState);
+//		Map<String, Object> map = new HashMap<String, Object>() ;
+//		map.put("orderLockState", orderLockState) ;
+//		if(i==1){
+//			return successJson(map);
+//		}else{
+//			return errorJson("服务器忙！");
+//		}
+//	}
+	
 	/**
 	 * 锁单列表
 	 * @param request
@@ -472,13 +494,23 @@ public class GroupOrderController extends BaseController {
 	 */
 	@RequestMapping(value = "/toOrderLockList.htm")
 	public String toOrderLockList(HttpServletRequest request, Model model) {
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		Integer bizId = WebUtils.getCurBizId(request);
+//		model.addAttribute("allProvince", allProvince);
+//		model.addAttribute("orgJsonStr",
+//				orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr",
+//				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+//		return "sales/orderLock/orderLockList";
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("allProvince", allProvince);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+		ToOrderLockListResult toOrderLockListResult=groupOrderFacade.toOrderLockList(bizId);
+		
+		model.addAttribute("allProvince", toOrderLockListResult.getAllProvince());
+		model.addAttribute("orgJsonStr",toOrderLockListResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",toOrderLockListResult.getOrgUserJsonStr());
+		
+		
 		return "sales/orderLock/orderLockList";
 	}
 
@@ -495,53 +527,66 @@ public class GroupOrderController extends BaseController {
 	public String toOrderLockTable(HttpServletRequest request, Model model,
 			GroupOrder order) throws ParseException {
 		
-		if (order != null && order.getDateType() == 2) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			if (!"".equals(order.getStartTime())) {
-				order.setStartTime(sdf.parse(order.getStartTime())
-						.getTime() + "");
-			}
-			if (!"".equals(order.getEndTime())) {
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime(sdf.parse(order.getEndTime()));
-				calendar.add(Calendar.DAY_OF_MONTH, +1);// 让日期加1
-				order.setEndTime(calendar.getTime().getTime() + "");
-			}
-		}
+//		if (order != null && order.getDateType() == 2) {
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//			if (!"".equals(order.getStartTime())) {
+//				order.setStartTime(sdf.parse(order.getStartTime())
+//						.getTime() + "");
+//			}
+//			if (!"".equals(order.getEndTime())) {
+//				Calendar calendar = Calendar.getInstance();
+//				calendar.setTime(sdf.parse(order.getEndTime()));
+//				calendar.add(Calendar.DAY_OF_MONTH, +1);// 让日期加1
+//				order.setEndTime(calendar.getTime().getTime() + "");
+//			}
+//		}
+//		
+//		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+//		pageBean.setPage(order.getPage());
+//		pageBean.setPageSize(order.getPageSize() == null ? Constants.PAGESIZE
+//				: order.getPageSize());
+//		pageBean.setParameter(order);
+//		// 如果人员为空并且部门不为空，则取部门下的人id
+//		if (StringUtils.isBlank(order.getSaleOperatorIds())
+//				&& StringUtils.isNotBlank(order.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = order.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
+//					WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				order.setSaleOperatorIds(salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//			}
+//		}
+//		pageBean = groupOrderService.selectOrderLockByConListPage(pageBean,
+//				WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+//		String totalPb = groupOrderService.selectOrderLockByCon(pageBean,
+//				WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+//		model.addAttribute("totalPb", totalPb);
+//		model.addAttribute("page", pageBean);
+//		model.addAttribute("orders", pageBean.getResult());
+//		return "sales/orderLock/orderLockTable";
 		
-		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
-		pageBean.setPage(order.getPage());
-		pageBean.setPageSize(order.getPageSize() == null ? Constants.PAGESIZE
-				: order.getPageSize());
-		pageBean.setParameter(order);
-		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(order.getSaleOperatorIds())
-				&& StringUtils.isNotBlank(order.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = order.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				order.setSaleOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
-		pageBean = groupOrderService.selectOrderLockByConListPage(pageBean,
-				WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
-		String totalPb = groupOrderService.selectOrderLockByCon(pageBean,
-				WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
-		model.addAttribute("totalPb", totalPb);
-		model.addAttribute("page", pageBean);
-		model.addAttribute("orders", pageBean.getResult());
+		ToOrderLockTableDTO orderLockTableDTO=new ToOrderLockTableDTO();
+		orderLockTableDTO.setBizId(WebUtils.getCurBizId(request));
+		orderLockTableDTO.setOrder(order);
+		orderLockTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		
+		ToOrderLockTableResult toOrderLockTableResult=groupOrderFacade.toOrderLockTable(orderLockTableDTO);
+		model.addAttribute("totalPb", toOrderLockTableResult.getTotalPb());
+		model.addAttribute("page", toOrderLockTableResult.getPageBean());
+		model.addAttribute("orders", toOrderLockTableResult.getPageBean().getResult());
+		
 		return "sales/orderLock/orderLockTable";
 	}
+	
 	@RequestMapping(value = "insertGroupMany.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String insertGroupMany(HttpServletRequest request,
