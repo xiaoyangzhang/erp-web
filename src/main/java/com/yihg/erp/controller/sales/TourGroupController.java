@@ -39,6 +39,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
+import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,7 +112,7 @@ import com.yihg.sales.po.AssistantSupplier;
 import com.yihg.sales.po.AssistantSupplierImg;
 import com.yihg.sales.po.AssistantSupplierImgType;
 import com.yihg.sales.po.AutocompleteInfo;
-import com.yihg.sales.po.GroupOrder;
+//import com.yihg.sales.po.GroupOrder;
 import com.yihg.sales.po.GroupOrderGuest;
 import com.yihg.sales.po.GroupOrderPrice;
 import com.yihg.sales.po.GroupOrderPrintPo;
@@ -118,7 +121,7 @@ import com.yihg.sales.po.GroupRequirement;
 import com.yihg.sales.po.GroupRoute;
 import com.yihg.sales.po.GroupRouteAttachment;
 import com.yihg.sales.po.GroupRouteSupplier;
-import com.yihg.sales.po.TourGroup;
+//import com.yihg.sales.po.TourGroup;
 import com.yihg.sales.vo.AssistantGroupVO;
 import com.yihg.sales.vo.AssistantSupplierVO;
 import com.yihg.sales.vo.GroupPriceVo;
@@ -141,7 +144,16 @@ import com.yihg.sys.api.SysBizBankAccountService;
 import com.yihg.sys.po.SysBizBankAccount;
 import com.yihg.travel.api.TravelHistoryRouteService;
 import com.yihg.travel.po.TravelHistoryRoute;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.facade.sales.query.ProfitQueryByTourDTO;
+import com.yimayhd.erpcenter.facade.sales.query.ToOrderLockTableDTO;
+import com.yimayhd.erpcenter.facade.sales.result.ProfitQueryByTourResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockListResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToProfitQueryTableResult;
+import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
+import com.yimayhd.erpcenter.facade.sales.service.TourGroupProfitFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 
 @Controller
@@ -225,6 +237,16 @@ public class TourGroupController extends BaseController {
 	
 	@Autowired
 	private FinanceService financeService;
+	
+	@Autowired
+	private TourGroupProfitFacade  tourGroupProfitFacade;
+	
+	@Autowired
+	private GroupOrderFacade groupOrderFacade;
+	
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
+	
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
 		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
@@ -2582,15 +2604,28 @@ public class TourGroupController extends BaseController {
 	 */
 	@RequestMapping(value = "/toProfitQueryList.htm")
 	public String toProfitQueryList(HttpServletRequest request, Model model) {
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-
+		
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+//
+//		Integer bizId = WebUtils.getCurBizId(request);
+//		model.addAttribute("orgJsonStr",
+//				orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr",
+//				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+//		model.addAttribute("bizId",bizId) ;
+//		return "sales/profit/profitQuery";
+		
+		//FIXME 这里和GroupOrder公共 可以考虑抽取
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+		
+		ToOrderLockListResult result = groupOrderFacade.toOrderLockList(bizId);
+
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("orgJsonStr",result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
 		model.addAttribute("bizId",bizId) ;
+		
 		return "sales/profit/profitQuery";
 	}
 
@@ -2606,43 +2641,57 @@ public class TourGroupController extends BaseController {
 	@RequiresPermissions(PermissionConstants.SALE_TEAM_PROFIT)
 	public String toProfitQueryTable(HttpServletRequest request, Model model,
 			GroupOrder order) {
-		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
-		pageBean.setPage(order.getPage());
-		pageBean.setPageSize(order.getPageSize() == null ? Constants.PAGESIZE
-				: order.getPageSize());
-		pageBean.setParameter(order);
-		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(order.getSaleOperatorIds())
-				&& StringUtils.isNotBlank(order.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = order.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				order.setSaleOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
-		pageBean = groupOrderService.selectProfitByConListPage(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-		GroupOrder staticInfo = groupOrderService.selectProfitByCon(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-		GroupOrder groupOrder = groupOrderService.selectProfitByConAndMode(
-				pageBean, WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-		model.addAttribute("groupOrder", groupOrder);
-		model.addAttribute("staticInfo", staticInfo);
-		model.addAttribute("page", pageBean);
-		model.addAttribute("groupList", pageBean.getResult());
+//		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+//		pageBean.setPage(order.getPage());
+//		pageBean.setPageSize(order.getPageSize() == null ? Constants.PAGESIZE
+//				: order.getPageSize());
+//		pageBean.setParameter(order);
+//		// 如果人员为空并且部门不为空，则取部门下的人id
+//		if (StringUtils.isBlank(order.getSaleOperatorIds())
+//				&& StringUtils.isNotBlank(order.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = order.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
+//					WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				order.setSaleOperatorIds(salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//			}
+//		}
+//		pageBean = groupOrderService.selectProfitByConListPage(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+//		GroupOrder staticInfo = groupOrderService.selectProfitByCon(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+//		GroupOrder groupOrder = groupOrderService.selectProfitByConAndMode(
+//				pageBean, WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+//		model.addAttribute("groupOrder", groupOrder);
+//		model.addAttribute("staticInfo", staticInfo);
+//		model.addAttribute("page", pageBean);
+//		model.addAttribute("groupList", pageBean.getResult());
+//		return "sales/profit/profitQueryTable";
+		
+		//FIXME 这个共用了一次
+		ToOrderLockTableDTO orderLockTableDTO=new ToOrderLockTableDTO();
+		orderLockTableDTO.setBizId(WebUtils.getCurBizId(request));
+		orderLockTableDTO.setOrder(order);
+		orderLockTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		
+		ToProfitQueryTableResult result = tourGroupProfitFacade.toProfitQueryTable(orderLockTableDTO);
+		model.addAttribute("groupOrder", result.getGroupOrder());
+		model.addAttribute("staticInfo", result.getStaticInfo());
+		model.addAttribute("page", result.getPageBean());
+		model.addAttribute("groupList", result.getPageBean().getResult());
+	
 		return "sales/profit/profitQueryTable";
 	}
 	
@@ -2708,65 +2757,101 @@ public class TourGroupController extends BaseController {
 	@RequestMapping(value = "/toProfitQueryListByTour.htm")
 	public String toProfitQueryListByTour(HttpServletRequest request,
 			Model model) {
+//		Integer bizId = WebUtils.getCurBizId(request);
+//		model.addAttribute("orgJsonStr",
+//				orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr",
+//				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+		
+		DepartmentTuneQueryDTO departmentTuneQueryDTO=new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr",result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		
 		return "sales/profit/profitQueryByTour";
 	}
 
+	/**
+	 * 按团查询预算利润
+	 * 
+	 * @param request
+	 * @param model
+	 * @param tour
+	 * @param page
+	 * @param pageSize
+	 * @return
+	 */
 	@RequestMapping(value = "/toProfitQueryTableByTour.htm")
 	public String toProfitQueryTableByTour(HttpServletRequest request,
 			Model model, TourGroup tour, Integer page, Integer pageSize) {
-		PageBean<TourGroup> pageBean = new PageBean<TourGroup>();
-		pageBean.setPage(page);
-		if (pageSize == null) {
-			pageSize = Constants.PAGESIZE;
-		}
-		pageBean.setPageSize(pageSize);
-		pageBean.setParameter(tour);
-		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(tour.getSaleOperatorIds())
-				&& StringUtils.isNotBlank(tour.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = tour.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				tour.setSaleOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
-		pageBean = tourGroupService.selectProfitByTourConListPage(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-		// 统计成人、小孩、全陪
-		PageBean<TourGroup> pb = tourGroupService.selectProfitByTourCon(
-				pageBean, WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-
-		// 总成本、总收入
-		TourGroup group = tourGroupService.selectProfitByTourConAndMode(
-				pageBean, WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-		if (group == null) {
-			group = new TourGroup();
-			group.setIncome(new BigDecimal(0));
-			group.setTotalBudget(new BigDecimal(0));
-		}
-		model.addAttribute("page", pageBean);
-		model.addAttribute("groupList", pageBean.getResult());
-		model.addAttribute("pb", pb.getResult());
-		model.addAttribute("totalBudget", group.getTotalBudget());
-		model.addAttribute("totalIncome", group.getIncome());
+//		PageBean<TourGroup> pageBean = new PageBean<TourGroup>();
+//		pageBean.setPage(page);
+//		if (pageSize == null) {
+//			pageSize = Constants.PAGESIZE;
+//		}
+//		pageBean.setPageSize(pageSize);
+//		pageBean.setParameter(tour);
+//		// 如果人员为空并且部门不为空，则取部门下的人id
+//		if (StringUtils.isBlank(tour.getSaleOperatorIds())
+//				&& StringUtils.isNotBlank(tour.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = tour.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
+//					WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				tour.setSaleOperatorIds(salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//			}
+//		}
+//		pageBean = tourGroupService.selectProfitByTourConListPage(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+//		// 统计成人、小孩、全陪
+//		PageBean<TourGroup> pb = tourGroupService.selectProfitByTourCon(
+//				pageBean, WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+//
+//		// 总成本、总收入
+//		TourGroup group = tourGroupService.selectProfitByTourConAndMode(
+//				pageBean, WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+//		if (group == null) {
+//			group = new TourGroup();
+//			group.setIncome(new BigDecimal(0));
+//			group.setTotalBudget(new BigDecimal(0));
+//		}
+//		model.addAttribute("page", pageBean);
+//		model.addAttribute("groupList", pageBean.getResult());
+//		model.addAttribute("pb", pb.getResult());
+//		model.addAttribute("totalBudget", group.getTotalBudget());
+//		model.addAttribute("totalIncome", group.getIncome());
+				
+		ProfitQueryByTourDTO profitQueryByTourDTO=new ProfitQueryByTourDTO();
+		profitQueryByTourDTO.setBizId(WebUtils.getCurBizId(request));
+		profitQueryByTourDTO.setTour(tour);
+		profitQueryByTourDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		profitQueryByTourDTO.setPage(page);
+		profitQueryByTourDTO.setPageSize(pageSize);
+		
+		ProfitQueryByTourResult profitQueryByTourResult=tourGroupProfitFacade.toProfitQueryTableByTour(profitQueryByTourDTO);
+		
+		model.addAttribute("page", profitQueryByTourResult.getPageBean());
+		model.addAttribute("groupList", profitQueryByTourResult.getPageBean().getResult());
+		model.addAttribute("pb",profitQueryByTourResult.getPb().getResult());
+		model.addAttribute("totalBudget", profitQueryByTourResult.getGroup().getTotalBudget());
+		model.addAttribute("totalIncome", profitQueryByTourResult.getGroup().getIncome());
+		
 		return "sales/profit/profitQueryTableByTour";
 	}
 
