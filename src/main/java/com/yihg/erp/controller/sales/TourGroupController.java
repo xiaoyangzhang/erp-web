@@ -115,7 +115,7 @@ import com.yihg.sales.po.AutocompleteInfo;
 //import com.yihg.sales.po.GroupOrder;
 import com.yihg.sales.po.GroupOrderGuest;
 import com.yihg.sales.po.GroupOrderPrice;
-import com.yihg.sales.po.GroupOrderPrintPo;
+//import com.yihg.sales.po.GroupOrderPrintPo;
 import com.yihg.sales.po.GroupOrderTransport;
 import com.yihg.sales.po.GroupRequirement;
 import com.yihg.sales.po.GroupRoute;
@@ -124,8 +124,8 @@ import com.yihg.sales.po.GroupRouteSupplier;
 //import com.yihg.sales.po.TourGroup;
 import com.yihg.sales.vo.AssistantGroupVO;
 import com.yihg.sales.vo.AssistantSupplierVO;
-import com.yihg.sales.vo.GroupPriceVo;
-import com.yihg.sales.vo.GroupRouteDayVO;
+//import com.yihg.sales.vo.GroupPriceVo;
+//import com.yihg.sales.vo.GroupRouteDayVO;
 import com.yihg.sales.vo.GroupRouteVO;
 import com.yihg.sales.vo.OtherInfoVO;
 import com.yihg.supplier.api.SupplierDriverService;
@@ -145,15 +145,21 @@ import com.yihg.sys.po.SysBizBankAccount;
 import com.yihg.travel.api.TravelHistoryRouteService;
 import com.yihg.travel.po.TravelHistoryRoute;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupPriceVo;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupRouteDayVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.facade.sales.query.ProfitQueryByTourDTO;
 import com.yimayhd.erpcenter.facade.sales.query.ToOrderLockTableDTO;
+import com.yimayhd.erpcenter.facade.sales.query.ToSKConfirmPreviewDTO;
 import com.yimayhd.erpcenter.facade.sales.result.ProfitQueryByTourResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockListResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToProfitQueryTableResult;
-import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
-import com.yimayhd.erpcenter.facade.sales.service.TourGroupProfitFacade;
+import com.yimayhd.erpcenter.facade.sales.result.ToSKConfirmPreviewResult;
+import com.yimayhd.erpcenter.facade.sales.service.GroupOrderLockFacade;
+import com.yimayhd.erpcenter.facade.sales.service.GroupProfitFacade;
+import com.yimayhd.erpcenter.facade.sales.service.GroupQueryPrintFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 
 @Controller
@@ -239,13 +245,16 @@ public class TourGroupController extends BaseController {
 	private FinanceService financeService;
 	
 	@Autowired
-	private TourGroupProfitFacade  tourGroupProfitFacade;
+	private GroupProfitFacade  tourGroupProfitFacade;//利润
 	
 	@Autowired
-	private GroupOrderFacade groupOrderFacade;
+	private GroupOrderLockFacade groupOrderLockFacade;//锁单
 	
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
+	
+	@Autowired
+	private GroupQueryPrintFacade groupQueryPrintFacade;//查询打印
 	
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
@@ -2619,7 +2628,7 @@ public class TourGroupController extends BaseController {
 		//FIXME 这里和GroupOrder公共 可以考虑抽取
 		Integer bizId = WebUtils.getCurBizId(request);
 		
-		ToOrderLockListResult result = groupOrderFacade.toOrderLockList(bizId);
+		ToOrderLockListResult result = groupOrderLockFacade.toOrderLockList(bizId);
 
 		model.addAttribute("allProvince", result.getAllProvince());
 		model.addAttribute("orgJsonStr",result.getOrgJsonStr());
@@ -3410,115 +3419,143 @@ public class TourGroupController extends BaseController {
 	@RequestMapping(value = "/toSKConfirmPreview.htm")
 	public String toSKConfirmPreview(HttpServletRequest request,
 			Integer groupId, Integer supplierId, Model model) {
-		String imgPath = bizSettingCommon.getMyBizLogo(request);
-		TourGroup tour = tourGroupService.selectByPrimaryKey(groupId);
-		PlatformEmployeePo po = sysPlatformEmployeeFacade
-				.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
-		po.setOrgName(orgService.findByOrgId(po.getOrgId()).getName());
-		List<GroupOrder> suppliers = groupOrderService
-				.selectSupplierByGroupId(groupId);
-		SupplierInfo supplierInfo = null;
-		List<SupplierInfo> supplierList = new ArrayList<SupplierInfo>();
-
-		for (GroupOrder order : suppliers) {
-			supplierInfo = supplierService.selectBySupplierId(order
-					.getSupplierId());
-			supplierList.add(supplierInfo);
-		}
-		// 行程
-		GroupOrder supplier = null;
-		if (null == supplierId && supplierList.size() > 0) {
-			supplierId = supplierList.get(0).getId();
-		}
-		GroupRouteVO vo = groupRouteService
-				.findGroupRouteByGroupIdAndSupplierId(groupId, supplierId);
-
-		List<GroupRouteDayVO> groupRouteDayVOs = vo.getGroupRouteDayVOList();
-
-		List<GroupPriceVo> vos = groupOrderService
-				.selectSupplierByGroupIdAndSupplierId(groupId, supplierId);
-
-		List<GroupOrder> orders = groupOrderService
-				.selectOrderByGroupIdAndBizIdAndSupplierId(groupId, supplierId,
-						WebUtils.getCurBizId(request));
-		for (GroupOrder groupOrder : orders) {
-			if (groupOrder.getSupplierId() == supplierId) {
-				supplier = groupOrder;
-			}
-		}
-		GroupOrderPrintPo gopp = null;
-		List<GroupOrderPrintPo> gopps = new ArrayList<GroupOrderPrintPo>();
-		for (GroupOrder order : orders) {
-			List<GroupOrderGuest> guests = groupOrderGuestService
-					.selectByOrderId(order.getId());
-			gopp = new GroupOrderPrintPo();
-			// 客人接送信息
-			gopp.setSupplierName(order.getSupplierName());
-			gopp.setSaleOperatorName(order.getSaleOperatorName());
-			gopp.setRemark(order.getRemarkInternal());
-			gopp.setPlace((order.getProvinceName() == null ? "" : order
-					.getProvinceName())
-					+ (order.getCityName() == null ? "" : order.getCityName()));
-			gopp.setPersonNum(order.getNumAdult()+"+"+order.getNumChild());
-			// 根据散客订单统计客人信息
-			if (guests.size() > 0) {
-				gopp.setCertificateNums(getGuestInfoNoPhone(guests));
-				for (GroupOrderGuest guest : guests) {
-					if (guest.getIsLeader() == 1) {
-						gopp.setGuesStatic(guest.getName() + "\n"
-								+ guest.getMobile());
-						break;
-					}
-				}
-				/*
-				if (gopp.getGuestInfo() == null || gopp.getGuestInfo() == "") {
-					// 如果客人中没有领队，默认取一条数据显示
-					gopp.setGuesStatic(guests.get(0).getName() + "\n"
-							+ guests.get(0).getMobile());
-				}*/
-			}
-			
-			gopp.setReceiveMode(order.getReceiveMode());
-			// 根据散客订单统计酒店信息
-			List<GroupRequirement> grogShopList = groupRequirementService
-					.selectByOrderAndType(order.getId(), 3);
-			if (grogShopList.size() > 0) {
-				if (grogShopList.get(0).getHotelLevel() != null) {
-					gopp.setHotelLevel(dicService.getById(
-							grogShopList.get(0).getHotelLevel()).getValue()
-							+ "\n");
-				}
-				gopp.setHotelNum(getHotelNum(grogShopList));
-			}
-			// 省外交通
-			// 根据散客订单统计接机信息
-			List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
-					.selectByOrderId(order.getId());
-			gopp.setAirPickup("接机：" + getAirInfo(groupOrderTransports, 0));
-			// 根据散客订单统计送机信息
-			gopp.setAirOff("送机：" + getAirInfo(groupOrderTransports, 1));
-
-			// 省内交通
-			gopp.setTrans("省内：" + getSourceType(groupOrderTransports));
-			gopps.add(gopp);
-		}
-		List<BookingGuide> guides = bookingGuideService
-				.selectGuidesByGroupId(groupId);
-		model.addAttribute("supplier", supplier);
+//		String imgPath = bizSettingCommon.getMyBizLogo(request);
+//		TourGroup tour = tourGroupService.selectByPrimaryKey(groupId);
+//		PlatformEmployeePo po = sysPlatformEmployeeFacade
+//				.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
+//		po.setOrgName(orgService.findByOrgId(po.getOrgId()).getName());
+//		List<GroupOrder> suppliers = groupOrderService
+//				.selectSupplierByGroupId(groupId);
+//		SupplierInfo supplierInfo = null;
+//		List<SupplierInfo> supplierList = new ArrayList<SupplierInfo>();
+//
+//		for (GroupOrder order : suppliers) {
+//			supplierInfo = supplierService.selectBySupplierId(order
+//					.getSupplierId());
+//			supplierList.add(supplierInfo);
+//		}
+//		// 行程
+//		GroupOrder supplier = null;
+//		if (null == supplierId && supplierList.size() > 0) {
+//			supplierId = supplierList.get(0).getId();
+//		}
+//		GroupRouteVO vo = groupRouteService
+//				.findGroupRouteByGroupIdAndSupplierId(groupId, supplierId);
+//
+//		List<GroupRouteDayVO> groupRouteDayVOs = vo.getGroupRouteDayVOList();
+//
+//		List<GroupPriceVo> vos = groupOrderService
+//				.selectSupplierByGroupIdAndSupplierId(groupId, supplierId);
+//
+//		List<GroupOrder> orders = groupOrderService
+//				.selectOrderByGroupIdAndBizIdAndSupplierId(groupId, supplierId,
+//						WebUtils.getCurBizId(request));
+//		for (GroupOrder groupOrder : orders) {
+//			if (groupOrder.getSupplierId() == supplierId) {
+//				supplier = groupOrder;
+//			}
+//		}
+//		GroupOrderPrintPo gopp = null;
+//		List<GroupOrderPrintPo> gopps = new ArrayList<GroupOrderPrintPo>();
+//		for (GroupOrder order : orders) {
+//			List<GroupOrderGuest> guests = groupOrderGuestService
+//					.selectByOrderId(order.getId());
+//			gopp = new GroupOrderPrintPo();
+//			// 客人接送信息
+//			gopp.setSupplierName(order.getSupplierName());
+//			gopp.setSaleOperatorName(order.getSaleOperatorName());
+//			gopp.setRemark(order.getRemarkInternal());
+//			gopp.setPlace((order.getProvinceName() == null ? "" : order
+//					.getProvinceName())
+//					+ (order.getCityName() == null ? "" : order.getCityName()));
+//			gopp.setPersonNum(order.getNumAdult()+"+"+order.getNumChild());
+//			// 根据散客订单统计客人信息
+//			if (guests.size() > 0) {
+//				gopp.setCertificateNums(getGuestInfoNoPhone(guests));
+//				for (GroupOrderGuest guest : guests) {
+//					if (guest.getIsLeader() == 1) {
+//						gopp.setGuesStatic(guest.getName() + "\n"
+//								+ guest.getMobile());
+//						break;
+//					}
+//				}
+//				/*
+//				if (gopp.getGuestInfo() == null || gopp.getGuestInfo() == "") {
+//					// 如果客人中没有领队，默认取一条数据显示
+//					gopp.setGuesStatic(guests.get(0).getName() + "\n"
+//							+ guests.get(0).getMobile());
+//				}*/
+//			}
+//			
+//			gopp.setReceiveMode(order.getReceiveMode());
+//			// 根据散客订单统计酒店信息
+//			List<GroupRequirement> grogShopList = groupRequirementService
+//					.selectByOrderAndType(order.getId(), 3);
+//			if (grogShopList.size() > 0) {
+//				if (grogShopList.get(0).getHotelLevel() != null) {
+//					gopp.setHotelLevel(dicService.getById(
+//							grogShopList.get(0).getHotelLevel()).getValue()
+//							+ "\n");
+//				}
+//				gopp.setHotelNum(getHotelNum(grogShopList));
+//			}
+//			// 省外交通
+//			// 根据散客订单统计接机信息
+//			List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
+//					.selectByOrderId(order.getId());
+//			gopp.setAirPickup("接机：" + getAirInfo(groupOrderTransports, 0));
+//			// 根据散客订单统计送机信息
+//			gopp.setAirOff("送机：" + getAirInfo(groupOrderTransports, 1));
+//
+//			// 省内交通
+//			gopp.setTrans("省内：" + getSourceType(groupOrderTransports));
+//			gopps.add(gopp);
+//		}
+//		List<BookingGuide> guides = bookingGuideService
+//				.selectGuidesByGroupId(groupId);
+//		model.addAttribute("supplier", supplier);
+//		model.addAttribute("groupId", groupId);
+//		model.addAttribute("supplierId", supplierId);
+//		model.addAttribute("guide", getGuides(guides));
+//		Collections.reverse(gopps);
+//		model.addAttribute("gopps", gopps);
+//		model.addAttribute("vos", vos);
+//		model.addAttribute("guides", guides);
+//		model.addAttribute("groupRouteDayVOs", groupRouteDayVOs);
+//		model.addAttribute("supplierList", supplierList);
+//		model.addAttribute("po", po);
+//		model.addAttribute("imgPath", imgPath);
+//		model.addAttribute("tour", tour);
+//		model.addAttribute("printTime", DateUtils.format(new Date()));
+//		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
+		
+		ToSKConfirmPreviewDTO toSKConfirmPreviewDTO=new ToSKConfirmPreviewDTO();
+		toSKConfirmPreviewDTO.setCurBizId(WebUtils.getCurBizId(request));
+		toSKConfirmPreviewDTO.setCurUserId(WebUtils.getCurUserId(request));
+		toSKConfirmPreviewDTO.setGroupId(groupId);
+		toSKConfirmPreviewDTO.setSupplierId(supplierId);
+		
+		ToSKConfirmPreviewResult result = groupQueryPrintFacade.toSKConfirmPreview(toSKConfirmPreviewDTO);
+		
+		model.addAttribute("supplier", result.getSupplier());
 		model.addAttribute("groupId", groupId);
 		model.addAttribute("supplierId", supplierId);
-		model.addAttribute("guide", getGuides(guides));
+		model.addAttribute("guide", result.getGuide());
+		
+		List<GroupOrderPrintPo> gopps=result.getGopps();
 		Collections.reverse(gopps);
 		model.addAttribute("gopps", gopps);
-		model.addAttribute("vos", vos);
-		model.addAttribute("guides", guides);
-		model.addAttribute("groupRouteDayVOs", groupRouteDayVOs);
-		model.addAttribute("supplierList", supplierList);
-		model.addAttribute("po", po);
-		model.addAttribute("imgPath", imgPath);
-		model.addAttribute("tour", tour);
+		
+		model.addAttribute("vos", result.getVos());
+		model.addAttribute("guides", result.getGuides());
+		model.addAttribute("groupRouteDayVOs", result.getGroupRouteDayVOs());
+		model.addAttribute("supplierList", result.getSupplierList());
+		model.addAttribute("po", result.getPo());
+		model.addAttribute("imgPath", result.getImgPath());
+		model.addAttribute("tour", result.getTour());
 		model.addAttribute("printTime", DateUtils.format(new Date()));
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
+		
 		return "sales/preview/skconfirm";
 	}
 
@@ -3643,269 +3680,455 @@ public class TourGroupController extends BaseController {
 	public void toExportSKWord(HttpServletRequest request,
 			HttpServletResponse response, Integer groupId, Integer supplierId,
 			Integer num) {
-		String url = request.getSession().getServletContext().getRealPath("/")
-				+ "/download/" + System.currentTimeMillis() + ".doc";
-		String imgPath = bizSettingCommon.getMyBizLogo(request);
-		TourGroup tour = tourGroupService.selectByPrimaryKey(groupId);
-		PlatformEmployeePo po = sysPlatformEmployeeFacade
-				.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
-		po.setOrgName(orgService.findByOrgId(po.getOrgId()).getName());
-		List<GroupOrder> suppliers = groupOrderService
-				.selectSupplierByGroupId(groupId);
-		SupplierInfo supplierInfo = null;
-		List<SupplierInfo> supplierList = new ArrayList<SupplierInfo>();
+//		String url = request.getSession().getServletContext().getRealPath("/")
+//				+ "/download/" + System.currentTimeMillis() + ".doc";
+//		String imgPath = bizSettingCommon.getMyBizLogo(request);
+//		TourGroup tour = tourGroupService.selectByPrimaryKey(groupId);
+//		PlatformEmployeePo po = sysPlatformEmployeeFacade
+//				.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
+//		po.setOrgName(orgService.findByOrgId(po.getOrgId()).getName());
+//		List<GroupOrder> suppliers = groupOrderService
+//				.selectSupplierByGroupId(groupId);
+//		SupplierInfo supplierInfo = null;
+//		List<SupplierInfo> supplierList = new ArrayList<SupplierInfo>();
+//
+//		for (GroupOrder order : suppliers) {
+//			supplierInfo = supplierService.selectBySupplierId(order
+//					.getSupplierId());
+//			supplierList.add(supplierInfo);
+//		}
+//		// 行程
+//		GroupOrder supplier = null;
+//		if (supplierId == null) {
+//			supplierId = supplierList.get(0).getId();
+//
+//		}
+//		GroupRouteVO vo = new GroupRouteVO();
+//		List<GroupRouteDayVO> groupRouteDayVOs = new ArrayList<GroupRouteDayVO>();
+//		if (num != 1) {
+//			vo = groupRouteService.findGroupRouteByGroupIdAndSupplierId(
+//					groupId, supplierId);
+//			groupRouteDayVOs = vo.getGroupRouteDayVOList();
+//		}
+//		List<GroupPriceVo> vos = groupOrderService
+//				.selectSupplierByGroupIdAndSupplierId(groupId, supplierId);
+//		List<GroupOrder> orders = groupOrderService
+//				.selectOrderByGroupIdAndBizIdAndSupplierId(groupId, supplierId,
+//						WebUtils.getCurBizId(request));
+//		for (GroupOrder groupOrder : orders) {
+//
+//			if (groupOrder.getSupplierId().doubleValue() == supplierId
+//					.doubleValue()) {
+//				supplier = groupOrder;
+//			}
+//
+//			GroupOrderPrintPo gopp = null;
+//			List<GroupOrderPrintPo> gopps = new ArrayList<GroupOrderPrintPo>();
+//			for (GroupOrder order : orders) {
+//				List<GroupOrderGuest> guests = groupOrderGuestService
+//						.selectByOrderId(order.getId());
+//				gopp = new GroupOrderPrintPo();
+//				// 客人接送信息
+//				gopp.setSupplierName(order.getSupplierName());
+//				gopp.setSaleOperatorName(order.getSaleOperatorName());
+//				gopp.setRemark(order.getRemarkInternal());
+//				gopp.setPlace((order.getProvinceName() == null ? "" : order
+//						.getProvinceName())
+//						+ (order.getCityName() == null ? "" : order
+//								.getCityName()));
+//				gopp.setPersonNum(order.getNumAdult()+"+"+order.getNumChild());
+//				// 根据散客订单统计客人信息
+//				if (guests.size() > 0) {
+//					gopp.setCertificateNums(getGuestInfoNoPhone(guests));
+//				}
+//				gopp.setReceiveMode(order.getReceiveMode());
+//				// 根据散客订单统计酒店信息
+//				List<GroupRequirement> grogShopList = groupRequirementService
+//						.selectByOrderAndType(order.getId(), 3);
+//				if (grogShopList.size() > 0) {
+//					if (grogShopList.get(0).getHotelLevel() != null) {
+//						gopp.setHotelLevel(dicService.getById(
+//								grogShopList.get(0).getHotelLevel()).getValue()
+//								+ "\n");
+//					}
+//					gopp.setHotelNum(getHotelNum(grogShopList));
+//				}
+//				// 省外交通
+//				// 根据散客订单统计接机信息
+//				List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
+//						.selectByOrderId(order.getId());
+//				gopp.setAirPickup("接机：" + getAirInfo(groupOrderTransports, 0));
+//				// 根据散客订单统计送机信息
+//				gopp.setAirOff("送机：" + getAirInfo(groupOrderTransports, 1));
+//
+//				// 省内交通
+//				gopp.setTrans("省内：" + getSourceType(groupOrderTransports));
+//				gopps.add(gopp);
+//			}
+//			List<BookingGuide> guides = bookingGuideService
+//					.selectGuidesByGroupId(groupId);
+//			String realPath = request.getSession().getServletContext()
+//					.getRealPath("/template/skConfirm.docx");
+//			if (1 == num) {
+//				realPath = request.getSession().getServletContext()
+//						.getRealPath("/template/skCharge.docx");
+//			}
+//			WordReporter export = new WordReporter(realPath);
+//			try {
+//				export.init();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//			Map<String, Object> params1 = new HashMap<String, Object>();
+//			params1.put("printTime", DateUtils.format(new Date()));
+//			params1.put("printName", WebUtils.getCurUser(request).getName());
+//			if (imgPath != null) {
+//				Map<String, String> picMap = new HashMap<String, String>();
+//				picMap.put("width", BizConfigConstant.BIZ_LOGO_WIDTH);
+//				picMap.put("height", BizConfigConstant.BIZ_LOGO_HEIGHT);
+//				picMap.put("type", "jpg");
+//				picMap.put("path", imgPath);
+//				params1.put("logo", picMap);
+//			} else {
+//				params1.put("logo", "");
+//			}
+//			Map<String, Object> map0 = new HashMap<String, Object>();
+//			// 收件方信息
+//			map0.put("supplier_name", supplier.getSupplierName());
+//			map0.put("contact", supplier.getContactName());
+//			map0.put("contact_tel", supplier.getContactTel());
+//			map0.put("contact_fax", supplier.getContactFax());
+//			// 发件方信息（定制团显示为销售）
+//			// 销售计调的组织机构信息
+//			PlatformEmployeePo employee = sysPlatformEmployeeFacade
+//					.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
+//			map0.put("company", orgService.findByOrgId(employee.getOrgId())
+//					.getName()); // 当前单位
+//			map0.put("user_name", employee.getName());
+//			map0.put("user_tel", employee.getMobile());
+//			map0.put("user_fax", employee.getFax());
+//
+//			Map<String, Object> map1 = new HashMap<String, Object>();
+//			map1.put("groupCode", tour.getGroupCode());
+//			map1.put("dateStart", DateUtils.format(tour.getDateStart()));
+//			map1.put("person",
+//					tour.getTotalAdult() + "+" + tour.getTotalChild());
+//			map1.put("guide", getGuides(guides));
+//			map1.put("productName", "【" + tour.getProductBrandName() + "】"
+//					+ tour.getProductName());
+//			/**
+//			 * 行程列表表格
+//			 */
+//			List<Map<String, String>> routeList = new ArrayList<Map<String, String>>();
+//			if (num != 1) {
+//				for (GroupRouteDayVO groupRoute : groupRouteDayVOs) {
+//					Map<String, String> map = new HashMap<String, String>();
+//					if (null != groupRoute.getGroupRoute().getGroupDate()) {
+//						map.put("day_num", DateUtils.format(groupRoute
+//								.getGroupRoute().getGroupDate()));
+//					} else {
+//						map.put("day_num", "");
+//					}
+//					map.put("route_desp", groupRoute.getGroupRoute()
+//							.getRouteDesp());
+//					map.put("breakfast", groupRoute.getGroupRoute()
+//							.getBreakfast());
+//					map.put("lunch", groupRoute.getGroupRoute().getLunch());
+//					map.put("supper", groupRoute.getGroupRoute().getSupper());
+//					map.put("hotel_name", groupRoute.getGroupRoute()
+//							.getHotelName());
+//					routeList.add(map);
+//				}
+//			}
+//			/**
+//			 * 收入表格
+//			 */
+//			List<Map<String, String>> priceList = new ArrayList<Map<String, String>>();
+//			Double totalNum = new Double(0);
+//			int i = 1;
+//			for (int j = 0; j <= vos.size(); j++) {
+//				Map<String, String> map = new HashMap<String, String>();
+//				if (j != vos.size()) {
+//					map.put("numOne", "" + i++);
+//					map.put("receivedMode", vos.get(j).getReceiveMode());
+//					map.put("priceDetail", vos.get(j).getPriceDetail());
+//					map.put("totalPrice", vos.get(j).getTotalPrice().toString()
+//							.replace(".0", ""));
+//					totalNum += vos.get(j).getTotalPrice();
+//				} else {
+//					map.put("numOne", "");
+//					map.put("receivedMode", "总计：");
+//					map.put("priceDetail", "");
+//					map.put("totalPrice", totalNum.toString().replace(".0", ""));
+//				}
+//				priceList.add(map);
+//			}
+//
+//			Map<String, Object> map4 = new HashMap<String, Object>();
+//			if (null != tour) {
+//				map4.put("remarkTwo", tour.getRemark());
+//				map4.put("service", tour.getServiceStandard());
+//			}
+//			List<Map<String, String>> goppsList = new ArrayList<Map<String, String>>();
+//			int x = 1;
+//			Collections.reverse(gopps);
+//			for (int j = 0; j < gopps.size(); j++) {
+//				Map<String, String> map5 = new HashMap<String, String>();
+//				map5.put("numTwo", "" + x++);
+//				map5.put("guest", gopps.get(j).getReceiveMode());
+//				map5.put("persons", gopps.get(j).getPersonNum());
+//				map5.put("place", gopps.get(j).getPlace());
+//				map5.put("hotelLevle", gopps.get(j).getHotelLevel());
+//				map5.put("hotelNum", gopps.get(j).getHotelNum());
+//				map5.put("trans", gopps.get(j).getAirPickup()
+//						+ gopps.get(j).getAirOff() + gopps.get(j).getTrans());
+//				map5.put("cerNum", gopps.get(j).getCertificateNums());
+//				map5.put("remarkOne", gopps.get(j).getRemark());
+//				goppsList.add(map5);
+//			}
+//			try {
+//				export.export(params1);
+//				export.export(map0, 0);
+//				export.export(map1, 1);
+//				if (num != 1) {
+//					export.export(routeList, 2);
+//					export.export(priceList, 3);
+//					export.export(goppsList, 4);
+//					export.export(map4, 5);
+//				} else {
+//					export.export(priceList, 2);
+//					export.export(goppsList, 3);
+//					export.export(map4, 4);
+//				}
+//				export.generate(url);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//
+//			try {
+//				request.setCharacterEncoding("UTF-8");
+//			} catch (UnsupportedEncodingException e1) {
+//				e1.printStackTrace();
+//			}
+//			String fileName = "";
+//			try {
+//				fileName = new String("散客确认单.doc".getBytes("UTF-8"),
+//						"iso-8859-1");
+//				if (1 == num) {
+//					fileName = new String("散客结算单.doc".getBytes("UTF-8"),
+//							"iso-8859-1");
+//				}
+//			} catch (UnsupportedEncodingException e) {
+//				e.printStackTrace();
+//			}
+//			response.setCharacterEncoding("utf-8");
+//			response.setContentType("application/msword"); // word格式
+//			try {
+//				response.setHeader("Content-Disposition",
+//						"attachment; filename=" + fileName);
+//				File file = new File(url);
+//				InputStream inputStream = new FileInputStream(file);
+//				OutputStream os = response.getOutputStream();
+//				byte[] b = new byte[1024];
+//				int length;
+//				while ((length = inputStream.read(b)) > 0) {
+//					os.write(b, 0, length);
+//				}
+//				inputStream.close();
+//				os.flush();
+//				os.close();
+//				file.delete();
+//			} catch (FileNotFoundException e) {
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		}
 
-		for (GroupOrder order : suppliers) {
-			supplierInfo = supplierService.selectBySupplierId(order
-					.getSupplierId());
-			supplierList.add(supplierInfo);
-		}
-		// 行程
-		GroupOrder supplier = null;
-		if (supplierId == null) {
-			supplierId = supplierList.get(0).getId();
+		
+		
+		ToSKConfirmPreviewDTO toSKConfirmPreviewDTO=new ToSKConfirmPreviewDTO();
+		toSKConfirmPreviewDTO.setCurBizId(WebUtils.getCurBizId(request));
+		toSKConfirmPreviewDTO.setCurUserId(WebUtils.getCurUserId(request));
+		toSKConfirmPreviewDTO.setGroupId(groupId);
+		toSKConfirmPreviewDTO.setSupplierId(supplierId);
+		
+		ToSKConfirmPreviewResult result = groupQueryPrintFacade.toSKConfirmPreview(toSKConfirmPreviewDTO);
+		
+		String url = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis() + ".doc";
+		
+		String imgPath = result.getImgPath();
+		GroupOrder supplier = result.getSupplier();
+		TourGroup tour = result.getTour();
+		String guideStr = result.getGuide();
+		List<GroupRouteDayVO> groupRouteDayVOs = result.getGroupRouteDayVOs();
+		List<GroupPriceVo> vos = result.getVos();
+		List<GroupOrderPrintPo> gopps = result.getGopps();
 
+		String realPath = request.getSession().getServletContext().getRealPath("/template/skConfirm.docx");
+		if (1 == num) {
+			realPath = request.getSession().getServletContext().getRealPath("/template/skCharge.docx");
 		}
-		GroupRouteVO vo = new GroupRouteVO();
-		List<GroupRouteDayVO> groupRouteDayVOs = new ArrayList<GroupRouteDayVO>();
+		WordReporter export = new WordReporter(realPath);
+		try {
+			export.init();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Map<String, Object> params1 = new HashMap<String, Object>();
+		params1.put("printTime", DateUtils.format(new Date()));
+		params1.put("printName", WebUtils.getCurUser(request).getName());
+		if (imgPath != null) {
+			Map<String, String> picMap = new HashMap<String, String>();
+			picMap.put("width", BizConfigConstant.BIZ_LOGO_WIDTH);
+			picMap.put("height", BizConfigConstant.BIZ_LOGO_HEIGHT);
+			picMap.put("type", "jpg");
+			picMap.put("path", imgPath);
+			params1.put("logo", picMap);
+		} else {
+			params1.put("logo", "");
+		}
+		Map<String, Object> map0 = new HashMap<String, Object>();
+		// 收件方信息
+		map0.put("supplier_name", supplier.getSupplierName());
+		map0.put("contact", supplier.getContactName());
+		map0.put("contact_tel", supplier.getContactTel());
+		map0.put("contact_fax", supplier.getContactFax());
+		// 发件方信息（定制团显示为销售）
+		// 销售计调的组织机构信息
+		PlatformEmployeePo employee = sysPlatformEmployeeFacade.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
+
+		//FIXME 待修复
+		map0.put("company", orgService.findByOrgId(employee.getOrgId()).getName()); // 当前单位
+
+		map0.put("user_name", employee.getName());
+		map0.put("user_tel", employee.getMobile());
+		map0.put("user_fax", employee.getFax());
+
+		Map<String, Object> map1 = new HashMap<String, Object>();
+		map1.put("groupCode", tour.getGroupCode());
+		map1.put("dateStart", DateUtils.format(tour.getDateStart()));
+		map1.put("person", tour.getTotalAdult() + "+" + tour.getTotalChild());
+		//map1.put("guide", getGuides(guides));
+		map1.put("guide",guideStr);
+		map1.put("productName", "【" + tour.getProductBrandName() + "】" + tour.getProductName());
+		/**
+		 * 行程列表表格
+		 */
+		List<Map<String, String>> routeList = new ArrayList<Map<String, String>>();
 		if (num != 1) {
-			vo = groupRouteService.findGroupRouteByGroupIdAndSupplierId(
-					groupId, supplierId);
-			groupRouteDayVOs = vo.getGroupRouteDayVOList();
-		}
-		List<GroupPriceVo> vos = groupOrderService
-				.selectSupplierByGroupIdAndSupplierId(groupId, supplierId);
-		List<GroupOrder> orders = groupOrderService
-				.selectOrderByGroupIdAndBizIdAndSupplierId(groupId, supplierId,
-						WebUtils.getCurBizId(request));
-		for (GroupOrder groupOrder : orders) {
-
-			if (groupOrder.getSupplierId().doubleValue() == supplierId
-					.doubleValue()) {
-				supplier = groupOrder;
-			}
-
-			GroupOrderPrintPo gopp = null;
-			List<GroupOrderPrintPo> gopps = new ArrayList<GroupOrderPrintPo>();
-			for (GroupOrder order : orders) {
-				List<GroupOrderGuest> guests = groupOrderGuestService
-						.selectByOrderId(order.getId());
-				gopp = new GroupOrderPrintPo();
-				// 客人接送信息
-				gopp.setSupplierName(order.getSupplierName());
-				gopp.setSaleOperatorName(order.getSaleOperatorName());
-				gopp.setRemark(order.getRemarkInternal());
-				gopp.setPlace((order.getProvinceName() == null ? "" : order
-						.getProvinceName())
-						+ (order.getCityName() == null ? "" : order
-								.getCityName()));
-				gopp.setPersonNum(order.getNumAdult()+"+"+order.getNumChild());
-				// 根据散客订单统计客人信息
-				if (guests.size() > 0) {
-					gopp.setCertificateNums(getGuestInfoNoPhone(guests));
-				}
-				gopp.setReceiveMode(order.getReceiveMode());
-				// 根据散客订单统计酒店信息
-				List<GroupRequirement> grogShopList = groupRequirementService
-						.selectByOrderAndType(order.getId(), 3);
-				if (grogShopList.size() > 0) {
-					if (grogShopList.get(0).getHotelLevel() != null) {
-						gopp.setHotelLevel(dicService.getById(
-								grogShopList.get(0).getHotelLevel()).getValue()
-								+ "\n");
-					}
-					gopp.setHotelNum(getHotelNum(grogShopList));
-				}
-				// 省外交通
-				// 根据散客订单统计接机信息
-				List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
-						.selectByOrderId(order.getId());
-				gopp.setAirPickup("接机：" + getAirInfo(groupOrderTransports, 0));
-				// 根据散客订单统计送机信息
-				gopp.setAirOff("送机：" + getAirInfo(groupOrderTransports, 1));
-
-				// 省内交通
-				gopp.setTrans("省内：" + getSourceType(groupOrderTransports));
-				gopps.add(gopp);
-			}
-			List<BookingGuide> guides = bookingGuideService
-					.selectGuidesByGroupId(groupId);
-			String realPath = request.getSession().getServletContext()
-					.getRealPath("/template/skConfirm.docx");
-			if (1 == num) {
-				realPath = request.getSession().getServletContext()
-						.getRealPath("/template/skCharge.docx");
-			}
-			WordReporter export = new WordReporter(realPath);
-			try {
-				export.init();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			Map<String, Object> params1 = new HashMap<String, Object>();
-			params1.put("printTime", DateUtils.format(new Date()));
-			params1.put("printName", WebUtils.getCurUser(request).getName());
-			if (imgPath != null) {
-				Map<String, String> picMap = new HashMap<String, String>();
-				picMap.put("width", BizConfigConstant.BIZ_LOGO_WIDTH);
-				picMap.put("height", BizConfigConstant.BIZ_LOGO_HEIGHT);
-				picMap.put("type", "jpg");
-				picMap.put("path", imgPath);
-				params1.put("logo", picMap);
-			} else {
-				params1.put("logo", "");
-			}
-			Map<String, Object> map0 = new HashMap<String, Object>();
-			// 收件方信息
-			map0.put("supplier_name", supplier.getSupplierName());
-			map0.put("contact", supplier.getContactName());
-			map0.put("contact_tel", supplier.getContactTel());
-			map0.put("contact_fax", supplier.getContactFax());
-			// 发件方信息（定制团显示为销售）
-			// 销售计调的组织机构信息
-			PlatformEmployeePo employee = sysPlatformEmployeeFacade
-					.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
-			map0.put("company", orgService.findByOrgId(employee.getOrgId())
-					.getName()); // 当前单位
-			map0.put("user_name", employee.getName());
-			map0.put("user_tel", employee.getMobile());
-			map0.put("user_fax", employee.getFax());
-
-			Map<String, Object> map1 = new HashMap<String, Object>();
-			map1.put("groupCode", tour.getGroupCode());
-			map1.put("dateStart", DateUtils.format(tour.getDateStart()));
-			map1.put("person",
-					tour.getTotalAdult() + "+" + tour.getTotalChild());
-			map1.put("guide", getGuides(guides));
-			map1.put("productName", "【" + tour.getProductBrandName() + "】"
-					+ tour.getProductName());
-			/**
-			 * 行程列表表格
-			 */
-			List<Map<String, String>> routeList = new ArrayList<Map<String, String>>();
-			if (num != 1) {
-				for (GroupRouteDayVO groupRoute : groupRouteDayVOs) {
-					Map<String, String> map = new HashMap<String, String>();
-					if (null != groupRoute.getGroupRoute().getGroupDate()) {
-						map.put("day_num", DateUtils.format(groupRoute
-								.getGroupRoute().getGroupDate()));
-					} else {
-						map.put("day_num", "");
-					}
-					map.put("route_desp", groupRoute.getGroupRoute()
-							.getRouteDesp());
-					map.put("breakfast", groupRoute.getGroupRoute()
-							.getBreakfast());
-					map.put("lunch", groupRoute.getGroupRoute().getLunch());
-					map.put("supper", groupRoute.getGroupRoute().getSupper());
-					map.put("hotel_name", groupRoute.getGroupRoute()
-							.getHotelName());
-					routeList.add(map);
-				}
-			}
-			/**
-			 * 收入表格
-			 */
-			List<Map<String, String>> priceList = new ArrayList<Map<String, String>>();
-			Double totalNum = new Double(0);
-			int i = 1;
-			for (int j = 0; j <= vos.size(); j++) {
+			for (GroupRouteDayVO groupRoute : groupRouteDayVOs) {
 				Map<String, String> map = new HashMap<String, String>();
-				if (j != vos.size()) {
-					map.put("numOne", "" + i++);
-					map.put("receivedMode", vos.get(j).getReceiveMode());
-					map.put("priceDetail", vos.get(j).getPriceDetail());
-					map.put("totalPrice", vos.get(j).getTotalPrice().toString()
-							.replace(".0", ""));
-					totalNum += vos.get(j).getTotalPrice();
+				if (null != groupRoute.getGroupRoute().getGroupDate()) {
+					map.put("day_num", DateUtils.format(groupRoute.getGroupRoute().getGroupDate()));
 				} else {
-					map.put("numOne", "");
-					map.put("receivedMode", "总计：");
-					map.put("priceDetail", "");
-					map.put("totalPrice", totalNum.toString().replace(".0", ""));
+					map.put("day_num", "");
 				}
-				priceList.add(map);
+				map.put("route_desp", groupRoute.getGroupRoute().getRouteDesp());
+				map.put("breakfast", groupRoute.getGroupRoute().getBreakfast());
+				map.put("lunch", groupRoute.getGroupRoute().getLunch());
+				map.put("supper", groupRoute.getGroupRoute().getSupper());
+				map.put("hotel_name", groupRoute.getGroupRoute().getHotelName());
+				routeList.add(map);
 			}
+		}
+		/**
+		 * 收入表格
+		 */
+		List<Map<String, String>> priceList = new ArrayList<Map<String, String>>();
+		Double totalNum = new Double(0);
+		int i = 1;
+		for (int j = 0; j <= vos.size(); j++) {
+			Map<String, String> map = new HashMap<String, String>();
+			if (j != vos.size()) {
+				map.put("numOne", "" + i++);
+				map.put("receivedMode", vos.get(j).getReceiveMode());
+				map.put("priceDetail", vos.get(j).getPriceDetail());
+				map.put("totalPrice", vos.get(j).getTotalPrice().toString().replace(".0", ""));
+				totalNum += vos.get(j).getTotalPrice();
+			} else {
+				map.put("numOne", "");
+				map.put("receivedMode", "总计：");
+				map.put("priceDetail", "");
+				map.put("totalPrice", totalNum.toString().replace(".0", ""));
+			}
+			priceList.add(map);
+		}
 
-			Map<String, Object> map4 = new HashMap<String, Object>();
-			if (null != tour) {
-				map4.put("remarkTwo", tour.getRemark());
-				map4.put("service", tour.getServiceStandard());
+		Map<String, Object> map4 = new HashMap<String, Object>();
+		if (null != tour) {
+			map4.put("remarkTwo", tour.getRemark());
+			map4.put("service", tour.getServiceStandard());
+		}
+		List<Map<String, String>> goppsList = new ArrayList<Map<String, String>>();
+		int x = 1;
+		Collections.reverse(gopps);
+		for (int j = 0; j < gopps.size(); j++) {
+			Map<String, String> map5 = new HashMap<String, String>();
+			map5.put("numTwo", "" + x++);
+			map5.put("guest", gopps.get(j).getReceiveMode());
+			map5.put("persons", gopps.get(j).getPersonNum());
+			map5.put("place", gopps.get(j).getPlace());
+			map5.put("hotelLevle", gopps.get(j).getHotelLevel());
+			map5.put("hotelNum", gopps.get(j).getHotelNum());
+			map5.put("trans", gopps.get(j).getAirPickup() + gopps.get(j).getAirOff() + gopps.get(j).getTrans());
+			map5.put("cerNum", gopps.get(j).getCertificateNums());
+			map5.put("remarkOne", gopps.get(j).getRemark());
+			goppsList.add(map5);
+		}
+		try {
+			export.export(params1);
+			export.export(map0, 0);
+			export.export(map1, 1);
+			if (num != 1) {
+				export.export(routeList, 2);
+				export.export(priceList, 3);
+				export.export(goppsList, 4);
+				export.export(map4, 5);
+			} else {
+				export.export(priceList, 2);
+				export.export(goppsList, 3);
+				export.export(map4, 4);
 			}
-			List<Map<String, String>> goppsList = new ArrayList<Map<String, String>>();
-			int x = 1;
-			Collections.reverse(gopps);
-			for (int j = 0; j < gopps.size(); j++) {
-				Map<String, String> map5 = new HashMap<String, String>();
-				map5.put("numTwo", "" + x++);
-				map5.put("guest", gopps.get(j).getReceiveMode());
-				map5.put("persons", gopps.get(j).getPersonNum());
-				map5.put("place", gopps.get(j).getPlace());
-				map5.put("hotelLevle", gopps.get(j).getHotelLevel());
-				map5.put("hotelNum", gopps.get(j).getHotelNum());
-				map5.put("trans", gopps.get(j).getAirPickup()
-						+ gopps.get(j).getAirOff() + gopps.get(j).getTrans());
-				map5.put("cerNum", gopps.get(j).getCertificateNums());
-				map5.put("remarkOne", gopps.get(j).getRemark());
-				goppsList.add(map5);
-			}
-			try {
-				export.export(params1);
-				export.export(map0, 0);
-				export.export(map1, 1);
-				if (num != 1) {
-					export.export(routeList, 2);
-					export.export(priceList, 3);
-					export.export(goppsList, 4);
-					export.export(map4, 5);
-				} else {
-					export.export(priceList, 2);
-					export.export(goppsList, 3);
-					export.export(map4, 4);
-				}
-				export.generate(url);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			export.generate(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-			try {
-				request.setCharacterEncoding("UTF-8");
-			} catch (UnsupportedEncodingException e1) {
-				e1.printStackTrace();
+		try {
+			request.setCharacterEncoding("UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+		String fileName = "";
+		try {
+			fileName = new String("散客确认单.doc".getBytes("UTF-8"), "iso-8859-1");
+			if (1 == num) {
+				fileName = new String("散客结算单.doc".getBytes("UTF-8"), "iso-8859-1");
 			}
-			String fileName = "";
-			try {
-				fileName = new String("散客确认单.doc".getBytes("UTF-8"),
-						"iso-8859-1");
-				if (1 == num) {
-					fileName = new String("散客结算单.doc".getBytes("UTF-8"),
-							"iso-8859-1");
-				}
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("application/msword"); // word格式
+		try {
+			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+			File file = new File(url);
+			InputStream inputStream = new FileInputStream(file);
+			OutputStream os = response.getOutputStream();
+			byte[] b = new byte[1024];
+			int length;
+			while ((length = inputStream.read(b)) > 0) {
+				os.write(b, 0, length);
 			}
-			response.setCharacterEncoding("utf-8");
-			response.setContentType("application/msword"); // word格式
-			try {
-				response.setHeader("Content-Disposition",
-						"attachment; filename=" + fileName);
-				File file = new File(url);
-				InputStream inputStream = new FileInputStream(file);
-				OutputStream os = response.getOutputStream();
-				byte[] b = new byte[1024];
-				int length;
-				while ((length = inputStream.read(b)) > 0) {
-					os.write(b, 0, length);
-				}
-				inputStream.close();
-				os.flush();
-				os.close();
-				file.delete();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			inputStream.close();
+			os.flush();
+			os.close();
+			file.delete();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -3932,7 +4155,6 @@ public class TourGroupController extends BaseController {
 			sb.append(guide.getGuideName() + " " + guide.getGuideMobile()
 					+ "\n");
 		}
-
 		return sb.toString();
 	}
 	

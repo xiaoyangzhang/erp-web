@@ -20,6 +20,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -101,7 +102,8 @@ public class TeamGroupController extends BaseController {
 	private GroupOrderGuestService groupOrderGuestService;
 	@Autowired
 	private AirTicketRequestService airTicketRequestService;
-
+	@Autowired
+	private TeamGroupFacade teamGroupFacade;
 	 @InitBinder  
 	  public void initListBinder(WebDataBinder binder)  
 	  {  

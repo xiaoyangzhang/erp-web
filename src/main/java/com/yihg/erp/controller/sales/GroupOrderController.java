@@ -123,9 +123,11 @@ import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.facade.sales.query.ToOrderLockTableDTO;
 import com.yimayhd.erpcenter.facade.sales.result.FitUpdateStateResult;
+import com.yimayhd.erpcenter.facade.sales.result.PreviewFitTransferResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockListResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockTableResult;
 import com.yimayhd.erpcenter.facade.sales.service.GroupOrderLockFacade;
+import com.yimayhd.erpcenter.facade.sales.service.GroupQueryPrintFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 
 @Controller
@@ -180,6 +182,8 @@ public class GroupOrderController extends BaseController {
 	private ProductGroupSupplierService productGroupSupplierService;
 	@Autowired
 	private BookingGuideService bookingGuideService;
+	
+	//FIXME 两个service，名称不同
 	@Autowired
 	private BookingSupplierDetailService bookingSupplierDetailService;
 
@@ -211,8 +215,10 @@ public class GroupOrderController extends BaseController {
 	private ProductCommonFacade productCommonFacade;
 	
 	@Autowired
-	private GroupOrderLockFacade groupOrderLockFacade;
+	private GroupOrderLockFacade groupOrderLockFacade; //锁单
 
+	@Autowired
+	private GroupQueryPrintFacade groupQueryPrintFacade;//查询打印
 	
 	/**
 	 * 散客订单、订单日志页面
@@ -4367,104 +4373,121 @@ public class GroupOrderController extends BaseController {
 	public String previewFitTransfer(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer groupId) {
 
-		String imgPath = bizSettingCommon.getMyBizLogo(request);
-		model.addAttribute("imgPath", imgPath);
-
-		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
-		model.addAttribute("tourGroup", tourGroup);
-		model.addAttribute("operatormobile", sysPlatformEmployeeFacade.findByEmployeeId(tourGroup.getOperatorId()).getPlatformEmployeePo().getMobile());
-		List<BookingGuide> guides = bookingGuideService
-				.selectGuidesByGroupId(groupId);
-		String guideString = "";
-		String driverString = "";
-		if (guides.size() > 0) {
-			guideString = getGuides(guides);
-			driverString = getDrivers(guides);
-		}
-		//预定车信息
-		List<BookingSupplier> bs4 = bookingSupplierService.getBookingSupplierByGroupIdAndSupplierType(groupId, 4) ;
-		StringBuilder sbsb = new StringBuilder() ;
-		for (BookingSupplier bs : bs4) {
-			List<BookingSupplierDetail> details = detailService.selectByPrimaryBookId(bs.getId()) ;
-			for (BookingSupplierDetail bsd : details) {
-				sbsb.append(bsd.getDriverName()+" "+bsd.getDriverTel()+" "+bsd.getCarLisence()+"\n") ;
-			}
-		}
-		driverString = sbsb.toString() ;
-		model.addAttribute("guideString", guideString);
-		model.addAttribute("driverString", driverString);
-		List<GroupOrder> orders = groupOrderService
-				.selectOrderByGroupId(groupId);
-		List<GroupOrderPrintPo> gopps = new ArrayList<GroupOrderPrintPo>();
-		GroupOrderPrintPo gopp = null;
-		String total = getHotelTotalNum(orders);
-		for (GroupOrder order : orders) {
-			// 拿到单条订单信息
-			gopp = new GroupOrderPrintPo();
-			gopp.setSupplierName(order.getSupplierName()+"\n"+order.getContactName());
-			gopp.setReceiveMode(order.getReceiveMode());
-			
-			gopp.setSaleOperatorName(order.getSaleOperatorName());
-			gopp.setRemark(order.getRemarkInternal());
-			gopp.setPlace((order.getProvinceName() == null ? "" : order
-					.getProvinceName())
-					+ (order.getCityName() == null ? "" : order.getCityName()));
-			// 根据散客订单统计人数
-			/*Integer numAdult = groupOrderGuestService
-					.selectNumAdultByOrderID(order.getId());
-			Integer numChild = groupOrderGuestService
-					.selectNumChildByOrderID(order.getId());*/
-			gopp.setPersonNum(order.getNumAdult()+"+"+order.getNumChild());
-			// 根据散客订单统计客人信息
-			List<GroupOrderGuest> guests = groupOrderGuestService
-					.selectByOrderId(order.getId());
-			/*for (GroupOrderGuest guest : guests) {
-				if (guest.getIsLeader() == 1) {
-					gopp.setGuesStatic(guest.getName() + " " + guests.size()
-							+ "人" + "\n" + guest.getMobile());
-					break;
-				}
-			}
-			if (gopp.getGuesStatic() == null || gopp.getGuesStatic() == "") {
-				// 如果客人中没有领队，默认取一条数据显示
-				gopp.setGuesStatic(guests.get(0).getName() + "\n"
-						+ guests.get(0).getMobile());
-			}*/
-			gopp.setGuesStatic(order.getReceiveMode());
-			gopp.setGuestInfo(getGuestInfo2(guests));
-			gopp.setGuests(guests);
-			// 根据散客订单统计酒店信息
-			List<GroupRequirement> grogShopList = groupRequirementService
-					.selectByOrderAndType(order.getId(), 3);
-			StringBuilder sb = new StringBuilder();
-			for (GroupRequirement gsl : grogShopList) {
-				if (gsl.getHotelLevel() != null) {
-					sb.append(dicService.getById(gsl.getHotelLevel())
-							.getValue() + "\n");
-				}
-			}
-			gopp.setHotelLevel(sb.toString());
-			gopp.setHotelNum(getHotelNum(grogShopList));
-			// 省外交通
-			// 根据散客订单统计接机信息
-			List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
-					.selectByOrderId(order.getId());
-			gopp.setAirPickup(getAirInfo(groupOrderTransports, 0));
-			// 根据散客订单统计送机信息
-			gopp.setAirOff(getAirInfo(groupOrderTransports, 1));
-			// 省内交通
-			gopp.setTrans(getSourceType(groupOrderTransports));
-			gopps.add(gopp);
-		}
-
-		model.addAttribute("orderList", gopps);
+//		String imgPath = bizSettingCommon.getMyBizLogo(request);
+//		model.addAttribute("imgPath", imgPath);
+//
+//		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
+//		model.addAttribute("tourGroup", tourGroup);
+//		model.addAttribute("operatormobile", sysPlatformEmployeeFacade.findByEmployeeId(tourGroup.getOperatorId()).getPlatformEmployeePo().getMobile());
+//		List<BookingGuide> guides = bookingGuideService
+//				.selectGuidesByGroupId(groupId);
+//		String guideString = "";
+//		String driverString = "";
+//		if (guides.size() > 0) {
+//			guideString = getGuides(guides);
+//			driverString = getDrivers(guides);
+//		}
+//		//预定车信息
+//		List<BookingSupplier> bs4 = bookingSupplierService.getBookingSupplierByGroupIdAndSupplierType(groupId, 4) ;
+//		StringBuilder sbsb = new StringBuilder() ;
+//		for (BookingSupplier bs : bs4) {
+//			List<BookingSupplierDetail> details = detailService.selectByPrimaryBookId(bs.getId()) ;
+//			for (BookingSupplierDetail bsd : details) {
+//				sbsb.append(bsd.getDriverName()+" "+bsd.getDriverTel()+" "+bsd.getCarLisence()+"\n") ;
+//			}
+//		}
+//		driverString = sbsb.toString() ;
+//		model.addAttribute("guideString", guideString);
+//		model.addAttribute("driverString", driverString);
+//		List<GroupOrder> orders = groupOrderService
+//				.selectOrderByGroupId(groupId);
+//		List<GroupOrderPrintPo> gopps = new ArrayList<GroupOrderPrintPo>();
+//		GroupOrderPrintPo gopp = null;
+//		String total = getHotelTotalNum(orders);
+//		for (GroupOrder order : orders) {
+//			// 拿到单条订单信息
+//			gopp = new GroupOrderPrintPo();
+//			gopp.setSupplierName(order.getSupplierName()+"\n"+order.getContactName());
+//			gopp.setReceiveMode(order.getReceiveMode());
+//			
+//			gopp.setSaleOperatorName(order.getSaleOperatorName());
+//			gopp.setRemark(order.getRemarkInternal());
+//			gopp.setPlace((order.getProvinceName() == null ? "" : order
+//					.getProvinceName())
+//					+ (order.getCityName() == null ? "" : order.getCityName()));
+//			// 根据散客订单统计人数
+//			/*Integer numAdult = groupOrderGuestService
+//					.selectNumAdultByOrderID(order.getId());
+//			Integer numChild = groupOrderGuestService
+//					.selectNumChildByOrderID(order.getId());*/
+//			gopp.setPersonNum(order.getNumAdult()+"+"+order.getNumChild());
+//			// 根据散客订单统计客人信息
+//			List<GroupOrderGuest> guests = groupOrderGuestService
+//					.selectByOrderId(order.getId());
+//			/*for (GroupOrderGuest guest : guests) {
+//				if (guest.getIsLeader() == 1) {
+//					gopp.setGuesStatic(guest.getName() + " " + guests.size()
+//							+ "人" + "\n" + guest.getMobile());
+//					break;
+//				}
+//			}
+//			if (gopp.getGuesStatic() == null || gopp.getGuesStatic() == "") {
+//				// 如果客人中没有领队，默认取一条数据显示
+//				gopp.setGuesStatic(guests.get(0).getName() + "\n"
+//						+ guests.get(0).getMobile());
+//			}*/
+//			gopp.setGuesStatic(order.getReceiveMode());
+//			gopp.setGuestInfo(getGuestInfo2(guests));
+//			gopp.setGuests(guests);
+//			// 根据散客订单统计酒店信息
+//			List<GroupRequirement> grogShopList = groupRequirementService
+//					.selectByOrderAndType(order.getId(), 3);
+//			StringBuilder sb = new StringBuilder();
+//			for (GroupRequirement gsl : grogShopList) {
+//				if (gsl.getHotelLevel() != null) {
+//					sb.append(dicService.getById(gsl.getHotelLevel())
+//							.getValue() + "\n");
+//				}
+//			}
+//			gopp.setHotelLevel(sb.toString());
+//			gopp.setHotelNum(getHotelNum(grogShopList));
+//			// 省外交通
+//			// 根据散客订单统计接机信息
+//			List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
+//					.selectByOrderId(order.getId());
+//			gopp.setAirPickup(getAirInfo(groupOrderTransports, 0));
+//			// 根据散客订单统计送机信息
+//			gopp.setAirOff(getAirInfo(groupOrderTransports, 1));
+//			// 省内交通
+//			gopp.setTrans(getSourceType(groupOrderTransports));
+//			gopps.add(gopp);
+//		}
+//
+//		model.addAttribute("orderList", gopps);
+//		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
+//		List<BookingDelivery> bds = deliveryService
+//				.getDeliveryListByGroupId(groupId);
+//		String deliveryDetail = getDeliveryInfo(bds);
+//		model.addAttribute("deliveryDetail", deliveryDetail);
+//		model.addAttribute("total", total);
+//		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
+		
+		PreviewFitTransferResult result=groupQueryPrintFacade.previewFitTransfer(groupId);
+		
+		model.addAttribute("orderList", result.getGopps());
+		model.addAttribute("deliveryDetail", result.getDeliveryDetail());
+		model.addAttribute("total", result.getTotal());
+		
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
-		List<BookingDelivery> bds = deliveryService
-				.getDeliveryListByGroupId(groupId);
-		String deliveryDetail = getDeliveryInfo(bds);
-		model.addAttribute("deliveryDetail", deliveryDetail);
-		model.addAttribute("total", total);
-		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
+		model.addAttribute("imgPath", result.getImgPath());
+		
+		model.addAttribute("tourGroup", result.getTourGroup());
+		model.addAttribute("guideString", result.getGuideString());
+		model.addAttribute("driverString", result.getDriverString());
+		
+		//FIXME 待修复
+		model.addAttribute("operatormobile", sysPlatformEmployeeFacade.findByEmployeeId(result.getTourGroup().getOperatorId()).getPlatformEmployeePo().getMobile());
+		
 		return "sales/preview/fitTransfer";
 
 	}
