@@ -57,7 +57,7 @@ public class PlatFormMenuController {
 	@RequiresPermissions(PermissionConstants.SYS_RES)
 	public String index(Integer rootId,
 			HttpServletRequest request, HttpServletResponse response, ModelMap model) {
-		int sysId = SysServiceSingleton.getPlatformSysPo().getSysId();
+		int sysId = SysServiceSingleton.getPlatformSysPo().getPlatformSysPo().getSysId();
 		//UserSession userSession = platformSessionService.getUserSession(SecurityConstant.USER_LOGIN_SESSION_KEY);
 		Integer curBizId = WebUtils.getCurBizId(request);
 		//List<PlatformMenuPo> itemList = this.menuList(sysId, rootId);
@@ -83,7 +83,7 @@ public class PlatFormMenuController {
 	@RequiresPermissions(PermissionConstants.SYS_RES)
 	@ResponseBody
 	public String getChild(Integer id) {
-		int sysId = SysServiceSingleton.getPlatformSysPo().getSysId();
+		int sysId = SysServiceSingleton.getPlatformSysPo().getPlatformSysPo().getSysId();
 		if (StringUtils.isBlank(id.toString())) {
 			id = 0;
 		}
@@ -121,7 +121,7 @@ public class PlatFormMenuController {
 	public String listAllMenu(
 			@RequestParam(defaultValue="1")int rootId,
 			HttpServletRequest request, HttpServletResponse response, ModelMap model) {
-		int sysId = SysServiceSingleton.getPlatformSysPo().getSysId();
+		int sysId = SysServiceSingleton.getPlatformSysPo().getPlatformSysPo().getSysId();
 		List<PlatformMenuPo> itemList = this.menuList(sysId, rootId);
 		return new Gson().toJson(itemList);
 	}
@@ -227,7 +227,7 @@ public class PlatFormMenuController {
 				.findPlatformRoleMenuLinkPoByMenuId(menuId).getPlatformRoleMenuLinkPos();
 		List<PlatformMenuPo> menuPos = sysPlatformMenuFacade
 				.getPlatformMenuListBysysIdAndParentId(SysServiceSingleton
-						.getPlatformSysPo().getSysId(), Integer
+						.getPlatformSysPo().getPlatformSysPo().getSysId(), Integer
 						.parseInt(menuId)).getPlatformMenuPos();
 		if (tempList.size() > 0) {
 			JsonObject json = new JsonObject();

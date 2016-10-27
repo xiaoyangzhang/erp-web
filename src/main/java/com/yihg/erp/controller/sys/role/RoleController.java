@@ -19,9 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.contant.PathPrefixConstant;
 import com.yihg.erp.contant.PermissionConstants;
@@ -29,11 +26,12 @@ import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.ResultWebUtils;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.supplier.constants.Constants;
+import com.yimayhd.erpcenter.dal.product.constans.Constants;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformMenuPo;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformRoleMenuLinkPo;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformRolePo;
 import com.yimayhd.erpcenter.facade.sys.query.PlatformRolePoDTO;
+import com.yimayhd.erpcenter.facade.sys.result.PlatformMenuPoListResult;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformMenuFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformRoleFacade;
 
@@ -54,8 +52,6 @@ public class RoleController extends BaseController{
 	private SysPlatformRoleFacade sysPlatformRoleFacade;
 	@Autowired
 	private SysPlatformMenuFacade sysPlatformMenuFacade;
-	@Autowired
-	private DicService  dicService;
 	@RequestMapping("roleList")
 	@RequiresPermissions(PermissionConstants.SYS_ROLE)
 	public String  getRoleList(HttpServletRequest request,HttpServletResponse reponse,ModelMap model){
@@ -114,7 +110,8 @@ public class RoleController extends BaseController{
 	public String addRole(HttpServletRequest request,HttpServletResponse reponse,ModelMap model){
 		//查询权限菜单 从等级开始查询
 		ArrayList<Map<Object, Object>> maps = new ArrayList<Map<Object,Object>>();
-		List<PlatformMenuPo> menulList = sysPlatformMenuFacade.getMenuListByBizId(WebUtils.getCurBizId(request), null).getPlatformMenuPos();
+		PlatformMenuPoListResult result = sysPlatformMenuFacade.getMenuListByBizId(WebUtils.getCurBizId(request), null);
+		List<PlatformMenuPo> menulList = result.getPlatformMenuPos();
 		for (PlatformMenuPo menu : menulList) {
 			
 			//查询此菜单下面是否有子菜单
@@ -141,8 +138,7 @@ public class RoleController extends BaseController{
 		String menuJosnStr = JSON.toJSONString(maps);
 //				System.out.println("menuJosnStr:"+menuJosnStr);
 		model.put("menuJosnStr", menuJosnStr);
-		List<DicInfo> roleGroup = dicService.getListByTypeCode(BasicConstants.ROLE_GROUP,WebUtils.getCurBizId(request));
-		model.addAttribute("roleGroup", roleGroup);
+		model.addAttribute("roleGroup", result.getRoleGroup());
 		
 		return PathPrefixConstant.SYSTEM_ROLE_PREFIX+"addRole";
 	}
@@ -172,7 +168,8 @@ public class RoleController extends BaseController{
 		ArrayList<Map<Object, Object>> maps = new ArrayList<Map<Object,Object>>();
 		Integer bizId = WebUtils.getCurBizId(request);
 		//List<PlatformMenuPo> menulList = sysPlatformMenuFacade.getPlatformMenuJosnList(SysServiceSingleton.getPlatformSysPo().getSysId());
-		List<PlatformMenuPo> menulList = sysPlatformMenuFacade.getMenuListByBizId(bizId, null).getPlatformMenuPos();
+		PlatformMenuPoListResult result = sysPlatformMenuFacade.getMenuListByBizId(bizId, null);
+		List<PlatformMenuPo> menulList =result .getPlatformMenuPos();
 		for (PlatformMenuPo menu : menulList) {
 			
 			//查询此菜单下面是否有子菜单
@@ -199,8 +196,7 @@ public class RoleController extends BaseController{
 		String menuJosnStr = JSON.toJSONString(maps);
 //		System.out.println("menuJosnStr:"+menuJosnStr);
 		model.put("menuJosnStr", menuJosnStr);
-		List<DicInfo> roleGroup = dicService.getListByTypeCode(BasicConstants.ROLE_GROUP,WebUtils.getCurBizId(request));
-		model.put("roleGroup", roleGroup);
+		model.put("roleGroup", result.getRoleGroup());
 		
 		return PathPrefixConstant.SYSTEM_ROLE_PREFIX+"editRole";
 	}

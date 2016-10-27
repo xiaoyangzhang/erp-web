@@ -515,6 +515,11 @@
 			<artifactId>erpcenterFacade-basic-client</artifactId>
 			<version>0.0.8-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterFacade-tj-client</artifactId>
+			<version>0.0.8-SNAPSHOT</version>
+		</dependency>
 		
 
 	</dependencies>
