@@ -270,9 +270,7 @@ public class TeamGroupController extends BaseController {
 		teamGroupVO.setGroupOrder(groupOrder);
 		model.addAttribute("teamGroupVO", teamGroupVO);
 		ToAddTeamGroupInfoDTO toAddTeamGroupInfoDTO = new ToAddTeamGroupInfoDTO();
-		com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder croupOrderv = new com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder();
-		BeanUtils.copyProperties(groupOrder, croupOrderv);
-		toAddTeamGroupInfoDTO.setGroupOrder(croupOrderv);
+		toAddTeamGroupInfoDTO.setGroupOrder(groupOrder);
 		toAddTeamGroupInfoDTO.setCurBizId(bizId);
 		ToAddTeamGroupInfoResult toAddTeamGroupInfoResult = teamGroupFacade.toAddTeamGroupInfo(toAddTeamGroupInfoDTO);
 		model.addAttribute("typeList", toAddTeamGroupInfoResult.getTypeList());
@@ -483,9 +481,7 @@ public class TeamGroupController extends BaseController {
 
 
 		FindTourGroupByConditionDTO findTourGroupByConditionDTO = new FindTourGroupByConditionDTO();
-		com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder croupOrderv = new com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder();
-		BeanUtils.copyProperties(groupOrder, croupOrderv);
-		findTourGroupByConditionDTO.setGroupOrder(croupOrderv);
+		findTourGroupByConditionDTO.setGroupOrder(groupOrder);
 
 		FindTourGroupByConditionResult findTourGroupByConditionResult = teamGroupFacade.findTourGroupByConditionLoadModel(findTourGroupByConditionDTO);
 		model.addAttribute("pageTotalAudit", findTourGroupByConditionResult.getPageTotalAudit());
