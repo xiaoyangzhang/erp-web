@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.yimayhd.erpcenter.dal.sys.po.PlatformSysPo;
+import com.yimayhd.erpcenter.facade.sys.result.PlatformSysPoResult;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformSysFacade;
 public class SysServiceSingleton {
 
@@ -56,9 +58,9 @@ public class SysServiceSingleton {
 		}
 	}
 	
-	public static SysPlatformSysFacade  getPlatformSysPo() {
-		SysPlatformSysFacade platformSysPo = null;
-		platformSysPo = (SysPlatformSysFacade) getInstance().getPlatformSysService().findByCode(code);
+	public static PlatformSysPoResult  getPlatformSysPo() {
+		PlatformSysPoResult platformSysPo = null;
+		platformSysPo =  getInstance().getPlatformSysService().findByCode(code);
 		return platformSysPo;
 	}
 
