@@ -20,10 +20,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.exception.ClientException;
-import com.yihg.basic.po.DicInfo;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.contant.PathPrefixConstant;
 import com.yihg.erp.contant.PermissionConstants;
@@ -31,10 +27,8 @@ import com.yihg.erp.contant.SysConfigConstant;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.sys.api.PlatformSessionService;
-import com.yihg.sys.api.SysBizBankAccountService;
-import com.yihg.sys.api.SysBizInfoService;
+import com.yimayhd.erpcenter.common.exception.ClientException;
+import com.yimayhd.erpcenter.dal.product.constans.Constants;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformRolePo;
@@ -59,22 +53,12 @@ public class EmployeeController extends BaseController{
 			.getLogger(EmployeeController.class);
 	@Autowired
 	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
-//	private PlatformEmployeeService platformEmployeeService;
 	@Autowired
 	private SysPlatformOrgFacade sysPlatformOrgFacade;
-//	private PlatformOrgService orgService;
-	
 	@Autowired
 	private SysPlatformRoleFacade sysPlatformRoleFacade;
-//	private PlatformRoleService platformRoleService;
-//	private SysBizBankAccountService bankAccountService;
-	@Autowired
-	private DicService dicService;
-	@Autowired
-	private SysBizInfoService bizInfoService;
 	@Autowired
 	private SysLoginFacade sysLoginFacade;
-//	private PlatformSessionService platformSessionService;
 	
 	@RequestMapping(value="listEmployee")
 	@RequiresPermissions(PermissionConstants.SYS_USER)
@@ -181,8 +165,7 @@ public class EmployeeController extends BaseController{
 		modelMap.addAttribute("bizId", bizId);
 		modelMap.addAttribute("empPo", empPo);
 		modelMap.addAttribute("orgId", orgId);
-		List<DicInfo> roleGroup = dicService.getListByTypeCode(BasicConstants.ROLE_GROUP,WebUtils.getCurBizId(request));
-		modelMap.put("roleGroup", roleGroup);
+		modelMap.put("roleGroup", rolePoListResult.getRoleGroup());
 		
 		return PathPrefixConstant.SYSTEM_EMPLOYEE_PREFIX+"employee_edit";
 	}

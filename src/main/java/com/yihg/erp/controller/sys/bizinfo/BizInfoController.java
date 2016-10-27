@@ -13,12 +13,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
 import com.yimayhd.erpcenter.dal.sys.po.SysBizBankAccount;
 import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
 import com.yimayhd.erpcenter.facade.sys.query.SysBizBankAccountDTO;
@@ -32,12 +30,9 @@ import com.yimayhd.erpcenter.facade.sys.service.SysBizInfoFacade;
 @Controller
 @RequestMapping("bizinfo")
 public class BizInfoController extends BaseController{
-
 	@Autowired
 	private SysBizBankAccountFacade sysBizBankAccountFacade;
 	
-	@Autowired
-	private DicService dicService;
 	@Autowired
 	private SysBizInfoFacade bizInfoFacade;
 	@Autowired
@@ -48,9 +43,7 @@ public class BizInfoController extends BaseController{
 			HttpServletResponse reponse,Integer id,ModelMap model){
 		SysBizBankAccountResult bankInfoResult = sysBizBankAccountFacade.getBankInfo(id);
 		SysBizBankAccount bankInfo = bankInfoResult.getSysBizBankAccount();
-		List<DicInfo> bankList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_BANK);
-		model.addAttribute("bankList", bankList);
+		model.addAttribute("bankList", bankInfoResult.getBankList());
 		return JSON.toJSONString(bankInfo);
 	}
 	/**
@@ -74,8 +67,7 @@ public class BizInfoController extends BaseController{
 			String logo = sysBizInfo.getLogo().split(",")[0];
 			model.addAttribute("logo", logo);
 		}
-		List<DicInfo> bankList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_BANK);
+		List<DicInfo> bankList = sysBankaccountListResult.getBankList();
 		model.addAttribute("bankList", bankList);
 		model.addAttribute("config", config);
 		return "sys/bizInfo/configBizInfo";

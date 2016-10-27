@@ -9,15 +9,15 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.yihg.basic.contants.BasicConstants.LOG_ACTION;
-import com.yihg.basic.po.LogOperator;
-import com.yihg.basic.util.LogFieldUtil;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupOrderPrice;
-import com.yihg.sales.po.GroupOrderTransport;
-import com.yihg.sales.po.GroupRoute;
-import com.yihg.sales.vo.GroupRouteDayVO;
+import com.yimayhd.erpcenter.dal.basic.constant.BasicConstants.LOG_ACTION;
+import com.yimayhd.erpcenter.dal.basic.po.LogOperator;
+import com.yimayhd.erpcenter.dal.basic.utils.LogFieldUtil;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrice;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupRouteDayVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 
 /**
