@@ -22,12 +22,10 @@ import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrice;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.CostIncome;
-import com.yimayhd.erpcenter.facade.sales.query.SaveCostItemDTO;
-//import com.yihg.sales.po.GroupOrderPrice;
-//import com.yihg.sales.vo.CostIncome;
-import com.yimayhd.erpcenter.facade.sales.query.ToAddProfitChangeDTO;
-import com.yimayhd.erpcenter.facade.sales.query.ToSaveCostIncomeDTO;
-import com.yimayhd.erpcenter.facade.sales.result.CostItemResult;
+import com.yimayhd.erpcenter.facade.sales.query.costitem.SaveCostItemDTO;
+import com.yimayhd.erpcenter.facade.sales.query.costitem.ToAddProfitChangeDTO;
+import com.yimayhd.erpcenter.facade.sales.query.costitem.ToSaveCostIncomeDTO;
+import com.yimayhd.erpcenter.facade.sales.result.costitem.CostItemResult;
 import com.yimayhd.erpcenter.facade.sales.service.CostItemFacade;
 
 @Controller
