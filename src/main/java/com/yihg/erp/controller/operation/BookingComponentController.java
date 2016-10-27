@@ -52,7 +52,9 @@ import com.yihg.supplier.po.SupplierContract;
 import com.yihg.supplier.po.SupplierContractPrice;
 import com.yihg.supplier.po.SupplierContractPriceDateInfo;
 import com.yihg.supplier.vo.SupplierCarVO;
+import com.yimayhd.erpcenter.facade.sales.query.BookingDeliveryQueryDTO;
 import com.yimayhd.erpcenter.facade.sales.query.ContractQueryDTO;
+import com.yimayhd.erpcenter.facade.sales.result.operation.BookingSupplierResult;
 import com.yimayhd.erpcenter.facade.sales.result.operation.TourGroupInfoResult;
 import com.yimayhd.erpcenter.facade.sales.service.BookingComponentFacade;
 
@@ -290,22 +292,23 @@ public class BookingComponentController extends BaseController {
 		pageBean.setParameter(supplierCar);
 		pageBean.setPage(supplierCar.getPage());
 		pageBean.setPageSize(supplierCar.getPageSize());
-		PageBean page = supplierCarService.selectPrivateCarListPage(pageBean,
-				WebUtils.getCurBizId(request));
-		List<SupplierCarVO> voList = new ArrayList<SupplierCarVO>();
-		List<SupplierCar> result = page.getResult();
-		if (result != null && result.size() > 0) {
-			for (SupplierCar sc : result) {
-				SupplierCarVO scv = new SupplierCarVO();
-				scv.setSupplierCar(sc);
-				scv.setImgList(supplierImgService.selectBySupplierCommentImgId(
-						sc.getId(), 5));
-				voList.add(scv);
-			}
-		}
-		model.addAttribute("voList", voList);
+		BookingSupplierResult result = bookingComponentFacade.selectPrivateCarListPage(pageBean, WebUtils.getCurBizId(request));
+//		PageBean page = supplierCarService.selectPrivateCarListPage(pageBean,
+//				WebUtils.getCurBizId(request));
+//		List<SupplierCarVO> voList = new ArrayList<SupplierCarVO>();
+//		List<SupplierCar> result = page.getResult();
+//		if (result != null && result.size() > 0) {
+//			for (SupplierCar sc : result) {
+//				SupplierCarVO scv = new SupplierCarVO();
+//				scv.setSupplierCar(sc);
+//				scv.setImgList(supplierImgService.selectBySupplierCommentImgId(
+//						sc.getId(), 5));
+//				voList.add(scv);
+//			}
+//		}
+		model.addAttribute("voList", result.getCarVOList());
 		model.addAttribute("config", config);
-		model.addAttribute("page", page);
+		model.addAttribute("page", result.getPageBean());
 		model.addAttribute("supplierCar", supplierCar);
 //		List<DicInfo> list = dicService
 //				.getListByTypeCode(Constants.FLEET_TYPE_CODE);
@@ -317,25 +320,31 @@ public class BookingComponentController extends BaseController {
 	@RequestMapping(value = "deliveryContract.htm")
 	public String deliveryContract(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model,Integer supplierId){
-		SupplierContract supplierContract = new SupplierContract();
-		//有效的协议
-		supplierContract.setState(1);
 		Integer bizId = WebUtils.getCurBizId(request);
-		BizSupplierRelation bizSupplierRelation = bizSupplierRelationService.getByBizIdAndSupplierId(bizId, supplierId);
-		PageBean<SupplierContract> pageBean = new PageBean<SupplierContract>();
-		pageBean.setPageSize(100);
-        pageBean.setPage(supplierContract.getPage());
-        pageBean.setParameter(supplierContract);
-        if(bizSupplierRelation != null){
-            pageBean = contractService.findContracts(pageBean, bizSupplierRelation.getId());
-        }
+		BookingDeliveryQueryDTO queryDTO = new BookingDeliveryQueryDTO();
+		queryDTO.setBizId(bizId);
+		queryDTO.setSupplierId(supplierId);
+		PageBean pageBean = bookingComponentFacade.deliveryContract(queryDTO);
+//		SupplierContract supplierContract = new SupplierContract();
+//		//有效的协议
+//		supplierContract.setState(1);
+//		Integer bizId = WebUtils.getCurBizId(request);
+//		BizSupplierRelation bizSupplierRelation = bizSupplierRelationService.getByBizIdAndSupplierId(bizId, supplierId);
+//		PageBean<SupplierContract> pageBean = new PageBean<SupplierContract>();
+//		pageBean.setPageSize(100);
+//        pageBean.setPage(supplierContract.getPage());
+//        pageBean.setParameter(supplierContract);
+//        if(bizSupplierRelation != null){
+//            pageBean = contractService.findContracts(pageBean, bizSupplierRelation.getId());
+//        }
         model.addAttribute("page", pageBean);
 		return "/operation/component/delivery-contract-list";
 	}
 	@RequestMapping(value = "deliveryContractPrice.do",method=RequestMethod.POST)
 	public String deliveryContractPrice(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model,Integer contractId){
-		List<SupplierContractPrice> supplierContractPrices = contractService.getContractPriceListByContractId(contractId);
+		//List<SupplierContractPrice> supplierContractPrices = contractService.getContractPriceListByContractId(contractId);
+		List<com.yimayhd.erpresource.dal.po.SupplierContractPrice> supplierContractPrices = bookingComponentFacade.getContractPriceListByContractId(contractId);
 		model.addAttribute("priceList", supplierContractPrices);
 		return "/operation/component/delivery-contract-list-table";
 	}
