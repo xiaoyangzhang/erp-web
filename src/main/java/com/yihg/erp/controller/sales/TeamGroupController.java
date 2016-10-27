@@ -20,10 +20,11 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.yimayhd.erpcenter.facade.sales.query.FindTourGroupByConditionDTO;
-import com.yimayhd.erpcenter.facade.sales.query.SaveTeamGroupInfoDTO;
-import com.yimayhd.erpcenter.facade.sales.query.ToAddTeamGroupInfoDTO;
-import com.yimayhd.erpcenter.facade.sales.query.ToEditTeamGroupInfoDTO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TeamGroupVO;
+import com.yimayhd.erpcenter.facade.sales.query.*;
 import com.yimayhd.erpcenter.facade.sales.result.*;
 import com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade;
 import org.apache.commons.lang.StringUtils;
@@ -49,12 +50,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.dubbo.common.json.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.yihg.airticket.api.AirTicketRequestService;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.common.GroupCodeUtil;
@@ -62,52 +57,19 @@ import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.finance.api.FinanceService;
+
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.sales.api.GroupOrderGuestService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.GroupRequirementService;
-import com.yihg.sales.api.TeamGroupService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupRequirement;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.TeamGroupVO;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
+
 
 @Controller
 @RequestMapping(value = "/teamGroup")
 public class TeamGroupController extends BaseController {
 
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private GroupOrderService groupOrderService;
-	@Autowired
-	private DicService dicService;
+
 	@Autowired
 	private SysConfig config;
 	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private PlatformOrgService orgService;
-	@Autowired
-	private RegionService regionService;
-	@Autowired
-	private TeamGroupService teamGroupService;
-	@Autowired
 	private BizSettingCommon settingCommon;
-	@Autowired
-	private GroupRequirementService groupRequirementService;
-	@Autowired
-	private FinanceService financeService;
-	@Autowired
-	private GroupOrderGuestService groupOrderGuestService;
-	@Autowired
-	private AirTicketRequestService airTicketRequestService;
 	@Autowired
 	private TeamGroupFacade teamGroupFacade;
 	 @InitBinder  
@@ -648,7 +610,13 @@ public class TeamGroupController extends BaseController {
 	@RequestMapping(value = "/saveRequireMent.do")
 	@ResponseBody
 	public String saveRequireMent(HttpServletRequest request,TeamGroupVO teamGroupVO){
-		teamGroupService.saveOrUpdateRequirement(teamGroupVO, WebUtils.getCurBizId(request), WebUtils.getCurUser(request).getName());
-		return successJson();
+		//teamGroupService.saveOrUpdateRequirement(teamGroupVO, WebUtils.getCurBizId(request), WebUtils.getCurUser(request).getName());
+		SaveRequireMentDTO saveRequireMentDTO = new SaveRequireMentDTO();
+		ResultSupport resultSupport = teamGroupFacade.saveRequireMent(saveRequireMentDTO);
+		if(resultSupport.isSuccess()) {
+			return successJson();
+		}else{
+			return errorJson(resultSupport.getResultMsg());
+		}
 	}
 }
