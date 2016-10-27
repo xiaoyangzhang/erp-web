@@ -11,7 +11,6 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.yihg.erp.contant.PathPrefixConstant;
-import com.yihg.erp.utils.SysServiceSingleton;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformSysPo;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformSysFacade;
 
@@ -26,7 +25,7 @@ public class sysConfigController {
 	
 	@RequestMapping(value="/sysConfigList")
     public String sysConfigList(HttpServletRequest request,HttpServletResponse reponse,ModelMap model){
-		System.out.println(SysServiceSingleton.getInstance().getPlatformSysPo().getSysId());
+//		System.out.println(SysServiceSingleton.getInstance().getPlatformSysPo().getPlatformSysPo().getSysId());
     	List<PlatformSysPo> list = sysPlatformSysFacade.getPlatformSysList().getPlatformSysPos();
         model.addAttribute("list", list);
         return PathPrefixConstant.SYSTEM_CONFIG_PREFIX+"sysConfigList";

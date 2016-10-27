@@ -10,8 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.yihg.sys.api.PlatformSysService;
-import com.yihg.sys.po.PlatformSysPo;
 
 
 
