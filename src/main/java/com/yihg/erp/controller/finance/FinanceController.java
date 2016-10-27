@@ -34,6 +34,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
@@ -41,6 +42,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yimayhd.erpcenter.facade.finance.service.FinanceFacade;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -154,6 +156,12 @@ public class FinanceController extends BaseController {
 	private BookingShopDetailService bookingShopDetailService;
 	@Resource
 	private BizSettingCommon bizSettingCommon;
+	
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
+	
+	@Autowired
+	private FinanceFacade financeFacade;
 	
 	DecimalFormat df = new DecimalFormat("0.##");
 	

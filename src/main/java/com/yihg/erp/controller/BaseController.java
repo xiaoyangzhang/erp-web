@@ -56,7 +56,7 @@ public class BaseController {
 		return jsonObject.toString();
 	}
 	
-	protected String errorJson(String msg){
+	protected String result(String msg){
 		JSONObject json = new JSONObject();
 		json.put("success", false);
 		json.put("msg", msg);

@@ -18,9 +18,9 @@ import com.google.gson.Gson;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrice;
-import com.yimayhd.erpcenter.facade.sales.query.SaveBudgetItemDTO;
+import com.yimayhd.erpcenter.facade.sales.query.budgetitem.SaveBudgetItemDTO;
 import com.yimayhd.erpcenter.facade.sales.result.BaseStateResult;
-import com.yimayhd.erpcenter.facade.sales.result.BudgetItemResult;
+import com.yimayhd.erpcenter.facade.sales.result.budgetitem.BudgetItemResult;
 //import com.yihg.sales.po.GroupOrderPrice;
 import com.yimayhd.erpcenter.facade.sales.service.BudgetItemFacade;
 

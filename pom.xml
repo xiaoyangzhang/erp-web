@@ -88,6 +88,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<facade-product-client.version>0.0.6-SNAPSHOT</facade-product-client.version>
 		<facade-common-client.version>0.0.8-SNAPSHOT</facade-common-client.version>
+		<facade-finance-client.version>0.0.8-SNAPSHOT</facade-finance-client.version>
 	</properties>
 
 	<dependencies>
@@ -368,7 +369,11 @@
 			  <artifactId>erpresourceDAL-client</artifactId>
 			  <version>0.0.8-SNAPSHOT</version>
 		</dependency>
- 
+ 		<dependency>
+			<groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterFacade-finance-client</artifactId>
+			<version>${facade-finance-client.version}</version>
+		</dependency>
 
 
 
