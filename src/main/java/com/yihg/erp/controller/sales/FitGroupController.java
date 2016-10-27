@@ -14,23 +14,27 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yihg.basic.contants.BasicConstants;
+//import com.yihg.basic.contants.BasicConstants;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.GroupCodeUtil;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.common.contants.BasicConstants;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+//import com.yihg.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.FitGroupInfoVO;
 import com.yimayhd.erpcenter.facade.sales.query.FitGroupInfoQueryDTO;
 import com.yimayhd.erpcenter.facade.sales.query.FitGroupInfoUpdateDTO;
 import com.yimayhd.erpcenter.facade.sales.query.FitTotalSKGroupQueryDTO;
 import com.yimayhd.erpcenter.facade.sales.query.FitUpdateTourGroupDTO;
+import com.yimayhd.erpcenter.facade.sales.query.ToSecImpNotGroupListDTO;
+import com.yimayhd.erpcenter.facade.sales.result.BaseStateResult;
 import com.yimayhd.erpcenter.facade.sales.result.FitGroupInfoQueryResult;
 import com.yimayhd.erpcenter.facade.sales.result.FitTotalSKGroupQueryResult;
-import com.yimayhd.erpcenter.facade.sales.result.FitUpdateStateResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToSecImpNotGroupListResult;
 import com.yimayhd.erpcenter.facade.sales.service.FitGroupFacade;
 
 @Controller
@@ -42,7 +46,7 @@ public class FitGroupController extends BaseController {
 //	@Autowired
 //	private DicService dicService;
 	@Autowired
-	private SysConfig config;
+	private SysConfig config;//FIXME 这个东西有疑问
 //	@Autowired
 //	private FitGroupService fitGroupService;
 //	@Autowired
@@ -135,7 +139,7 @@ public class FitGroupController extends BaseController {
 		FitUpdateTourGroupDTO fitUpdateTourGroupDTO=new FitUpdateTourGroupDTO();
 		fitUpdateTourGroupDTO.setTourGroup(tourGroup);
 		
-		FitUpdateStateResult result = fitGroupFacade.updateFitTourGroup(fitUpdateTourGroupDTO);
+		BaseStateResult result = fitGroupFacade.updateFitTourGroup(fitUpdateTourGroupDTO);
 		if(!result.isSuccess()){
 			errorJson(result.getError());
 		}
@@ -169,7 +173,7 @@ public class FitGroupController extends BaseController {
 //		tourGroupService.delFitTourGroup(groupId);
 //		return successJson();
 		
-		FitUpdateStateResult result = fitGroupFacade.delFitTourGroup(groupId);
+		BaseStateResult result = fitGroupFacade.delFitTourGroup(groupId);
 		if(!result.isSuccess()){
 			errorJson(result.getError());
 		}
@@ -212,8 +216,16 @@ public class FitGroupController extends BaseController {
 //		model.addAttribute("groupId", gid);
 //		model.addAttribute("page", pageBean);
 		
-		//FIXME 待实现
+		ToSecImpNotGroupListDTO toSecImpNotGroupListDTO=new ToSecImpNotGroupListDTO();
 		
+		
+		ToSecImpNotGroupListResult result=fitGroupFacade.toSecImpNotGroupList(toSecImpNotGroupListDTO);
+		
+		model.addAttribute("pp", result.getPp());
+		model.addAttribute("groupOrder", result.getGroupOrder());
+		model.addAttribute("groupId", gid);
+		model.addAttribute("page", result.getPageBean());
+	
 		return "sales/fitGroup/secImpNotGroupOrder";
 	}
 	
@@ -237,7 +249,6 @@ public class FitGroupController extends BaseController {
 //			}
 //		}
 		
-		//FIXME 这个工具类改如何处理？
 		TourGroup   tourGroup = fitGroupInfoVO.getTourGroup();
 		tourGroup.setGroupCode(GroupCodeUtil.getCode(tourGroup.getGroupCode(), tourGroup.getGroupCodeMark()));
 		
@@ -329,7 +340,7 @@ public class FitGroupController extends BaseController {
 		model.addAttribute("fitGroupInfoVO", result.getFitGroupInfoVO());
 		model.addAttribute("operType", operType);
 		model.addAttribute("ppList", result.getPp());
-		model.addAttribute("config", config);//FIXME 这个东西有疑问
+		model.addAttribute("config", config);
 		
 		return "sales/fitGroup/fitGroupInfo";
 	}
@@ -343,7 +354,6 @@ public class FitGroupController extends BaseController {
 	 * @param tourGroup
 	 * @return
 	 */
-	//FIXME 导入TourGroup修复
 	@RequestMapping(value = "toFitGroupList.htm")
 	@RequiresPermissions(PermissionConstants.SALE_SK_TEAM)
 	public String toFitGroupList(HttpServletRequest request,

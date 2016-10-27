@@ -18,15 +18,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
-import com.yihg.basic.api.DicService;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.sales.api.GroupOrderPriceService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.po.GroupOrderPrice;
-import com.yihg.sales.vo.CostIncome;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrice;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.CostIncome;
+import com.yimayhd.erpcenter.facade.sales.query.SaveCostItemDTO;
+//import com.yihg.sales.po.GroupOrderPrice;
+//import com.yihg.sales.vo.CostIncome;
 import com.yimayhd.erpcenter.facade.sales.query.ToAddProfitChangeDTO;
-import com.yimayhd.erpcenter.facade.sales.service.GroupProfitFacade;
+import com.yimayhd.erpcenter.facade.sales.query.ToSaveCostIncomeDTO;
+import com.yimayhd.erpcenter.facade.sales.result.CostItemResult;
+import com.yimayhd.erpcenter.facade.sales.service.CostItemFacade;
 
 @Controller
 @RequestMapping(value = "/costItem")
@@ -35,22 +37,26 @@ public class CostItemController extends BaseController {
 	private static final Logger logger = LoggerFactory.getLogger(CostItemController.class);
 	
 	@Autowired
-	private GroupOrderService groupOrderService ;
-	
-	@Autowired
-	private GroupOrderPriceService groupOrderPriceService ;
-	
-	@Autowired
-	private DicService dicService ;
-	
-	@Autowired
-	private GroupProfitFacade tourGroupProfitFacade;
+	private CostItemFacade costItemFacade;
 	
 	@RequestMapping(value="/toSaveCostIncome",method=RequestMethod.POST)
 	@ResponseBody
 	public String toSaveCostIncome(HttpServletRequest request,HttpServletResponse response,ModelMap model,String price){
+//		CostIncome costIncome = JSON.parseObject(price, CostIncome.class);
+//		groupOrderPriceService.saveCostIncomeBatch(costIncome,WebUtils.getCurUser(request).getEmployeeId(),WebUtils.getCurUser(request).getName()) ;
+//		return successJson();
+		
 		CostIncome costIncome = JSON.parseObject(price, CostIncome.class);
-		groupOrderPriceService.saveCostIncomeBatch(costIncome,WebUtils.getCurUser(request).getEmployeeId(),WebUtils.getCurUser(request).getName()) ;
+		Integer    employeeId = WebUtils.getCurUser(request).getEmployeeId();
+		String     curUserName = WebUtils.getCurUser(request).getName();
+		
+		ToSaveCostIncomeDTO toSaveCostIncomeDTO =new ToSaveCostIncomeDTO();
+		toSaveCostIncomeDTO.setCostIncome(costIncome);
+		toSaveCostIncomeDTO.setCurUserName(curUserName);
+		toSaveCostIncomeDTO.setEmployeeId(employeeId);
+		
+		costItemFacade.toSaveCostIncome(toSaveCostIncomeDTO);
+		
 		return successJson();
 	}
 	/**
@@ -62,13 +68,25 @@ public class CostItemController extends BaseController {
 	@RequestMapping(value = "/saveCostItem", method = RequestMethod.POST)
 	@ResponseBody
 	public String saveCostItem(HttpServletRequest request,GroupOrderPrice groupOrderPrice,Model model){
+		
+//		groupOrderPrice.setMode(1); //0是预算，1是成本
+//		groupOrderPrice.setRowState(1);
+//		groupOrderPrice.setCreatorId(WebUtils.getCurUserId(request));
+//		groupOrderPrice.setCreatorName(WebUtils.getCurUser(request).getName());
+//		groupOrderPrice.setCreateTime(new Date().getTime());
+//		groupOrderPriceService.insertSelective(groupOrderPrice) ;
+		
 		groupOrderPrice.setMode(1); //0是预算，1是成本
 		groupOrderPrice.setRowState(1);
 		groupOrderPrice.setCreatorId(WebUtils.getCurUserId(request));
 		groupOrderPrice.setCreatorName(WebUtils.getCurUser(request).getName());
 		groupOrderPrice.setCreateTime(new Date().getTime());
-		groupOrderPriceService.insertSelective(groupOrderPrice) ;
-		logger.info("添加价格成本成功");
+		
+		SaveCostItemDTO  saveCostItemDTO=new SaveCostItemDTO();
+		saveCostItemDTO.setGroupOrderPrice(groupOrderPrice);
+		
+		costItemFacade.saveCostItem(saveCostItemDTO);
+
 		return successJson();
 	}
 	
@@ -81,10 +99,16 @@ public class CostItemController extends BaseController {
 	@RequestMapping(value = "editCostItem.do", method = RequestMethod.GET)
 	@ResponseBody
 	public String editCostItem(Integer id,Model model){
-		GroupOrderPrice groupOrderPrice = groupOrderPriceService.selectByPrimaryKey(id) ;
+		
+//		GroupOrderPrice groupOrderPrice = groupOrderPriceService.selectByPrimaryKey(id) ;
+//		Gson gson = new Gson();
+//		String string = gson.toJson(groupOrderPrice);
+//		logger.info("跳转修改价格成本页面");
+//		return string ;
+		
+		CostItemResult result=costItemFacade.editCostItem(id);
 		Gson gson = new Gson();
-		String string = gson.toJson(groupOrderPrice);
-		logger.info("跳转修改价格成本页面");
+		String string = gson.toJson(result.getGroupOrderPrice());
 		return string ;
 	}
 	
@@ -97,17 +121,25 @@ public class CostItemController extends BaseController {
 	@RequestMapping(value="/updateCostItem", method = RequestMethod.POST)
 	@ResponseBody
 	public String updateCostItem(GroupOrderPrice groupOrderPrice,Model model){
-		groupOrderPrice.setMode(1); //0是预算，1是成本
-		groupOrderPriceService.updateByPrimaryKeySelective(groupOrderPrice) ;
-		logger.info("修改价格成本成功");
+		
+//		groupOrderPrice.setMode(1); //0是预算，1是成本
+//		groupOrderPriceService.updateByPrimaryKeySelective(groupOrderPrice) ;
+//		logger.info("修改价格成本成功");
+//		return successJson();
+	
+		SaveCostItemDTO  costItemDTO=new SaveCostItemDTO();
+		costItemDTO.setGroupOrderPrice(groupOrderPrice);
+		costItemFacade.updateCostItem(costItemDTO);
+		
 		return successJson();
 	}
 	
 	@RequestMapping(value="/deleteCostItemById", method = RequestMethod.GET)
 	@ResponseBody
 	public String deleteCostItemById(Integer id,Model model){
-		groupOrderPriceService.deleteByPrimaryKey(id) ;
-		logger.info("删除价格成本成功");
+//		groupOrderPriceService.deleteByPrimaryKey(id) ;
+//		logger.info("删除价格成本成功");
+		costItemFacade.deleteCostItemById(id);
 		return successJson() ;
 	}
 	
@@ -144,7 +176,7 @@ public class CostItemController extends BaseController {
 		profitChangeDTO.setCreatorName(WebUtils.getCurUser(request).getName());
 		profitChangeDTO.setPrice(price);
 		
-		tourGroupProfitFacade.toAddProfitChange(profitChangeDTO);
+		costItemFacade.toAddProfitChange(profitChangeDTO);
 		
 		return successJson() ;
 	}

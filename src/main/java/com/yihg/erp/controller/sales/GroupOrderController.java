@@ -122,7 +122,7 @@ import com.yihg.sys.api.PlatformOrgService;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.facade.sales.query.ToOrderLockTableDTO;
-import com.yimayhd.erpcenter.facade.sales.result.FitUpdateStateResult;
+import com.yimayhd.erpcenter.facade.sales.result.BaseStateResult;
 import com.yimayhd.erpcenter.facade.sales.result.PreviewFitTransferResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockListResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockTableResult;
@@ -462,7 +462,7 @@ public class GroupOrderController extends BaseController {
 //			return errorJson("服务器忙！");
 //		}
 		
-		FitUpdateStateResult result = groupOrderLockFacade.updateOrderLockState(orderId, orderLockState);
+		BaseStateResult result = groupOrderLockFacade.updateOrderLockState(orderId, orderLockState);
 		if(result.isSuccess()){
 			Map<String, Object> map = new HashMap<String, Object>() ;
 			map.put("orderLockState", orderLockState) ;
