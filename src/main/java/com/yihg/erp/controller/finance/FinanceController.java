@@ -45,10 +45,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.yimayhd.erpcenter.facade.finance.query.AduditStatisticsListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.AuditDTO;
+import org.yimayhd.erpcenter.facade.finance.query.AuditListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.FinAuditDTO;
 import org.yimayhd.erpcenter.facade.finance.query.IncomeJoinTableListDTO;
 import org.yimayhd.erpcenter.facade.finance.query.IncomeOrPayDTO;
+import org.yimayhd.erpcenter.facade.finance.query.PayDTO;
 import org.yimayhd.erpcenter.facade.finance.query.SettleSealListDTO;
 import org.yimayhd.erpcenter.facade.finance.query.StatementCheckPreviewDTO;
+import org.yimayhd.erpcenter.facade.finance.query.UnsealDTO;
 import org.yimayhd.erpcenter.facade.finance.result.IncomeOrPaytResult;
 import org.yimayhd.erpcenter.facade.finance.result.ResultSupport;
 import org.yimayhd.erpcenter.facade.finance.result.SettleSealListResult;
@@ -68,6 +73,7 @@ import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
 import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.common.util.NumberUtil;
+import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePay;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
@@ -951,7 +957,7 @@ public class FinanceController extends BaseController {
 		if(page != null){
 			dto.setPage(page);
 		}
-		if(pageSize){
+		if(pageSize != null){
 			dto.setPageSize(pageSize);
 		}
 		
@@ -979,12 +985,11 @@ public class FinanceController extends BaseController {
 	 */
 	@RequestMapping(value = "getAuditUserList.do", method = RequestMethod.GET)
 	@ResponseBody
-	public String getAuditUserList(HttpServletRequest request,
-			HttpServletResponse reponse, String name)
+	public String getAuditUserList(HttpServletRequest request, HttpServletResponse reponse, String name)
 			throws UnsupportedEncodingException {
-		List<Map<String, String>> list = tourGroupService.getAuditUserList(
-				WebUtils.getCurBizId(request),
-				java.net.URLDecoder.decode(name, "UTF-8"));
+		
+		List<Map<String, String>> list = financeFacade.getAuditUserList(java.net.URLDecoder.decode(name, "UTF-8"), 
+				WebUtils.getCurBizId(request));
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("success", "true");
 		map.put("result", list);
@@ -997,7 +1002,7 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "operateLog.htm")
 	public String operateLog(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer groupId) {
-		List<TourGroup> operateLogs = financeService.getOperateLogs(groupId);
+		List<TourGroup> operateLogs = financeFacade.operateLog(groupId);
 		model.addAttribute("operateLogs", operateLogs);
 		return "finance/operate-log";
 	}
@@ -1013,30 +1018,23 @@ public class FinanceController extends BaseController {
 			String feeType, String checkedIds, String unCheckedIds,
 			String comCheckedIds, String comUnCheckedIds, String financeGuides,
 			String priceCheckedIds, String priceUnCheckedIds) {
+		
+		
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		//处理审核
-		financeService.audit(groupId, feeType, checkedIds, unCheckedIds,comCheckedIds, 
-				comUnCheckedIds, emp.getEmployeeId(),emp.getName());
+		AuditDTO dto = new AuditDTO();
+		dto.setGroupId(groupId);
+		dto.setFeeType(feeType);
+		dto.setCheckedIds(priceUnCheckedIds);
+		dto.setUnCheckedIds(priceUnCheckedIds);
+		dto.setComCheckedIds(comCheckedIds);
+		dto.setComUnCheckedIds(comUnCheckedIds);
+		dto.setFinanceGuides(financeGuides);
+		dto.setPriceCheckedIds(priceCheckedIds);
+		dto.setPriceUnCheckedIds(priceUnCheckedIds);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
 		
-		if(StringUtils.isNotEmpty(financeGuides)){
-			//处理导游报账
-			List<FinanceGuide> list = JSONArray.parseArray(financeGuides, FinanceGuide.class);
-			financeGuideService.financeBatchSave(list);
-			
-			//修改订单结算方式
-			FinanceGuide fg = null;
-			for(int i = 0; i < list.size(); i++){
-				fg = list.get(i);
-				BookingSupplier supplier = new BookingSupplier();
-				supplier.setId(fg.getBookingIdLink());
-				supplier.setCashType(fg.getCashType());
-				bookingSupplierService.updateByPrimaryKeySelective(supplier);
-			}
-		}
-		
-		//审核订单价格
-		groupOrderPriceService.auditPriceByIds(priceCheckedIds, priceUnCheckedIds);
-		
+		financeFacade.audit(dto);
 		return null;
 	}
 	
@@ -1049,25 +1047,14 @@ public class FinanceController extends BaseController {
 	public String auditList(HttpServletRequest request, HttpServletResponse reponse, 
 			ModelMap model, String data, String financeGuides) {
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		//处理审核
-		financeService.audit(data, emp.getEmployeeId(), emp.getName());
 		
-		if(StringUtils.isNotEmpty(financeGuides)){
-			
-			//处理导游报账
-			List<FinanceGuide> list = JSONArray.parseArray(financeGuides, FinanceGuide.class);
-			financeGuideService.financeBatchSave(list);
-			
-			//修改订单结算方式
-			FinanceGuide fg = null;
-			for(int i = 0; i < list.size(); i++){
-				fg = list.get(i);
-				BookingSupplier supplier = new BookingSupplier();
-				supplier.setId(fg.getBookingIdLink());
-				supplier.setCashType(fg.getCashType());
-				bookingSupplierService.updateByPrimaryKeySelective(supplier);
-			}
-		}
+		AuditListDTO dto = new AuditListDTO();
+		dto.setData(data);
+		dto.setFinanceGuides(financeGuides);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		
+		financeFacade.auditList(dto);
 		return null;
 	}
 
@@ -1077,10 +1064,14 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "finAudit.do")
 	@ResponseBody
 	@PostHandler
-	public String finAudit(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, Integer groupId) {
+	public String finAudit(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer groupId) {
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		financeService.audit(groupId, emp.getEmployeeId(), emp.getName());
+		
+		FinAuditDTO dto = new FinAuditDTO();
+		dto.setGroupId(groupId);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		financeFacade.finAudit(dto);
 		return null;
 	}
 
@@ -1093,7 +1084,12 @@ public class FinanceController extends BaseController {
 	public String finUnAudit(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer groupId) {
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		financeService.unAudit(groupId, emp.getName());
+		
+		FinAuditDTO dto = new FinAuditDTO();
+		dto.setGroupId(groupId);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		financeFacade.finUnAudit(dto);
 		return null;
 	}
 
@@ -1103,10 +1099,13 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "batchSeal.do")
 	@ResponseBody
 	@PostHandler
-	public String batchSeal(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, String groupIds) {
+	public String batchSeal(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String groupIds) {
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		financeService.batchSeal(groupIds, emp.getEmployeeId(), emp.getName());
+		UnsealDTO dto = new UnsealDTO();
+		dto.setGroupIds(groupIds);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		financeFacade.batchSeal(dto);
 		return null;
 	}
 
@@ -1116,10 +1115,14 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "unseal.do")
 	@ResponseBody
 	@PostHandler
-	public String unseal(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, String groupId) {
+	public String unseal(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String groupId) {
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		financeService.unseal(groupId, emp.getEmployeeId(), emp.getName());
+		
+		UnsealDTO dto = new UnsealDTO();
+		dto.setGroupIds(groupId);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		financeFacade.unseal(dto);
 		return null;
 	}
 
@@ -1136,21 +1139,15 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "pay.do")
 	@ResponseBody
 	@PostHandler
-	public String pay(HttpServletRequest request, HttpServletResponse reponse,
-			ModelMap model, FinancePay pay) {
+	public String pay(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, FinancePay pay) {
+		
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		pay.setUserId(emp.getEmployeeId());
-		pay.setUserName(emp.getName());
-		pay.setBizId(WebUtils.getCurBizId(request));
-		
-//		以下几句获得收付款当前商家的类别，因为其它收入，其它支出是共用一个商家类别，代码里面求各是需要判断用到 ou
-		SupplierInfo sInfo = supplierService.selectBySupplierId(pay.getSupplierId());
-		int SupplierType = pay.getSupplierType();
-		if (sInfo != null)
-			SupplierType = sInfo.getSupplierType();
-		
-		FinancePay rt = financeService.pay(pay,	JSON.parseArray(pay.getDetails(), FinancePayDetail.class), SupplierType);
-		return String.valueOf(rt.getId());
+		PayDTO dto = new PayDTO();
+		dto.setFinancePay(pay);
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		return financeFacade.pay(dto);
 	}
 
 	/**
@@ -1166,9 +1163,10 @@ public class FinanceController extends BaseController {
 	@ResponseBody
 	public String querySupplierBankAccountList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer sid) {
+		
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("success", "true");
-		map.put("accountList", supplierService.selectBankBySupplierId(sid));
+		map.put("accountList", financeFacade.querySupplierBankAccountList(sid));
 		return JSON.toJSONString(map);
 	}
 
@@ -1182,7 +1180,6 @@ public class FinanceController extends BaseController {
 		if (employee != null) {
 			model.addAttribute("operatePerson", employee.getName());
 		}
-		
 	}
 
 	/**
@@ -1645,13 +1642,15 @@ public class FinanceController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping("/billList.htm")
-	public String receiveOrderList(HttpServletRequest request,
-			HttpServletResponse response, ModelMap model, TourGroup group,
-			Integer page) {
-		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
+	public String receiveOrderList(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroup group, Integer page) {
+		
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		model.addAttribute("bizId", bizId); // 过滤B商家
+		
 		return "finance/bill/receiveBillList";
 	}
 
