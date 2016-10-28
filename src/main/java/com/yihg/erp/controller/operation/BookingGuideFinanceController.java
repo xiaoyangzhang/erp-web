@@ -23,9 +23,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
+import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.result.RegionResult;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -82,6 +87,12 @@ import com.yihg.supplier.po.SupplierInfo;
 import com.yihg.sys.api.PlatformEmployeeService;
 import com.yihg.sys.api.PlatformOrgService;
 import com.yimayhd.erpcenter.dal.sys.po.UserSession;
+import com.yimayhd.erpcenter.facade.sales.query.BookingGuideQueryDTO;
+import com.yimayhd.erpcenter.facade.sales.result.BookingGuideResult;
+import com.yimayhd.erpcenter.facade.sales.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.sales.result.WebResult;
+import com.yimayhd.erpcenter.facade.sales.service.BookingGuideFacade;
+import com.yimayhd.erpcenter.facade.sales.service.BookingGuideFinanceFacade;
 /**
  * @author : xuzejun
  * @date : 2015年7月25日 下午2:31:01
@@ -132,6 +143,12 @@ public class BookingGuideFinanceController extends BaseController {
 	private PlatformOrgService orgService;
 	@Autowired
 	private PlatformEmployeeService platformEmployeeService;
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
+	@Autowired
+	private BookingGuideFinanceFacade bookingGuideFinanceFacade;
+	@Autowired
+	private BookingGuideFacade bookingGuideFacade;
 	/**
 	 * @author : xuzejun
 	 * @date : 2015年7月25日 下午2:31:01
@@ -140,17 +157,21 @@ public class BookingGuideFinanceController extends BaseController {
 	@RequestMapping(value = "/list.htm")
 	//@RequiresPermissions(PermissionConstants.JDGL_GUIDE)
 	public String toList(HttpServletRequest request,ModelMap model) {
-		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-		
+//		Integer bizId = WebUtils.getCurBizId(request);
+//		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO	departmentTuneQueryDTO = new  DepartmentTuneQueryDTO();
+	    departmentTuneQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		DepartmentTuneQueryResult queryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", queryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", queryResult.getOrgUserJsonStr());
 		return "operation/guideFinance/guide-list";
 	}
 	
 	//TourGroup group,
 	@RequestMapping(value = "/bookingGuideList.do")
 	//@RequiresPermissions(PermissionConstants.JDGL_GUIDE)
-	public String bookingGuideList(HttpServletRequest request, ModelMap model,TourGroupVO group) {
+	public String bookingGuideList(HttpServletRequest request, ModelMap model,com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO group) {
 		PageBean pageBean = new PageBean();
 		if(group.getPage()==null){
 			group.setPage(1);
@@ -161,31 +182,31 @@ public class BookingGuideFinanceController extends BaseController {
 			pageBean.setPageSize(group.getPageSize());
 		}
 		Map paramters = WebUtils.getQueryParamters(request);
-		if(StringUtils.isBlank((String)paramters.get("saleOperatorIds")) && StringUtils.isNotBlank((String)paramters.get("orgIds"))){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = paramters.get("orgIds").toString().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-				//paramters.put("saleOperatorIds", salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
+//		if(StringUtils.isBlank((String)paramters.get("saleOperatorIds")) && StringUtils.isNotBlank((String)paramters.get("orgIds"))){
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = paramters.get("orgIds").toString().split(",");
+//			for(String orgIdStr : orgIdArr){
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds="";
+//			for(Integer usrId : set){
+//				salesOperatorIds+=usrId+",";
+//			}
+//			if(!salesOperatorIds.equals("")){
+//				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+//			}
+//		}
+		String operatorIds = (String)paramters.get("saleOperatorIds");
+		String orgIds = (String)paramters.get("orgIds");
+		group.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(operatorIds, orgIds, WebUtils.getCurBizId(request)));
 		group.setSupplierType(Constants.GUIDE);
 		group.setBizId(WebUtils.getCurBizId(request));
 		
 		pageBean.setParameter(group);
 		pageBean.setPage(group.getPage());
 		
-		pageBean = tourGroupService.getGuideGroupList2(pageBean, group, WebUtils.getDataUserIdSet(request));
-		//pageBean = tourGroupService.getGroupInfoList(pageBean, group, WebUtils.getDataUserIdSet(request));
-		//fillData(pageBean.getResult());
+		pageBean = bookingGuideFinanceFacade.getGuideGroupList2(pageBean, group, WebUtils.getDataUserIdSet(request));
 		model.addAttribute("page", pageBean);
 		return "operation/guideFinance/guide-listView";
 	}
@@ -197,15 +218,20 @@ public class BookingGuideFinanceController extends BaseController {
 	 */
 	@RequestMapping(value = "/lockList.htm")
 	public String lockList(HttpServletRequest request,ModelMap model) {
-		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+//		Integer bizId = WebUtils.getCurBizId(request);
+//		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO	departmentTuneQueryDTO = new  DepartmentTuneQueryDTO();
+	    departmentTuneQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		DepartmentTuneQueryResult queryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", queryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", queryResult.getOrgUserJsonStr());
 		return "operation/guideFinance/guide-lock-list";
 	}
 	
 
 	@RequestMapping(value = "/lockListTable.do")
-	public String lockListTable(HttpServletRequest request, ModelMap model,TourGroupVO group) {
+	public String lockListTable(HttpServletRequest request, ModelMap model,com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO group) {
 		UserSession user = WebUtils.getCurrentUserSession(request);
 		Map<String,Boolean> optMap = user.getOptMap();
 		model.addAttribute("optMap_LOCK", optMap.containsKey(PermissionConstants.JDGL_DYJDSH.concat("_").concat(PermissionConstants.JDGL_GUIDE_LOCK)));
@@ -220,64 +246,70 @@ public class BookingGuideFinanceController extends BaseController {
 			pageBean.setPageSize(group.getPageSize());
 		}
 		Map paramters = WebUtils.getQueryParamters(request);
-		if(StringUtils.isBlank((String)paramters.get("saleOperatorIds")) && StringUtils.isNotBlank((String)paramters.get("orgIds"))){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = paramters.get("orgIds").toString().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
+//		if(StringUtils.isBlank((String)paramters.get("saleOperatorIds")) && StringUtils.isNotBlank((String)paramters.get("orgIds"))){
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = paramters.get("orgIds").toString().split(",");
+//			for(String orgIdStr : orgIdArr){
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds="";
+//			for(Integer usrId : set){
+//				salesOperatorIds+=usrId+",";
+//			}
+//			if(!salesOperatorIds.equals("")){
+//				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+//			}
+//		}
+		String operatorIds = (String)paramters.get("saleOperatorIds");
+		String orgIds = (String)paramters.get("orgIds");
+		group.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(operatorIds, orgIds, WebUtils.getCurBizId(request)));
+		
 		group.setSupplierType(Constants.GUIDE);
 		group.setBizId(WebUtils.getCurBizId(request));
 		
 		pageBean.setParameter(group);
 		pageBean.setPage(group.getPage());
 		
-		pageBean = tourGroupService.getGuideGroupList2(pageBean, group, WebUtils.getDataUserIdSet(request));
+		pageBean = bookingGuideFinanceFacade.getGuideGroupList2(pageBean, group, WebUtils.getDataUserIdSet(request));
 		model.addAttribute("page", pageBean);
 		return "operation/guideFinance/guide-lock-listView";
 	}
 	
 	@RequestMapping(value = "/changeStateLock.do")
 	public String changeStateLock(HttpServletRequest request,Integer groupId) {
-		bookingGuideService.updateStateLock(groupId);
+//		bookingGuideService.updateStateLock(groupId);
+		ResultSupport resultSupport = bookingGuideFinanceFacade.changeStateLock(groupId);
 		return "operation/guideFinance/guide-lock-list";
 	}
 	
 	@RequestMapping(value = "/changeStateUnlock.do")
 	public String changeStateUnlock(HttpServletRequest request,Integer groupId) {
-		bookingGuideService.updateStateUnlock(groupId);
+//		bookingGuideService.updateStateUnlock(groupId);
+		ResultSupport resultSupport = bookingGuideFinanceFacade.changeStateUnlock(groupId);
 		return "operation/guideFinance/guide-lock-list";
 	}
 	
-	private void fillData(List<BookingGroup> bookingGroupList){
-		if(bookingGroupList!=null&&bookingGroupList.size()>0){
-			for(BookingGroup group : bookingGroupList){
-				if(group.getProductBrandName()!=null){
-					group.setProductName("【"+group.getProductBrandName()+"】"+group.getProductName());
-				}
-				//填充定制团的组团社名称
-				if(group.getSupplierId()!=null){
-					SupplierInfo supplierInfo = supplierSerivce.selectBySupplierId(group.getSupplierId());
-					if(supplierInfo!=null){
-						group.setSupplierName(supplierInfo.getNameFull());
-					}
-				}
-				//TODO:此处填充订单数和金额
-				group.setCount(bookingGuideService.getSelectCountByGruopId(group.getGroupId()));
-				group.setGuideList(bookingGuideService.selectGuidesByGroupId(group.getGroupId()));
-				
-			}
-		}
-	}
+//	private void fillData(List<BookingGroup> bookingGroupList){
+//		if(bookingGroupList!=null&&bookingGroupList.size()>0){
+//			for(BookingGroup group : bookingGroupList){
+//				if(group.getProductBrandName()!=null){
+//					group.setProductName("【"+group.getProductBrandName()+"】"+group.getProductName());
+//				}
+//				//填充定制团的组团社名称
+//				if(group.getSupplierId()!=null){
+//					SupplierInfo supplierInfo = supplierSerivce.selectBySupplierId(group.getSupplierId());
+//					if(supplierInfo!=null){
+//						group.setSupplierName(supplierInfo.getNameFull());
+//					}
+//				}
+//				//TODO:此处填充订单数和金额
+//				group.setCount(bookingGuideService.getSelectCountByGruopId(group.getGroupId()));
+//				group.setGuideList(bookingGuideService.selectGuidesByGroupId(group.getGroupId()));
+//				
+//			}
+//		}
+//	}
 	
 	/**
 	 * @author : xuzejun
@@ -287,23 +319,24 @@ public class BookingGuideFinanceController extends BaseController {
 	@RequestMapping(value = "/guideDetailList.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_GUIDE)
 	public String guideDetailList( ModelMap model,Integer groupId) {
-		TourGroup tg = tourGroupService.selectByPrimaryKey(groupId) ;
-		model.addAttribute("groupMode", tg.getGroupMode());
+//		TourGroup tg = tourGroupService.selectByPrimaryKey(groupId) ;
+		BookingGuideResult result = bookingGuideFinanceFacade.guideDetailList(groupId);
+		model.addAttribute("groupMode", result.getTourGroup().getGroupMode());
 		model.addAttribute("groupId", groupId);
 		//查询需求订单
-		List<GroupRequirement> groupRequirements = groupRequirementService.selectByGroupIdAndType(groupId, Constants.GUIDE);
-		if (groupRequirements!=null && groupRequirements.size()>0) {
-			GroupOrder groupOrder = groupOrderService
-					.selectByPrimaryKey(groupRequirements.get(0).getOrderId());
-			for (GroupRequirement req : groupRequirements) {
-				if (groupOrder!=null) {
-					req.setNameFull(groupOrder.getSupplierName());
-				}
-			}
-		}
-		List<BookingGuidesVO> vo = bookingGuideService.selectBookingGuideVoByGroupId(groupId);
-		model.addAttribute("vo", vo);
-		model.addAttribute("groupRequirements", groupRequirements);
+//		List<GroupRequirement> groupRequirements = groupRequirementService.selectByGroupIdAndType(groupId, Constants.GUIDE);
+//		if (groupRequirements!=null && groupRequirements.size()>0) {
+//			GroupOrder groupOrder = groupOrderService
+//					.selectByPrimaryKey(groupRequirements.get(0).getOrderId());
+//			for (GroupRequirement req : groupRequirements) {
+//				if (groupOrder!=null) {
+//					req.setNameFull(groupOrder.getSupplierName());
+//				}
+//			}
+//		}
+//		List<BookingGuidesVO> vo = bookingGuideService.selectBookingGuideVoByGroupId(groupId);
+		model.addAttribute("vo", result.getBookingGuidesVOs());
+		model.addAttribute("groupRequirements", result.getGroupRequirements());
 		return "operation/guideFinance/guide-listViewDetail";
 	}
 	
@@ -316,8 +349,9 @@ public class BookingGuideFinanceController extends BaseController {
 	@RequiresPermissions(PermissionConstants.JDGL_GUIDE)
 	public String guideDetailListView( ModelMap model,Integer groupId) {
 		model.addAttribute("groupId", groupId);
-		List<BookingGuidesVO> vo = bookingGuideService.selectBookingGuideVoByGroupId(groupId);
-		model.addAttribute("vo", vo);
+//		List<BookingGuidesVO> vo = bookingGuideService.selectBookingGuideVoByGroupId(groupId);
+		List<com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingGuidesVO> guidesVOs = bookingGuideFinanceFacade.guideDetailListView(groupId);
+		model.addAttribute("vo", guidesVOs);
 		return "operation/guideFinance/guide-detaillistView";
 	}
 	
@@ -326,8 +360,10 @@ public class BookingGuideFinanceController extends BaseController {
 	@RequiresPermissions(PermissionConstants.JDGL_GUIDE)
 	public String toGuideDetailListView( ModelMap model,Integer groupId) {
 		model.addAttribute("groupId", groupId);
-		List<BookingGuidesVO> vo = bookingGuideService.selectBookingGuideVoByGroupId(groupId);
-		model.addAttribute("vo", vo);
+//		List<BookingGuidesVO> vo = bookingGuideService.selectBookingGuideVoByGroupId(groupId);
+		List<com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingGuidesVO> guidesVOs = bookingGuideFinanceFacade.guideDetailListView(groupId);
+
+		model.addAttribute("vo", guidesVOs);
 		model.addAttribute("view",1);
 		return "operation/guideFinance/guide-detaillistView";
 	}
@@ -338,18 +374,20 @@ public class BookingGuideFinanceController extends BaseController {
 	 */
 	@RequestMapping(value = "/saveGuide.do")
 	@ResponseBody
-	public String saveGuide(HttpServletRequest request, ModelMap model,BookingGuidesVO guideVO) {
-		BookingGuide guide = guideVO.getGuide();
+	public String saveGuide(HttpServletRequest request, ModelMap model,com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingGuidesVO guideVO) {
+		com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide guide = guideVO.getGuide();
 		if(guide.getId()==null){
-			int No = bookingGuideService.getBookingCountByTime();
-			guide.setBookingNo(bizSettingCommon.getMyBizCode(request)+Constants.GUIDE+new SimpleDateFormat("yyMMdd").format(new Date())+(No+100));
+//			int No = bookingGuideService.getBookingCountByTime();
+//			guide.setBookingNo(bizSettingCommon.getMyBizCode(request)+Constants.GUIDE+new SimpleDateFormat("yyMMdd").format(new Date())+(No+100));
 			guide.setUserId(WebUtils.getCurUserId(request));
 			guide.setUserName(WebUtils.getCurUser(request).getName());
 			guide.setCreateTime(System.currentTimeMillis());
 			guide.setBookingDate(new Date());
 			guide.setIsDefault((byte)0);
 		}
-		return bookingGuideService.insertSelective(guideVO)>0?successJson("id",guide.getGroupId()+""):errorJson("操作失败！");
+//		return bookingGuideService.insertSelective(guideVO)>0?successJson("id",guide.getGroupId()+""):errorJson("操作失败！");
+		WebResult<Map<Object,Object>> result = bookingGuideFinanceFacade.saveGuide(guideVO, bizSettingCommon.getMyBizCode(request));
+		return result.isSuccess() ? successJson("id",""+result.getValue().get("id")) : errorJson("操作失败！");
 	}
 	
 	/**
@@ -360,12 +398,13 @@ public class BookingGuideFinanceController extends BaseController {
 	@RequestMapping(value = "/toEditGuideView.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_GUIDE)
 	public String toEditGuideView( ModelMap model,Integer groupId,Integer id) {
-		if(id!=null){
-			BookingGuidesVO vo = bookingGuideService.selectBookingGuideVoByGroupIdAndId(id);
-			model.addAttribute("vo", vo);
-		}
-		List<BookingSupplierDetail> driverList = detailService.getDriversByGroupIdAndType(groupId,Constants.FLEET);
-		model.addAttribute("driverList", driverList);
+//		if(id!=null){
+//			BookingGuidesVO vo = bookingGuideService.selectBookingGuideVoByGroupIdAndId(id);
+		BookingGuideResult result = bookingGuideFinanceFacade.toEditGuideView(groupId, id);
+			model.addAttribute("vo", result.getGuidesVO());
+//		}
+//		List<BookingSupplierDetail> driverList = detailService.getDriversByGroupIdAndType(groupId,Constants.FLEET);
+		model.addAttribute("driverList", result.getSupplierDetails());
 		model.addAttribute("groupId", groupId);
 		return "operation/guideFinance/edit-guide";
 	}
@@ -380,8 +419,9 @@ public class BookingGuideFinanceController extends BaseController {
 	@RequestMapping(value = "impGuideList.htm")	
 	public String impGuideList(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,SupplierGuide guide,Integer page,Integer pageSize){
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+		RegionResult regionResult = productCommonFacade.queryProvinces();
+		model.addAttribute("allProvince", regionResult.getRegionList());
 		//loadGuideList(model,guide,page,pageSize,bizId);
 		model.addAttribute("images_source", config.getImages200Url());
 		return "operation/guideFinance/imp-guideList";
@@ -393,21 +433,27 @@ public class BookingGuideFinanceController extends BaseController {
 	 * @Description: 导游查询结果
 	 */
 	@RequestMapping(value = "impGuideList.do",method=RequestMethod.POST)
-	public String queryImpGuideList(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,SupplierGuide guide,Integer page,Integer pageSize){
+	public String queryImpGuideList(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,com.yimayhd.erpresource.dal.po.SupplierGuide guide,Integer page,Integer pageSize){
 		Integer bizId = WebUtils.getCurBizId(request);
 		loadGuideList(model,guide,page,pageSize,bizId);
 		model.addAttribute("images_source", config.getImages200Url());
 		return "operation/guideFinance/imp-guideListView";
 	}	
 	
-	private void loadGuideList(ModelMap model,SupplierGuide guide,Integer page,Integer pageSize,Integer bizId){
+	private void loadGuideList(ModelMap model,com.yimayhd.erpresource.dal.po.SupplierGuide guide,Integer page,Integer pageSize,Integer bizId){
 		if(page==null){
 			page = 1;
 		}
 		if(pageSize==null){
 			pageSize = Constants.PAGESIZE;
 		}
-		PageBean pageBean = guideService.getGuideListByBizId(guide,bizId, page, pageSize);
+//		PageBean pageBean = guideService.getGuideListByBizId(guide,bizId, page, pageSize);
+		BookingGuideQueryDTO queryDTO = new BookingGuideQueryDTO();
+		queryDTO.setBizId(bizId);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setSupplierGuide(guide);
+		PageBean pageBean = bookingGuideFacade.getGuideListByBizId(queryDTO);
 		model.addAttribute("pageBean", pageBean);
 	
 	}
@@ -420,12 +466,16 @@ public class BookingGuideFinanceController extends BaseController {
 	@RequestMapping(value = "/defTetailGuide.do",method = RequestMethod.POST)
 	@ResponseBody
 	public String defTetailGuide(Integer id,Integer groupId) {
-		bookingGuideService.updateBygroupId(groupId);
-		BookingGuide g = new BookingGuide();
+//		bookingGuideService.updateBygroupId(groupId);
+//		BookingGuide g = new BookingGuide();
+//		g.setId(id);
+//		g.setIsDefault((byte)1);
+//		return bookingGuideService.updateByPrimaryKeySelective(g)>0?successJson():errorJson("操作失败！");
+		com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide g = new com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide();
 		g.setId(id);
 		g.setIsDefault((byte)1);
-		return bookingGuideService.updateByPrimaryKeySelective(g)>0?successJson():errorJson("操作失败！");
-
+		ResultSupport resultSupport = bookingGuideFacade.defTetailGuide(g, groupId);
+		return resultSupport.isSuccess() ? successJson() : errorJson("操作失败！");
 	}
 	
 	
@@ -601,25 +651,27 @@ public class BookingGuideFinanceController extends BaseController {
 	 */
 	@RequestMapping(value = "/finance.htm")
 	public String finance(Integer groupId,Integer bookingId,ModelMap model,Integer fromfin){
-		BookingGuide guide = bookingGuideService.selectByPrimaryKey(bookingId);
-		if(guide != null){
-			List<FinanceGuide> list = financeGuideService.selectListByGroupIdAndBookingId(groupId, bookingId);
-			/*Integer[] supplierType ={Constants.SCENICSPOT,Constants.HOTEL,Constants.RESTAURANT,Constants.FLEET,Constants.OTHERINCOME,Constants.OTHEROUTCOME};*/
-			TourGroup group = tourGroupService.selectByPrimaryKey(groupId);//团信息
-			BookingGuidesVO guidesVo = bookingGuideService.selectBookingGuideVoByGroupIdAndId(bookingId);
+//		BookingGuide guide = bookingGuideService.selectByPrimaryKey(bookingId);
+		BookingGuideResult result = bookingGuideFacade.guideFinance(groupId, bookingId);
+		if(result.getBookingGuide() != null){
+//			List<FinanceGuide> list = financeGuideService.selectListByGroupIdAndBookingId(groupId, bookingId);
+//			/*Integer[] supplierType ={Constants.SCENICSPOT,Constants.HOTEL,Constants.RESTAURANT,Constants.FLEET,Constants.OTHERINCOME,Constants.OTHEROUTCOME};*/
+//			TourGroup group = tourGroupService.selectByPrimaryKey(groupId);//团信息
+//			BookingGuidesVO guidesVo = bookingGuideService.selectBookingGuideVoByGroupIdAndId(bookingId);
 			String supplierName = "";
-			//团队才有组团社
-					if(group!=null && group.getGroupMode()>0){
-						List<GroupOrder> listg = groupOrderService.selectOrderByGroupId(groupId);
-						if(listg!=null && listg.size()>0){
-							supplierName=listg.get(0).getSupplierName();
-						}
-					}
-			model.addAttribute("supplierName",supplierName);
-			model.addAttribute("guidesVo", guidesVo);
-			model.addAttribute("group", group);
+//			//团队才有组团社
+//					if(group!=null && group.getGroupMode()>0){
+//						List<GroupOrder> listg = groupOrderService.selectOrderByGroupId(groupId);
+//						if(listg!=null && listg.size()>0){
+//							supplierName=listg.get(0).getSupplierName();
+//						}
+//					}
+			model.addAttribute("supplierName",result.getOrderList().get(0).getSupplierName());
+			model.addAttribute("guidesVo", result.getGuidesVO());
+			model.addAttribute("group", result.getTourGroup());
 			BigDecimal count=new BigDecimal(0);
-			for (FinanceGuide l : list) {
+			List<com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide> list = result.getFinanceGuides();
+			for (com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide l : list) {
 					if(l.getSupplierType().equals(Constants.OTHERINCOME)){
 						count=count.subtract(l.getTotal());
 					}else{
@@ -642,20 +694,24 @@ public class BookingGuideFinanceController extends BaseController {
 	 * @Description: 报账单
 	 */
 	@RequestMapping(value = "/financeSupplierView.htm")
-	public String financeSupplierView(FinanceGuide financeGuide,ModelMap model){
-		List<BookingSupplier> list = financeGuideService.getFinanceSupplierByFinanceGuide(financeGuide);
-		BookingGuide guide= bookingGuideService.selectByPrimaryKey(financeGuide.getBookingId());
+	public String financeSupplierView(com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide financeGuide,ModelMap model){
+//		List<BookingSupplier> list = financeGuideService.getFinanceSupplierByFinanceGuide(financeGuide);
+//		BookingGuide guide= bookingGuideService.selectByPrimaryKey(financeGuide.getBookingId());
+		BookingGuideResult result = bookingGuideFacade.financeSupplierView(financeGuide);
+		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier> bookingSuppliers = result.getBookingSuppliers();
+		
 		BigDecimal count=new BigDecimal(0);
-		for (BookingSupplier l : list) {
+		for (com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier l : bookingSuppliers) {
 			if(l.getSupplierType().equals(Constants.OTHERINCOME)){
 				count=count.subtract(l.getFtotal());
 			}else{
 				count=count.add(l.getFtotal());
 			}
 		}
-		getSupplierDetail(list);
+//		getSupplierDetail(list);
 		model.addAttribute("count", count);
-		model.addAttribute("list", list);
+		model.addAttribute("list", bookingSuppliers);
+		com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide guide = result.getBookingGuide();
 		model.addAttribute("stateFinance", guide.getStateFinance());
 		model.addAttribute("financeGuide", financeGuide);
 		return "operation/guideFinance/guide-financeSupplier";
@@ -667,51 +723,53 @@ public class BookingGuideFinanceController extends BaseController {
 	 * @Description: 关联   id为1排除已经有的
 	 */
 	@RequestMapping(value = "/getFinanceSupplierView.htm")
-	public String financeRelevanceSupplierView(FinanceGuide financeGuide,ModelMap model){
-		List<BookingSupplier> list = financeGuideService.getFinanceSupplierByFinanceGuide(financeGuide);
+	public String financeRelevanceSupplierView(com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide financeGuide,ModelMap model){
+//		List<BookingSupplier> list = financeGuideService.getFinanceSupplierByFinanceGuide(financeGuide);
 		//StringBuffer sb = new StringBuffer();
-		getSupplierDetail(list);
+//		getSupplierDetail(list);
+		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier> list = bookingGuideFacade.getFinanceSupplierByFinanceGuide(financeGuide);
+
 		model.addAttribute("list", list);
 		model.addAttribute("financeGuide", financeGuide);
 		return "operation/guideFinance/imp-guide-financeSupplier";
 	}
 
-	private void getSupplierDetail(List<BookingSupplier> list) {
-	
-		for (BookingSupplier bookingSupplier : list) {
-			List<BookingSupplierDetail> supplierDetails = detailService.selectByPrimaryBookId(bookingSupplier.getId());
-			//for (BookingSupplierDetail bookingSupplierDetail : supplierDetails) {
-			List<String> str = new ArrayList<String>();
-				for (int i = 0; i < supplierDetails.size(); i++) {
-				
-				if(bookingSupplier.getId().equals(supplierDetails.get(i).getBookingId())){
-					if(bookingSupplier.getSupplierType().equals(Constants.SCENICSPOT)){//景点
-						//门票：日期 + 项目 + 单价*（数量-免去）
-						str.add(com.yihg.erp.utils.DateUtils.format(supplierDetails.get(i).getItemDate())+" "+supplierDetails.get(i).getType1Name()+" "+supplierDetails.get(i).getItemPrice()+"*"+"("+supplierDetails.get(i).getItemNum()+"-"+supplierDetails.get(i).getItemNumMinus()+")");/*+(bookingSupplierDetail.getItemNum()-bookingSupplierDetail.getItemNumMinus());*/
-					}else if (bookingSupplier.getSupplierType().equals(Constants.HOTEL)) {//用房
-						//入住日期 + 类别（房型）  单价*(数量-名去)
-						str.add(com.yihg.erp.utils.DateUtils.format(supplierDetails.get(i).getItemDate())+" "+supplierDetails.get(i).getType1Name()+"("+(null==supplierDetails.get(i).getType2Name()?"":supplierDetails.get(i).getType2Name())+")"+" "+supplierDetails.get(i).getItemPrice()+"*"+"("+supplierDetails.get(i).getItemNum()+"-"+supplierDetails.get(i).getItemNumMinus()+")");
-					}else if (bookingSupplier.getSupplierType().equals(Constants.RESTAURANT)) {//用餐
-						//用餐日期 + 餐厅（类别）  单价*(数量-名去)
-						str.add(com.yihg.erp.utils.DateUtils.format(supplierDetails.get(i).getItemDate())+" "+supplierDetails.get(i).getType1Name()+"("+(null==supplierDetails.get(i).getType2Name()?"":supplierDetails.get(i).getType2Name())+")"+" "+supplierDetails.get(i).getItemPrice()+"*"+"("+supplierDetails.get(i).getItemNum()+"-"+supplierDetails.get(i).getItemNumMinus()+")");
-					}else if (bookingSupplier.getSupplierType().equals(Constants.FLEET)) {//用车
-						//车型（座位数）+车牌号 司机 + 联系方式
-						str.add(supplierDetails.get(i).getType1Name()+"("+supplierDetails.get(i).getType2Name()+")"+" "+supplierDetails.get(i).getCarLisence()+" "+supplierDetails.get(i).getDriverName()+" "+supplierDetails.get(i).getDriverTel());
-					}else if (bookingSupplier.getSupplierType().equals(Constants.OTHERINCOME)) {//其他收入
-						//项目  价格*数量  备注
-						str.add(supplierDetails.get(i).getType1Name()+" "+supplierDetails.get(i).getItemPrice()+"*"+supplierDetails.get(i).getItemNum()+" "+bookingSupplier.getRemark());
-					}else if (bookingSupplier.getSupplierType().equals(Constants.OTHEROUTCOME)) {//其他支出
-						//项目  价格*数量  备注
-						str.add(supplierDetails.get(i).getType1Name()+" "+supplierDetails.get(i).getItemPrice()+"*"+supplierDetails.get(i).getItemNum()+" "+bookingSupplier.getRemark());
-					}
-					
-				}
-				bookingSupplier.setSupplierDetail(str);
-			}
-			
-			
-		}
-	}
+//	private void getSupplierDetail(List<BookingSupplier> list) {
+//	
+//		for (BookingSupplier bookingSupplier : list) {
+//			List<BookingSupplierDetail> supplierDetails = detailService.selectByPrimaryBookId(bookingSupplier.getId());
+//			//for (BookingSupplierDetail bookingSupplierDetail : supplierDetails) {
+//			List<String> str = new ArrayList<String>();
+//				for (int i = 0; i < supplierDetails.size(); i++) {
+//				
+//				if(bookingSupplier.getId().equals(supplierDetails.get(i).getBookingId())){
+//					if(bookingSupplier.getSupplierType().equals(Constants.SCENICSPOT)){//景点
+//						//门票：日期 + 项目 + 单价*（数量-免去）
+//						str.add(com.yihg.erp.utils.DateUtils.format(supplierDetails.get(i).getItemDate())+" "+supplierDetails.get(i).getType1Name()+" "+supplierDetails.get(i).getItemPrice()+"*"+"("+supplierDetails.get(i).getItemNum()+"-"+supplierDetails.get(i).getItemNumMinus()+")");/*+(bookingSupplierDetail.getItemNum()-bookingSupplierDetail.getItemNumMinus());*/
+//					}else if (bookingSupplier.getSupplierType().equals(Constants.HOTEL)) {//用房
+//						//入住日期 + 类别（房型）  单价*(数量-名去)
+//						str.add(com.yihg.erp.utils.DateUtils.format(supplierDetails.get(i).getItemDate())+" "+supplierDetails.get(i).getType1Name()+"("+(null==supplierDetails.get(i).getType2Name()?"":supplierDetails.get(i).getType2Name())+")"+" "+supplierDetails.get(i).getItemPrice()+"*"+"("+supplierDetails.get(i).getItemNum()+"-"+supplierDetails.get(i).getItemNumMinus()+")");
+//					}else if (bookingSupplier.getSupplierType().equals(Constants.RESTAURANT)) {//用餐
+//						//用餐日期 + 餐厅（类别）  单价*(数量-名去)
+//						str.add(com.yihg.erp.utils.DateUtils.format(supplierDetails.get(i).getItemDate())+" "+supplierDetails.get(i).getType1Name()+"("+(null==supplierDetails.get(i).getType2Name()?"":supplierDetails.get(i).getType2Name())+")"+" "+supplierDetails.get(i).getItemPrice()+"*"+"("+supplierDetails.get(i).getItemNum()+"-"+supplierDetails.get(i).getItemNumMinus()+")");
+//					}else if (bookingSupplier.getSupplierType().equals(Constants.FLEET)) {//用车
+//						//车型（座位数）+车牌号 司机 + 联系方式
+//						str.add(supplierDetails.get(i).getType1Name()+"("+supplierDetails.get(i).getType2Name()+")"+" "+supplierDetails.get(i).getCarLisence()+" "+supplierDetails.get(i).getDriverName()+" "+supplierDetails.get(i).getDriverTel());
+//					}else if (bookingSupplier.getSupplierType().equals(Constants.OTHERINCOME)) {//其他收入
+//						//项目  价格*数量  备注
+//						str.add(supplierDetails.get(i).getType1Name()+" "+supplierDetails.get(i).getItemPrice()+"*"+supplierDetails.get(i).getItemNum()+" "+bookingSupplier.getRemark());
+//					}else if (bookingSupplier.getSupplierType().equals(Constants.OTHEROUTCOME)) {//其他支出
+//						//项目  价格*数量  备注
+//						str.add(supplierDetails.get(i).getType1Name()+" "+supplierDetails.get(i).getItemPrice()+"*"+supplierDetails.get(i).getItemNum()+" "+bookingSupplier.getRemark());
+//					}
+//					
+//				}
+//				bookingSupplier.setSupplierDetail(str);
+//			}
+//			
+//			
+//		}
+//	}
 	
 	
 	/**
@@ -722,18 +780,18 @@ public class BookingGuideFinanceController extends BaseController {
 	@RequestMapping(value = "/financeSave.do",method = RequestMethod.POST)
 	@ResponseBody
 	public String financeSave(String data) {
-		List<FinanceGuide> list = JSONArray.parseArray(data, FinanceGuide.class);
-		BookingGuide guide = bookingGuideService.selectByPrimaryKey(list.get(0).getBookingId());
-		if(guide.getStateFinance()!=null && guide.getStateFinance().equals(1)){
-			return errorJson("已审核！");
-		}
-		try{
-			financeGuideService.financeBatchSave(list);
-		}catch(Exception ex){
-			return errorJson("操作失败！");
-		}
-		
-		return successJson();
+		List<com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide> financeGuides = JSONArray.parseArray(data, com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide.class);
+//		BookingGuide guide = bookingGuideService.selectByPrimaryKey(list.get(0).getBookingId());
+//		if(guide.getStateFinance()!=null && guide.getStateFinance().equals(1)){
+//			return errorJson("已审核！");
+//		}
+//		try{
+//			financeGuideService.financeBatchSave(list);
+//		}catch(Exception ex){
+//			return errorJson("操作失败！");
+//		}
+		ResultSupport resultSupport = bookingGuideFinanceFacade.financeSave(financeGuides);
+		return resultSupport.isSuccess() ?  successJson() : errorJson(resultSupport.getResultMsg());
 	}
 	
 	/**
@@ -747,7 +805,12 @@ public class BookingGuideFinanceController extends BaseController {
 	@ResponseBody
 	public String delFinance(Integer groupId, Integer bookingIdLink,Integer bookingId) {
 		
-		financeGuideService.financeDelete(groupId, bookingIdLink, bookingId);
+//		financeGuideService.financeDelete(groupId, bookingIdLink, bookingId);
+		BookingGuideQueryDTO queryDTO = new BookingGuideQueryDTO();
+		queryDTO.setGroupId(groupId);
+		queryDTO.setBookingIdLink(bookingIdLink);
+		queryDTO.setBookingGuideId(bookingId);
+		ResultSupport delFinance = bookingGuideFacade.delFinance(queryDTO);
 		return successJson();
 	}
 	
@@ -776,17 +839,17 @@ public class BookingGuideFinanceController extends BaseController {
 			pageBean.setPageSize(pageSize);
 		}
 		pageBean.setParameter(guide);
-		pageBean = bookingGuideService.selectBookingGuideListCountListPage(pageBean, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
-		List<BookingGuideListCount> resultList = pageBean.getResult();
-		if(resultList!=null&&resultList.size()>0){
-			for (BookingGuideListCount bookingGuideListCount : resultList) {
-				SupplierGuide guideInfo = guideService.getGuideInfoById(bookingGuideListCount.getGuideId());
-				if(guideInfo!=null){
-					bookingGuideListCount.setGuideNo(guideInfo.getLicenseNo());
-				}
-			}
-		}
-
+//		pageBean = bookingGuideService.selectBookingGuideListCountListPage(pageBean, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+//		List<BookingGuideListCount> resultList = pageBean.getResult();
+//		if(resultList!=null&&resultList.size()>0){
+//			for (BookingGuideListCount bookingGuideListCount : resultList) {
+//				SupplierGuide guideInfo = guideService.getGuideInfoById(bookingGuideListCount.getGuideId());
+//				if(guideInfo!=null){
+//					bookingGuideListCount.setGuideNo(guideInfo.getLicenseNo());
+//				}
+//			}
+//		}
+		pageBean = bookingGuideFinanceFacade.bookingGuideList(pageBean, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
 		model.addAttribute("page", pageBean);
 		return "operation/guideFinance/guide-list-countView";
 	}
@@ -818,7 +881,9 @@ public class BookingGuideFinanceController extends BaseController {
 			pageBean.setPageSize(pageSize);
 		}
 		pageBean.setParameter(guide);
-		pageBean = bookingGuideService.selectBookingGuideListSelectListPage(pageBean, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+//		pageBean = bookingGuideService.selectBookingGuideListSelectListPage(pageBean, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+		pageBean = bookingGuideFacade.bookingGuideListSelect(pageBean, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+
 		model.addAttribute("page", pageBean);
 		return "operation/guideFinance/guide-list-selectView";
 	}
@@ -890,18 +955,22 @@ public class BookingGuideFinanceController extends BaseController {
 		String realPath = "" ;
 		String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
+		BookingGuideResult result = bookingGuideFinanceFacade.createGroupOrder(guideId, num);
+		com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup tourGroup = result.getTourGroup();
+		com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide bookingGuide = result.getBookingGuide();
 		//查询导游信息
-		BookingGuide bookingGuide = bookingGuideService.selectByPrimaryKey(guideId);			
+//		BookingGuide bookingGuide = bookingGuideService.selectByPrimaryKey(guideId);			
 		//团信息
-		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(bookingGuide.getGroupId());
+//		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(bookingGuide.getGroupId());
 		/**
 		 * 获取全陪，定制团一个团对应一个订单
 		 */
 		String accompanys = "" ;
-		List<GroupOrder> orders = groupOrderService.selectOrderByGroupId(tourGroup.getId()) ;
-		GroupOrder order = orders.get(0) ;
-		List<GroupOrderGuest> guests = groupOrderGuestService.selectByOrderId(order.getId()) ;
-		for (GroupOrderGuest guest : guests) { 
+		List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest> guests = result.getGuestGuides();
+//		List<GroupOrder> orders = groupOrderService.selectOrderByGroupId(tourGroup.getId()) ;
+//		GroupOrder order = orders.get(0) ;
+//		List<GroupOrderGuest> guests = groupOrderGuestService.selectByOrderId(order.getId()) ;
+		for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest guest : guests) { 
 			if(guest.getType()==3){
 				accompanys = guest.getName()+"-"+guest.getMobile() ;
 				break ;
@@ -951,10 +1020,11 @@ public class BookingGuideFinanceController extends BaseController {
 		/**
 		 * 行程列表
 		 */
-		List<GroupRoute> routeList = routeService.selectByGroupId(bookingGuide.getGroupId());
+		List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute> routeList = result.getGroupRoutes();
+//		List<GroupRoute> routeList = routeService.selectByGroupId(bookingGuide.getGroupId());
 		List<Map<String,String>> routeMapList = new ArrayList<Map<String,String>>();
-		if(routeList!=null && routeList.size()>0){
-			for(GroupRoute route:routeList){
+		if(!CollectionUtils.isEmpty(routeList)){
+			for(com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute route:routeList){
 				Map<String,String> routeMap = new HashMap<String,String>();
 				Date date = DateUtils.addDays(tourGroup.getDateStart(), route.getDayNum()==null?0:(route.getDayNum()-1));
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -979,13 +1049,14 @@ public class BookingGuideFinanceController extends BaseController {
 		/**
 		 * 计调信息
 		 */
-		List<GroupGuidePrintPo> pos = new ArrayList<GroupGuidePrintPo>() ;
-		GroupGuidePrintPo po = null ;
+		List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo> pos = result.getGroupGuides(); ;
+		com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo po = null ;
 		//预定下接社信息
 		List<Map<String,String>> mapList = new ArrayList<Map<String,String>>();
-		List<BookingDelivery> deliveries = deliveryService.getDeliveryListByGroupId(tourGroup.getId()) ;
-		for (BookingDelivery bd : deliveries) {
-			po = new  GroupGuidePrintPo();
+//		List<BookingDelivery> deliveries = deliveryService.getDeliveryListByGroupId(tourGroup.getId()) ;
+		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery> deliveries = result.getBookingDeliveries();
+		for (com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery bd : deliveries) {
+			po = new  com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo();
 			po.setSupplierType("下接社");
 			po.setSupplierName(bd.getSupplierName());
 			po.setContacktWay(bd.getContact()+"-"+bd.getContactMobile());
@@ -998,9 +1069,10 @@ public class BookingGuideFinanceController extends BaseController {
 			pos.add(po) ;
 		}
 		//预定购物
-		List<BookingShop> shops = shopService.getShopListByGroupId(tourGroup.getId()) ;
-		for (BookingShop bs : shops) {
-			po = new  GroupGuidePrintPo();
+//		List<BookingShop> shops = shopService.getShopListByGroupId(tourGroup.getId()) ;
+		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop> shops = result.getBookingShops();
+		for (com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop bs : shops) {
+			po = new  com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo();
 			po.setSupplierType("购物店");
 			po.setSupplierName(bs.getSupplierName());
 			po.setContacktWay("");
@@ -1011,88 +1083,88 @@ public class BookingGuideFinanceController extends BaseController {
 		/**
 		 * 预订房信息
 		 */
-		List<BookingSupplier> bs3 = supplierService.getBookingSupplierByGroupIdAndSupplierType(tourGroup.getId(), 3) ;
-		for (BookingSupplier bs : bs3) {
-			po = new  GroupGuidePrintPo();
-			po.setSupplierType("房");
-			po.setSupplierName(bs.getSupplierName());
-			po.setContacktWay(bs.getContact()+"-"+bs.getContactMobile());
-			po.setPaymentWay(bs.getCashType());
-			List<BookingSupplierDetail> details = detailService.selectByPrimaryBookId(bs.getId()) ;
-			StringBuilder sb = new StringBuilder() ;
-			for (BookingSupplierDetail bsd : details) {
-				String dd = "" ;
-				if(bsd.getItemDate()!=null){
-					dd = com.yihg.erp.utils.DateUtils.format(bsd.getItemDate()) ;
-				}
-				sb.append(dd+
-						" 【"+bsd.getType1Name()+"】 "+
-						bsd.getItemPrice().toString().replace(".0","")+
-						"*("+bsd.getItemNum().toString().replace(".0","")+
-						"-"+bsd.getItemNumMinus().toString().replace(".0","")+")");
-			}
-			po.setDetail(sb.toString());
-			
-			pos.add(po) ;
-		}
+//		List<BookingSupplier> bs3 = supplierService.getBookingSupplierByGroupIdAndSupplierType(tourGroup.getId(), 3) ;
+//		for (BookingSupplier bs : bs3) {
+//			po = new  GroupGuidePrintPo();
+//			po.setSupplierType("房");
+//			po.setSupplierName(bs.getSupplierName());
+//			po.setContacktWay(bs.getContact()+"-"+bs.getContactMobile());
+//			po.setPaymentWay(bs.getCashType());
+//			List<BookingSupplierDetail> details = detailService.selectByPrimaryBookId(bs.getId()) ;
+//			StringBuilder sb = new StringBuilder() ;
+//			for (BookingSupplierDetail bsd : details) {
+//				String dd = "" ;
+//				if(bsd.getItemDate()!=null){
+//					dd = com.yihg.erp.utils.DateUtils.format(bsd.getItemDate()) ;
+//				}
+//				sb.append(dd+
+//						" 【"+bsd.getType1Name()+"】 "+
+//						bsd.getItemPrice().toString().replace(".0","")+
+//						"*("+bsd.getItemNum().toString().replace(".0","")+
+//						"-"+bsd.getItemNumMinus().toString().replace(".0","")+")");
+//			}
+//			po.setDetail(sb.toString());
+//			
+//			pos.add(po) ;
+//		}
 		/**
 		 * 预定车信息
 		 */
-		List<BookingSupplier> bs4 = supplierService.getBookingSupplierByGroupIdAndSupplierType(tourGroup.getId(), 4) ;
-		for (BookingSupplier bs : bs4) {
-			po = new  GroupGuidePrintPo();
-			po.setSupplierType("车");
-			po.setSupplierName(bs.getSupplierName());
-			po.setContacktWay(bs.getContact()+"-"+bs.getContactMobile());
-			po.setPaymentWay(bs.getCashType());
-			List<BookingSupplierDetail> details = detailService.selectByPrimaryBookId(bs.getId()) ;
-			StringBuilder sb = new StringBuilder() ;
-			for (BookingSupplierDetail bsd : details) {
-				String dd = "" ;
-				if(bsd.getItemDate()!=null){
-					dd = com.yihg.erp.utils.DateUtils.format(bsd.getItemDate()) ;
-				}
-				sb.append(dd+
-						" 【"+bsd.getType1Name()+"】 "+
-						bsd.getItemPrice().toString().replace(".0","")+
-						"*("+bsd.getItemNum().toString().replace(".0","")+
-						"-"+(bsd.getItemNumMinus()==null?0:bsd.getItemNumMinus().toString().replace(".0",""))+")");
-			}
-			po.setDetail(sb.toString());
-			
-			pos.add(po) ;
-		}
+//		List<BookingSupplier> bs4 = supplierService.getBookingSupplierByGroupIdAndSupplierType(tourGroup.getId(), 4) ;
+//		for (BookingSupplier bs : bs4) {
+//			po = new  GroupGuidePrintPo();
+//			po.setSupplierType("车");
+//			po.setSupplierName(bs.getSupplierName());
+//			po.setContacktWay(bs.getContact()+"-"+bs.getContactMobile());
+//			po.setPaymentWay(bs.getCashType());
+//			List<BookingSupplierDetail> details = detailService.selectByPrimaryBookId(bs.getId()) ;
+//			StringBuilder sb = new StringBuilder() ;
+//			for (BookingSupplierDetail bsd : details) {
+//				String dd = "" ;
+//				if(bsd.getItemDate()!=null){
+//					dd = com.yihg.erp.utils.DateUtils.format(bsd.getItemDate()) ;
+//				}
+//				sb.append(dd+
+//						" 【"+bsd.getType1Name()+"】 "+
+//						bsd.getItemPrice().toString().replace(".0","")+
+//						"*("+bsd.getItemNum().toString().replace(".0","")+
+//						"-"+(bsd.getItemNumMinus()==null?0:bsd.getItemNumMinus().toString().replace(".0",""))+")");
+//			}
+//			po.setDetail(sb.toString());
+//			
+//			pos.add(po) ;
+//		}
 		/**
 		 * 预定景区信息
 		 */
-		List<BookingSupplier> bs5 = supplierService.getBookingSupplierByGroupIdAndSupplierType(tourGroup.getId(), 5) ;
-		for (BookingSupplier bs : bs5) {
-			po = new  GroupGuidePrintPo();
-			po.setSupplierType("景区");
-			po.setSupplierName(bs.getSupplierName());
-			po.setContacktWay(bs.getContact()+"-"+bs.getContactMobile());
-			po.setPaymentWay(bs.getCashType());
-			List<BookingSupplierDetail> details = detailService.selectByPrimaryBookId(bs.getId()) ;
-			StringBuilder sb = new StringBuilder() ;
-			for (BookingSupplierDetail bsd : details) {
-				String dd = "" ;
-				if(bsd.getItemDate()!=null){
-					dd = com.yihg.erp.utils.DateUtils.format(bsd.getItemDate()) ;
-				}
-				sb.append(dd+
-						" 【"+bsd.getType1Name()+"】 "+
-						bsd.getItemPrice().toString().replace(".0","")+
-						"*("+bsd.getItemNum().toString().replace(".0","")+
-						"-"+bsd.getItemNumMinus().toString().replace(".0","")+")");
-			}
-			po.setDetail(sb.toString());
-			
-			pos.add(po) ;
-		}
+//		List<BookingSupplier> bs5 = supplierService.getBookingSupplierByGroupIdAndSupplierType(tourGroup.getId(), 5) ;
+//		for (BookingSupplier bs : bs5) {
+//			po = new  GroupGuidePrintPo();
+//			po.setSupplierType("景区");
+//			po.setSupplierName(bs.getSupplierName());
+//			po.setContacktWay(bs.getContact()+"-"+bs.getContactMobile());
+//			po.setPaymentWay(bs.getCashType());
+//			List<BookingSupplierDetail> details = detailService.selectByPrimaryBookId(bs.getId()) ;
+//			StringBuilder sb = new StringBuilder() ;
+//			for (BookingSupplierDetail bsd : details) {
+//				String dd = "" ;
+//				if(bsd.getItemDate()!=null){
+//					dd = com.yihg.erp.utils.DateUtils.format(bsd.getItemDate()) ;
+//				}
+//				sb.append(dd+
+//						" 【"+bsd.getType1Name()+"】 "+
+//						bsd.getItemPrice().toString().replace(".0","")+
+//						"*("+bsd.getItemNum().toString().replace(".0","")+
+//						"-"+bsd.getItemNumMinus().toString().replace(".0","")+")");
+//			}
+//			po.setDetail(sb.toString());
+//			
+//			pos.add(po) ;
+//		}
 		/**
 		 * 组织打印数据
 		 */
-		for (GroupGuidePrintPo ggp : pos) {
+		for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo ggp : pos) {
 			Map<String,String> map = new HashMap<String,String>();
 			map.put("supplierType",ggp.getSupplierType()) ;
 			map.put("supplierName",ggp.getSupplierName()) ;
@@ -1101,43 +1173,47 @@ public class BookingGuideFinanceController extends BaseController {
 			map.put("detail", ggp.getDetail()) ;
 			mapList.add(map) ;
 		}
-		
-		List<Map<String, String>> orderList = null ;
+		List<Map<String, String>> orderList = new ArrayList<Map<String, String>>();
 		if(num==2){
-			List<GroupOrder> orders1 = groupOrderService.selectOrderByGroupId(tourGroup.getId()) ;
-			List<GroupOrderPrintPo> gopps = new ArrayList<GroupOrderPrintPo>() ;
-			GroupOrderPrintPo gopp = null ;
-			for (GroupOrder order1 : orders1) {
+			List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo> gopps = result.getGroupOrderPrints();
+//			List<GroupOrder> orders1 = groupOrderService.selectOrderByGroupId(tourGroup.getId()) ;
+//			List<GroupOrderPrintPo> gopps = new ArrayList<GroupOrderPrintPo>() ;
+//			GroupOrderPrintPo gopp = null ;
+//			for (GroupOrder order1 : orders1) {
+			for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo gopp : gopps) {
+				
 				//拿到单条订单信息
-				gopp = new GroupOrderPrintPo() ;
+//				gopp = new GroupOrderPrintPo() ;
 				/*gopp.setSupplierName(order.getSupplierName()) ;
 				gopp.setSaleOperatorName(order.getSaleOperatorName()) ;*/
-				gopp.setRemark(order.getRemark());
+//				gopp.setRemark(order.getRemark());
 				
 				//根据散客订单统计人数
-				Integer numAdult = groupOrderGuestService.selectNumAdultByOrderID(order1.getId()) ;
-				Integer numChild = groupOrderGuestService.selectNumChildByOrderID(order1.getId()) ;
-				gopp.setPersonNum(numAdult+"大"+numChild+"小");
+//				Integer numAdult = groupOrderGuestService.selectNumAdultByOrderID(order1.getId()) ;
+//				Integer numChild = groupOrderGuestService.selectNumChildByOrderID(order1.getId()) ;
+//				gopp.setPersonNum(numAdult+"大"+numChild+"小");
 				//根据散客订单统计客人信息
-				List<GroupOrderGuest> guests1 = groupOrderGuestService.selectByOrderId(order1.getId()) ;
+//				List<GroupOrderGuest> guests1 = groupOrderGuestService.selectByOrderId(order1.getId()) ;
+				List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest> guests1 = gopp.getGuests();
 				gopp.setGuestInfo(getGuestInfo(guests1)) ;
 				//根据散客订单统计酒店信息
-				List<GroupRequirement> grogShopList = groupRequirementService
-						.selectByOrderAndType(order1.getId(), 3);
-				gopp.setHotelInfo(getHotelInfo(grogShopList));
+//				List<GroupRequirement> grogShopList = groupRequirementService
+//						.selectByOrderAndType(order1.getId(), 3);
+//				gopp.setHotelInfo(getHotelInfo(grogShopList));
 				//根据散客订单统计接机信息
-				List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
-						.selectByOrderId(order1.getId());
+//				List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
+//						.selectByOrderId(order1.getId());
+				List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport> groupOrderTransports = gopp.getOrderTransports();
 				gopp.setAirPickup(getAirInfo(groupOrderTransports, 0)) ;
 				//根据散客订单统计送机信息
 				gopp.setAirOff(getAirInfo(groupOrderTransports,1));
 				gopps.add(gopp) ;
+//			}
 			}
 			
-			
-			orderList = new ArrayList<Map<String, String>>();
+//			orderList = new ArrayList<Map<String, String>>();
 			int i = 0 ;
-			for (GroupOrderPrintPo po1: gopps) {
+			for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo po1: gopps) {
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("num",""+i++) ;
 				/*map.put("supplierName",po1.getSupplierName()) ;
@@ -1174,9 +1250,9 @@ public class BookingGuideFinanceController extends BaseController {
 	 * @param guests
 	 * @return
 	 */
-	public String getGuestInfo(List<GroupOrderGuest> guests) {
+	public String getGuestInfo(List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest> guests) {
 		StringBuilder sb = new StringBuilder();
-		for (GroupOrderGuest guest : guests) {
+		for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest guest : guests) {
 			sb.append(guest.getName() + " " + guest.getMobile() + " "
 					+ guest.getCertificateNum() + ";");
 		}
@@ -1189,17 +1265,17 @@ public class BookingGuideFinanceController extends BaseController {
 	 * @param grogShopList
 	 * @return
 	 */
-	public String getHotelInfo(List<GroupRequirement> grogShopList) {
-		StringBuilder sb = new StringBuilder();
-		for (GroupRequirement groupRequirement : grogShopList) {
-			sb.append(groupRequirement.getRequireDate() + " "
-					+ dicService.getById(groupRequirement.getHotelLevel()).getValue() + " "
-					+ groupRequirement.getCountSingleRoom() + "单间" + " "
-					+ groupRequirement.getCountDoubleRoom() + "标间" + " "
-					+ groupRequirement.getCountTripleRoom() + "三人间");
-		}
-		return sb.toString();
-	}
+//	public String getHotelInfo(List<GroupRequirement> grogShopList) {
+//		StringBuilder sb = new StringBuilder();
+//		for (GroupRequirement groupRequirement : grogShopList) {
+//			sb.append(groupRequirement.getRequireDate() + " "
+//					+ dicService.getById(groupRequirement.getHotelLevel()).getValue() + " "
+//					+ groupRequirement.getCountSingleRoom() + "单间" + " "
+//					+ groupRequirement.getCountDoubleRoom() + "标间" + " "
+//					+ groupRequirement.getCountTripleRoom() + "三人间");
+//		}
+//		return sb.toString();
+//	}
 
 	/**
 	 * 接送信息
@@ -1209,17 +1285,17 @@ public class BookingGuideFinanceController extends BaseController {
 	 * 0表示接信息 1表示送信息
 	 * @return
 	 */
-	public String getAirInfo(List<GroupOrderTransport> groupOrderTransports,
+	public String getAirInfo(List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport> groupOrderTransports,
 			Integer flag) {
 		StringBuilder sb = new StringBuilder();
 		if (flag == 0) {
-			for (GroupOrderTransport transport : groupOrderTransports) {
+			for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport transport : groupOrderTransports) {
 				sb.append(transport.getArrivalTime() + " "
 						+ transport.getClassNo() + ";");
 			}
 		}
 		if (flag == 1) {
-			for (GroupOrderTransport transport : groupOrderTransports) {
+			for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport transport : groupOrderTransports) {
 				sb.append(transport.getDepartureTime() + " "
 						+ transport.getClassNo() + ";");
 			}
