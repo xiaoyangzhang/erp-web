@@ -506,6 +506,16 @@
 			<version>0.0.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>com.yimayhd.erpresource</groupId>
+			<artifactId>erpresourceDAL-client</artifactId>
+			<version>0.0.8-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterFacade-supplier-client</artifactId>
+			<version>0.0.8-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-sales-client</artifactId>
 			<version>0.0.8-SNAPSHOT</version>
