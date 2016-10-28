@@ -17,11 +17,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +36,6 @@ import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -88,7 +85,6 @@ import org.yimayhd.erpcenter.facade.finance.result.ViewShopCommissionStatsListRe
 import org.yimayhd.erpcenter.facade.finance.service.FinanceFacade;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.yihg.erp.aop.PostHandler;
 import com.yihg.erp.aop.RequiresPermissions;
@@ -413,8 +409,8 @@ public class FinanceController extends BaseController {
 			HttpServletResponse reponse, ModelMap model) {
 		List<TourGroup> auditorList = financeFacade.getAuditorList();
 		model.addAttribute("auditorList", auditorList);
-		Integer bizId = WebUtils.getCurBizId(request);
 		
+		Integer bizId = WebUtils.getCurBizId(request);
 		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
 		departmentTuneQueryDTO.setBizId(bizId);
 		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
