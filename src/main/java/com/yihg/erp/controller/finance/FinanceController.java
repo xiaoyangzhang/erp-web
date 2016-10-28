@@ -82,6 +82,7 @@ import org.yimayhd.erpcenter.facade.finance.result.SettleSealListResult;
 import org.yimayhd.erpcenter.facade.finance.result.StatementCheckPreviewResult;
 import org.yimayhd.erpcenter.facade.finance.result.SubjectSummaryResult;
 import org.yimayhd.erpcenter.facade.finance.result.ToBookingShopVerifyListlResult;
+import org.yimayhd.erpcenter.facade.finance.result.TourGroupDetiailsResult;
 import org.yimayhd.erpcenter.facade.finance.result.VerifyBillResult;
 import org.yimayhd.erpcenter.facade.finance.result.ViewShopCommissionStatsListResult;
 import org.yimayhd.erpcenter.facade.finance.service.FinanceFacade;
@@ -100,7 +101,12 @@ import com.yihg.erp.utils.WordReporter;
 import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.common.util.NumberUtil;
 import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePay;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplierDetail;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrice;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
@@ -232,7 +238,7 @@ public class FinanceController extends BaseController {
 		out.flush();
 		
 		String startDate = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-		List<BookingSupplier> results = bookingSupplierService.selectIdList();
+		List<BookingSupplier> results = financeFacade.getBookingSupplierIdList();
 		
 		if(results != null && results.size() > 0){
 			BookingSupplier bookingSupplier = null;
@@ -305,13 +311,13 @@ public class FinanceController extends BaseController {
 		out.flush();
 		
 		String startDate = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-		List<GroupOrder> results = groupOrderService.selectIdList(supplierId);
+		List<GroupOrder> results = financeFacade.getGroupOrderIdList(supplierId);
 		
 		if(results != null && results.size() > 0){
 			GroupOrder order = null;
 			for(int i = 0; i < results.size(); i++){
 				order = results.get(i);
-				financeService.calcGroupOrderTotalCash(order.getId());
+				financeFacade.calcGroupOrderTotalCash(order.getId());
 				
 				if (i%100==0){
 					out.write(".");
@@ -358,13 +364,13 @@ public class FinanceController extends BaseController {
 		out.flush();
 		
 		String startDate = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-		List<TourGroup> results = tourGroupService.selectGroupByDateZone(startTime, endTime, bizId);
+		List<TourGroup> results = financeFacade.selectGroupByDateZone(startTime, endTime, bizId);
 		
 		if(results != null && results.size() > 0){
 			TourGroup tg = null;
 			for(int i = 0; i < results.size(); i++){
 				tg = results.get(i);
-				financeService.calcTotalCash_collection(tg.getId());
+				financeFacade.calcGroupTotalCash(tg.getId());
 				
 				if (i%100==0){
 					out.write(".");
@@ -1244,9 +1250,11 @@ public class FinanceController extends BaseController {
 		String receive = "re";
 		String unreceive = "un";
 		String cash_type = "cash_type";
-
+		
+		TourGroupDetiailsResult result = financeFacade.getTourGroupDetails(groupId);
+		
 		// 旅行团信息
-		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
+		TourGroup tourGroup = result.getTourGroup();
 
 		Integer totalAdult = tourGroup.getTotalAdult(), totalChild = tourGroup
 				.getTotalChild(), totalGuide = tourGroup.getTotalGuide();
@@ -1281,21 +1289,15 @@ public class FinanceController extends BaseController {
 		String print_time = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
 		commonMap.put("print_time", print_time);
 		// 销售订单
-		List<GroupOrder> orderList = groupOrderService
-				.selectOrderByGroupId(groupId);
+		List<GroupOrder> orderList = result.getOrderList();
 		// 购物店收入
-		List<BookingShop> shoppingList = bookingShopService
-				.getShopListByGroupId(groupId);
+		List<BookingShop> shoppingList = result.getShoppingList();
 		// 其他收入
-		List<BookingSupplier> otherList = bookingSupplierService
-				.getBookingSupplierByGroupIdAndSupplierType(groupId,
-						com.yihg.supplier.constants.Constants.OTHERINCOME);
+		List<BookingSupplier> otherList = result.getOtherList();
 		// 地接社支出
-		List<BookingDelivery> deliveryList = bookingDeliveryService
-				.getDeliveryListByGroupId(groupId);
+		List<BookingDelivery> deliveryList = result.getDeliveryList();
 		// 供应商支出
-		List<BookingSupplier> paymentList = bookingSupplierService
-				.selectByPrimaryGroupId(groupId);
+		List<BookingSupplier> paymentList = result.getPaymentList();
 
 		// 总计
 		Map<String, Object> totalMap = new HashMap<String, Object>();
@@ -1328,8 +1330,7 @@ public class FinanceController extends BaseController {
 			int numChild = order.getNumChild() == null ? 0 : order
 					.getNumChild();
 			map.put(person_num, (numAdult + numChild) + blankStr);
-			List<GroupOrderPrice> priceList = groupOrderPriceService
-					.selectByOrder(order.getId());
+			List<GroupOrderPrice> priceList = financeFacade.getOrderPriceByOrder(order.getId());
 			int i = 1;
 			StringBuilder descStr = new StringBuilder();
 			for (GroupOrderPrice orderPrice : priceList) {
@@ -1444,8 +1445,7 @@ public class FinanceController extends BaseController {
 			map.put(cash_type, bookingSupplier.getCashType() == null ? ""
 					: bookingSupplier.getCashType());
 
-			List<BookingSupplierDetail> detailList = bookingSupplierDetailService
-					.selectByPrimaryBookId(bookingSupplier.getId());
+			List<BookingSupplierDetail> detailList = financeFacade.getBookingSupplierDetailById(bookingSupplier.getId());
 			int i = 1;
 			StringBuilder descStr = new StringBuilder();
 			for (BookingSupplierDetail detail : detailList) {
@@ -1518,9 +1518,7 @@ public class FinanceController extends BaseController {
 		List<Map<String, String>> paymentSwitcherList = new ArrayList<Map<String, String>>();
 		for (BookingDelivery delivery : deliveryList) {
 			Map<String, String> map = new HashMap<String, String>();
-			map.put(type, SupplierConstant.supplierTypeMap.get(supplierService
-					.selectBySupplierId(delivery.getSupplierId())
-					.getSupplierType()));
+			map.put(type, SupplierConstant.supplierTypeMap.get(financeFacade.getSupplierById(delivery.getSupplierId()).getSupplierType()));
 			map.put(supplier_name, delivery.getSupplierName());
 			map.put(cash_type, "");
 			BigDecimal t1 = delivery.getTotal();
@@ -1551,13 +1549,11 @@ public class FinanceController extends BaseController {
 		// 商家支出
 		for (BookingSupplier bookingSupplier : paymentList) {
 			if (bookingSupplier.getSupplierType().equals(
-					com.yihg.sales.constants.Constants.OTHER)) {
+					com.yimayhd.erpcenter.dal.sales.client.constants.Constants.OTHER)) {
 				continue;
 			}
 			Map<String, String> map = new HashMap<String, String>();
-			map.put(type, SupplierConstant.supplierTypeMap.get(supplierService
-					.selectBySupplierId(bookingSupplier.getSupplierId())
-					.getSupplierType()));
+			map.put(type, SupplierConstant.supplierTypeMap.get(financeFacade.getSupplierById(bookingSupplier.getSupplierId()).getSupplierType()));
 			map.put(supplier_name, bookingSupplier.getSupplierName());
 			map.put(cash_type, bookingSupplier.getCashType() == null ? blankStr
 					: bookingSupplier.getCashType());
@@ -1571,8 +1567,7 @@ public class FinanceController extends BaseController {
 							.doubleValue()));
 			map.put(unreceive, t1 == null || t2 == null ? blankStr
 					: WordReporter.getPoint2(t1.subtract(t2).doubleValue()));
-			List<BookingSupplierDetail> detailList = bookingSupplierDetailService
-					.selectByPrimaryBookId(bookingSupplier.getId());
+			List<BookingSupplierDetail> detailList = financeFacade.getBookingSupplierDetailById(bookingSupplier.getId());
 			int i = 1;
 			StringBuilder descStr = new StringBuilder();
 			for (BookingSupplierDetail detail : detailList) {
