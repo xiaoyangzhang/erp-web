@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.product.api.ProductGroupSupplierService;
 import com.yihg.product.po.ProductGroupSupplier;
+import com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade;
 /**
  * @author : xuzejun
  * @date : 2015年7月1日 下午3:06:44
@@ -28,8 +29,7 @@ public class ProductGroupSupplierController extends BaseController {
 			.getLogger(ProductGroupSupplierController.class);
 
 	@Autowired
-	private ProductGroupSupplierService groupSupplierService;
-	
+	private ProductPricePlusFacade productPricePlusFacade;
 	/**
 	 * @author : xuzejun
 	 * @date : 2015年7月1日 下午3:10:12

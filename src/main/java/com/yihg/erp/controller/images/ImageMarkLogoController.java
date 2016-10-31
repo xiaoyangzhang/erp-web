@@ -24,9 +24,9 @@ import com.yihg.architect.logger.LogFactory;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.images.po.ImgWatermark;
-import com.yihg.images.service.ImgWatermarkService;
-import com.yihg.images.util.FileConstant;
+import com.yimayhd.erpcenter.dal.basic.po.ImgWatermark;
+import com.yimayhd.erpcenter.facade.basic.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.basic.service.ImgFacade;
 
 @Controller
 @RequestMapping(value = "/imageMark")
@@ -35,7 +35,7 @@ public class ImageMarkLogoController extends BaseController{
 	Log logger = LogFactory.getLogger(ImageMarkLogoController.class);
 
 	@Autowired
-	private ImgWatermarkService imgWatermarkService;
+	private ImgFacade imgFacade;
 	@Autowired
 	private SysConfig sysConfig;
 	
@@ -123,7 +123,7 @@ public class ImageMarkLogoController extends BaseController{
 		watermark.setDealerId(WebUtils.getCurBizId(request));
 		watermark.setSysId("0");
 		
-		int count = this.imgWatermarkService.deleteWatermarkById(WebUtils.getCurUserId(request),WebUtils.getCurBizId(request),"0");
+		//int count = this.imgWatermarkService.deleteWatermarkById(WebUtils.getCurUserId(request),WebUtils.getCurBizId(request),"0");
 		watermark.setLastModifiedTime(new Date());
 		watermark.setName(String.valueOf(WebUtils.getCurUserId(request))+"-"+String.valueOf(0));
 		watermark.setFilePath(iconImagePath);
@@ -134,8 +134,9 @@ public class ImageMarkLogoController extends BaseController{
 		watermark.setIconImageHeight(inticonImageHeight);
 		watermark.setStatus(intstatus);
 		try {
-			int resultCount = this.imgWatermarkService.saveWatermark(watermark);
-			return resultCount > 0 ? successJson() : errorJson("服务器未响应");
+//			int resultCount = imgWatermarkService.saveWatermark(watermark);
+			ResultSupport resultSupport = imgFacade.saveWatermark(watermark);
+			return resultSupport.isSuccess() ? successJson() : errorJson("服务器未响应");
 		} catch (Exception e) {
 			logger.error("水印 信息保存失败",e);
 			e.printStackTrace();

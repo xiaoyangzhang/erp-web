@@ -1,22 +1,6 @@
 package com.yihg.erp.controller.product;
 
-import com.alibaba.fastjson.JSON;
-import com.yihg.erp.aop.RequiresPermissions;
-import com.yihg.erp.contant.PermissionConstants;
-import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.utils.SysConfig;
-import com.yihg.product.api.ProductRemarkService;
-import com.yihg.product.api.ProductRouteService;
-import com.yihg.product.api.ProductRouteSupplierService;
-import com.yihg.product.api.ProductRouteTrafficService;
-import com.yihg.product.po.ProductRemark;
-import com.yihg.product.po.ProductRoute;
-import com.yihg.product.po.ProductRouteSupplier;
-import com.yihg.product.po.ProductRouteTraffic;
-import com.yihg.product.vo.ProductRouteDayVo;
-import com.yihg.product.vo.ProductRouteVo;
-import com.yimayhd.erpcenter.facade.result.GetProductRouteResult;
-import com.yimayhd.erpcenter.facade.service.ProductFacade;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,8 +10,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.alibaba.fastjson.JSON;
+import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.utils.SysConfig;
+import com.yimayhd.erpcenter.dal.product.po.ProductRemark;
+import com.yimayhd.erpcenter.dal.product.po.ProductRoute;
+import com.yimayhd.erpcenter.dal.product.vo.ProductRouteVo;
+import com.yimayhd.erpcenter.facade.result.GetProductRouteResult;
+import com.yimayhd.erpcenter.facade.service.ProductFacade;
 
 /**
  * Created by ZhengZiyu on 2015/7/7.
@@ -36,10 +26,6 @@ import java.util.List;
 @RequestMapping("/productInfo/route")
 public class ProductRouteController extends BaseController{
 
-    @Autowired
-    private ProductRouteService productRouteService;
-    @Autowired
-    private ProductRemarkService remarkService;
     @Autowired
     private SysConfig config;
     @Autowired

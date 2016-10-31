@@ -1,43 +1,16 @@
 package com.yihg.erp.controller.product;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.yihg.erp.aop.RequiresPermissions;
-import com.yihg.erp.contant.PermissionConstants;
-import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.controller.images.utils.DateUtil;
-import com.yihg.erp.utils.SysConfig;
-import com.yihg.product.api.ProductGroupPriceService;
-import com.yihg.product.api.ProductGroupService;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.api.ProductRemarkService;
-import com.yihg.product.api.ProductRouteService;
-import com.yihg.product.api.ProductStockService;
-import com.yihg.product.po.PriceView;
-import com.yihg.product.po.ProductGroup;
-import com.yihg.product.po.ProductGroupSupplier;
-import com.yihg.product.po.ProductRemark;
-import com.yihg.product.po.ProductStock;
-import com.yihg.product.vo.ProductInfoVo;
-import com.yihg.product.vo.ProductRouteVo;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
-import com.yimayhd.erpcenter.facade.query.DetailDTO;
-import com.yimayhd.erpcenter.facade.result.DetailResult;
-import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
+import org.erpcenterFacade.common.client.query.BrandQueryDTO;
+import org.erpcenterFacade.common.client.result.BrandQueryResult;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,21 +18,34 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.erp.utils.WebUtils;
-import com.yihg.images.util.DateUtils;
-import com.yihg.mybatis.utility.PageBean;
-import com.yihg.product.po.ProductSales;
-import com.yihg.supplier.constants.Constants;
-import com.yimayhd.erpcenter.facade.result.ProductInfoResult;
-import com.yimayhd.erpcenter.facade.service.ProductFacade;
-
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.yihg.erp.aop.RequiresPermissions;
+import com.yihg.erp.contant.PermissionConstants;
+import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.controller.images.utils.DateUtil;
+import com.yihg.erp.utils.SysConfig;
+import com.yihg.erp.utils.WebUtils;
+import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.dal.basic.constant.BasicConstants;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.basic.utils.DateUtils;
+import com.yimayhd.erpcenter.dal.product.po.PriceView;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
+import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
+import com.yimayhd.erpcenter.dal.product.po.ProductSales;
+import com.yimayhd.erpcenter.dal.product.po.ProductStock;
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
+import com.yimayhd.erpcenter.facade.query.DetailDTO;
+import com.yimayhd.erpcenter.facade.result.DetailResult;
+import com.yimayhd.erpcenter.facade.result.ProductInfoResult;
+import com.yimayhd.erpcenter.facade.service.ProductFacade;
+import com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade;
+import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
 
 /**
  * @author : xuzejun
@@ -72,44 +58,30 @@ public class ProductSalesController extends BaseController {
 	private static final Logger log = LoggerFactory
 			.getLogger(ProductSalesController.class);
 
-	@Autowired
-	private ProductInfoService productInfoService;
-
-	@Autowired
-	private ProductRouteService productRouteService;
-
-	@Autowired
-	private ProductRemarkService productRemarkService;
-
-	@Autowired
-	private ProductGroupService productGroupService;
-	
-	@Autowired
-	private ProductGroupPriceService priceService;
-
-	@Autowired
-	private DicService dicService;
-	
-	@Resource
-	private ProductStockService stockService;
 
 	@Autowired
 	private SysConfig config;
 	
 	@Autowired
 	private ProductFacade productFacade;
-
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
 
 	@Autowired
 	private ProductUpAndDownFrameFacade productUpAndDownFrameFacade;
+	@Autowired
+	private ProductPricePlusFacade productPricePlusFacade;
 	/****************************************组团版********************************/
 	
 	@RequestMapping(value = "/list.htm")
 	@RequiresPermissions(PermissionConstants.SALE_SK_ADD)
 	public String toList(ModelMap model,HttpServletRequest request) {
 		//产品名称
-		List<DicInfo> brandList = dicService
-				.getListByTypeCode(BasicConstants.CPXL_PP,WebUtils.getCurBizId(request));
+//		List<DicInfo> brandList = dicService
+//				.getListByTypeCode(BasicConstants.CPXL_PP,WebUtils.getCurBizId(request));
+		BrandQueryDTO brandQueryDTO  = new BrandQueryDTO();
+		brandQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		BrandQueryResult brandList = productCommonFacade.brandQuery(brandQueryDTO);
 		model.addAttribute("brandList", brandList);
 		return "product/sales/list";
 	}
@@ -128,10 +100,8 @@ public class ProductSalesController extends BaseController {
 		}
 		pageBean.setParameter(productSales);
 		pageBean.setPage(page);
-		pageBean = productInfoService.findProductSales(pageBean, bizId,WebUtils.getCurUser(request).getOrgId());
-		
-		
-		
+//		pageBean = productInfoService.findProductSales(pageBean, bizId,WebUtils.getCurUser(request).getOrgId());
+		pageBean = productFacade.findProductSales(pageBean, bizId,WebUtils.getCurUser(request).getOrgId());
 		model.addAttribute("page", pageBean);
 		model.addAttribute("pageNum", page);
 		model.addAttribute("config", config);
@@ -142,8 +112,9 @@ public class ProductSalesController extends BaseController {
 	@ResponseBody
 	public String loadMinPrice(HttpServletRequest request,String list){
 		List<Integer> productIds = JSON.parseArray(list, Integer.class);
-		Date date = com.yihg.images.util.DateUtils.formatDate(new Date(), com.yihg.images.util.DateUtils.FORMAT_SHORT);
-		List<Map> mapList = priceService.getMinPriceByProductIdSetAndDate(productIds, date);
+		Date date = DateUtils.formatDate(new Date(), DateUtils.FORMAT_SHORT);
+//		List<Map> mapList = priceService.getMinPriceByProductIdSetAndDate(productIds, date);
+		List<Map> mapList = productPricePlusFacade.loadMinPrice(productIds, date);
 		return JSON.toJSONString(mapList);
 	}
 	

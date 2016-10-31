@@ -1,18 +1,17 @@
 package com.yihg.erp.controller.product;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.yihg.erp.controller.BaseController;
-import com.yihg.product.api.ProductGroupExtraItemService;
-import com.yihg.product.po.ProductGroupExtraItem;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.yihg.erp.controller.BaseController;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupExtraItem;
 
 /**
  * Created by ZhengZiyu on 2015/7/18.
@@ -21,8 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping(value = "/productInfo/price/extra")
 public class ProductPriceExtraController extends BaseController{
 
-    @Autowired
-    private ProductGroupExtraItemService productGroupExtraItemService;
 
     @RequestMapping(value = "/save.do", method = RequestMethod.POST)
     @ResponseBody

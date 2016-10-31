@@ -1,13 +1,8 @@
 package com.yihg.erp.controller.images.utils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 
 import org.apache.commons.lang.StringUtils;
 import org.csource.upload.UploadFileUtil;
@@ -16,8 +11,7 @@ import com.squareup.pollexor.Thumbor;
 import com.squareup.pollexor.ThumborUrlBuilder;
 import com.yihg.architect.logger.Log;
 import com.yihg.architect.logger.LogFactory;
-import com.yihg.images.po.ImgWatermark;
-import com.yihg.images.util.FileConstant;
+import com.yimayhd.erpcenter.dal.basic.po.ImgWatermark;
 
 public class ThumborUtil {
 	

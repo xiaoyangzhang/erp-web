@@ -10,34 +10,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSONArray;
-import com.yihg.erp.aop.RequiresPermissions;
-import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.DateUtils;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.product.api.ProductGroupPriceService;
-import com.yihg.product.api.ProductGroupSellerService;
-import com.yihg.product.api.ProductGroupService;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.po.ProductGroup;
-import com.yihg.product.po.ProductGroupPrice;
-import com.yihg.product.po.ProductGroupSeller;
-import com.yihg.product.po.ProductGroupSupplier;
-import com.yihg.product.po.ProductInfo;
-import com.yihg.product.vo.PriceCopyVo;
-import com.yihg.supplier.api.ContractService;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupPrice;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupSeller;
+import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
+import com.yimayhd.erpcenter.dal.product.vo.PriceCopyVo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 /**
  * @author : xuzejun
  * @date : 2015年7月1日 下午3:06:44
@@ -49,18 +36,6 @@ public class ProductPriceController extends BaseController {
 	private static final Logger log = LoggerFactory
 			.getLogger(ProductPriceController.class);
 
-	@Autowired
-	private ProductGroupService productGroupService;
-	@Autowired
-    private ProductGroupPriceService groupService;
-	@Autowired
-    private ProductInfoService productInfoService;
-	@Autowired
-	private PlatformOrgService orgService;
-	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private ProductGroupSellerService productGroupSellerService;
 	
 	
 	/**

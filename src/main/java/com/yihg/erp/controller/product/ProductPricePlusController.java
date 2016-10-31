@@ -21,21 +21,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.product.api.ProductGroupPriceService;
-import com.yihg.product.api.ProductGroupService;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.supplier.constants.Constants;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
 import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
 import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
 import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
 import com.yimayhd.erpcenter.dal.product.vo.StockStaticCondition;
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
 import com.yimayhd.erpcenter.facade.query.ProductGroupSupplierDTO;
 import com.yimayhd.erpcenter.facade.query.ProductStockStaticDto;
 import com.yimayhd.erpcenter.facade.query.ProductSupplierConditionDTO;
@@ -57,16 +52,6 @@ public class ProductPricePlusController extends BaseController {
 	private static final Logger log = LoggerFactory
 			.getLogger(ProductPricePlusController.class);
 
-	@Autowired
-	private ProductGroupService productGroupService;
-	@Autowired
-    private ProductGroupPriceService groupService;
-	@Autowired
-	private RegionService regionService;
-	@Autowired
-	private ProductInfoService productInfoService;
-	@Autowired
-	private ProductGroupSupplierService groupSupplierService;
 	@Autowired
 	private ProductStockFacade productStockFacade;
 	@Autowired

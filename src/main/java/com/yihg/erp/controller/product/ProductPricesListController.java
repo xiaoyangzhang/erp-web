@@ -4,12 +4,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.yihg.product.api.ProductGroupExtraItemService;
-import com.yihg.product.po.ProductGroupExtraItem;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,22 +14,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.erp.aop.RequiresPermissions;
-import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.product.api.ProductGroupPriceService;
-import com.yihg.product.api.ProductGroupService;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.po.ProductGroup;
-import com.yihg.product.po.ProductGroupPriceStockallocate;
-import com.yihg.product.po.ProductGroupSupplier;
-import com.yihg.product.po.ProductInfo;
-import com.yihg.product.vo.ProductPriceVo;
+import com.yimayhd.erpcenter.dal.basic.constant.BasicConstants;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupExtraItem;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupPriceStockallocate;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
+import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
+import com.yimayhd.erpcenter.dal.product.vo.ProductPriceVo;
 
 /**
  * @author : xuzejun
@@ -46,19 +36,6 @@ public class ProductPricesListController extends BaseController {
     private static final Logger log = LoggerFactory
             .getLogger(ProductPricesListController.class);
 
-    @Autowired
-    private ProductGroupPriceService groupService;
-    @Autowired
-    private DicService dicService;
-	@Autowired
-	private ProductGroupSupplierService groupSupplierService;
-	@Autowired
-	private ProductInfoService infoService;
-	@Autowired
-	private ProductGroupService productGroupService;
-
-	@Autowired
-	private ProductGroupExtraItemService productGroupExtraItemService;
 	/**
 	 * @author : xuzejun
 	 * @date : 2015年7月1日 下午3:10:12

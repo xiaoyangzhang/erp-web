@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.yihg.product.api.ProductRemarkService;
 import com.yimayhd.erpcenter.dal.product.po.ProductRemark;
 import com.yimayhd.erpcenter.facade.query.ProductRemarkDTO;
 import com.yimayhd.erpcenter.facade.result.ToProductRemarkResult;
@@ -21,8 +20,6 @@ import com.yimayhd.erpcenter.facade.service.ProductFacade;
 @RequestMapping("/productInfo/remark")
 public class ProductRemarkController {
 
-    @Autowired
-    private ProductRemarkService productRemarkService;
     @Autowired
     private ProductFacade productFacade;
     @RequestMapping(value = "/view.htm", method = RequestMethod.GET)

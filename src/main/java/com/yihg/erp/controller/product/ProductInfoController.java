@@ -60,11 +60,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.contant.BizConfigConstant;
@@ -76,23 +71,18 @@ import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.product.api.ProductGroupSellerService;
-import com.yihg.product.api.ProductGroupService;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.api.ProductRemarkService;
-import com.yihg.product.api.ProductRouteService;
-import com.yihg.product.constants.Constants;
-import com.yihg.product.po.ProductGroup;
-import com.yihg.product.po.ProductGroupSeller;
-import com.yihg.product.po.ProductInfo;
-import com.yihg.product.po.ProductRemark;
-import com.yihg.product.po.ProductRoute;
-import com.yihg.product.vo.StockStaticCondition;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
+import com.yimayhd.erpcenter.dal.basic.constant.BasicConstants;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupSeller;
+import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
+import com.yimayhd.erpcenter.dal.product.po.ProductRemark;
+import com.yimayhd.erpcenter.dal.product.po.ProductRoute;
 import com.yimayhd.erpcenter.dal.product.vo.ProductInfoVo;
 import com.yimayhd.erpcenter.dal.product.vo.ProductRouteVo;
+import com.yimayhd.erpcenter.dal.product.vo.StockStaticCondition;
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.facade.query.ProductPriceListDTO;
 import com.yimayhd.erpcenter.facade.query.ProductSaveDTO;
@@ -118,29 +108,9 @@ public class ProductInfoController extends BaseController {
 			.getLogger(ProductInfoController.class);
 
 	@Autowired
-	private ProductInfoService productInfoService;
-	@Autowired
-	private ProductRouteService productRouteService;
-	@Autowired
-	private RegionService regionService;
-	@Autowired
-	private DicService dicService;
-	@Autowired
 	private SysConfig config;
 	@Resource
 	private BizSettingCommon bizSettingCommon;
-	@Autowired
-	private PlatformOrgService orgService;
-	@Autowired
-	private ProductRemarkService productRemarkService;
-	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private ProductGroupService productGroupService;
-	@Autowired
-	private ProductGroupSupplierService groupSupplierService;
-	@Autowired
-	private ProductGroupSellerService sellerService;
 	@Autowired
 	private ProductFacade productFacade;
 	@Autowired
@@ -343,10 +313,18 @@ public class ProductInfoController extends BaseController {
 	public String productZTlist(HttpServletRequest request, ModelMap model,
 			ProductInfo productInfo) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> brandList = dicService.getListByTypeCode(BasicConstants.CPXL_PP, bizId);
-		model.addAttribute("orgJsonStr",orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-		model.addAttribute("brandList", brandList);
+//		List<DicInfo> brandList = dicService.getListByTypeCode(BasicConstants.CPXL_PP, bizId);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
+//		model.addAttribute("orgJsonStr",orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr",platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO	departmentTuneQueryDTO = new  DepartmentTuneQueryDTO();
+	    departmentTuneQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		DepartmentTuneQueryResult queryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", queryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", queryResult.getOrgUserJsonStr());
+		model.addAttribute("brandList", brandQueryResult.getBrandList());
 
 		return "product/productZT_list";
 	}
@@ -359,7 +337,10 @@ public class ProductInfoController extends BaseController {
 		//List<RegionInfo> allProvince = regionService.getAllProvince();
 		// 产品名称
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> brandList = dicService.getListByTypeCode(BasicConstants.CPXL_PP, bizId);
+//		List<DicInfo> brandList = dicService.getListByTypeCode(BasicConstants.CPXL_PP, bizId);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
 		if (page == null) {
 			page = 1;
 		}
@@ -369,24 +350,26 @@ public class ProductInfoController extends BaseController {
 		} else {
 			pageBean.setPageSize(pageSize);
 		}
-		if (StringUtils.isBlank(productInfo.getOperatorIds())
-				&& StringUtils.isNotBlank(productInfo.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = productInfo.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				productInfo.setOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
+//		if (StringUtils.isBlank(productInfo.getOperatorIds())
+//				&& StringUtils.isNotBlank(productInfo.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = productInfo.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(
+//					WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				productInfo.setOperatorIds(salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//			}
+//		}
+		productInfo.setOperatorIds(productCommonFacade.setSaleOperatorIds(productInfo.getOperatorIds(), 
+				productInfo.getOrgIds(), WebUtils.getCurBizId(request)));
 		pageBean.setParameter(productInfo);
 		pageBean.setPage(page);
 		Map parameters = new HashMap();
@@ -398,7 +381,7 @@ public class ProductInfoController extends BaseController {
 		pageBean = productInfoService.findProductInfos2(pageBean, parameters);
 
 		//model.addAttribute("allProvince", allProvince);
-		model.addAttribute("brandList", brandList);
+		model.addAttribute("brandList", brandQueryResult.getBrandList());
 		model.addAttribute("page", pageBean);
 		model.addAttribute("pageNum", page);
 		model.addAttribute("priceMode", getPriceMode(request));
@@ -417,13 +400,22 @@ public class ProductInfoController extends BaseController {
 	public String productAYlist(HttpServletRequest request, ModelMap model,
 			ProductInfo productInfo) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> brandList = dicService.getListByTypeCode(
-				BasicConstants.CPXL_PP, bizId);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-		model.addAttribute("brandList", brandList);
+//		List<DicInfo> brandList = dicService.getListByTypeCode(
+//				BasicConstants.CPXL_PP, bizId);
+//		model.addAttribute("orgJsonStr",
+//				orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr",
+//				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+//		model.addAttribute("brandList", brandList);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
+		DepartmentTuneQueryDTO	departmentTuneQueryDTO = new  DepartmentTuneQueryDTO();
+	    departmentTuneQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		DepartmentTuneQueryResult queryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", queryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", queryResult.getOrgUserJsonStr());
+		model.addAttribute("brandList", brandQueryResult.getBrandList());
 		model.addAttribute("state", productInfo.getState());
 		return "product/productAY_list";
 	}
@@ -433,11 +425,15 @@ public class ProductInfoController extends BaseController {
 			ProductInfo productInfo, String productName, String name,
 			Integer page, Integer pageSize) {
 		// 省市
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+		RegionResult allProvince = productCommonFacade.queryProvinces();
 		// 产品名称
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> brandList = dicService.getListByTypeCode(
-				BasicConstants.CPXL_PP, bizId);
+//		List<DicInfo> brandList = dicService.getListByTypeCode(
+//				BasicConstants.CPXL_PP, bizId);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
 		if (page == null) {
 			page = 1;
 		}
@@ -447,24 +443,26 @@ public class ProductInfoController extends BaseController {
 		} else {
 			pageBean.setPageSize(pageSize);
 		}
-		if (StringUtils.isBlank(productInfo.getOperatorIds())
-				&& StringUtils.isNotBlank(productInfo.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = productInfo.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				productInfo.setOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
+//		if (StringUtils.isBlank(productInfo.getOperatorIds())
+//				&& StringUtils.isNotBlank(productInfo.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = productInfo.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(
+//					WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				productInfo.setOperatorIds(salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//			}
+//		}
+		productInfo.setOperatorIds(productCommonFacade.setSaleOperatorIds(productInfo.getOperatorIds(), 
+				productInfo.getOrgIds(), WebUtils.getCurBizId(request)));
 		pageBean.setParameter(productInfo);
 		pageBean.setPage(page);
 		Map parameters = new HashMap();
@@ -476,7 +474,7 @@ public class ProductInfoController extends BaseController {
 		pageBean = productInfoService.findProductInfos2(pageBean, parameters);
 		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
 		model.addAttribute("allProvince", allProvince);
-		model.addAttribute("brandList", brandList);
+		model.addAttribute("brandList", brandQueryResult.getBrandList());
 		model.addAttribute("page", pageBean);
 		model.addAttribute("pageNum", page);
 		model.addAttribute("priceStateMap", priceStateMap);
@@ -1284,9 +1282,12 @@ public class ProductInfoController extends BaseController {
 						new Date(), 6), "yyyy-MM-dd");
 		model.addAttribute("groupDate", groupDate);
 		model.addAttribute("toGroupDate", toGroupDate);
-		List<DicInfo> brandList = dicService.getListByTypeCode(
-				BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
-		model.addAttribute("brandList", brandList);
+//		List<DicInfo> brandList = dicService.getListByTypeCode(
+//				BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
+		model.addAttribute("brandList", brandQueryResult.getBrandList());
 		return "product/stock/stock-statics";
 	}
 
@@ -1923,9 +1924,12 @@ public class ProductInfoController extends BaseController {
 		}
 		*/
 		
-		List<DicInfo> brandList = dicService.getListByTypeCode(
-				BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
-		model.addAttribute("brandList", brandList);
+//		List<DicInfo> brandList = dicService.getListByTypeCode(
+//				BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		BrandQueryResult brandQueryResult = productCommonFacade.brandQuery(brandQueryDTO);
+		model.addAttribute("brandList", brandQueryResult.getBrandList());
 		model.addAttribute("product", productInfo);
 		if (page == null) {
 			page = 1;
@@ -2034,15 +2038,16 @@ public class ProductInfoController extends BaseController {
 		ProductInfo productInfoIns = JSON.parseObject(insertJson, ProductInfo.class);
 		ProductInfo productInfoDel = JSON.parseObject(deleteJson, ProductInfo.class);
 		try {
-			for (ProductGroupSeller pgSeller : productInfoIns.getGroupSellers()) {
-				pgSeller.setBizId(WebUtils.getCurBizId(request));
-				pgSeller.setCreateTime(new Date().getTime());
-				//sellerService.insertSelective(pgSeller);
-				sellerService.insertByBatch(pgSeller);
-			}
-			for (ProductGroupSeller pgSeller : productInfoDel.getGroupSellers()) {
-				sellerService.delSellerBatch(pgSeller.getGroupId(), pgSeller.getProductId(), pgSeller.getOperatorId());
-			}
+//			for (ProductGroupSeller pgSeller : productInfoIns.getGroupSellers()) {
+//				pgSeller.setBizId(WebUtils.getCurBizId(request));
+//				pgSeller.setCreateTime(new Date().getTime());
+//				//sellerService.insertSelective(pgSeller);
+//				sellerService.insertByBatch(pgSeller);
+//			}
+//			for (ProductGroupSeller pgSeller : productInfoDel.getGroupSellers()) {
+//				sellerService.delSellerBatch(pgSeller.getGroupId(), pgSeller.getProductId(), pgSeller.getOperatorId());
+//			}
+//			productFacade.u
 			return successJson();
 		} catch (Exception e) {
 
