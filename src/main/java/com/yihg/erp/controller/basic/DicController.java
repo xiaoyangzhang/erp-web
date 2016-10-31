@@ -14,20 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.DicTypeService;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.DicTypeInfo;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.basic.po.DicTypeInfo;
+import com.yimayhd.erpcenter.facade.basic.service.DicFacade;
 
 @Controller
 @RequestMapping("/basic")
 public class DicController extends BaseController{
 	@Autowired
-	private DicService dicService;
-	@Autowired
-	private DicTypeService dicTypeService;
+	private DicFacade dicFacade;
 	
 	@RequestMapping(value="/dicTypeIndex.htm",method=RequestMethod.GET)
 	public String dicTypeIndex(HttpServletRequest request,HttpServletResponse response,ModelMap model){
@@ -39,14 +36,7 @@ public class DicController extends BaseController{
 	
 	@RequestMapping(value="/dicTypeList.htm",method=RequestMethod.GET)
 	public String dicTypeList(HttpServletRequest request,HttpServletResponse response,ModelMap model,String pid,String name){
-		if(StringUtils.isNotBlank(name)){
-			try {
-				name = new String(request.getParameter("name").getBytes("iso8859-1"),"utf-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		}
-		List<DicTypeInfo> dicTypeList = dicTypeService.getListByPidAndName(pid,name);
+		List<DicTypeInfo> dicTypeList = dicFacade.dicTypeList(pid, name);
 		model.addAttribute("list", dicTypeList);		
 		model.addAttribute("pid", pid);
 		model.addAttribute("name", name);
@@ -55,16 +45,16 @@ public class DicController extends BaseController{
 	
 	@RequestMapping(value="/addDicType.htm",method=RequestMethod.GET)
 	public String dicTypeAdd(HttpServletRequest request,HttpServletResponse response,ModelMap model,String pid){
-		DicTypeInfo info = dicTypeService.getById(pid);
+		DicTypeInfo info = dicFacade.getDicTypeById(pid);
 		model.addAttribute("parentType", info);
 		return "/basic/dic/dic_type_add";
 	}
 	
 	@RequestMapping(value="/editDicType.htm",method=RequestMethod.GET)
 	public String dicTypeEdit(HttpServletRequest request,HttpServletResponse response,ModelMap model,String id){
-		DicTypeInfo info = dicTypeService.getById(id);
+		DicTypeInfo info = dicFacade.getDicTypeById(id);
 		model.addAttribute("type", info);
-		DicTypeInfo parentType = dicTypeService.getById(info.getPid());
+		DicTypeInfo parentType = dicFacade.getDicTypeById(info.getPid());
 		model.addAttribute("parentType", parentType);
 		return "/basic/dic/dic_type_edit";
 	}
@@ -73,9 +63,9 @@ public class DicController extends BaseController{
 	@RequestMapping(value="/submitDicType.do",method=RequestMethod.POST)
 	public String dicTypeSubmit(HttpServletRequest request,HttpServletResponse response,DicTypeInfo info){
 		if(info.getId()!=null ){
-			dicTypeService.update(info);
+			dicFacade.dicTypeUpdate(info);
 		}else{
-			dicTypeService.add(info);	
+			dicFacade.dicTypeAdd(info);	
 		}
 		return "redirect:dicTypeList.htm?pid="+info.getPid();
 	}
@@ -83,13 +73,13 @@ public class DicController extends BaseController{
 	@RequestMapping(value = "/delDicType.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String dicTypeDel(HttpServletRequest request,HttpServletResponse response,ModelMap model,String id) {
-		dicTypeService.delete(id);
+		dicFacade.dicTypeDelete(id);
 		return successJson();			
 	}
 	
 	@RequestMapping(value="/dicIndex.htm",method=RequestMethod.GET)
 	public String dicIndex(HttpServletRequest request,HttpServletResponse response,ModelMap model){
-		String dicTypeJson = dicTypeService.getDicTypeJson();
+		String dicTypeJson = dicFacade.getDicTypeJson();
 		model.addAttribute("dicTypeJson", dicTypeJson);
 		return "/basic/dic/dic_index";
 	}
@@ -114,7 +104,7 @@ public class DicController extends BaseController{
 				e.printStackTrace();
 			}
 		}
-		DicTypeInfo dicType = dicTypeService.getById(type);
+		DicTypeInfo dicType = dicFacade.getDicTypeById(type);
 		int share = 1;
 		int bizId = WebUtils.getCurBizId(request);
 		if(dicType!=null){
@@ -122,9 +112,9 @@ public class DicController extends BaseController{
 		}
 		List<DicInfo> list = null;
 		if(share==1){
-			list = dicService.getListByTypeIdAndName(type, name);
+			list = dicFacade.getListByTypeIdAndName(type, name);
 		}else{
-			list = dicService.getListByTypeIdAndName(type,bizId,name);			
+			list = dicFacade.getListByTypeIdAndName(type,bizId,name);			
 		}
 		model.addAttribute("bizId", bizId);
 		model.addAttribute("share", share);
@@ -136,7 +126,7 @@ public class DicController extends BaseController{
 	
 	@RequestMapping(value="/addDic.htm",method=RequestMethod.GET)
 	public String dicAdd(HttpServletRequest request,HttpServletResponse response,ModelMap model,String type){
-		DicTypeInfo dicTypeInfo = dicTypeService.getById(type);
+		DicTypeInfo dicTypeInfo = dicFacade.getDicTypeById(type);
 		int share = 1;
 		if(dicTypeInfo!=null){
 			share = dicTypeInfo.getShareStatus() == null ?1:dicTypeInfo.getShareStatus();
@@ -149,8 +139,8 @@ public class DicController extends BaseController{
 	
 	@RequestMapping(value="/editDic.htm",method=RequestMethod.GET)
 	public String dicEdit(HttpServletRequest request,HttpServletResponse response,ModelMap model,String id){
-		DicInfo dicInfo = dicService.getById(id);
-		DicTypeInfo dicTypeInfo = dicTypeService.getById(dicInfo.getTypeId());
+		DicInfo dicInfo = dicFacade.getDicById(id);
+		DicTypeInfo dicTypeInfo = dicFacade.getDicTypeById(dicInfo.getTypeId());
 		int share = 1;
 		if(dicTypeInfo!=null){
 			share = dicTypeInfo.getShareStatus() == null ?1:dicTypeInfo.getShareStatus();
@@ -168,9 +158,9 @@ public class DicController extends BaseController{
 		}
 		try {
 			if(dicInfo.getId()!=null){
-				dicService.update(dicInfo);
+				dicFacade.dicUpdate(dicInfo);
 			}else{
-				dicService.add(dicInfo);
+				dicFacade.dicAdd(dicInfo);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -182,7 +172,7 @@ public class DicController extends BaseController{
 	@ResponseBody
 	public String dicDel(HttpServletRequest request,HttpServletResponse response,ModelMap model,String id) {
 		//Long dicId = Long.valueOf(id);
-		dicService.delDic(id);		
+		dicFacade.dicDel(id);		
 		return successJson();
 	}
 }
