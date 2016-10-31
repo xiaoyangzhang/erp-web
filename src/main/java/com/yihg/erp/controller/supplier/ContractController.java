@@ -9,14 +9,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.po.RegionInfo;
-import com.yihg.erp.utils.SysConfig;
-import com.yihg.supplier.api.SupplierService;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.impl.cookie.DateUtils;
-import org.apache.tools.ant.taskdefs.Input;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,24 +20,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
 import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.supplier.api.BizSupplierRelationService;
-import com.yihg.supplier.api.ContractService;
-import com.yihg.supplier.api.SupplierItemService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.constants.SupplierConstant;
-import com.yihg.supplier.po.BizSupplierRelation;
-import com.yihg.supplier.po.SupplierContract;
-import com.yihg.supplier.po.SupplierContractPrice;
-import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.supplier.po.SupplierItem;
-import com.yihg.supplier.vo.SupplierContractPriceVo;
-import com.yihg.supplier.vo.SupplierContractVo;
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
+import com.yimayhd.erpcenter.facade.supplier.query.SupplierContractVoDTO;
+import com.yimayhd.erpcenter.facade.supplier.result.ContractSupplierListResult;
+import com.yimayhd.erpcenter.facade.supplier.result.NewContractPagaResult;
+import com.yimayhd.erpcenter.facade.supplier.result.WebResult;
+import com.yimayhd.erpcenter.facade.supplier.service.ContractFacade;
+import com.yimayhd.erpresource.dal.constants.Constants;
+import com.yimayhd.erpresource.dal.constants.SupplierConstant;
+import com.yimayhd.erpresource.dal.po.SupplierContract;
+import com.yimayhd.erpresource.dal.po.SupplierContractPrice;
+import com.yimayhd.erpresource.dal.po.SupplierInfo;
+import com.yimayhd.erpresource.dal.vo.SupplierContractVo;
 
 /**
  * Created by ZhengZiyu on 2015/6/10.
@@ -51,22 +43,12 @@ import com.yihg.supplier.vo.SupplierContractVo;
 @Controller
 @RequestMapping("contract")
 public class ContractController extends BaseController{
+	private static final Logger log = LoggerFactory
+			.getLogger(ContractController.class);
+	
+    @Autowired
+    private ContractFacade contractFacade;
 
-    @Autowired
-    private DicService dicService;
-
-    @Autowired
-    private ContractService contractService;
-
-    @Autowired
-    private RegionService regionService;
-    @Autowired
-    private BizSupplierRelationService bizSupplierRelationService;
-
-    @Autowired
-    private SupplierService supplierService;
-    @Autowired
-    private SupplierItemService itemService;
     @Autowired
     private SysConfig config;
     private static final Map<Integer, String> supplierTypeMap = SupplierConstant.supplierTypeMap;
@@ -104,148 +86,112 @@ public class ContractController extends BaseController{
     @RequestMapping(value="/{supplierId}/add.htm", method = RequestMethod.GET)
     public String newContractPage(HttpServletRequest request,@PathVariable("supplierId") String supplierId, Model model){
         Integer bizId = WebUtils.getCurBizId(request);
-//        SupplierInfo supplierInfo = supplierService.selectBySupplierId(Integer.valueOf(supplierId));
-//        BizSupplierRelation bizSupplierRelation = bizSupplierRelationService.getByBizIdAndSupplierId(bizId, Integer.valueOf(supplierId));
-//        model.addAttribute("supplierInfo", supplierInfo);
-//        model.addAttribute("bizSupplierRelation", bizSupplierRelation);
-        SupplierContractVo supplierContractVo = contractService.findContract(bizId, Integer.valueOf(supplierId), null);
+        NewContractPagaResult webResult = contractFacade.newContractPage(bizId, supplierId);
+        
+        SupplierContractVo supplierContractVo = webResult.getSupplierContractVo();
        
-        		try {
-					SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd");
-					 String signDate =  df.format(new Date());
-					 model.addAttribute("signDate", df.parse(signDate));
-				} catch (ParseException e) {
-					e.printStackTrace();
-				}
+		try {
+			SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd");
+			 String signDate =  df.format(new Date());
+			 model.addAttribute("signDate", df.parse(signDate));
+		} catch (ParseException e) {
+			log.error(e.getMessage());
+		}
+		
         if(supplierContractVo.getSupplierInfo().getSupplierType().equals(Constants.SCENICSPOT)||supplierContractVo.getSupplierInfo().getSupplierType().equals(Constants.SHOPPING)){
-        	List<SupplierItem> dictTypeList = itemService.findSupplierItemBySupplierId(Integer.valueOf(supplierId));
-        	model.addAttribute("dictTypeList", dictTypeList);
+        	model.addAttribute("dictTypeList", webResult.getDictTypeList());
         	
         }else if(supplierContractVo.getSupplierInfo().getSupplierType().equals(Constants.LOCALTRAVEL)){
-         	List<DicInfo> dictTypeList = dicService.getListByTypeCode(BasicConstants.XMFY_DJXM,bizId);
-         	model.addAttribute("dictTypeList", dictTypeList);
+         	model.addAttribute("dictTypeList", webResult.getDicInfoList());
         }else{
-        	List<DicInfo> dictTypeList = dicService.getListByTypeCode(Constants.dictTypeMap.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-        	model.addAttribute("dictTypeList", dictTypeList);
+        	model.addAttribute("dictTypeList", webResult.getDicInfoList());
 		}
 
-        //酒店两种字典类型
-//        if(Constants.HOTEL.equals(supplierContractVo.getSupplierInfo().getSupplierType())){
-//            List<DicInfo> dictType2List = dicService.getListByTypeCode(Constants.dictType2Map.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-//            model.addAttribute("dictType2List", dictType2List);
-//        }
         //车队二级类型
         if(Constants.FLEET.equals(supplierContractVo.getSupplierInfo().getSupplierType())){
-            List<DicInfo> dictSecLevelTypeList = dicService.getListByTypeCode(Constants.FLEET_LINE_BRAND_TYPE_CODE,bizId);
-            model.addAttribute("dictSecLevelTypeList", dictSecLevelTypeList);
+            model.addAttribute("dictSecLevelTypeList", webResult.getDictSecLevelTypeList());
         }
         model.addAttribute("supplierContractVo", supplierContractVo);
         model.addAttribute("supplierId", supplierId);
         model.addAttribute("config", config);
-        List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
 		
 		
-		model.addAttribute("cashTypes", cashTypes);
+		model.addAttribute("cashTypes", webResult.getCashTypes());
         return "contract/contract_add";
     }
 
     @RequestMapping(value="/{supplierId}/{contractId}/edit.htm", method = RequestMethod.GET)
     public String editContractPage(HttpServletRequest request,@PathVariable("supplierId") String supplierId, Model model, @PathVariable("contractId") String contractId){
         Integer bizId = WebUtils.getCurBizId(request);
-//        SupplierInfo supplierInfo = supplierService.selectBySupplierId(Integer.valueOf(supplierId));
-//        BizSupplierRelation bizSupplierRelation = bizSupplierRelationService.getByBizIdAndSupplierId(bizId, Integer.valueOf(supplierId));
-        SupplierContractVo supplierContractVo = contractService.findContract(bizId, Integer.valueOf(supplierId), Integer.valueOf(contractId));
-       // List<DicInfo> dictTypeList = dicService.getListByTypeCode(Constants.dictTypeMap.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-       // model.addAttribute("dictTypeList", dictTypeList);
+        NewContractPagaResult webResult = contractFacade.editContractPage(bizId, supplierId, contractId);
+        
+        SupplierContractVo supplierContractVo = webResult.getSupplierContractVo();
         
         if(supplierContractVo.getSupplierInfo().getSupplierType().equals(Constants.SCENICSPOT)||supplierContractVo.getSupplierInfo().getSupplierType().equals(Constants.SHOPPING)){
-        	List<SupplierItem> dictTypeList = itemService.findSupplierItemBySupplierId(Integer.valueOf(supplierId));
-        	model.addAttribute("dictTypeList", dictTypeList);
-        	
+        	model.addAttribute("dictTypeList", webResult.getDictTypeList());
         	
         }else if(supplierContractVo.getSupplierInfo().getSupplierType().equals(Constants.LOCALTRAVEL)){
-         	List<DicInfo> dictTypeList = dicService.getListByTypeCode(BasicConstants.XMFY_DJXM,bizId);
-         	model.addAttribute("dictTypeList", dictTypeList);
-        }else {
-			
-        	List<DicInfo> dictTypeList = dicService.getListByTypeCode(Constants.dictTypeMap.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-        	model.addAttribute("dictTypeList", dictTypeList);
+         	model.addAttribute("dictTypeList", webResult.getDicInfoList());
+        }else{
+        	model.addAttribute("dictTypeList", webResult.getDicInfoList());
 		}
         //酒店两种字典类型
         if(Constants.HOTEL.equals(supplierContractVo.getSupplierInfo().getSupplierType())){
-            List<DicInfo> dictType2List = dicService.getListByTypeCode(Constants.dictType2Map.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-            model.addAttribute("dictType2List", dictType2List);
+            model.addAttribute("dictType2List", webResult.getDictType2List());
         }
-        //车队二级类型
+      //车队二级类型
         if(Constants.FLEET.equals(supplierContractVo.getSupplierInfo().getSupplierType())){
-            List<DicInfo> dictSecLevelTypeList = dicService.getListByTypeCode(Constants.FLEET_LINE_BRAND_TYPE_CODE,bizId);
-            model.addAttribute("dictSecLevelTypeList", dictSecLevelTypeList);
+            model.addAttribute("dictSecLevelTypeList", webResult.getDictSecLevelTypeList());
         }
 
         model.addAttribute("supplierContractVo", supplierContractVo);
         model.addAttribute("config", config);
-        List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
-		
-		
-		model.addAttribute("cashTypes", cashTypes);
+        model.addAttribute("cashTypes", webResult.getCashTypes());
         return "contract/contract_edit";
     }
 
     @RequestMapping(value="/{supplierId}/{contractId}/view.htm", method = RequestMethod.GET)
     public String viewContractPage(HttpServletRequest request,@PathVariable("supplierId") String supplierId, Model model, @PathVariable("contractId") String contractId){
         Integer bizId = WebUtils.getCurBizId(request);
-        SupplierContractVo supplierContractVo = contractService.findContract(bizId, Integer.valueOf(supplierId), Integer.valueOf(contractId));
-
+        NewContractPagaResult webResult = contractFacade.viewContractPage(bizId, supplierId, contractId);
+        
+        SupplierContractVo supplierContractVo = webResult.getSupplierContractVo();
+        
         if(supplierContractVo.getSupplierInfo().getSupplierType().equals(Constants.SCENICSPOT)||supplierContractVo.getSupplierInfo().getSupplierType().equals(Constants.SHOPPING)){
-        	List<SupplierItem> dictTypeList = itemService.findSupplierItemBySupplierId(Integer.valueOf(supplierId));
-        	model.addAttribute("dictTypeList", dictTypeList);
-        	
-        }else {
-			
-        	List<DicInfo> dictTypeList = dicService.getListByTypeCode(Constants.dictTypeMap.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-        	model.addAttribute("dictTypeList", dictTypeList);
+        	model.addAttribute("dictTypeList", webResult.getDictTypeList());
+        }else{
+        	model.addAttribute("dictTypeList", webResult.getDicInfoList());
 		}
-
-        //酒店两种字典类型
-        if(Constants.HOTEL.equals(supplierContractVo.getSupplierInfo().getSupplierType())){
-            /*List<DicInfo> dictType2List = dicService.getListByTypeCode(Constants.dictType2Map.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-            model.addAttribute("dictType2List", dictType2List);*/
-        }
-        //车队二级类型
+      //车队二级类型
         if(Constants.FLEET.equals(supplierContractVo.getSupplierInfo().getSupplierType())){
-            List<DicInfo> dictSecLevelTypeList = dicService.getListByTypeCode(Constants.FLEET_LINE_BRAND_TYPE_CODE,bizId);
-            model.addAttribute("dictSecLevelTypeList", dictSecLevelTypeList);
+            model.addAttribute("dictSecLevelTypeList", webResult.getDictSecLevelTypeList());
         }
 
         model.addAttribute("supplierContractVo", supplierContractVo);
         model.addAttribute("config", config);
-        List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
-		
-		
-		model.addAttribute("cashTypes", cashTypes);
+        model.addAttribute("cashTypes", webResult.getCashTypes());
         return "contract/contract_view";
     }
 
     @RequestMapping(value="/fleet-add.htm", method = RequestMethod.GET)
     public String newFleetContractPage(HttpServletRequest request, Model model,Integer supplierId){
         Integer bizId = WebUtils.getCurBizId(request);
-        SupplierContractVo supplierContractVo = contractService.findFleetContract(bizId, null);
+        NewContractPagaResult webResult = contractFacade.newFleetContractPage(bizId, supplierId);
+        
+        SupplierContractVo supplierContractVo = webResult.getSupplierContractVo();
 
-        List<DicInfo> dictTypeList = dicService.getListByTypeCode(Constants.dictTypeMap.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-        model.addAttribute("dictTypeList", dictTypeList);
+        model.addAttribute("dictTypeList", webResult.getDicInfoList());
 
         //车队二级类型
         if(Constants.FLEET.equals(supplierContractVo.getSupplierInfo().getSupplierType())){
-            List<DicInfo> dictSecLevelTypeList = dicService.getListByTypeCode(Constants.FLEET_LINE_BRAND_TYPE_CODE,bizId);
-            model.addAttribute("dictSecLevelTypeList", dictSecLevelTypeList);
+           
+            model.addAttribute("dictSecLevelTypeList", webResult.getDictSecLevelTypeList());
         }
         model.addAttribute("supplierContractVo", supplierContractVo);
         model.addAttribute("config", config);
         model.addAttribute("supplierId", supplierId);
-        List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
 		
-		
-		model.addAttribute("cashTypes", cashTypes);
+		model.addAttribute("cashTypes", webResult.getCashTypes());
         return "contract/contract_add";
     }
 
@@ -253,67 +199,51 @@ public class ContractController extends BaseController{
     @RequestMapping(value="/{contractId}/fleet-edit.htm", method = RequestMethod.GET)
     public String editFleetContractPage(HttpServletRequest request, Model model, @PathVariable("contractId") String contractId){
         Integer bizId = WebUtils.getCurBizId(request);
-//        SupplierInfo supplierInfo = supplierService.selectBySupplierId(Integer.valueOf(supplierId));
-//        BizSupplierRelation bizSupplierRelation = bizSupplierRelationService.getByBizIdAndSupplierId(bizId, Integer.valueOf(supplierId));
-        SupplierContractVo supplierContractVo = contractService.findFleetContract(bizId, Integer.valueOf(contractId));
-      //  List<DicInfo> dictTypeList = dicService.getListByTypeCode(Constants.dictTypeMap.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-       // model.addAttribute("dictTypeList", dictTypeList);
+        
+        NewContractPagaResult webResult = contractFacade.editFleetContractPage(bizId, contractId);
+        SupplierContractVo supplierContractVo = webResult.getSupplierContractVo();
         if(supplierContractVo.getSupplierInfo().getSupplierType().equals(Constants.SCENICSPOT)||supplierContractVo.getSupplierInfo().getSupplierType().equals(Constants.SHOPPING)){
-        	List<SupplierItem> dictTypeList = itemService.findSupplierItemBySupplierId(supplierContractVo.getSupplierInfo().getId());
-        	model.addAttribute("dictTypeList", dictTypeList);
-//        	List<SupplierContract> contractList = contractService.findContracts(bizId, supplierContractVo.getSupplierInfo().getId());
-//        	model.addAttribute("contractList", contractList);
+        	model.addAttribute("dictTypeList", webResult.getDictTypeList());
         }else {
-			
-        	List<DicInfo> dictTypeList = dicService.getListByTypeCode(Constants.dictTypeMap.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-        	model.addAttribute("dictTypeList", dictTypeList);
+        	model.addAttribute("dictTypeList", webResult.getDicInfoList());
 		}
         //酒店两种字典类型
         if(Constants.HOTEL.equals(supplierContractVo.getSupplierInfo().getSupplierType())){
-            List<DicInfo> dictType2List = dicService.getListByTypeCode(Constants.dictType2Map.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-            model.addAttribute("dictType2List", dictType2List);
+            model.addAttribute("dictType2List", webResult.getDictType2List());
         }
         //车队二级类型
         if(Constants.FLEET.equals(supplierContractVo.getSupplierInfo().getSupplierType())){
-            List<DicInfo> dictSecLevelTypeList = dicService.getListByTypeCode(Constants.FLEET_LINE_BRAND_TYPE_CODE,bizId);
-            model.addAttribute("dictSecLevelTypeList", dictSecLevelTypeList);
+            model.addAttribute("dictSecLevelTypeList", webResult.getDictSecLevelTypeList());
         }
 
         model.addAttribute("supplierContractVo", supplierContractVo);
         model.addAttribute("config", config);
-List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
 		
 		
-		model.addAttribute("cashTypes", cashTypes);
+		model.addAttribute("cashTypes", webResult.getCashTypes());
         return "contract/contract_edit";
     }
 
     @RequestMapping(value="/{contractId}/fleet-view.htm", method = RequestMethod.GET)
     public String viewFleetContractPage(HttpServletRequest request,Model model, @PathVariable("contractId") String contractId){
         Integer bizId = WebUtils.getCurBizId(request);
-        SupplierContractVo supplierContractVo = contractService.findFleetContract(bizId, Integer.valueOf(contractId));
+        NewContractPagaResult webResult = contractFacade.viewFleetContractPage(bizId, contractId);
+        SupplierContractVo supplierContractVo = webResult.getSupplierContractVo();
 
-
-        List<DicInfo> dictTypeList = dicService.getListByTypeCode(Constants.dictTypeMap.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-        model.addAttribute("dictTypeList", dictTypeList);
+        model.addAttribute("dictTypeList", webResult.getDicInfoList());
 
         //酒店两种字典类型
         if(Constants.HOTEL.equals(supplierContractVo.getSupplierInfo().getSupplierType())){
-            List<DicInfo> dictType2List = dicService.getListByTypeCode(Constants.dictType2Map.get(supplierContractVo.getSupplierInfo().getSupplierType()));
-            model.addAttribute("dictType2List", dictType2List);
+            model.addAttribute("dictType2List", webResult.getDictType2List());
         }
         //车队二级类型
         if(Constants.FLEET.equals(supplierContractVo.getSupplierInfo().getSupplierType())){
-            List<DicInfo> dictSecLevelTypeList = dicService.getListByTypeCode(Constants.FLEET_LINE_BRAND_TYPE_CODE,bizId);
-            model.addAttribute("dictSecLevelTypeList", dictSecLevelTypeList);
+        	 model.addAttribute("dictSecLevelTypeList", webResult.getDictSecLevelTypeList());
         }
 
         model.addAttribute("supplierContractVo", supplierContractVo);
         model.addAttribute("config", config);
-        List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
-		
-		
-		model.addAttribute("cashTypes", cashTypes);
+        model.addAttribute("cashTypes", webResult.getCashTypes());
         return "contract/contract_view";
     }
 
@@ -329,16 +259,16 @@ List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS,
         supplierInfo.setState(1);
         pageBean.setParameter(supplierInfo);
 
-        pageBean = contractService.findSupplierInfos(pageBean, bizId);
+        ContractSupplierListResult webResult = contractFacade.contractSupplierList(bizId, pageBean, supplierInfo
+                .getProvinceId() + "", supplierInfo.getCityId() + "");
+        pageBean = webResult.getPageBean();
         model.addAttribute("page", pageBean);
-        List<RegionInfo> allProvince = regionService.getAllProvince();
+        List<RegionInfo> allProvince = webResult.getAllProvince();
         model.addAttribute("allProvince", allProvince);
-        List<RegionInfo> cityList = regionService.getRegionById(supplierInfo
-                .getProvinceId() + "");
+        List<RegionInfo> cityList = webResult.getCityList();
         model.addAttribute("cityList", cityList);
 
-        List<RegionInfo> areaList = regionService.getRegionById(supplierInfo
-                .getCityId() + "");
+        List<RegionInfo> areaList = webResult.getAreaList();
         model.addAttribute("areaList", areaList);
         model.addAttribute("supplierInfo", supplierInfo);
         model.addAttribute("flag", 0);
@@ -352,28 +282,14 @@ List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS,
                                PageBean<SupplierContract> pageBean,
                                Model model){
 
-//        pageBean = new PageBean<SupplierContract>();
-    	/*if(supplierContract.getStartDate()==null && supplierContract.getEndDate()==null){
-    		 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");    
-    		 Date startDate = null;
-    		 Date endDate = null;
-    		 try{
-    			 startDate = sdf.parse(com.yihg.erp.utils.DateUtils.getMonthFirstDay());
-    			 endDate = sdf.parse(com.yihg.erp.utils.DateUtils.getMonthLastDay());
-    		 }catch(ParseException ex){}
-    		supplierContract.setStartDate(startDate);
-    		supplierContract.setEndDate(endDate);
-    	}*/
+    	
         pageBean.setPageSize(supplierContract.getPageSize());
         pageBean.setPage(supplierContract.getPage());
         pageBean.setParameter(supplierContract);
         Integer bizId = WebUtils.getCurBizId(request);
-        BizSupplierRelation bizSupplierRelation = bizSupplierRelationService.getByBizIdAndSupplierId(bizId, Integer.valueOf(supplierId));
-        if(bizSupplierRelation != null){
-            pageBean = contractService.findContracts(pageBean, bizSupplierRelation.getId());
-        }
+        WebResult<PageBean> webResult = contractFacade.contractList(supplierId, pageBean, bizId);
         
-        model.addAttribute("page", pageBean);
+        model.addAttribute("page", webResult.getValue());
         model.addAttribute("flag", Integer.parseInt(flag));
         model.addAttribute("supplierId", supplierId);
         return "contract/contract_list";
@@ -388,7 +304,8 @@ List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS,
         pageBean.setPage(supplierContract.getPage());
         pageBean.setParameter(supplierContract);
         Integer bizId = WebUtils.getCurBizId(request);
-        pageBean = contractService.findContracts(pageBean, 0 - bizId);//车队shop_supplier_id=0
+        WebResult<PageBean> webResult =contractFacade.fleetList(bizId, pageBean, supplierId);
+        pageBean =webResult.getValue();
         model.addAttribute("page", pageBean);
         model.addAttribute("supplierType", Constants.FLEET);
         model.addAttribute("supplierId", supplierId);
@@ -414,17 +331,25 @@ List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS,
     @RequestMapping(value = "/add.do", method = RequestMethod.POST)
     @ResponseBody
     public String newContract(SupplierContractVo supplierContractVo){
-    	this.handleSupplierContractVo(supplierContractVo);
-        supplierContractVo = contractService.saveContract(supplierContractVo);
+    	SupplierContractVoDTO supplierContractVoDTO = new SupplierContractVoDTO();
+    	supplierContractVoDTO.setSupplierContractVo(supplierContractVo);
+    	WebResult<SupplierContractVo> webResult = contractFacade.newContract(supplierContractVoDTO);
+        supplierContractVo = webResult.getValue();
         return successJson("contractId", String.valueOf(supplierContractVo.getSupplierContract().getId()));
     }
 
     @RequestMapping(value = "/edit.do", method = RequestMethod.POST)
     @ResponseBody
     public String editContract(SupplierContractVo supplierContractVo){
-    	this.handleSupplierContractVo(supplierContractVo);
-        contractService.updateContract(supplierContractVo);
-        return successJson();
+    	SupplierContractVoDTO supplierContractVoDTO = new SupplierContractVoDTO();
+    	supplierContractVoDTO.setSupplierContractVo(supplierContractVo);
+    	WebResult<Boolean> webResult = contractFacade.editContract(supplierContractVoDTO);
+    	if(webResult.isSuccess()){
+    		 return successJson();
+    	}else{
+    		return errorJson(webResult.getResultMsg());
+    	}
+       
     }
 
     @RequestMapping(value = "/{supplierId}/{contractId}/delete.do", method = RequestMethod.POST)
@@ -432,7 +357,11 @@ List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS,
     public String deleteContract(HttpServletRequest request,@PathVariable("supplierId") Integer supplierId, 
     		@PathVariable("contractId") Integer contractId){
         Integer bizId = WebUtils.getCurBizId(request);
-        boolean success = contractService.deleteContract(bizId, supplierId, contractId);
+        WebResult<Boolean> webResult =contractFacade.deleteContract(bizId, supplierId, contractId);
+        if(!webResult.isSuccess()){
+        	return errorJson("操作失败");
+        }
+        boolean success = webResult.getValue();
         if(success){
             return successJson();
         }else{
@@ -451,10 +380,11 @@ List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS,
     @ResponseBody
     public String copyContract(HttpServletRequest request,@PathVariable("supplierId") Integer supplierId, 
     		@PathVariable("contractId") Integer contractId){
-    	//Integer bizId = WebUtils.getCurBizId(request);
-    	//boolean success = contractService.deleteContract(bizId, supplierId, contractId);
     	try {
-			contractService.copySupplierContract(contractId);
+    		WebResult<Boolean> webResult = contractFacade.copyContract(supplierId, contractId);
+    		if(!webResult.isSuccess()){
+    			return errorJson("复制失败");
+    		}
 			return successJson();
 		} catch (Exception e) {
 			return errorJson("复制失败");
@@ -468,7 +398,11 @@ List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS,
     public String deleteFleetContract(HttpServletRequest request,
                                  @PathVariable("contractId") Integer contractId){
         Integer bizId = WebUtils.getCurBizId(request);
-        boolean success = contractService.deleteFleetContract(bizId, contractId);
+        WebResult<Boolean> webResult = contractFacade.copyContract(bizId, contractId);
+        if(!webResult.isSuccess()){
+			return errorJson("操作失败");
+		}
+        boolean success = webResult.getValue();
         if(success){
             return successJson();
         }else{

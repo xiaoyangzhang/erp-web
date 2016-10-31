@@ -9,12 +9,14 @@ import org.springframework.stereotype.Service;
 
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.sys.api.PlatformOrgService;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
 
 @Service
 public class BizSettingCommon {
-	@Resource
-	private PlatformOrgService orgService;	
+//	@Resource
+//	private PlatformOrgService orgService;	
+	@Autowired
+	private SysPlatformOrgFacade platformOrgFacade;
 	@Resource
 	private SysConfig config;
 	/**
@@ -25,7 +27,7 @@ public class BizSettingCommon {
 	 */
 	public String getMyBizCode(HttpServletRequest request){
 		//WebUtils.getCurBizCode(request)
-		return orgService.getCompanyCodeByOrgId(WebUtils.getCurBizId(request), WebUtils.getCurUser(request).getOrgId());
+		return platformOrgFacade.getCompanyCodeByOrgId(WebUtils.getCurBizId(request), WebUtils.getCurUser(request).getOrgId());
 	}
 	
 	/**
@@ -46,7 +48,7 @@ public class BizSettingCommon {
 	 * @return
 	 */
 	public String getOrgLogo(Integer bizId,Integer orgId){
-		String logo = orgService.getLogoByOrgId(bizId,orgId); 
+		String logo = platformOrgFacade.getLogoByOrgId(bizId,orgId); 
 		if(StringUtils.isNotBlank(logo)){
 			return config.getImgServerUrl()+logo;
 		}

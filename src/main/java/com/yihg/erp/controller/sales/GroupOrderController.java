@@ -8,25 +8,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,16 +32,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
-import com.yihg.airticket.api.AirTicketRequestService;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.RegionInfo;
+//import com.yihg.airticket.api.AirTicketRequestService;
+//import com.yihg.basic.api.DicService;
+//import com.yihg.basic.api.RegionService;
+//import com.yihg.basic.contants.BasicConstants;
+//import com.yihg.basic.po.DicInfo;
+//import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
-import com.yihg.erp.common.GroupCodeUtil;
-import com.yihg.erp.common.MergeGroupUtils;
 import com.yihg.erp.contant.BizConfigConstant;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
@@ -56,169 +47,218 @@ import com.yihg.erp.utils.DateUtils;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
-import com.yihg.finance.po.FinanceCommission;
-import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.api.BookingDeliveryService;
-import com.yihg.operation.api.BookingGuideService;
-import com.yihg.operation.api.BookingShopService;
-import com.yihg.operation.api.BookingSupplierDetailService;
-import com.yihg.operation.api.BookingSupplierService;
-import com.yihg.operation.po.BookingDelivery;
-import com.yihg.operation.po.BookingGuide;
-import com.yihg.operation.po.BookingShop;
-import com.yihg.operation.po.BookingSupplier;
-import com.yihg.operation.po.BookingSupplierDetail;
-import com.yihg.product.api.ProductGroupExtraItemService;
-import com.yihg.product.api.ProductGroupPriceService;
-import com.yihg.product.api.ProductGroupService;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.api.ProductRemarkService;
-import com.yihg.product.api.ProductRouteService;
-import com.yihg.product.po.ProductAttachment;
-import com.yihg.product.po.ProductGroup;
-import com.yihg.product.po.ProductGroupExtraItem;
-import com.yihg.product.po.ProductGroupPrice;
-import com.yihg.product.po.ProductInfo;
-import com.yihg.product.po.ProductRemark;
-import com.yihg.product.po.ProductRoute;
-import com.yihg.product.po.ProductRouteSupplier;
-import com.yihg.product.po.ProductRouteTraffic;
-import com.yihg.product.vo.ProductGroupSupplierVo;
-import com.yihg.product.vo.ProductRouteDayVo;
-import com.yihg.product.vo.ProductRouteVo;
-import com.yihg.sales.api.GroupOrderGuestService;
-import com.yihg.sales.api.GroupOrderPriceService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.GroupOrderTransportService;
-import com.yihg.sales.api.GroupRequirementService;
-import com.yihg.sales.api.GroupRouteService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.GroupGuidePrintPo;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupOrderPrice;
-import com.yihg.sales.po.GroupOrderPrintPo;
-import com.yihg.sales.po.GroupOrderTransport;
-import com.yihg.sales.po.GroupRequirement;
-import com.yihg.sales.po.GroupRoute;
-import com.yihg.sales.po.GroupRouteAttachment;
-import com.yihg.sales.po.GroupRouteSupplier;
-import com.yihg.sales.po.GroupRouteTraffic;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.GroupOrderPriceVO;
-import com.yihg.sales.vo.GroupOrderVO;
-import com.yihg.sales.vo.GroupRouteDayVO;
-import com.yihg.sales.vo.GroupRouteVO;
-import com.yihg.sales.vo.MergeGroupOrderVO;
-import com.yihg.sales.vo.SalePrice;
-import com.yihg.sales.vo.TransportVO;
-import com.yihg.supplier.api.SupplierGuideService;
-import com.yihg.supplier.api.SupplierService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierContactMan;
-import com.yihg.supplier.po.SupplierGuide;
-import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.api.PlatformOrgService;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupPrice;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplierDetail;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo;
+//import com.yihg.finance.po.FinanceCommission;
+//import com.yihg.mybatis.utility.PageBean;
+//import com.yihg.operation.api.BookingDeliveryService;
+//import com.yihg.operation.api.BookingGuideService;
+//import com.yihg.operation.api.BookingShopService;
+//import com.yihg.operation.api.BookingSupplierDetailService;
+//import com.yihg.operation.api.BookingSupplierService;
+//import com.yihg.operation.po.BookingDelivery;
+//import com.yihg.operation.po.BookingGuide;
+//import com.yihg.operation.po.BookingShop;
+//import com.yihg.operation.po.BookingSupplier;
+//import com.yihg.operation.po.BookingSupplierDetail;
+//import com.yihg.product.api.ProductGroupExtraItemService;
+//import com.yihg.product.api.ProductGroupPriceService;
+//import com.yihg.product.api.ProductGroupService;
+//import com.yihg.product.api.ProductGroupSupplierService;
+//import com.yihg.product.api.ProductInfoService;
+//import com.yihg.product.api.ProductRemarkService;
+//import com.yihg.product.api.ProductRouteService;
+//import com.yihg.product.po.ProductAttachment;
+//import com.yihg.product.po.ProductGroup;
+//import com.yihg.product.po.ProductGroupExtraItem;
+//import com.yihg.product.po.ProductGroupPrice;
+//import com.yihg.product.po.ProductInfo;
+//import com.yihg.product.po.ProductRemark;
+//import com.yihg.product.po.ProductRoute;
+//import com.yihg.product.po.ProductRouteSupplier;
+//import com.yihg.product.po.ProductRouteTraffic;
+//import com.yihg.product.vo.ProductGroupSupplierVo;
+//import com.yihg.product.vo.ProductRouteDayVo;
+//import com.yihg.product.vo.ProductRouteVo;
+//import com.yihg.sales.api.GroupOrderGuestService;
+//import com.yihg.sales.api.GroupOrderPriceService;
+//import com.yihg.sales.api.GroupOrderService;
+//import com.yihg.sales.api.GroupOrderTransportService;
+//import com.yihg.sales.api.GroupRequirementService;
+//import com.yihg.sales.api.GroupRouteService;
+//import com.yihg.sales.api.TourGroupService;
+//import com.yihg.sales.po.GroupGuidePrintPo;
+//import com.yihg.sales.po.GroupOrderGuest;
+//import com.yihg.sales.po.GroupOrderPrice;
+//import com.yihg.sales.po.GroupOrderPrintPo;
+//import com.yihg.sales.po.GroupOrderTransport;
+//import com.yihg.sales.po.GroupRequirement;
+//import com.yihg.sales.po.GroupRoute;
+//import com.yihg.sales.po.GroupRouteAttachment;
+//import com.yihg.sales.po.GroupRouteSupplier;
+//import com.yihg.sales.po.GroupRouteTraffic;
+//import com.yihg.sales.po.TourGroup;
+//import com.yihg.sales.vo.GroupOrderPriceVO;
+//import com.yihg.sales.vo.GroupOrderVO;
+//import com.yihg.sales.vo.GroupRouteDayVO;
+//import com.yihg.sales.vo.GroupRouteVO;
+//import com.yihg.sales.vo.MergeGroupOrderVO;
+//import com.yihg.sales.vo.SalePrice;
+//import com.yihg.sales.vo.TransportVO;
+//import com.yihg.supplier.api.SupplierGuideService;
+//import com.yihg.supplier.api.SupplierService;
+//import com.yihg.supplier.constants.Constants;
+//import com.yihg.supplier.po.SupplierContactMan;
+//import com.yihg.supplier.po.SupplierGuide;
+//import com.yihg.supplier.po.SupplierInfo;
+//import com.yihg.sys.api.PlatformOrgService;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrice;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRequirement;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupOrderPriceVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupOrderVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupRouteDayVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupRouteVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.MergeGroupOrderVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.SalePrice;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TransportVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
-import com.yimayhd.erpcenter.facade.sales.query.ToOrderLockTableDTO;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.AddGroupOrderDTO;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.EditOrderGroupInfoDTO;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.GetFitOrderListDataDTO;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.MergeGroupDTO;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToDeliveryPriceTableDTO;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToNotGroupListDTO;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToOrderLockTableDTO;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToProductOrdersTableDTO;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToSecImpNotGroupListDTO;
 import com.yimayhd.erpcenter.facade.sales.result.BaseStateResult;
 import com.yimayhd.erpcenter.facade.sales.result.PreviewFitTransferResult;
-import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockListResult;
-import com.yimayhd.erpcenter.facade.sales.result.ToOrderLockTableResult;
-import com.yimayhd.erpcenter.facade.sales.service.GroupOrderLockFacade;
-import com.yimayhd.erpcenter.facade.sales.service.GroupQueryPrintFacade;
-import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.GetFitOrderListDataResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToAddGroupOrderResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToDeliveryPriceListResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToDeliveryPriceTableResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToEditGroupOrderResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToFitEditResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToFitOrderListResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToImpNotGroupListDTO;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToImpNotGroupListResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToLookGroupOrderResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToMergeGroupResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToNotGroupListResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToOrderLockListResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToOrderLockTableResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToProductOrdersListResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToProductOrdersTableResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToSecImpNotGroupListResult;
+import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
+import com.yimayhd.erpresource.dal.po.SupplierContactMan;
+import com.yimayhd.erpresource.dal.po.SupplierGuide;
+import com.yimayhd.erpresource.dal.po.SupplierInfo;
 
 @Controller
 @RequestMapping(value = "/groupOrder")
 public class GroupOrderController extends BaseController {
-	private static final Logger log = LoggerFactory
-			.getLogger(GroupOrderController.class);
+	
+	private static final Logger log = LoggerFactory.getLogger(GroupOrderController.class);
 
-	@Autowired
-	private SupplierGuideService guideService;
-	@Autowired
-	private DicService dicService;
-	@Autowired
-	private RegionService regionService;
-	@Autowired
-	private GroupOrderService groupOrderService;
-	@Autowired
-	private GroupOrderGuestService groupOrderGuestService;
-	@Autowired
-	private GroupOrderPriceService groupOrderPriceService;
-	@Autowired
-	private GroupOrderTransportService groupOrderTransportService;
-	@Autowired
-	private GroupRequirementService groupRequirementService;
-	@Autowired
-	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
-//	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private SupplierService supplierService;
-	@Autowired
-	private ProductInfoService productInfoService;
-	@Autowired
-	private ProductGroupService productGroupService;
-	@Autowired
-	private ProductGroupExtraItemService productGroupExtraItemService;
-
-	@Autowired
-	private ProductGroupPriceService productGroupPriceService;
-	@Autowired
-	private ProductRouteService productRouteService;
-	@Autowired
-	private GroupRouteService groupRouteService;
-	@Autowired
-	private TourGroupService tourGroupService;
+//	@Autowired
+//	private SupplierGuideService guideService;
+//	@Autowired
+//	private DicService dicService;
+//	@Autowired
+//	private RegionService regionService;
+//	@Autowired
+//	private GroupOrderService groupOrderService;
+//	@Autowired
+//	private GroupOrderGuestService groupOrderGuestService;
+//	@Autowired
+//	private GroupOrderPriceService groupOrderPriceService;
+//	@Autowired
+//	private GroupOrderTransportService groupOrderTransportService;
+//	@Autowired
+//	private GroupRequirementService groupRequirementService;
+//	@Autowired
+//	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
+////	private PlatformEmployeeService platformEmployeeService;
+//	@Autowired
+//	private SupplierService supplierService;
+//	@Autowired
+//	private ProductInfoService productInfoService;
+//	@Autowired
+//	private ProductGroupService productGroupService;
+//	@Autowired
+//	private ProductGroupExtraItemService productGroupExtraItemService;
+//
+//	@Autowired
+//	private ProductGroupPriceService productGroupPriceService;
+//	@Autowired
+//	private ProductRouteService productRouteService;
+//	@Autowired
+//	private GroupRouteService groupRouteService;
+//	@Autowired
+//	private TourGroupService tourGroupService;
+	
+	//FIXME 特殊暂放
 	@Autowired
 	private SysConfig config;
-	@Autowired
-	private PlatformOrgService orgService;
-	@Autowired
-	private ProductRemarkService productRemarkService;
-	@Autowired
-	private ProductGroupSupplierService productGroupSupplierService;
-	@Autowired
-	private BookingGuideService bookingGuideService;
 	
-	//FIXME 两个service，名称不同
-	@Autowired
-	private BookingSupplierDetailService bookingSupplierDetailService;
-
+//	@Autowired
+//	private PlatformOrgService orgService;
+//	@Autowired
+//	private ProductRemarkService productRemarkService;
+//	@Autowired
+//	private ProductGroupSupplierService productGroupSupplierService;
+//	@Autowired
+//	private BookingGuideService bookingGuideService;
+//	
+//	//FIXME 两个service，名称不同
+//	@Autowired
+//	private BookingSupplierDetailService bookingSupplierDetailService;
+//
+	//FIXME 特殊暂放
 	@Autowired
 	private BizSettingCommon settingCommon;
-
-	@Autowired
-	private BizSettingCommon bizSettingCommon;
-	@Autowired
-	private BookingDeliveryService deliveryService;
-
-	@Autowired
-	private GroupRouteService routeService;
-
-	@Autowired
-	private BookingShopService shopService;
-
-	@Autowired
-	private BookingSupplierService bookingSupplierService;
-	@Autowired
-	private BookingSupplierDetailService detailService;
-	@Autowired
-	private AirTicketRequestService airTicketRequestService ;
+//
+//	@Autowired
+//	private BizSettingCommon bizSettingCommon;
+//	@Autowired
+//	private BookingDeliveryService deliveryService;
+//
+//	@Autowired
+//	private GroupRouteService routeService;
+//
+//	@Autowired
+//	private BookingShopService shopService;
+//
+//	@Autowired
+//	private BookingSupplierService bookingSupplierService;
+//	@Autowired
+//	private BookingSupplierDetailService detailService;
+//	@Autowired
+//	private AirTicketRequestService airTicketRequestService ;
+//	
+//	@Autowired
+//	private SupplierService supplierInfoService;
+//	
+//	@Autowired
+//	private GroupOrderLockFacade groupOrderLockFacade; //锁单
+//
+//	@Autowired
+//	private GroupQueryPrintFacade groupQueryPrintFacade;//查询打印
 	
 	@Autowired
-	private SupplierService supplierInfoService ;
-	
-	@Autowired
-	private ProductCommonFacade productCommonFacade;
-	
-	@Autowired
-	private GroupOrderLockFacade groupOrderLockFacade; //锁单
-
-	@Autowired
-	private GroupQueryPrintFacade groupQueryPrintFacade;//查询打印
+	private GroupOrderFacade groupOrderFacade;
 	
 	/**
 	 * 散客订单、订单日志页面
@@ -234,6 +274,7 @@ public class GroupOrderController extends BaseController {
 			throws ParseException {
 		return "sales/fitOrder/fitList";
 	}
+	
 	/**
 	 * 日志详细
 	 * @param request
@@ -247,18 +288,28 @@ public class GroupOrderController extends BaseController {
 	public String getFitOrderListData(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, GroupOrder groupOrder)
 			throws ParseException {
-		if(null==groupOrder.getTourGroup()){
-			TourGroup tourGroup = new TourGroup() ;
-			groupOrder.setTourGroup(tourGroup);
-		}
-		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
-		pageBean.setPageSize(1000);
-		pageBean.setPage(1);
-		pageBean.setParameter(groupOrder);
-		pageBean = groupOrderService.selectProductOrderListPage(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-		model.addAttribute("page", pageBean);
+//		if(null==groupOrder.getTourGroup()){
+//			TourGroup tourGroup = new TourGroup() ;
+//			groupOrder.setTourGroup(tourGroup);
+//		}
+//		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+//		pageBean.setPageSize(1000);
+//		pageBean.setPage(1);
+//		pageBean.setParameter(groupOrder);
+//		pageBean = groupOrderService.selectProductOrderListPage(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+//		model.addAttribute("page", pageBean);
+//		return "sales/fitOrder/productOrdersDetail";
+		
+		GetFitOrderListDataDTO getFitOrderListDataDTO=new GetFitOrderListDataDTO();
+		getFitOrderListDataDTO.setCurBizId(WebUtils.getCurBizId(request));
+		getFitOrderListDataDTO.setGroupOrder(groupOrder);
+		getFitOrderListDataDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		
+		GetFitOrderListDataResult result=groupOrderFacade.getFitOrderListData(getFitOrderListDataDTO);
+		model.addAttribute("page", result.getPageBean());
+		
 		return "sales/fitOrder/productOrdersDetail";
 	}
 	/**
@@ -269,15 +320,25 @@ public class GroupOrderController extends BaseController {
 	 */
 	@RequestMapping(value = "/toProductOrdersList.htm")
 	public String toProductOrdersList(HttpServletRequest request, Model model) {
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		Integer bizId = WebUtils.getCurBizId(request);
+//		model.addAttribute("allProvince", allProvince);
+//		model.addAttribute("orgJsonStr",
+//				orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr",
+//				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+//		return "sales/fitOrder/productOrdersList";
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("allProvince", allProvince);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+		
+		ToProductOrdersListResult result=groupOrderFacade.toProductOrdersList(bizId);
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("orgJsonStr",result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		
 		return "sales/fitOrder/productOrdersList";
 	}
+	
 	/**
 	 * 订单日志查询分页
 	 * @param request
@@ -288,33 +349,60 @@ public class GroupOrderController extends BaseController {
 	@RequestMapping(value = "/toProductOrdersTable.htm")
 	public String toProductOrdersTable(HttpServletRequest request, Model model,
 			GroupOrder order) {
-		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
-		pageBean.setPage(order.getPage());
-		pageBean.setPageSize(order.getPageSize() == null ? Constants.PAGESIZE
-				: order.getPageSize());
-		pageBean.setParameter(order);
-		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(order.getSaleOperatorIds())
-				&& StringUtils.isNotBlank(order.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = order.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				order.setSaleOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
-		pageBean = groupOrderService.selectOrderGroupByProductIdListPage(pageBean,
-				WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
-		GroupOrder go = groupOrderService.selectOrderGroupByProductIdList(pageBean,WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request)) ;
+		
+//		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+//		pageBean.setPage(order.getPage());
+//		pageBean.setPageSize(order.getPageSize() == null ? Constants.PAGESIZE: order.getPageSize());
+//		pageBean.setParameter(order);
+//		
+//		// 如果人员为空并且部门不为空，则取部门下的人id
+//		if (StringUtils.isBlank(order.getSaleOperatorIds())
+//				&& StringUtils.isNotBlank(order.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = order.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				order.setSaleOperatorIds(salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//			}
+//		}
+//		
+//		pageBean = groupOrderService.selectOrderGroupByProductIdListPage(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+//		
+//		GroupOrder go = groupOrderService.selectOrderGroupByProductIdList(pageBean,WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request)) ;
+//		if(null!=go){
+//			model.addAttribute("totalOrder", go.getTotalOrder());
+//			model.addAttribute("totalAdult", go.getTotalAdult());
+//			model.addAttribute("totalChild", go.getTotalChild());
+//			model.addAttribute("totalSum", go.getTotalSum());
+//		}else{
+//			model.addAttribute("totalOrder", "");
+//			model.addAttribute("totalAdult", "");
+//			model.addAttribute("totalChild", "");
+//			model.addAttribute("totalSum", "");
+//		}
+//		
+//		model.addAttribute("page", pageBean);
+//		model.addAttribute("orders", pageBean.getResult());
+		
+		ToProductOrdersTableDTO toProductOrdersTableDTO=new ToProductOrdersTableDTO();
+		toProductOrdersTableDTO.setCurBizId(WebUtils.getCurBizId(request));
+		toProductOrdersTableDTO.setOrder(order);
+		toProductOrdersTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		
+		ToProductOrdersTableResult result=groupOrderFacade.toProductOrdersTable(toProductOrdersTableDTO);
+		
+		GroupOrder go=result.getGo();
 		if(null!=go){
 			model.addAttribute("totalOrder", go.getTotalOrder());
 			model.addAttribute("totalAdult", go.getTotalAdult());
@@ -326,9 +414,9 @@ public class GroupOrderController extends BaseController {
 			model.addAttribute("totalChild", "");
 			model.addAttribute("totalSum", "");
 		}
+		model.addAttribute("page", result.getPageBean());
+		model.addAttribute("orders", result.getPageBean().getResult());
 		
-		model.addAttribute("page", pageBean);
-		model.addAttribute("orders", pageBean.getResult());
 		return "sales/fitOrder/productOrdersTable";
 	}
 	
@@ -349,99 +437,148 @@ public class GroupOrderController extends BaseController {
 	public String toAddGroupOrder(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer productId,
 			Integer groupId, Integer priceId) {
+//		model.addAttribute("priceId", priceId);
+//		model.addAttribute("groupId", groupId);
+//		model.addAttribute("operType", 1);
+//		ProductGroupPrice productGroupPrice = productGroupPriceService
+//				.selectByPrimaryKey(priceId).getGroupPrice();
+//
+//		model.addAttribute("allowNum", productGroupPrice.getStockCount()
+//				- productGroupPrice.getReceiveCount());
+//
+//		ProductGroup group = productGroupService.getGroupInfoById(groupId);
+//		model.addAttribute("productGroup", group);
+//
+//		ProductInfo productInfo = productInfoService
+//				.findProductInfoById(productId);
+//
+//		model.addAttribute("productInfo", productInfo);
+//
+//		ProductRemark productRemark = productRemarkService
+//				.findProductRemarkByProductId(productId);
+//		model.addAttribute("productRemark", productRemark);
+//		List<ProductGroupExtraItem> grouplist = productGroupExtraItemService
+//				.findByGroupId(groupId);
+//
+//		model.addAttribute("grouplist", grouplist);
+//		
+//		int bizId = WebUtils.getCurBizId(request);
+//		
+//		ProductGroupPrice groupPrice = productGroupPriceService
+//				.selectByPrimaryKey(priceId).getGroupPrice();
+//		model.addAttribute("groupPrice", groupPrice);
+//		List<DicInfo> jdxjList = dicService.getListByTypeCode(BasicConstants.GYXX_JDXJ);
+//		model.addAttribute("jdxjList", jdxjList);
+//		List<DicInfo> jtfsList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_JTFS,bizId);
+//		model.addAttribute("jtfsList", jtfsList);
+//		List<DicInfo> zjlxList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_ZJLX);
+//		model.addAttribute("zjlxList", zjlxList);
+//		List<DicInfo> sourceTypeList = dicService.getListByTypeCode(Constants.GUEST_SOURCE_TYPE,bizId);
+//		model.addAttribute("sourceTypeList", sourceTypeList);
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+//		
+//		List<DicInfo> lysfxmList = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_LYSFXM, bizId);
+//		model.addAttribute("lysfxmList", lysfxmList);
+//		PlatformEmployeePo curUser = WebUtils.getCurUser(request);
+//		model.addAttribute("curUser", curUser);
+//	
+//		
+//
+//		List<ProductGroupSupplierVo> groupSuppliersList = productGroupSupplierService
+//				.selectProductGroupSupplierVos(groupId, priceId);
+//		model.addAttribute("groupSuppliersList", groupSuppliersList);
+		
+		int bizId = WebUtils.getCurBizId(request);
+		PlatformEmployeePo curUser = WebUtils.getCurUser(request);
+
+		ToAddGroupOrderResult result= groupOrderFacade.toAddGroupOrder(bizId,productId,groupId,priceId);
+		
 		model.addAttribute("priceId", priceId);
 		model.addAttribute("groupId", groupId);
 		model.addAttribute("operType", 1);
-		ProductGroupPrice productGroupPrice = productGroupPriceService
-				.selectByPrimaryKey(priceId).getGroupPrice();
-
-		model.addAttribute("allowNum", productGroupPrice.getStockCount()
-				- productGroupPrice.getReceiveCount());
-
-		ProductGroup group = productGroupService.getGroupInfoById(groupId);
-		model.addAttribute("productGroup", group);
-
-		ProductInfo productInfo = productInfoService
-				.findProductInfoById(productId);
-
-		model.addAttribute("productInfo", productInfo);
-
-		ProductRemark productRemark = productRemarkService
-				.findProductRemarkByProductId(productId);
-		model.addAttribute("productRemark", productRemark);
-		List<ProductGroupExtraItem> grouplist = productGroupExtraItemService
-				.findByGroupId(groupId);
-
-		model.addAttribute("grouplist", grouplist);
-		
-		int bizId = WebUtils.getCurBizId(request);
-		
-		ProductGroupPrice groupPrice = productGroupPriceService
-				.selectByPrimaryKey(priceId).getGroupPrice();
-		model.addAttribute("groupPrice", groupPrice);
-		List<DicInfo> jdxjList = dicService.getListByTypeCode(BasicConstants.GYXX_JDXJ);
-		model.addAttribute("jdxjList", jdxjList);
-		List<DicInfo> jtfsList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JTFS,bizId);
-		model.addAttribute("jtfsList", jtfsList);
-		List<DicInfo> zjlxList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_ZJLX);
-		model.addAttribute("zjlxList", zjlxList);
-		List<DicInfo> sourceTypeList = dicService.getListByTypeCode(Constants.GUEST_SOURCE_TYPE,bizId);
-		model.addAttribute("sourceTypeList", sourceTypeList);
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-		
-		List<DicInfo> lysfxmList = dicService.getListByTypeCode(
-				BasicConstants.GYXX_LYSFXM, bizId);
-		model.addAttribute("lysfxmList", lysfxmList);
-		PlatformEmployeePo curUser = WebUtils.getCurUser(request);
 		model.addAttribute("curUser", curUser);
-	
 		
-
-		List<ProductGroupSupplierVo> groupSuppliersList = productGroupSupplierService
-				.selectProductGroupSupplierVos(groupId, priceId);
-		model.addAttribute("groupSuppliersList", groupSuppliersList);
+		model.addAttribute("productInfo", result.getProductInfo());
+		model.addAttribute("productGroup", result.getGroup());
+		
+		ProductGroupPrice productGroupPrice = result.getProductGroupPrice();
+		model.addAttribute("allowNum", productGroupPrice.getStockCount()- productGroupPrice.getReceiveCount());
+		
+		model.addAttribute("productRemark", result.getProductRemark());
+		model.addAttribute("grouplist", result.getGrouplist());
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("zjlxList", result.getZjlxList());
+		model.addAttribute("jtfsList", result.getJtfsList());
+		model.addAttribute("jdxjList", result.getJdxjList());
+		model.addAttribute("groupPrice", result.getGroupPrice());
+		model.addAttribute("sourceTypeList", result.getSourceTypeList());
+		model.addAttribute("groupSuppliersList", result.getGroupSuppliersList());
+		model.addAttribute("lysfxmList", result.getLysfxmList());
 
 		return "sales/groupOrder/addGroupOrder";
 	}
+	
 	@RequestMapping("toSalePriceList.htm")
 	public String toDeliveryPriceList(HttpServletRequest request,Model model){
+//		Integer bizId = WebUtils.getCurBizId(request);
+//		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr", sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+//		List<DicInfo> lysfxmList = dicService.getListByTypeCode(BasicConstants.GYXX_LYSFXM, bizId);
+//		model.addAttribute("lysfxmList", lysfxmList);
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
-		List<DicInfo> lysfxmList = dicService.getListByTypeCode(
-				BasicConstants.GYXX_LYSFXM, bizId);
-		model.addAttribute("lysfxmList", lysfxmList);
+		
+		ToDeliveryPriceListResult result=groupOrderFacade.toDeliveryPriceList(bizId);
+		
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		model.addAttribute("lysfxmList", result.getLysfxmList());
+		
 		return "/operation/sales/salePriceList" ;
 	}
+	
 	@RequestMapping("toSalePriceTable.htm")
 	public String toDeliveryPriceTable(HttpServletRequest request,SalePrice sp,Model model){
-		PageBean<SalePrice> pageBean = new PageBean<SalePrice>() ;
-		pageBean.setPage(sp.getPage());
-		pageBean.setPageSize(sp.getPageSize()==null?Constants.PAGESIZE:sp.getPageSize());
-		if(StringUtils.isBlank(sp.getSaleOperatorIds()) && StringUtils.isNotBlank(sp.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = sp.getOrgIds().toString().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				sp.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		pageBean.setParameter(sp);
-		BigDecimal totals = groupOrderService.getSalePriceToalPrice(pageBean,WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request)) ;
-		pageBean = groupOrderService.getSalePriceListPage(pageBean, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request)) ;
-		model.addAttribute("totals", totals) ;
-		model.addAttribute("page", pageBean) ;
-		model.addAttribute("prices", pageBean.getResult()) ;
+
+//		PageBean<SalePrice> pageBean = new PageBean<SalePrice>() ;
+//		pageBean.setPage(sp.getPage());
+//		pageBean.setPageSize(sp.getPageSize()==null?Constants.PAGESIZE:sp.getPageSize());
+//		if(StringUtils.isBlank(sp.getSaleOperatorIds()) && StringUtils.isNotBlank(sp.getOrgIds())){
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = sp.getOrgIds().toString().split(",");
+//			for(String orgIdStr : orgIdArr){
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds="";
+//			for(Integer usrId : set){
+//				salesOperatorIds+=usrId+",";
+//			}
+//			if(!salesOperatorIds.equals("")){
+//				sp.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+//			}
+//		}
+//		pageBean.setParameter(sp);
+//		BigDecimal totals = groupOrderService.getSalePriceToalPrice(pageBean,WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request)) ;
+//		pageBean = groupOrderService.getSalePriceListPage(pageBean, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request)) ;
+//		model.addAttribute("totals", totals) ;
+//		model.addAttribute("page", pageBean) ;
+//		model.addAttribute("prices", pageBean.getResult()) ;
+	
+		ToDeliveryPriceTableDTO toDeliveryPriceTableDTO=new ToDeliveryPriceTableDTO();
+		toDeliveryPriceTableDTO.setSp(sp);
+		toDeliveryPriceTableDTO.setBizId(WebUtils.getCurBizId(request));
+		toDeliveryPriceTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		
+		ToDeliveryPriceTableResult result=groupOrderFacade.toDeliveryPriceTable(toDeliveryPriceTableDTO);
+		model.addAttribute("totals", result.getTotals()) ;
+		model.addAttribute("page", result.getPageBean()) ;
+		model.addAttribute("prices", result.getPageBean().getResult()) ;
+		
 		return "/operation/sales/salePriceTable" ;
 	}	
 	/**
@@ -462,7 +599,7 @@ public class GroupOrderController extends BaseController {
 //			return errorJson("服务器忙！");
 //		}
 		
-		BaseStateResult result = groupOrderLockFacade.updateOrderLockState(orderId, orderLockState);
+		BaseStateResult result = groupOrderFacade.updateOrderLockState(orderId, orderLockState);
 		if(result.isSuccess()){
 			Map<String, Object> map = new HashMap<String, Object>() ;
 			map.put("orderLockState", orderLockState) ;
@@ -472,16 +609,16 @@ public class GroupOrderController extends BaseController {
 		}
 	}
 	
-//	//FIXME 这批量咋处理的？？
-//	/**
-//	 * 更新订单锁单状态
-//	 * @param request
-//	 * @param model
-//	 * @return
-//	 */
-//	@RequestMapping(value = "/batchUpdateOrderLockState.do")
-//	@ResponseBody
-//	public String batchUpdateOrderLockState(Integer orderId,Integer orderLockState) {
+	//FIXME 这批量咋处理的，逻辑和单个处理一样
+	/**
+	 * 更新订单锁单状态
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value = "/batchUpdateOrderLockState.do")
+	@ResponseBody
+	public String batchUpdateOrderLockState(Integer orderId,Integer orderLockState) {
 //		int i = groupOrderService.updateOrderLockState(orderId, orderLockState);
 //		Map<String, Object> map = new HashMap<String, Object>() ;
 //		map.put("orderLockState", orderLockState) ;
@@ -490,7 +627,16 @@ public class GroupOrderController extends BaseController {
 //		}else{
 //			return errorJson("服务器忙！");
 //		}
-//	}
+		
+		BaseStateResult result = groupOrderFacade.updateOrderLockState(orderId, orderLockState);
+		if(result.isSuccess()){
+			Map<String, Object> map = new HashMap<String, Object>() ;
+			map.put("orderLockState", orderLockState) ;
+			return successJson(map);
+		}else{
+			return errorJson(result.getError());
+		}
+	}
 	
 	/**
 	 * 锁单列表
@@ -510,12 +656,11 @@ public class GroupOrderController extends BaseController {
 //		return "sales/orderLock/orderLockList";
 		
 		Integer bizId = WebUtils.getCurBizId(request);
-		ToOrderLockListResult toOrderLockListResult=groupOrderLockFacade.toOrderLockList(bizId);
+		ToOrderLockListResult toOrderLockListResult=groupOrderFacade.toOrderLockList(bizId);
 		
 		model.addAttribute("allProvince", toOrderLockListResult.getAllProvince());
 		model.addAttribute("orgJsonStr",toOrderLockListResult.getOrgJsonStr());
 		model.addAttribute("orgUserJsonStr",toOrderLockListResult.getOrgUserJsonStr());
-		
 		
 		return "sales/orderLock/orderLockList";
 	}
@@ -585,7 +730,7 @@ public class GroupOrderController extends BaseController {
 		orderLockTableDTO.setOrder(order);
 		orderLockTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 		
-		ToOrderLockTableResult toOrderLockTableResult=groupOrderLockFacade.toOrderLockTable(orderLockTableDTO);
+		ToOrderLockTableResult toOrderLockTableResult=groupOrderFacade.toOrderLockTable(orderLockTableDTO);
 		model.addAttribute("totalPb", toOrderLockTableResult.getTotalPb());
 		model.addAttribute("page", toOrderLockTableResult.getPageBean());
 		model.addAttribute("orders", toOrderLockTableResult.getPageBean().getResult());
@@ -598,33 +743,40 @@ public class GroupOrderController extends BaseController {
 	public String insertGroupMany(HttpServletRequest request,
 			HttpServletResponse reponse, String ids, String code) {
 
-		TourGroup tourGroup = tourGroupService.selectByGroupCode(code);
-		if (tourGroup == null) {
-			return errorJson("未查到该团号对应的散客团信息!");
+//		TourGroup tourGroup = tourGroupService.selectByGroupCode(code);
+//		if (tourGroup == null) {
+//			return errorJson("未查到该团号对应的散客团信息!");
+//		}
+//		String[] split = ids.split(",");
+//		for (String str : split) {
+//			GroupOrder groupOrder = groupOrderService
+//					.selectByPrimaryKey(Integer.parseInt(str));
+//			groupOrder.setGroupId(tourGroup.getId());
+//			groupOrderService.updateGroupOrder(groupOrder);
+//			tourGroup.setOrderNum(tourGroup.getOrderNum() == null ? 1
+//					: tourGroup.getOrderNum() + 1);
+//			tourGroupService.updateByPrimaryKey(tourGroup);
+//			groupOrderService.updateGroupPersonNum(tourGroup.getId());
+//			groupOrderService.updateGroupPrice(tourGroup.getId());
+//
+//			List<GroupRequirement> list = groupRequirementService
+//					.selectByOrderId(Integer.parseInt(str));
+//			if (list != null && list.size() > 0) {
+//				for (GroupRequirement groupRequirement : list) {
+//					groupRequirement.setGroupId(tourGroup.getId());
+//					groupRequirementService
+//							.updateByPrimaryKeySelective(groupRequirement);
+//				}
+//			}
+//		}
+//		return successJson();
+	
+		BaseStateResult result=groupOrderFacade.insertGroupMany(ids,code);
+		if(result.isSuccess()){
+			return successJson();
+		}else{
+			return errorJson(result.getError());
 		}
-		String[] split = ids.split(",");
-		for (String str : split) {
-			GroupOrder groupOrder = groupOrderService
-					.selectByPrimaryKey(Integer.parseInt(str));
-			groupOrder.setGroupId(tourGroup.getId());
-			groupOrderService.updateGroupOrder(groupOrder);
-			tourGroup.setOrderNum(tourGroup.getOrderNum() == null ? 1
-					: tourGroup.getOrderNum() + 1);
-			tourGroupService.updateByPrimaryKey(tourGroup);
-			groupOrderService.updateGroupPersonNum(tourGroup.getId());
-			groupOrderService.updateGroupPrice(tourGroup.getId());
-
-			List<GroupRequirement> list = groupRequirementService
-					.selectByOrderId(Integer.parseInt(str));
-			if (list != null && list.size() > 0) {
-				for (GroupRequirement groupRequirement : list) {
-					groupRequirement.setGroupId(tourGroup.getId());
-					groupRequirementService
-							.updateByPrimaryKeySelective(groupRequirement);
-				}
-			}
-		}
-		return successJson();
 	}
 
 	@RequestMapping(value = "insertGroup.do", method = RequestMethod.POST)
@@ -632,30 +784,37 @@ public class GroupOrderController extends BaseController {
 	public String insertGroup(HttpServletRequest request,
 			HttpServletResponse reponse, Integer id, String code) {
 
-		TourGroup tourGroup = tourGroupService.selectByGroupCode(code);
-		if (tourGroup == null) {
-			return errorJson("未查到该团号对应的散客团信息!");
+//		TourGroup tourGroup = tourGroupService.selectByGroupCode(code);
+//		if (tourGroup == null) {
+//			return errorJson("未查到该团号对应的散客团信息!");
+//		}
+//		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(id);
+//		groupOrder.setGroupId(tourGroup.getId());
+//		groupOrderService.updateGroupOrder(groupOrder);
+//		tourGroup.setOrderNum(tourGroup.getOrderNum() == null ? 1 : tourGroup
+//				.getOrderNum() + 1);
+//		tourGroupService.updateByPrimaryKey(tourGroup);
+//		groupOrderService.updateGroupPersonNum(tourGroup.getId());
+//		groupOrderService.updateGroupPrice(tourGroup.getId());
+//
+//		List<GroupRequirement> list = groupRequirementService
+//				.selectByOrderId(id);
+//		if (list != null && list.size() > 0) {
+//			for (GroupRequirement groupRequirement : list) {
+//				groupRequirement.setGroupId(tourGroup.getId());
+//				groupRequirementService
+//						.updateByPrimaryKeySelective(groupRequirement);
+//			}
+//		}
+//
+//		return successJson();
+		
+		BaseStateResult result=groupOrderFacade.insertGroup(id,code);
+		if(result.isSuccess()){
+			return successJson();
+		}else{
+			return errorJson(result.getError());
 		}
-		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(id);
-		groupOrder.setGroupId(tourGroup.getId());
-		groupOrderService.updateGroupOrder(groupOrder);
-		tourGroup.setOrderNum(tourGroup.getOrderNum() == null ? 1 : tourGroup
-				.getOrderNum() + 1);
-		tourGroupService.updateByPrimaryKey(tourGroup);
-		groupOrderService.updateGroupPersonNum(tourGroup.getId());
-		groupOrderService.updateGroupPrice(tourGroup.getId());
-
-		List<GroupRequirement> list = groupRequirementService
-				.selectByOrderId(id);
-		if (list != null && list.size() > 0) {
-			for (GroupRequirement groupRequirement : list) {
-				groupRequirement.setGroupId(tourGroup.getId());
-				groupRequirementService
-						.updateByPrimaryKeySelective(groupRequirement);
-			}
-		}
-
-		return successJson();
 	}
 
 	/**
@@ -670,27 +829,35 @@ public class GroupOrderController extends BaseController {
 	@ResponseBody
 	public String editOrderGroupInfo(HttpServletRequest request,
 			HttpServletResponse reponse, TourGroup tourGroup) {
-		if (tourGroup.getPrudctBrandId() != null) {
-			DicInfo dicInfo = dicService.getById(tourGroup.getPrudctBrandId()
-					+ "");
-			tourGroup.setProductBrandName(dicInfo.getValue());
+//		if (tourGroup.getPrudctBrandId() != null) {
+//			DicInfo dicInfo = dicService.getById(tourGroup.getPrudctBrandId()+ "");
+//			tourGroup.setProductBrandName(dicInfo.getValue());
+//		}
+//		if (tourGroup.getGroupCode() != null) {
+//			tourGroup.setGroupCode(GroupCodeUtil.getCode(
+//					tourGroup.getGroupCode(), tourGroup.getGroupCodeMark()));
+//		}
+//		if(tourGroup.getGroupState()==2){
+//		List<FinanceCommission> fc1=groupOrderService.selectFinanceCommissionByGroupId(tourGroup.getId());
+//		if (fc1 != null && fc1.size() > 0) {
+//				return "该团已有购物及佣金被审核！";
+//		}
+//		List<FinanceCommission> fc2=groupOrderService.selectFCByGroupId(tourGroup.getId());
+//		if (fc2 != null && fc2.size() > 0) {
+//				return "该团已有购物及佣金被审核！";
+//		}
+//		}
+//		tourGroupService.updateByPrimaryKeySelective(tourGroup);
+//		return successJson();
+		EditOrderGroupInfoDTO editOrderGroupInfoDTO=new EditOrderGroupInfoDTO();
+		editOrderGroupInfoDTO.setTourGroup(tourGroup);
+		
+		BaseStateResult result=groupOrderFacade.editOrderGroupInfo(editOrderGroupInfoDTO);
+		if(result.isSuccess()){
+			return successJson();
+		}else{
+			return errorJson(result.getError());
 		}
-		if (tourGroup.getGroupCode() != null) {
-			tourGroup.setGroupCode(GroupCodeUtil.getCode(
-					tourGroup.getGroupCode(), tourGroup.getGroupCodeMark()));
-		}
-		if(tourGroup.getGroupState()==2){
-		List<FinanceCommission> fc1=groupOrderService.selectFinanceCommissionByGroupId(tourGroup.getId());
-		if (fc1 != null && fc1.size() > 0) {
-					return "该团已有购物及佣金被审核！";
-		}
-		List<FinanceCommission> fc2=groupOrderService.selectFCByGroupId(tourGroup.getId());
-		if (fc2 != null && fc2.size() > 0) {
-					return "该团已有购物及佣金被审核！";
-		}
-		}
-		tourGroupService.updateByPrimaryKeySelective(tourGroup);
-		return successJson();
 	}
 
 	/**
@@ -705,8 +872,15 @@ public class GroupOrderController extends BaseController {
 	@ResponseBody
 	public String delFitTour(HttpServletRequest request,
 			HttpServletResponse reponse, Integer groupId) {
-		tourGroupService.delFitTourGroup(groupId);
-		return successJson();
+//		tourGroupService.delFitTourGroup(groupId);
+//		return successJson();
+		
+		BaseStateResult result=groupOrderFacade.delFitTourGroup(groupId);
+		if(result.isSuccess()){
+			return successJson();
+		}else{
+			return errorJson(result.getError());
+		}
 	}
 
 	
@@ -724,26 +898,31 @@ public class GroupOrderController extends BaseController {
 	public String toFitOrderList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer groupId,
 			Integer operType) throws ParseException {
-		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
-		model.addAttribute("tourGroup", tourGroup);
-		List<GroupOrder> result = groupOrderService
-				.selectOrderByGroupId(groupId);
-		for (GroupOrder groupOrder2 : result) {
-			groupOrder2.setGroupNo(tourGroupService.selectByPrimaryKey(
-					groupOrder2.getGroupId()).getGroupCode());
-			List<GroupRoute> list = groupRouteService
-					.selectByOrderId(groupOrder2.getId());
-			if (list != null && list.size() > 0) {
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(sdf.parse(groupOrder2.getDepartureDate()));
-				cal.add(Calendar.DAY_OF_MONTH, +(list.size() - 1));
-				Date time = cal.getTime();
-				groupOrder2.setFitDate(sdf.format(time));
-			}
-		}
-		model.addAttribute("groupOrderList", result);
+		
+//		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
+//		model.addAttribute("tourGroup", tourGroup);
+//		List<GroupOrder> result = groupOrderService.selectOrderByGroupId(groupId);
+//		for (GroupOrder groupOrder2 : result) {
+//			groupOrder2.setGroupNo(tourGroupService.selectByPrimaryKey(groupOrder2.getGroupId()).getGroupCode());
+//			List<GroupRoute> list = groupRouteService.selectByOrderId(groupOrder2.getId());
+//			if (list != null && list.size() > 0) {
+//				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//				Calendar cal = Calendar.getInstance();
+//				cal.setTime(sdf.parse(groupOrder2.getDepartureDate()));
+//				cal.add(Calendar.DAY_OF_MONTH, +(list.size() - 1));
+//				Date time = cal.getTime();
+//				groupOrder2.setFitDate(sdf.format(time));
+//			}
+//		}
+//		model.addAttribute("groupOrderList", result);
+//		model.addAttribute("operType", operType);
+		
 		model.addAttribute("operType", operType);
+		
+		ToFitOrderListResult result=groupOrderFacade.toFitOrderList(groupId);
+		model.addAttribute("groupOrderList", result.getList());
+		model.addAttribute("tourGroup", result.getTourGroup());
+		
 		return "sales/groupOrder/fitOrderList";
 	}
 
@@ -760,13 +939,22 @@ public class GroupOrderController extends BaseController {
 	public String toFitEdit(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer groupId,
 			Integer operType) {
-		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
-		List<DicInfo> ppList = dicService.getListByTypeCode(
-				BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
-		model.addAttribute("ppList", ppList);
-		model.addAttribute("tourGroup", tourGroup);
+		
+//		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
+//		List<DicInfo> ppList = dicService.getListByTypeCode(BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
+//		model.addAttribute("ppList", ppList);
+//		model.addAttribute("tourGroup", tourGroup);
+//		model.addAttribute("operType", operType);
+//		model.addAttribute("groupId", groupId);
+		
+		Integer bizId = WebUtils.getCurBizId(request);
+		ToFitEditResult result=groupOrderFacade.toFitEdit(groupId,bizId);
+		
+		model.addAttribute("ppList", result.getPpList());
+		model.addAttribute("tourGroup", result.getTourGroup());
 		model.addAttribute("operType", operType);
 		model.addAttribute("groupId", groupId);
+		
 		return "sales/groupOrder/fitEdit";
 	}
 
@@ -787,195 +975,208 @@ public class GroupOrderController extends BaseController {
 	public String mergeGroup(HttpServletRequest request,
 			HttpServletResponse reponse, MergeGroupOrderVO mergeGroupOrderVO)
 			throws ParseException {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		List<GroupOrder> orderList = mergeGroupOrderVO.getOrderList();
-
-		List<MergeGroupOrderVO> result = new ArrayList<MergeGroupOrderVO>();
-		for (int i = 0; i < orderList.size();) {
-			GroupOrder order = orderList.get(i);
-			GroupOrder groupOrder = groupOrderService.findById(order.getId());
-			groupOrder.setGroupCode(order.getGroupCode());
-			orderList.remove(order);
-			MergeGroupOrderVO mov = new MergeGroupOrderVO();
-			mov.getOrderList().add(groupOrder);
-
-			for (int j = 0; j < orderList.size();) {
-				GroupOrder order2 = orderList.get(j);
-				GroupOrder go = groupOrderService.findById(order2.getId());
-				go.setGroupCode(order2.getGroupCode());
-				// 相同，分组，并加入到组容器集合
-				if (go.getGroupCode().equals(groupOrder.getGroupCode())) {
-					mov.getOrderList().add(go);
-					orderList.remove(order2);
-				} else {
-					j++;
-				}
-			}
-			result.add(mov);
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		List<GroupOrder> orderList = mergeGroupOrderVO.getOrderList();
+//
+//		List<MergeGroupOrderVO> result = new ArrayList<MergeGroupOrderVO>();
+//		for (int i = 0; i < orderList.size();) {
+//			GroupOrder order = orderList.get(i);
+//			GroupOrder groupOrder = groupOrderService.findById(order.getId());
+//			groupOrder.setGroupCode(order.getGroupCode());
+//			orderList.remove(order);
+//			MergeGroupOrderVO mov = new MergeGroupOrderVO();
+//			mov.getOrderList().add(groupOrder);
+//
+//			for (int j = 0; j < orderList.size();) {
+//				GroupOrder order2 = orderList.get(j);
+//				GroupOrder go = groupOrderService.findById(order2.getId());
+//				go.setGroupCode(order2.getGroupCode());
+//				// 相同，分组，并加入到组容器集合
+//				if (go.getGroupCode().equals(groupOrder.getGroupCode())) {
+//					mov.getOrderList().add(go);
+//					orderList.remove(order2);
+//				} else {
+//					j++;
+//				}
+//			}
+//			result.add(mov);
+//		}
+//		// --------------------------------------------------------------------------------
+//		for (MergeGroupOrderVO mergeGroupOrderVO2 : result) {
+//			List<GroupOrder> orderList2 = mergeGroupOrderVO2.getOrderList();
+//			ProductInfo productInfo = null;
+//			for (GroupOrder groupOrder : orderList2) {
+//				ProductInfo productInfo2 = productInfoService
+//						.findProductInfoById(groupOrder.getProductId());
+//				if (productInfo == null) {
+//					productInfo = productInfo2;
+//				} else if (productInfo2 != null
+//						&& productInfo2.getTravelDays() > productInfo
+//								.getTravelDays()) {
+//					productInfo = productInfo2;
+//				}
+//			}
+//			// -------------------------------------------------------------------------------
+//			ProductRouteVo productRouteVo = productRouteService
+//					.findByProductId(productInfo.getId());
+//			ProductRemark productRemark = productRemarkService
+//					.findProductRemarkByProductId(productInfo.getId());
+//
+//			TourGroup tourGroup = new TourGroup();
+//			tourGroup.setServiceStandard(productRemark.getItemInclude()
+//					+ productRemark.getItemExclude());
+//			tourGroup.setRemark(productRemark.getChildPlan()
+//					+ productRemark.getShoppingPlan()
+//					+ productRemark.getItemCharge()
+//					+ productRemark.getItemFree());
+//			tourGroup
+//					.setWarmNotice(productRemark.getAttention()
+//							+ productRemark.getItemOther()
+//							+ productRemark.getWarmTip());
+//
+//			tourGroup.setServiceStandard(productRemark.getItemInclude()
+//					+ productRemark.getItemExclude());
+//			tourGroup.setRemark(productRemark.getChildPlan()
+//					+ productRemark.getShoppingPlan()
+//					+ productRemark.getItemCharge()
+//					+ productRemark.getItemFree());
+//			tourGroup
+//					.setWarmNotice(productRemark.getAttention()
+//							+ productRemark.getItemOther()
+//							+ productRemark.getWarmTip());
+//
+//			mergeGroupOrderVO2.setTourGroup(tourGroup);
+//
+//			GroupRouteVO groupRouteVO = new GroupRouteVO();
+//			List<GroupRouteDayVO> groupRouteDayVOList = new ArrayList<GroupRouteDayVO>();
+//			List<ProductRouteDayVo> productRoteDayVoList = productRouteVo
+//					.getProductRoteDayVoList();
+//
+//			if (productRoteDayVoList != null && productRoteDayVoList.size() > 0) {
+//				for (int i = 0; i < productRoteDayVoList.size(); i++) {
+//					ProductRoute productRoute = productRoteDayVoList.get(i)
+//							.getProductRoute();
+//					GroupRoute groupRoute = new GroupRoute();
+//					GroupRouteDayVO groupRouteDayVO = new GroupRouteDayVO();
+//					try {
+//						BeanUtils.copyProperties(groupRoute, productRoute);
+//						Calendar cal = Calendar.getInstance();
+//						cal.setTime(sdf.parse(mergeGroupOrderVO2.getOrderList()
+//								.get(0).getDepartureDate()));
+//						cal.add(Calendar.DAY_OF_MONTH, i);
+//						Date time = cal.getTime();
+//						groupRoute.setId(null);
+//						groupRoute.setGroupDate(time);
+//						List<ProductAttachment> productAttachmentsList = productRoteDayVoList
+//								.get(i).getProductAttachments();
+//						List<GroupRouteAttachment> groupRouteAttachmentList = new ArrayList<GroupRouteAttachment>();
+//						if (productAttachmentsList != null
+//								&& productAttachmentsList.size() > 0) {
+//							for (ProductAttachment productAttachment : productAttachmentsList) {
+//								GroupRouteAttachment groupRouteAttachment = new GroupRouteAttachment();
+//								BeanUtils.copyProperties(groupRouteAttachment,
+//										productAttachment);
+//								groupRouteAttachment.setId(null);
+//								groupRouteAttachmentList
+//										.add(groupRouteAttachment);
+//							}
+//						}
+//
+//						List<ProductRouteTraffic> productRouteTrafficList = productRoteDayVoList
+//								.get(i).getProductRouteTrafficList();
+//						List<GroupRouteTraffic> groupRouteTrafficList = new ArrayList<GroupRouteTraffic>();
+//						if (productRouteTrafficList != null
+//								&& productRouteTrafficList.size() > 0) {
+//							for (ProductRouteTraffic productRouteTraffic : productRouteTrafficList) {
+//								GroupRouteTraffic groupRouteTraffic = new GroupRouteTraffic();
+//								BeanUtils.copyProperties(groupRouteTraffic,
+//										productRouteTraffic);
+//								groupRouteTraffic.setId(null);
+//								groupRouteTrafficList.add(groupRouteTraffic);
+//
+//							}
+//						}
+//
+//						// List<GroupRouteSupplier> groupRouteScenicSupplierList
+//						// =
+//						// new ArrayList<GroupRouteSupplier>();
+//						// List<ProductRouteSupplier> productScenicSupplierList
+//						// =
+//						// productRoteDayVoList
+//						// .get(i).getProductScenicSupplierList();
+//						// if (productScenicSupplierList != null
+//						// && productScenicSupplierList.size() > 0) {
+//						// for (ProductRouteSupplier productRouteScenicSupplier
+//						// :
+//						// productScenicSupplierList) {
+//						// GroupRouteSupplier groupRouteScenicSupplier = new
+//						// GroupRouteSupplier();
+//						// BeanUtils.copyProperties(groupRouteScenicSupplier,
+//						// productRouteScenicSupplier);
+//						// groupRouteScenicSupplier.setId(null);
+//						// groupRouteScenicSupplierList
+//						// .add(groupRouteScenicSupplier);
+//						// }
+//						// }
+//
+//						List<GroupRouteSupplier> groupRouteOptionsSupplierList = new ArrayList<GroupRouteSupplier>();
+//						List<ProductRouteSupplier> productOptionsSupplierList = productRoteDayVoList
+//								.get(i).getProductOptionsSupplierList();
+//						if (productOptionsSupplierList != null
+//								&& productOptionsSupplierList.size() > 0) {
+//							for (ProductRouteSupplier productRouteSupplier : productOptionsSupplierList) {
+//								GroupRouteSupplier groupRouteOptionsSupplier = new GroupRouteSupplier();
+//								BeanUtils.copyProperties(
+//										groupRouteOptionsSupplier,
+//										productRouteSupplier);
+//								groupRouteOptionsSupplier.setId(null);
+//								groupRouteOptionsSupplierList
+//										.add(groupRouteOptionsSupplier);
+//							}
+//						}
+//						groupRouteDayVO.setGroupRoute(groupRoute);
+//						groupRouteDayVO
+//								.setGroupRouteAttachmentList(groupRouteAttachmentList);
+//						groupRouteDayVO
+//								.setGroupRouteOptionsSupplierList(groupRouteOptionsSupplierList);
+//						// groupRouteDayVO
+//						// .setGroupRouteScenicSupplierList(groupRouteScenicSupplierList);
+//						groupRouteDayVO
+//								.setGroupRouteTrafficList(groupRouteTrafficList);
+//
+//					} catch (Exception e) {
+//						return errorJson("行程转换错误!");
+//					}
+//					groupRouteDayVOList.add(groupRouteDayVO);
+//
+//				}
+//
+//			}
+//			groupRouteVO.setGroupRouteDayVOList(groupRouteDayVOList);
+//
+//			mergeGroupOrderVO2.setGroupRouteVO(groupRouteVO);
+//		}
+//
+//		// -------------------------------------------------------------------------------
+//
+//		groupOrderService.mergeGroup(result, WebUtils.getCurBizId(request),
+//				WebUtils.getCurUserId(request), WebUtils.getCurUser(request)
+//						.getName(), settingCommon.getMyBizCode(request));
+		
+		MergeGroupDTO mergeGroupDTO=new MergeGroupDTO();
+		
+		mergeGroupDTO.setBizCode(settingCommon.getMyBizCode(request));
+		mergeGroupDTO.setBizId(WebUtils.getCurBizId(request));
+		mergeGroupDTO.setUserId(WebUtils.getCurUserId(request));
+		mergeGroupDTO.setUserName(WebUtils.getCurUser(request).getName());
+		
+		BaseStateResult result = groupOrderFacade.mergeGroup(mergeGroupDTO);
+		
+		if(result.isSuccess()){
+			return successJson();
+		}else{
+			return errorJson(result.getError());
 		}
-		// --------------------------------------------------------------------------------
-		for (MergeGroupOrderVO mergeGroupOrderVO2 : result) {
-			List<GroupOrder> orderList2 = mergeGroupOrderVO2.getOrderList();
-			ProductInfo productInfo = null;
-			for (GroupOrder groupOrder : orderList2) {
-				ProductInfo productInfo2 = productInfoService
-						.findProductInfoById(groupOrder.getProductId());
-				if (productInfo == null) {
-					productInfo = productInfo2;
-				} else if (productInfo2 != null
-						&& productInfo2.getTravelDays() > productInfo
-								.getTravelDays()) {
-					productInfo = productInfo2;
-				}
-			}
-			// -------------------------------------------------------------------------------
-			ProductRouteVo productRouteVo = productRouteService
-					.findByProductId(productInfo.getId());
-			ProductRemark productRemark = productRemarkService
-					.findProductRemarkByProductId(productInfo.getId());
-
-			TourGroup tourGroup = new TourGroup();
-			tourGroup.setServiceStandard(productRemark.getItemInclude()
-					+ productRemark.getItemExclude());
-			tourGroup.setRemark(productRemark.getChildPlan()
-					+ productRemark.getShoppingPlan()
-					+ productRemark.getItemCharge()
-					+ productRemark.getItemFree());
-			tourGroup
-					.setWarmNotice(productRemark.getAttention()
-							+ productRemark.getItemOther()
-							+ productRemark.getWarmTip());
-
-			tourGroup.setServiceStandard(productRemark.getItemInclude()
-					+ productRemark.getItemExclude());
-			tourGroup.setRemark(productRemark.getChildPlan()
-					+ productRemark.getShoppingPlan()
-					+ productRemark.getItemCharge()
-					+ productRemark.getItemFree());
-			tourGroup
-					.setWarmNotice(productRemark.getAttention()
-							+ productRemark.getItemOther()
-							+ productRemark.getWarmTip());
-
-			mergeGroupOrderVO2.setTourGroup(tourGroup);
-
-			GroupRouteVO groupRouteVO = new GroupRouteVO();
-			List<GroupRouteDayVO> groupRouteDayVOList = new ArrayList<GroupRouteDayVO>();
-			List<ProductRouteDayVo> productRoteDayVoList = productRouteVo
-					.getProductRoteDayVoList();
-
-			if (productRoteDayVoList != null && productRoteDayVoList.size() > 0) {
-				for (int i = 0; i < productRoteDayVoList.size(); i++) {
-					ProductRoute productRoute = productRoteDayVoList.get(i)
-							.getProductRoute();
-					GroupRoute groupRoute = new GroupRoute();
-					GroupRouteDayVO groupRouteDayVO = new GroupRouteDayVO();
-					try {
-						BeanUtils.copyProperties(groupRoute, productRoute);
-						Calendar cal = Calendar.getInstance();
-						cal.setTime(sdf.parse(mergeGroupOrderVO2.getOrderList()
-								.get(0).getDepartureDate()));
-						cal.add(Calendar.DAY_OF_MONTH, i);
-						Date time = cal.getTime();
-						groupRoute.setId(null);
-						groupRoute.setGroupDate(time);
-						List<ProductAttachment> productAttachmentsList = productRoteDayVoList
-								.get(i).getProductAttachments();
-						List<GroupRouteAttachment> groupRouteAttachmentList = new ArrayList<GroupRouteAttachment>();
-						if (productAttachmentsList != null
-								&& productAttachmentsList.size() > 0) {
-							for (ProductAttachment productAttachment : productAttachmentsList) {
-								GroupRouteAttachment groupRouteAttachment = new GroupRouteAttachment();
-								BeanUtils.copyProperties(groupRouteAttachment,
-										productAttachment);
-								groupRouteAttachment.setId(null);
-								groupRouteAttachmentList
-										.add(groupRouteAttachment);
-							}
-						}
-
-						List<ProductRouteTraffic> productRouteTrafficList = productRoteDayVoList
-								.get(i).getProductRouteTrafficList();
-						List<GroupRouteTraffic> groupRouteTrafficList = new ArrayList<GroupRouteTraffic>();
-						if (productRouteTrafficList != null
-								&& productRouteTrafficList.size() > 0) {
-							for (ProductRouteTraffic productRouteTraffic : productRouteTrafficList) {
-								GroupRouteTraffic groupRouteTraffic = new GroupRouteTraffic();
-								BeanUtils.copyProperties(groupRouteTraffic,
-										productRouteTraffic);
-								groupRouteTraffic.setId(null);
-								groupRouteTrafficList.add(groupRouteTraffic);
-
-							}
-						}
-
-						// List<GroupRouteSupplier> groupRouteScenicSupplierList
-						// =
-						// new ArrayList<GroupRouteSupplier>();
-						// List<ProductRouteSupplier> productScenicSupplierList
-						// =
-						// productRoteDayVoList
-						// .get(i).getProductScenicSupplierList();
-						// if (productScenicSupplierList != null
-						// && productScenicSupplierList.size() > 0) {
-						// for (ProductRouteSupplier productRouteScenicSupplier
-						// :
-						// productScenicSupplierList) {
-						// GroupRouteSupplier groupRouteScenicSupplier = new
-						// GroupRouteSupplier();
-						// BeanUtils.copyProperties(groupRouteScenicSupplier,
-						// productRouteScenicSupplier);
-						// groupRouteScenicSupplier.setId(null);
-						// groupRouteScenicSupplierList
-						// .add(groupRouteScenicSupplier);
-						// }
-						// }
-
-						List<GroupRouteSupplier> groupRouteOptionsSupplierList = new ArrayList<GroupRouteSupplier>();
-						List<ProductRouteSupplier> productOptionsSupplierList = productRoteDayVoList
-								.get(i).getProductOptionsSupplierList();
-						if (productOptionsSupplierList != null
-								&& productOptionsSupplierList.size() > 0) {
-							for (ProductRouteSupplier productRouteSupplier : productOptionsSupplierList) {
-								GroupRouteSupplier groupRouteOptionsSupplier = new GroupRouteSupplier();
-								BeanUtils.copyProperties(
-										groupRouteOptionsSupplier,
-										productRouteSupplier);
-								groupRouteOptionsSupplier.setId(null);
-								groupRouteOptionsSupplierList
-										.add(groupRouteOptionsSupplier);
-							}
-						}
-						groupRouteDayVO.setGroupRoute(groupRoute);
-						groupRouteDayVO
-								.setGroupRouteAttachmentList(groupRouteAttachmentList);
-						groupRouteDayVO
-								.setGroupRouteOptionsSupplierList(groupRouteOptionsSupplierList);
-						// groupRouteDayVO
-						// .setGroupRouteScenicSupplierList(groupRouteScenicSupplierList);
-						groupRouteDayVO
-								.setGroupRouteTrafficList(groupRouteTrafficList);
-
-					} catch (Exception e) {
-						return errorJson("行程转换错误!");
-					}
-					groupRouteDayVOList.add(groupRouteDayVO);
-
-				}
-
-			}
-			groupRouteVO.setGroupRouteDayVOList(groupRouteDayVOList);
-
-			mergeGroupOrderVO2.setGroupRouteVO(groupRouteVO);
-		}
-
-		// -------------------------------------------------------------------------------
-
-		groupOrderService.mergeGroup(result, WebUtils.getCurBizId(request),
-				WebUtils.getCurUserId(request), WebUtils.getCurUser(request)
-						.getName(), settingCommon.getMyBizCode(request));
-
-		return successJson();
 	}
 
 	/**
@@ -993,32 +1194,34 @@ public class GroupOrderController extends BaseController {
 	public String secMergeGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer groupId,
 			String ids) {
-		List<GroupOrder> glist = groupOrderService
-				.selectOrderByGroupId(groupId);
-		List<String> datelist = new ArrayList<String>();
-		List<Integer> productlist = new ArrayList<Integer>();
-		List<Integer> statelist = new ArrayList<Integer>();
-		if (glist != null && glist.size() > 0) {
-			datelist.add(glist.get(0).getDepartureDate());
-		}
-		String[] split = ids.split(",");
-		for (String id : split) {
-			datelist.add(groupOrderService.findById(Integer.parseInt(id))
-					.getDepartureDate());
-			productlist.add(groupOrderService.findById(Integer.parseInt(id))
-					.getProductId());
-			statelist.add(groupOrderService.findById(Integer.parseInt(id))
-					.getStateFinance());
-		}
-		// if (!Utils.hasSame(datelist)) {
-		// return errorJson("发团日期一致的订单才允许添加!");
-		// }
-		// if (!Utils.hasSame(productlist)) {
-		// return errorJson("产品一致的订单才允许并团!");
-		// }
-		for (String str : split) {
-			tourGroupService.addFitOrder(groupId, Integer.parseInt(str));
-		}
+		
+//		List<GroupOrder> glist = groupOrderService.selectOrderByGroupId(groupId);
+//		List<String> datelist = new ArrayList<String>();
+//		List<Integer> productlist = new ArrayList<Integer>();
+//		List<Integer> statelist = new ArrayList<Integer>();
+//		if (glist != null && glist.size() > 0) {
+//			datelist.add(glist.get(0).getDepartureDate());
+//		}
+//		String[] split = ids.split(",");
+//		for (String id : split) {
+//			datelist.add(groupOrderService.findById(Integer.parseInt(id)).getDepartureDate());
+//			productlist.add(groupOrderService.findById(Integer.parseInt(id)).getProductId());
+//			statelist.add(groupOrderService.findById(Integer.parseInt(id)).getStateFinance());
+//		}
+//		
+//		// if (!Utils.hasSame(datelist)) {
+//		// return errorJson("发团日期一致的订单才允许添加!");
+//		// }
+//		// if (!Utils.hasSame(productlist)) {
+//		// return errorJson("产品一致的订单才允许并团!");
+//		// }
+//		
+//		for (String str : split) {
+//			tourGroupService.addFitOrder(groupId, Integer.parseInt(str));
+//		}
+		
+		groupOrderFacade.secMergeGroup(groupId,ids);
+		
 		return successJson();
 	}
 
@@ -1037,31 +1240,38 @@ public class GroupOrderController extends BaseController {
 	@ResponseBody
 	public String beforeInsertGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String ids) {
-		String[] split = ids.split(",");
-		List<String> datelist = new ArrayList<String>();
-//		List<Integer> productlist = new ArrayList<Integer>();
-//		List<Integer> brandlist = new ArrayList<Integer>();
-//		List<Integer> statelist = new ArrayList<Integer>();
-		for (String id : split) {
-			GroupOrder groupOrder = groupOrderService.findById(Integer
-					.parseInt(id));
-			datelist.add(groupOrder.getDepartureDate());
-//			productlist.add(groupOrder.getProductId());
-//			statelist.add(groupOrder.getStateFinance());
-//			brandlist.add(groupOrder.getProductBrandId());
-			List<GroupOrderGuest> guestList = groupOrderGuestService
-					.selectByOrderId(Integer.parseInt(id));
-			if (guestList == null || guestList.size() == 0) {
-				return errorJson("订单号:" + groupOrder.getOrderNo()
-						+ "无客人信息,无法并团!");
-			}
-
+//		String[] split = ids.split(",");
+//		List<String> datelist = new ArrayList<String>();
+////		List<Integer> productlist = new ArrayList<Integer>();
+////		List<Integer> brandlist = new ArrayList<Integer>();
+////		List<Integer> statelist = new ArrayList<Integer>();
+//		for (String id : split) {
+//			GroupOrder groupOrder = groupOrderService.findById(Integer
+//					.parseInt(id));
+//			datelist.add(groupOrder.getDepartureDate());
+////			productlist.add(groupOrder.getProductId());
+////			statelist.add(groupOrder.getStateFinance());
+////			brandlist.add(groupOrder.getProductBrandId());
+//			List<GroupOrderGuest> guestList = groupOrderGuestService
+//					.selectByOrderId(Integer.parseInt(id));
+//			if (guestList == null || guestList.size() == 0) {
+//				return errorJson("订单号:" + groupOrder.getOrderNo()
+//						+ "无客人信息,无法并团!");
+//			}
+//
+//		}
+//
+//		if (!MergeGroupUtils.hasSame(datelist)) {
+//			return errorJson("发团日期一致的订单才允许加入到团中!");
+//		}
+//		return successJson();
+		
+		BaseStateResult result=groupOrderFacade.beforeInsertGroup(ids);
+		if(result.isSuccess()){
+			return errorJson(result.getError());
+		}else{
+			return successJson();
 		}
-
-		if (!MergeGroupUtils.hasSame(datelist)) {
-			return errorJson("发团日期一致的订单才允许加入到团中!");
-		}
-		return successJson();
 	}
 	/**
 	 * 判断是否满足并团条件
@@ -1076,38 +1286,46 @@ public class GroupOrderController extends BaseController {
 	@ResponseBody
 	public String judgeMergeGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String ids) {
-		String[] split = ids.split(",");
-		List<String> datelist = new ArrayList<String>();
-		List<Integer> productlist = new ArrayList<Integer>();
-		List<Integer> brandlist = new ArrayList<Integer>();
-		List<Integer> statelist = new ArrayList<Integer>();
-		for (String id : split) {
-			GroupOrder groupOrder = groupOrderService.findById(Integer
-					.parseInt(id));
-			datelist.add(groupOrder.getDepartureDate());
-			productlist.add(groupOrder.getProductId());
-			statelist.add(groupOrder.getStateFinance());
-			brandlist.add(groupOrder.getProductBrandId());
-			List<GroupOrderGuest> guestList = groupOrderGuestService
-					.selectByOrderId(Integer.parseInt(id));
-			if (guestList == null || guestList.size() == 0) {
-				return errorJson("订单号:" + groupOrder.getOrderNo()
-						+ "无客人信息,无法并团!");
-			}
-
+		
+//		String[] split = ids.split(",");
+//		List<String> datelist = new ArrayList<String>();
+//		List<Integer> productlist = new ArrayList<Integer>();
+//		List<Integer> brandlist = new ArrayList<Integer>();
+//		List<Integer> statelist = new ArrayList<Integer>();
+//		for (String id : split) {
+//			GroupOrder groupOrder = groupOrderService.findById(Integer
+//					.parseInt(id));
+//			datelist.add(groupOrder.getDepartureDate());
+//			productlist.add(groupOrder.getProductId());
+//			statelist.add(groupOrder.getStateFinance());
+//			brandlist.add(groupOrder.getProductBrandId());
+//			List<GroupOrderGuest> guestList = groupOrderGuestService
+//					.selectByOrderId(Integer.parseInt(id));
+//			if (guestList == null || guestList.size() == 0) {
+//				return errorJson("订单号:" + groupOrder.getOrderNo()
+//						+ "无客人信息,无法并团!");
+//			}
+//
+//		}
+//
+//		if (!MergeGroupUtils.hasSame(datelist)) {
+//			return errorJson("发团日期一致的订单才允许并团!");
+//		}
+//		// if (!MergeGroupUtils.hasSame(productlist)) {
+//		// return errorJson("产品一致的订单才允许并团!");
+//		// }
+//		if (!MergeGroupUtils.hasSame(brandlist)) {
+//			return errorJson("产品品牌一致的订单才允许并团!");
+//		}
+//
+//		return successJson();
+		
+		BaseStateResult result=groupOrderFacade.judgeMergeGroup(ids);
+		if(result.isSuccess()){
+			return errorJson(result.getError());
+		}else{
+			return successJson();
 		}
-
-		if (!MergeGroupUtils.hasSame(datelist)) {
-			return errorJson("发团日期一致的订单才允许并团!");
-		}
-		// if (!MergeGroupUtils.hasSame(productlist)) {
-		// return errorJson("产品一致的订单才允许并团!");
-		// }
-		if (!MergeGroupUtils.hasSame(brandlist)) {
-			return errorJson("产品品牌一致的订单才允许并团!");
-		}
-
-		return successJson();
 	}
 
 	/**
@@ -1122,17 +1340,21 @@ public class GroupOrderController extends BaseController {
 	@RequestMapping(value = "toMergeGroup.htm")
 	public String toMergeGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String ids) {
-		List<GroupOrder> list = new ArrayList<GroupOrder>();
-		String[] split = ids.split(",");
-		for (String str : split) {
-			GroupOrder groupOrder = groupOrderService.findById(Integer
-					.parseInt(str));
-			groupOrder.setGroupOrderGuestList((groupOrderGuestService
-					.selectByOrderId(groupOrder.getId())));
-			list.add(groupOrder);
-		}
-		model.addAttribute("list", list);
+		
+//		List<GroupOrder> list = new ArrayList<GroupOrder>();
+//		String[] split = ids.split(",");
+//		for (String str : split) {
+//			GroupOrder groupOrder = groupOrderService.findById(Integer.parseInt(str));
+//			groupOrder.setGroupOrderGuestList((groupOrderGuestService.selectByOrderId(groupOrder.getId())));
+//			list.add(groupOrder);
+//		}
+//		model.addAttribute("list", list);
+//		model.addAttribute("ids", ids);
+		
+		ToMergeGroupResult result=groupOrderFacade.toMergeGroup(ids);
+		model.addAttribute("list", result.getList());
 		model.addAttribute("ids", ids);
+		
 		return "sales/groupOrder/mergeGroup";
 	}
 
@@ -1144,8 +1366,7 @@ public class GroupOrderController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping(value = "toGroupOrderList.htm")
-	public String toGroupOrderList(HttpServletRequest request,
-			HttpServletResponse reponse) {
+	public String toGroupOrderList(HttpServletRequest request,HttpServletResponse reponse) {
 		return "sales/groupOrder/GroupOrderList";
 	}
 
@@ -1164,141 +1385,169 @@ public class GroupOrderController extends BaseController {
 	public String toNotGroupList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, GroupOrder groupOrder)
 			throws ParseException {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//
+//		if (groupOrder.getReqType() != null && groupOrder.getReqType() == 0) {
+//			groupOrder.setDateType(1);
+//			Calendar c = Calendar.getInstance();
+//			int year = c.get(Calendar.YEAR);
+//			int month = c.get(Calendar.MONTH);
+//			c.set(year, month, 1);
+//			groupOrder.setDepartureDate(c.get(Calendar.YEAR) + "-"
+//					+ (c.get(Calendar.MONTH) + 1) + "-01");
+//			c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+//			groupOrder.setEndTime(c.get(Calendar.YEAR) + "-"
+//					+ (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE));
+//		}
+//
+//		PageBean pageBean = new PageBean();
+//		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
+//				: groupOrder.getPageSize());
+//		pageBean.setPage(groupOrder.getPage());
+//		pageBean.setParameter(groupOrder);
+//		// 如果人员为空并且部门不为空，则取部门下的人id
+//		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
+//				&& StringUtils.isNotBlank(groupOrder.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = groupOrder.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
+//					WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//			}
+//		}
+//		model.addAttribute("groupOrder", groupOrder);
+//
+//		if (groupOrder.getDateType()!=null && groupOrder.getDateType() == 2) {
+//			if (groupOrder.getDepartureDate() != null) {
+//				groupOrder.setDepartureDate(sdf.parse(
+//						groupOrder.getDepartureDate()).getTime()
+//						+ "");
+//			}
+//			if (groupOrder.getEndTime() != null) {
+//				Calendar calendar = new GregorianCalendar();
+//				calendar.setTime(sdf.parse(groupOrder.getEndTime()));
+//				calendar.add(calendar.DATE, 1);// 把日期往后增加一天.整数往后推,负数往前移动
+//				groupOrder.setEndTime(calendar.getTime().getTime() + "");
+//			}
+//
+//		}
+//
+//		pageBean = groupOrderService.selectNotGroupListPage(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+//
+//		GroupOrder order = groupOrderService.selectTotalNotGroup(groupOrder,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+//
+//		if (groupOrder.getDateType()!=null && groupOrder.getDateType() == 2) {
+//			if (groupOrder.getDepartureDate() != null) {
+//				groupOrder.setDepartureDate(sdf.format(new Date(Long
+//						.valueOf(groupOrder.getDepartureDate()))));
+//			}
+//			if (groupOrder.getEndTime() != null) {
+//				Calendar calendar = new GregorianCalendar();
+//				calendar.setTimeInMillis(Long.valueOf(groupOrder.getEndTime()));
+//				calendar.add(calendar.DATE, -1);// 把日期往后增加一天.整数往后推,负数往前移动
+//				groupOrder.setEndTime(sdf.format(calendar.getTime()));
+//			}
+//		}
+//
+//		model.addAttribute("totalAudit",
+//				order == null ? 0 : order.getNumAdult());
+//		model.addAttribute("totalChild",
+//				order == null ? 0 : order.getNumChild());
+//		model.addAttribute("total", order == null ? 0 : order.getTotal());
+//
+//		List<GroupOrder> result = pageBean.getResult();
+//		Integer pageTotalAudit = 0;
+//		Integer pageTotalChild = 0;
+//		BigDecimal pageTotal = new BigDecimal(0);
+//
+//		for (GroupOrder groupOrder2 : result) {
+//			List<GroupRoute> list = groupRouteService
+//					.selectByOrderId(groupOrder2.getId());
+//			if (list != null && list.size() > 0) {
+//				Calendar cal = Calendar.getInstance();
+//				cal.setTime(sdf.parse(groupOrder2.getDepartureDate()));
+//				cal.add(Calendar.DAY_OF_MONTH, +(list.size() - 1));
+//				Date time = cal.getTime();
+//				groupOrder2.setFitDate(sdf.format(time));
+//			}
+//			pageTotalAudit += groupOrder2.getNumAdult();
+//			pageTotalChild += groupOrder2.getNumChild();
+//			pageTotal = pageTotal
+//					.add(groupOrder2.getTotal() == null ? new BigDecimal(0)
+//							: groupOrder2.getTotal());
+//			
+//			if (groupOrder2.getCreateTime() != null) {
+//				SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//				Long createTime = groupOrder2.getCreateTime();
+//				String dateStr = sf.format(createTime);
+//				groupOrder2.setCreateTimeStr(dateStr);
+//			}
+//			
+//		}
+//		model.addAttribute("pageTotalAudit", pageTotalAudit);
+//		model.addAttribute("pageTotalChild", pageTotalChild);
+//		model.addAttribute("pageTotal", pageTotal);
+//
+//		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
+//				WebUtils.getCurBizId(request));
+//		model.addAttribute("pp", pp);
+//		model.addAttribute("page", pageBean);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+//		List<RegionInfo> cityList = null;
+//		if (groupOrder.getProvinceId() != null
+//				&& groupOrder.getProvinceId() != -1) {
+//			cityList = regionService.getRegionById(groupOrder.getProvinceId()
+//					+ "");
+//		}
+//		model.addAttribute("allCity", cityList);
+//		Integer bizId = WebUtils.getCurBizId(request);
+//		model.addAttribute("orgJsonStr",
+//				orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr",
+//				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+		
+		ToNotGroupListDTO toNotGroupListDTO=new ToNotGroupListDTO();
+		toNotGroupListDTO.setBizId( WebUtils.getCurBizId(request));
+		toNotGroupListDTO.setGroupOrder(groupOrder);
+		toNotGroupListDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		
+		ToNotGroupListResult result=groupOrderFacade.toNotGroupList(toNotGroupListDTO);
+		
+		model.addAttribute("groupOrder", result.getGroupOrder());
+		
+		model.addAttribute("totalAudit",result.getTotalAudit());
+		model.addAttribute("totalChild",result.getTotalChild());
+		model.addAttribute("total",result.getTotal());
 
-		if (groupOrder.getReqType() != null && groupOrder.getReqType() == 0) {
-			groupOrder.setDateType(1);
-			Calendar c = Calendar.getInstance();
-			int year = c.get(Calendar.YEAR);
-			int month = c.get(Calendar.MONTH);
-			c.set(year, month, 1);
-			groupOrder.setDepartureDate(c.get(Calendar.YEAR) + "-"
-					+ (c.get(Calendar.MONTH) + 1) + "-01");
-			c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
-			groupOrder.setEndTime(c.get(Calendar.YEAR) + "-"
-					+ (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE));
-		}
+		model.addAttribute("pageTotalAudit",result.getPageTotalAudit());
+		model.addAttribute("pageTotalChild", result.getPageTotalChild());
+		model.addAttribute("pageTotal", result.getPageTotal());
 
-		PageBean pageBean = new PageBean();
-		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
-				: groupOrder.getPageSize());
-		pageBean.setPage(groupOrder.getPage());
-		pageBean.setParameter(groupOrder);
-		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
-				&& StringUtils.isNotBlank(groupOrder.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = groupOrder.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
-		model.addAttribute("groupOrder", groupOrder);
+		model.addAttribute("pp", result.getPp());
+		model.addAttribute("page", result.getPageBean());
+		model.addAttribute("allProvince", result.getAllProvince());
+		
 
-		if (groupOrder.getDateType()!=null && groupOrder.getDateType() == 2) {
-			if (groupOrder.getDepartureDate() != null) {
-				groupOrder.setDepartureDate(sdf.parse(
-						groupOrder.getDepartureDate()).getTime()
-						+ "");
-			}
-			if (groupOrder.getEndTime() != null) {
-				Calendar calendar = new GregorianCalendar();
-				calendar.setTime(sdf.parse(groupOrder.getEndTime()));
-				calendar.add(calendar.DATE, 1);// 把日期往后增加一天.整数往后推,负数往前移动
-				groupOrder.setEndTime(calendar.getTime().getTime() + "");
-			}
-
-		}
-
-		pageBean = groupOrderService.selectNotGroupListPage(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-
-		GroupOrder order = groupOrderService.selectTotalNotGroup(groupOrder,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-
-		if (groupOrder.getDateType()!=null && groupOrder.getDateType() == 2) {
-			if (groupOrder.getDepartureDate() != null) {
-				groupOrder.setDepartureDate(sdf.format(new Date(Long
-						.valueOf(groupOrder.getDepartureDate()))));
-			}
-			if (groupOrder.getEndTime() != null) {
-				Calendar calendar = new GregorianCalendar();
-				calendar.setTimeInMillis(Long.valueOf(groupOrder.getEndTime()));
-				calendar.add(calendar.DATE, -1);// 把日期往后增加一天.整数往后推,负数往前移动
-				groupOrder.setEndTime(sdf.format(calendar.getTime()));
-			}
-		}
-
-		model.addAttribute("totalAudit",
-				order == null ? 0 : order.getNumAdult());
-		model.addAttribute("totalChild",
-				order == null ? 0 : order.getNumChild());
-		model.addAttribute("total", order == null ? 0 : order.getTotal());
-
-		List<GroupOrder> result = pageBean.getResult();
-		Integer pageTotalAudit = 0;
-		Integer pageTotalChild = 0;
-		BigDecimal pageTotal = new BigDecimal(0);
-
-		for (GroupOrder groupOrder2 : result) {
-			List<GroupRoute> list = groupRouteService
-					.selectByOrderId(groupOrder2.getId());
-			if (list != null && list.size() > 0) {
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(sdf.parse(groupOrder2.getDepartureDate()));
-				cal.add(Calendar.DAY_OF_MONTH, +(list.size() - 1));
-				Date time = cal.getTime();
-				groupOrder2.setFitDate(sdf.format(time));
-			}
-			pageTotalAudit += groupOrder2.getNumAdult();
-			pageTotalChild += groupOrder2.getNumChild();
-			pageTotal = pageTotal
-					.add(groupOrder2.getTotal() == null ? new BigDecimal(0)
-							: groupOrder2.getTotal());
-			
-			if (groupOrder2.getCreateTime() != null) {
-				SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				Long createTime = groupOrder2.getCreateTime();
-				String dateStr = sf.format(createTime);
-				groupOrder2.setCreateTimeStr(dateStr);
-			}
-			
-		}
-		model.addAttribute("pageTotalAudit", pageTotalAudit);
-		model.addAttribute("pageTotalChild", pageTotalChild);
-		model.addAttribute("pageTotal", pageTotal);
-
-		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
-				WebUtils.getCurBizId(request));
-		model.addAttribute("pp", pp);
-		model.addAttribute("page", pageBean);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-		List<RegionInfo> cityList = null;
-		if (groupOrder.getProvinceId() != null
-				&& groupOrder.getProvinceId() != -1) {
-			cityList = regionService.getRegionById(groupOrder.getProvinceId()
-					+ "");
-		}
-		model.addAttribute("allCity", cityList);
-		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+		model.addAttribute("allCity", result.getCityList());
+		model.addAttribute("orgJsonStr",result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		
 		return "sales/groupOrder/notGroupList";
 	}
 
@@ -1307,34 +1556,47 @@ public class GroupOrderController extends BaseController {
 	public String toSecImpNotGroupList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, GroupOrder groupOrder,
 			Integer gid) {
-		if (groupOrder.getReqType() != null && groupOrder.getReqType() == 0) {
-			Calendar c = Calendar.getInstance();
-			int year = c.get(Calendar.YEAR);
-			int month = c.get(Calendar.MONTH);
-			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			c.set(year, month, 1);
-			groupOrder.setDepartureDate(c.get(Calendar.YEAR) + "-"
-					+ (c.get(Calendar.MONTH) + 1) + "-01");
-			c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
-			groupOrder.setEndTime(c.get(Calendar.YEAR) + "-"
-					+ (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE));
-			groupOrder.setDateType(1);
-		}
-		PageBean pageBean = new PageBean();
-		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
-				: groupOrder.getPageSize());
-		pageBean.setPage(groupOrder.getPage());
-		pageBean.setParameter(groupOrder);
-		pageBean = groupOrderService.selectNotGroupListPage(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-		List<GroupOrder> result = pageBean.getResult();
-		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
-				WebUtils.getCurBizId(request));
-		model.addAttribute("pp", pp);
-		model.addAttribute("groupOrder", groupOrder);
+		
+//		if (groupOrder.getReqType() != null && groupOrder.getReqType() == 0) {
+//			Calendar c = Calendar.getInstance();
+//			int year = c.get(Calendar.YEAR);
+//			int month = c.get(Calendar.MONTH);
+//			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+//			c.set(year, month, 1);
+//			groupOrder.setDepartureDate(c.get(Calendar.YEAR) + "-"
+//					+ (c.get(Calendar.MONTH) + 1) + "-01");
+//			c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+//			groupOrder.setEndTime(c.get(Calendar.YEAR) + "-"
+//					+ (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE));
+//			groupOrder.setDateType(1);
+//		}
+//		PageBean pageBean = new PageBean();
+//		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
+//				: groupOrder.getPageSize());
+//		pageBean.setPage(groupOrder.getPage());
+//		pageBean.setParameter(groupOrder);
+//		pageBean = groupOrderService.selectNotGroupListPage(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+//		List<GroupOrder> result = pageBean.getResult();
+//		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
+//				WebUtils.getCurBizId(request));
+//		model.addAttribute("pp", pp);
+//		model.addAttribute("groupOrder", groupOrder);
+//		model.addAttribute("groupId", gid);
+//		model.addAttribute("page", pageBean);
+		
+		 ToSecImpNotGroupListDTO toSecImpNotGroupListDTO=new ToSecImpNotGroupListDTO();
+		 toSecImpNotGroupListDTO.setCurBizId(WebUtils.getCurBizId(request));
+		 toSecImpNotGroupListDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		 toSecImpNotGroupListDTO.setGroupOrder(groupOrder);
+		 
+		ToSecImpNotGroupListResult result=groupOrderFacade.toSecImpNotGroupList(toSecImpNotGroupListDTO);
+		model.addAttribute("pp", result.getPp());
+		model.addAttribute("groupOrder", result.getGroupOrder());
 		model.addAttribute("groupId", gid);
-		model.addAttribute("page", pageBean);
+		model.addAttribute("page", result.getPageBean());
+		
 		return "sales/groupOrder/secImpNotGroupOrder";
 	}
 
@@ -1352,41 +1614,50 @@ public class GroupOrderController extends BaseController {
 	public String toImpNotGroupList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, GroupOrder groupOrder,
 			String idLists) {
-		if (null == groupOrder.getEndTime()
-				&& null == groupOrder.getDepartureDate()) {
-			Calendar c = Calendar.getInstance();
-			int year = c.get(Calendar.YEAR);
-			int month = c.get(Calendar.MONTH);
-			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			c.set(year, month, 1);
-			groupOrder.setDepartureDate(c.get(Calendar.YEAR) + "-"
-					+ (c.get(Calendar.MONTH) + 1) + "-01");
-			c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
-			groupOrder.setEndTime(c.get(Calendar.YEAR) + "-"
-					+ (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE));
-
-		}
-		model.addAttribute("idLists", idLists);
-		String[] split = idLists.split(",");
-		List<Integer> intIds = new ArrayList<Integer>();
-		for (String id : split) {
-			intIds.add(Integer.parseInt(id));
-		}
-		groupOrder.setIdList(intIds);
-		PageBean pageBean = new PageBean();
-		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
-				: groupOrder.getPageSize());
-		pageBean.setPage(groupOrder.getPage());
-		pageBean.setParameter(groupOrder);
-		pageBean = groupOrderService.selectNotGroupListPage(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-		List<GroupOrder> result = pageBean.getResult();
-		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
-				WebUtils.getCurBizId(request));
-		model.addAttribute("pp", pp);
-		model.addAttribute("groupOrder", groupOrder);
-		model.addAttribute("page", pageBean);
+//		if (null == groupOrder.getEndTime()
+//				&& null == groupOrder.getDepartureDate()) {
+//			Calendar c = Calendar.getInstance();
+//			int year = c.get(Calendar.YEAR);
+//			int month = c.get(Calendar.MONTH);
+//			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+//			c.set(year, month, 1);
+//			groupOrder.setDepartureDate(c.get(Calendar.YEAR) + "-"
+//					+ (c.get(Calendar.MONTH) + 1) + "-01");
+//			c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+//			groupOrder.setEndTime(c.get(Calendar.YEAR) + "-"
+//					+ (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE));
+//
+//		}
+//		model.addAttribute("idLists", idLists);
+//		String[] split = idLists.split(",");
+//		List<Integer> intIds = new ArrayList<Integer>();
+//		for (String id : split) {
+//			intIds.add(Integer.parseInt(id));
+//		}
+//		groupOrder.setIdList(intIds);
+//		PageBean pageBean = new PageBean();
+//		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
+//				: groupOrder.getPageSize());
+//		pageBean.setPage(groupOrder.getPage());
+//		pageBean.setParameter(groupOrder);
+//		pageBean = groupOrderService.selectNotGroupListPage(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+//		List<GroupOrder> result = pageBean.getResult();
+//		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,WebUtils.getCurBizId(request));
+//		model.addAttribute("pp", pp);
+//		model.addAttribute("groupOrder", groupOrder);
+//		model.addAttribute("page", pageBean);
+		
+		ToImpNotGroupListDTO toImpNotGroupListDTO=new ToImpNotGroupListDTO();
+		
+		toImpNotGroupListDTO.setBizId(WebUtils.getCurBizId(request));
+		toImpNotGroupListDTO.setGroupOrder(groupOrder);
+		toImpNotGroupListDTO.setIdLists(idLists);
+		toImpNotGroupListDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		
+		ToImpNotGroupListResult result=groupOrderFacade.toImpNotGroupList(toImpNotGroupListDTO);
+		
 		return "sales/groupOrder/impNotGroupOrder";
 	}
 
@@ -1551,23 +1822,29 @@ public class GroupOrderController extends BaseController {
 	@ResponseBody
 	public String delGroupOrder(HttpServletRequest request,
 			HttpServletResponse reponse, Integer id) {
-		if (airTicketRequestService.doesOrderhaveRequested(WebUtils.getCurBizId(request), id)){
-			return errorJson("删除订单前请先取消机票申请。");
+		
+//		if (airTicketRequestService.doesOrderhaveRequested(WebUtils.getCurBizId(request), id)){
+//			return errorJson("删除订单前请先取消机票申请。");
+//		}
+//		GroupOrder groupOrder = groupOrderService.findById(id);
+//		groupOrder.setState(-1);
+//		groupOrderService.updateGroupOrder(groupOrder);
+//		if (groupOrder.getPriceId() != null) {
+//
+//			boolean updateStock = productGroupPriceService.updateStock(
+//					groupOrder.getPriceId(), groupOrder.getSupplierId(),
+//					-(groupOrder.getNumAdult() + groupOrder.getNumChild()));
+//
+//			log.info("更新库存:" + updateStock);
+//		}
+//		bookingSupplierService.upateGroupIdAfterDelOrderFromGroup(id);
+		
+		BaseStateResult result = groupOrderFacade.delGroupOrder(WebUtils.getCurBizId(request),id);
+		if(result.isSuccess()){
+			return successJson();
+		}else{
+			return errorJson(result.getError());
 		}
-		GroupOrder groupOrder = groupOrderService.findById(id);
-		groupOrder.setState(-1);
-		groupOrderService.updateGroupOrder(groupOrder);
-		if (groupOrder.getPriceId() != null) {
-
-			boolean updateStock = productGroupPriceService.updateStock(
-					groupOrder.getPriceId(), groupOrder.getSupplierId(),
-					-(groupOrder.getNumAdult() + groupOrder.getNumChild()));
-
-			log.info("更新库存:" + updateStock);
-		}
-		bookingSupplierService.upateGroupIdAfterDelOrderFromGroup(id);
-
-		return successJson();
 	}
 
 	
@@ -1587,399 +1864,444 @@ public class GroupOrderController extends BaseController {
 	public String addGroupOrder(HttpServletRequest request,
 			HttpServletResponse reponse, GroupOrderVO groupOrderVO,
 			Integer priceId, Integer priceGroupId)
-			throws IllegalAccessException, InvocationTargetException {
+			throws IllegalAccessException, InvocationTargetException {		
+		
+//		groupOrderVO.getGroupOrder().setBizId(WebUtils.getCurBizId(request));
+//		groupOrderVO.getGroupOrder().setOrderNo(
+//				settingCommon.getMyBizCode(request));
+//		groupOrderVO.getGroupOrder().setOperatorId(
+//				WebUtils.getCurUserId(request));
+//		groupOrderVO.getGroupOrder().setOperatorName(
+//				WebUtils.getCurUser(request).getName());
+//		groupOrderVO.getGroupOrder().setCreatorId(
+//				WebUtils.getCurUserId(request));
+//		groupOrderVO.getGroupOrder().setCreatorName(
+//				WebUtils.getCurUser(request).getName());
+//		groupOrderVO.getGroupOrder().setPriceId(priceId);
+//		groupOrderVO.getGroupOrder().setCreateTime(System.currentTimeMillis());
+//
+//		ProductRouteVo productRouteVo = productRouteService
+//				.findByProductId(groupOrderVO.getGroupOrder().getProductId());
+//		GroupRouteVO groupRouteVO = new GroupRouteVO();
+//		// -----------------------------------------------------
+//		List<GroupRouteDayVO> groupRouteDayVOList = new ArrayList<GroupRouteDayVO>();
+//		List<ProductRouteDayVo> productRoteDayVoList = productRouteVo
+//				.getProductRoteDayVoList();
+//		// -----------------------------------------------------
+//		if (productRoteDayVoList != null && productRoteDayVoList.size() > 0) {
+//			for (int i = 0; i < productRoteDayVoList.size(); i++) {
+//				ProductRoute productRoute = productRoteDayVoList.get(i)
+//						.getProductRoute();
+//				GroupRoute groupRoute = new GroupRoute();
+//				GroupRouteDayVO groupRouteDayVO = new GroupRouteDayVO();
+//				try {
+//					BeanUtils.copyProperties(groupRoute, productRoute);
+//					groupRoute.setId(null);
+//					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//					Calendar cal = Calendar.getInstance();
+//					cal.setTime(sdf.parse(groupOrderVO.getGroupOrder()
+//							.getDepartureDate()));
+//					cal.add(Calendar.DAY_OF_MONTH, +(i + 1));
+//					Date time = cal.getTime();
+//					groupRoute.setGroupDate(time);
+//					List<ProductAttachment> productAttachmentsList = productRoteDayVoList
+//							.get(i).getProductAttachments();
+//					List<GroupRouteAttachment> groupRouteAttachmentList = new ArrayList<GroupRouteAttachment>();
+//					if (productAttachmentsList != null
+//							&& productAttachmentsList.size() > 0) {
+//						GroupRouteAttachment groupRouteAttachment = new GroupRouteAttachment();
+//						for (ProductAttachment productAttachment : productAttachmentsList) {
+//							BeanUtils.copyProperties(groupRouteAttachment,
+//									productAttachment);
+//							groupRouteAttachment.setId(null);
+//							groupRouteAttachmentList.add(groupRouteAttachment);
+//						}
+//					}
+//
+//					List<ProductRouteTraffic> productRouteTrafficList = productRoteDayVoList
+//							.get(i).getProductRouteTrafficList();
+//					List<GroupRouteTraffic> groupRouteTrafficList = new ArrayList<GroupRouteTraffic>();
+//					if (productRouteTrafficList != null
+//							&& productRouteTrafficList.size() > 0) {
+//						for (ProductRouteTraffic productRouteTraffic : productRouteTrafficList) {
+//							GroupRouteTraffic groupRouteTraffic = new GroupRouteTraffic();
+//							BeanUtils.copyProperties(groupRouteTraffic,
+//									productRouteTraffic);
+//							groupRouteTraffic.setId(null);
+//							groupRouteTrafficList.add(groupRouteTraffic);
+//
+//						}
+//					}
+//
+//					// List<GroupRouteSupplier> groupRouteScenicSupplierList =
+//					// new ArrayList<GroupRouteSupplier>();
+//					// List<ProductRouteSupplier> productScenicSupplierList =
+//					// productRoteDayVoList
+//					// .get(i).getProductScenicSupplierList();
+//					// if (productScenicSupplierList != null
+//					// && productScenicSupplierList.size() > 0) {
+//					// for (ProductRouteSupplier productRouteScenicSupplier :
+//					// productScenicSupplierList) {
+//					// GroupRouteSupplier groupRouteScenicSupplier = new
+//					// GroupRouteSupplier();
+//					// BeanUtils.copyProperties(groupRouteScenicSupplier,
+//					// productRouteScenicSupplier);
+//					// groupRouteScenicSupplier.setId(null);
+//					// groupRouteScenicSupplierList
+//					// .add(groupRouteScenicSupplier);
+//					// }
+//					// }
+//
+//					List<GroupRouteSupplier> groupRouteOptionsSupplierList = new ArrayList<GroupRouteSupplier>();
+//					List<ProductRouteSupplier> productOptionsSupplierList = productRoteDayVoList
+//							.get(i).getProductOptionsSupplierList();
+//					if (productOptionsSupplierList != null
+//							&& productOptionsSupplierList.size() > 0) {
+//						for (ProductRouteSupplier productRouteSupplier : productOptionsSupplierList) {
+//							GroupRouteSupplier groupRouteOptionsSupplier = new GroupRouteSupplier();
+//							BeanUtils.copyProperties(groupRouteOptionsSupplier,
+//									productRouteSupplier);
+//							groupRouteOptionsSupplier.setId(null);
+//							groupRouteOptionsSupplierList
+//									.add(groupRouteOptionsSupplier);
+//						}
+//					}
+//					groupRouteDayVO.setGroupRoute(groupRoute);
+//					groupRouteDayVO
+//							.setGroupRouteAttachmentList(groupRouteAttachmentList);
+//					groupRouteDayVO
+//							.setGroupRouteOptionsSupplierList(groupRouteOptionsSupplierList);
+//					// groupRouteDayVO
+//					// .setGroupRouteScenicSupplierList(groupRouteScenicSupplierList);
+//
+//				} catch (Exception e) {
+//					return errorJson("行程转换错误!");
+//				}
+//				groupRouteDayVOList.add(groupRouteDayVO);
+//
+//			}
+//
+//		}
+//		groupRouteVO.setGroupRouteDayVOList(groupRouteDayVOList);
+//
+//		List<GroupOrderGuest> audlt = new ArrayList<GroupOrderGuest>();
+//		List<GroupOrderGuest> child = new ArrayList<GroupOrderGuest>();
+//		int isSingle = 0;
+//		List<GroupOrderGuest> groupOrderGuestList2 = groupOrderVO
+//				.getGroupOrderGuestList();
+//		List<GroupOrderPrice> insertList = new ArrayList<GroupOrderPrice>();
+//		int totalIncome = 0;
+//		if (groupOrderGuestList2 != null && groupOrderGuestList2.size() > 0) {
+//			for (GroupOrderGuest groupOrderGuest : groupOrderGuestList2) {
+//
+//				if (groupOrderGuest.getIsSingleRoom() == 1) {
+//					isSingle++;
+//				}
+//				if (groupOrderGuest.getType() == 1) {
+//					audlt.add(groupOrderGuest);
+//				} else {
+//					child.add(groupOrderGuest);
+//				}
+//
+//			}
+//			ProductGroupPrice productGroupPrice = productGroupPriceService
+//					.selectByPrimaryKey(priceId).getGroupPrice();
+//
+//			// ----------------------收入----------------------
+//
+//			GroupOrderPrice audltIn = new GroupOrderPrice();
+//			audltIn.setCreateTime(System.currentTimeMillis());
+//			audltIn.setCreatorId(WebUtils.getCurUserId(request));
+//			audltIn.setCreatorName(WebUtils.getCurUser(request).getName());
+//			audltIn.setMode(0);
+//			audltIn.setNumPerson(Double.valueOf(audlt.size()+""));
+//			audltIn.setUnitPrice(productGroupPrice.getPriceSettlementAdult()
+//					.doubleValue());
+//			audltIn.setNumTimes(1.0);
+//			totalIncome += audlt.size()
+//					* productGroupPrice.getPriceSettlementAdult().doubleValue()
+//					* 1;
+//			audltIn.setTotalPrice(audlt.size()
+//					* productGroupPrice.getPriceSettlementAdult().doubleValue()
+//					* 1);
+//			DicInfo dicInfo = dicService.getDicInfoByTypeCodeAndDicCode(
+//					BasicConstants.GGXX_LYSFXM, BasicConstants.CR);
+//			audltIn.setItemId(dicInfo.getId());// 大人
+//			audltIn.setItemName(dicInfo.getValue());
+//			if (audlt.size() != 0) {
+//				insertList.add(audltIn);
+//			}
+//
+//			GroupOrderPrice childIn = new GroupOrderPrice();
+//			childIn.setCreateTime(System.currentTimeMillis());
+//			childIn.setCreatorId(WebUtils.getCurUserId(request));
+//			childIn.setCreatorName(WebUtils.getCurUser(request).getName());
+//			childIn.setMode(0);
+//			childIn.setNumPerson(Double.valueOf(child.size()+""));
+//			childIn.setUnitPrice(productGroupPrice.getPriceSettlementChild()
+//					.doubleValue());
+//			childIn.setNumTimes(1.0);
+//			totalIncome += child.size()
+//					* productGroupPrice.getPriceSettlementChild().doubleValue()
+//					* 1;
+//			childIn.setTotalPrice(child.size()
+//					* productGroupPrice.getPriceSettlementChild().doubleValue()
+//					* 1);
+//			dicInfo = dicService.getDicInfoByTypeCodeAndDicCode(
+//					BasicConstants.GGXX_LYSFXM, BasicConstants.ERT);
+//			childIn.setItemId(dicInfo.getId());// 小孩
+//			childIn.setItemName(dicInfo.getValue());
+//			if (child.size() != 0) {
+//				insertList.add(childIn);
+//			}
+//			if (isSingle > 0) {
+//				GroupOrderPrice roomIn = new GroupOrderPrice();
+//				roomIn.setCreateTime(System.currentTimeMillis());
+//				roomIn.setCreatorId(WebUtils.getCurUserId(request));
+//				roomIn.setCreatorName(WebUtils.getCurUser(request).getName());
+//				roomIn.setMode(0);
+//				roomIn.setNumPerson(Double.valueOf(isSingle+""));
+//				roomIn.setUnitPrice(productGroupPrice
+//						.getPriceSettlementRoomeSpread().doubleValue());
+//				roomIn.setNumTimes(1.0);
+//				totalIncome += isSingle
+//						* productGroupPrice.getPriceSettlementRoomeSpread()
+//								.doubleValue() * 1;
+//				roomIn.setTotalPrice(isSingle
+//						* productGroupPrice.getPriceSettlementRoomeSpread()
+//								.doubleValue() * 1);
+//				dicInfo = dicService.getDicInfoByTypeCodeAndDicCode(
+//						BasicConstants.GGXX_LYSFXM, BasicConstants.DFC);
+//				roomIn.setItemId(dicInfo.getId());
+//				roomIn.setItemName(dicInfo.getValue()); // 单房差
+//				insertList.add(roomIn);
+//			}
+//
+//			// -------------------成本------------------------
+//
+//			GroupOrderPrice audltOut = new GroupOrderPrice();
+//			audltOut.setCreateTime(System.currentTimeMillis());
+//			audltOut.setCreatorId(WebUtils.getCurUserId(request));
+//			audltOut.setCreatorName(WebUtils.getCurUser(request).getName());
+//			audltOut.setMode(1); // 成本
+//			audltOut.setNumPerson(Double.valueOf(audlt.size()+""));
+//			audltOut.setUnitPrice(productGroupPrice.getPriceCostAdult()
+//					.doubleValue());
+//			audltOut.setNumTimes(1.0);
+//			audltOut.setTotalPrice(audlt.size()
+//					* productGroupPrice.getPriceCostAdult().doubleValue() * 1);
+//			dicInfo = dicService.getDicInfoByTypeCodeAndDicCode(
+//					BasicConstants.GGXX_LYSFXM, BasicConstants.CR);
+//			audltOut.setItemId(dicInfo.getId());
+//			audltOut.setItemName(dicInfo.getValue());
+//			if (audlt.size() != 0) {
+//				insertList.add(audltOut);
+//			}
+//
+//			GroupOrderPrice childOut = new GroupOrderPrice();
+//			childOut.setCreateTime(System.currentTimeMillis());
+//			childOut.setCreatorId(WebUtils.getCurUserId(request));
+//			childOut.setCreatorName(WebUtils.getCurUser(request).getName());
+//			childOut.setMode(1); // 成本
+//			childOut.setNumPerson(Double.valueOf(child.size()+""));
+//			childOut.setUnitPrice(productGroupPrice.getPriceCostChild()
+//					.doubleValue());
+//			childOut.setNumTimes(1.0);
+//			childOut.setTotalPrice(child.size()
+//					* productGroupPrice.getPriceCostChild().doubleValue() * 1);
+//			dicInfo = dicService.getDicInfoByTypeCodeAndDicCode(
+//					BasicConstants.GGXX_LYSFXM, BasicConstants.ERT);
+//			childOut.setItemId(dicInfo.getId());
+//			childOut.setItemName(dicInfo.getValue());
+//			if (child.size() != 0) {
+//				insertList.add(childOut);
+//			}
+//
+//			if (isSingle > 0) {
+//				GroupOrderPrice roomIn = new GroupOrderPrice();
+//				roomIn.setCreateTime(System.currentTimeMillis());
+//				roomIn.setCreatorId(WebUtils.getCurUserId(request));
+//				roomIn.setCreatorName(WebUtils.getCurUser(request).getName());
+//				roomIn.setMode(1);
+//				roomIn.setNumPerson(Double.valueOf(isSingle+""));
+//				roomIn.setUnitPrice(productGroupPrice.getPriceCostRoomSpread()
+//						.doubleValue());
+//				roomIn.setNumTimes(1.0);
+//				roomIn.setTotalPrice(isSingle
+//						* productGroupPrice.getPriceCostRoomSpread()
+//								.doubleValue() * 1);
+//				dicInfo = dicService.getDicInfoByTypeCodeAndDicCode(
+//						BasicConstants.GGXX_LYSFXM, BasicConstants.DFC);
+//				roomIn.setItemId(dicInfo.getId());
+//				roomIn.setItemName(dicInfo.getValue()); // 单房差
+//				insertList.add(roomIn);
+//			}
+//
+//		}
+//		List<GroupOrderPrice> groupOrderPriceList = groupOrderVO
+//				.getGroupOrderPriceList();
+//		if (groupOrderPriceList != null && groupOrderPriceList.size() > 0) {
+//			for (GroupOrderPrice groupOrderPrice : groupOrderPriceList) {
+//				totalIncome += groupOrderPrice.getUnitPrice()
+//						* groupOrderPrice.getNumPerson()
+//						* groupOrderPrice.getNumTimes();
+//			}
+//		}
+//		groupOrderVO.getGroupOrder().setTotal(new BigDecimal(totalIncome));
+//
+//		// modified by gejinjun 2105-11-03 防止出现保存出错但是也更新库存的问题，修改为如下逻辑
+//		try {
+//			// 修改订单信息
+//			groupOrderService.saveGroupOrder(groupOrderVO, groupRouteVO,
+//					insertList);
+//			// 更新库存信息
+//			ProductGroup group = productGroupService
+//					.getGroupInfoById(priceGroupId);
+//			boolean updateStock = productGroupPriceService.updateStock(priceId,
+//					group.getGroupSetting() == 0 ? groupOrderVO.getGroupOrder()
+//							.getSupplierId() : null, groupOrderVO
+//							.getGroupOrderGuestList().size());
+//			log.info("更新库存状态:" + updateStock);
+//		} catch (Exception ex) {
+//			// 修改订单信息或更新库存报错
+//			ex.printStackTrace();
+//			log.error(ex.getMessage());
+//		}
+//
+//		return successJson();
+		
 		groupOrderVO.getGroupOrder().setBizId(WebUtils.getCurBizId(request));
-		groupOrderVO.getGroupOrder().setOrderNo(
-				settingCommon.getMyBizCode(request));
-		groupOrderVO.getGroupOrder().setOperatorId(
-				WebUtils.getCurUserId(request));
-		groupOrderVO.getGroupOrder().setOperatorName(
-				WebUtils.getCurUser(request).getName());
-		groupOrderVO.getGroupOrder().setCreatorId(
-				WebUtils.getCurUserId(request));
-		groupOrderVO.getGroupOrder().setCreatorName(
-				WebUtils.getCurUser(request).getName());
+		groupOrderVO.getGroupOrder().setOrderNo(settingCommon.getMyBizCode(request));
+		groupOrderVO.getGroupOrder().setOperatorId(WebUtils.getCurUserId(request));
+		groupOrderVO.getGroupOrder().setOperatorName(WebUtils.getCurUser(request).getName());
+		groupOrderVO.getGroupOrder().setCreatorId(WebUtils.getCurUserId(request));
+		groupOrderVO.getGroupOrder().setCreatorName(WebUtils.getCurUser(request).getName());
 		groupOrderVO.getGroupOrder().setPriceId(priceId);
 		groupOrderVO.getGroupOrder().setCreateTime(System.currentTimeMillis());
-
-		ProductRouteVo productRouteVo = productRouteService
-				.findByProductId(groupOrderVO.getGroupOrder().getProductId());
-		GroupRouteVO groupRouteVO = new GroupRouteVO();
-		// -----------------------------------------------------
-		List<GroupRouteDayVO> groupRouteDayVOList = new ArrayList<GroupRouteDayVO>();
-		List<ProductRouteDayVo> productRoteDayVoList = productRouteVo
-				.getProductRoteDayVoList();
-		// -----------------------------------------------------
-		if (productRoteDayVoList != null && productRoteDayVoList.size() > 0) {
-			for (int i = 0; i < productRoteDayVoList.size(); i++) {
-				ProductRoute productRoute = productRoteDayVoList.get(i)
-						.getProductRoute();
-				GroupRoute groupRoute = new GroupRoute();
-				GroupRouteDayVO groupRouteDayVO = new GroupRouteDayVO();
-				try {
-					BeanUtils.copyProperties(groupRoute, productRoute);
-					groupRoute.setId(null);
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(sdf.parse(groupOrderVO.getGroupOrder()
-							.getDepartureDate()));
-					cal.add(Calendar.DAY_OF_MONTH, +(i + 1));
-					Date time = cal.getTime();
-					groupRoute.setGroupDate(time);
-					List<ProductAttachment> productAttachmentsList = productRoteDayVoList
-							.get(i).getProductAttachments();
-					List<GroupRouteAttachment> groupRouteAttachmentList = new ArrayList<GroupRouteAttachment>();
-					if (productAttachmentsList != null
-							&& productAttachmentsList.size() > 0) {
-						GroupRouteAttachment groupRouteAttachment = new GroupRouteAttachment();
-						for (ProductAttachment productAttachment : productAttachmentsList) {
-							BeanUtils.copyProperties(groupRouteAttachment,
-									productAttachment);
-							groupRouteAttachment.setId(null);
-							groupRouteAttachmentList.add(groupRouteAttachment);
-						}
-					}
-
-					List<ProductRouteTraffic> productRouteTrafficList = productRoteDayVoList
-							.get(i).getProductRouteTrafficList();
-					List<GroupRouteTraffic> groupRouteTrafficList = new ArrayList<GroupRouteTraffic>();
-					if (productRouteTrafficList != null
-							&& productRouteTrafficList.size() > 0) {
-						for (ProductRouteTraffic productRouteTraffic : productRouteTrafficList) {
-							GroupRouteTraffic groupRouteTraffic = new GroupRouteTraffic();
-							BeanUtils.copyProperties(groupRouteTraffic,
-									productRouteTraffic);
-							groupRouteTraffic.setId(null);
-							groupRouteTrafficList.add(groupRouteTraffic);
-
-						}
-					}
-
-					// List<GroupRouteSupplier> groupRouteScenicSupplierList =
-					// new ArrayList<GroupRouteSupplier>();
-					// List<ProductRouteSupplier> productScenicSupplierList =
-					// productRoteDayVoList
-					// .get(i).getProductScenicSupplierList();
-					// if (productScenicSupplierList != null
-					// && productScenicSupplierList.size() > 0) {
-					// for (ProductRouteSupplier productRouteScenicSupplier :
-					// productScenicSupplierList) {
-					// GroupRouteSupplier groupRouteScenicSupplier = new
-					// GroupRouteSupplier();
-					// BeanUtils.copyProperties(groupRouteScenicSupplier,
-					// productRouteScenicSupplier);
-					// groupRouteScenicSupplier.setId(null);
-					// groupRouteScenicSupplierList
-					// .add(groupRouteScenicSupplier);
-					// }
-					// }
-
-					List<GroupRouteSupplier> groupRouteOptionsSupplierList = new ArrayList<GroupRouteSupplier>();
-					List<ProductRouteSupplier> productOptionsSupplierList = productRoteDayVoList
-							.get(i).getProductOptionsSupplierList();
-					if (productOptionsSupplierList != null
-							&& productOptionsSupplierList.size() > 0) {
-						for (ProductRouteSupplier productRouteSupplier : productOptionsSupplierList) {
-							GroupRouteSupplier groupRouteOptionsSupplier = new GroupRouteSupplier();
-							BeanUtils.copyProperties(groupRouteOptionsSupplier,
-									productRouteSupplier);
-							groupRouteOptionsSupplier.setId(null);
-							groupRouteOptionsSupplierList
-									.add(groupRouteOptionsSupplier);
-						}
-					}
-					groupRouteDayVO.setGroupRoute(groupRoute);
-					groupRouteDayVO
-							.setGroupRouteAttachmentList(groupRouteAttachmentList);
-					groupRouteDayVO
-							.setGroupRouteOptionsSupplierList(groupRouteOptionsSupplierList);
-					// groupRouteDayVO
-					// .setGroupRouteScenicSupplierList(groupRouteScenicSupplierList);
-
-				} catch (Exception e) {
-					return errorJson("行程转换错误!");
-				}
-				groupRouteDayVOList.add(groupRouteDayVO);
-
-			}
-
+		
+		AddGroupOrderDTO addGroupOrderDTO=new AddGroupOrderDTO();
+		addGroupOrderDTO.setGroupOrderVO(groupOrderVO);
+		addGroupOrderDTO.setPriceGroupId(priceGroupId);
+		addGroupOrderDTO.setPriceId(priceId);
+		
+		BaseStateResult result=groupOrderFacade.addGroupOrder(addGroupOrderDTO);
+		if(result.isSuccess()){
+			return successJson();
+		}else{
+			return errorJson(result.getError());
 		}
-		groupRouteVO.setGroupRouteDayVOList(groupRouteDayVOList);
-
-		List<GroupOrderGuest> audlt = new ArrayList<GroupOrderGuest>();
-		List<GroupOrderGuest> child = new ArrayList<GroupOrderGuest>();
-		int isSingle = 0;
-		List<GroupOrderGuest> groupOrderGuestList2 = groupOrderVO
-				.getGroupOrderGuestList();
-		List<GroupOrderPrice> insertList = new ArrayList<GroupOrderPrice>();
-		int totalIncome = 0;
-		if (groupOrderGuestList2 != null && groupOrderGuestList2.size() > 0) {
-			for (GroupOrderGuest groupOrderGuest : groupOrderGuestList2) {
-
-				if (groupOrderGuest.getIsSingleRoom() == 1) {
-					isSingle++;
-				}
-				if (groupOrderGuest.getType() == 1) {
-					audlt.add(groupOrderGuest);
-				} else {
-					child.add(groupOrderGuest);
-				}
-
-			}
-			ProductGroupPrice productGroupPrice = productGroupPriceService
-					.selectByPrimaryKey(priceId).getGroupPrice();
-
-			// ----------------------收入----------------------
-
-			GroupOrderPrice audltIn = new GroupOrderPrice();
-			audltIn.setCreateTime(System.currentTimeMillis());
-			audltIn.setCreatorId(WebUtils.getCurUserId(request));
-			audltIn.setCreatorName(WebUtils.getCurUser(request).getName());
-			audltIn.setMode(0);
-			audltIn.setNumPerson(Double.valueOf(audlt.size()+""));
-			audltIn.setUnitPrice(productGroupPrice.getPriceSettlementAdult()
-					.doubleValue());
-			audltIn.setNumTimes(1.0);
-			totalIncome += audlt.size()
-					* productGroupPrice.getPriceSettlementAdult().doubleValue()
-					* 1;
-			audltIn.setTotalPrice(audlt.size()
-					* productGroupPrice.getPriceSettlementAdult().doubleValue()
-					* 1);
-			DicInfo dicInfo = dicService.getDicInfoByTypeCodeAndDicCode(
-					BasicConstants.GGXX_LYSFXM, BasicConstants.CR);
-			audltIn.setItemId(dicInfo.getId());// 大人
-			audltIn.setItemName(dicInfo.getValue());
-			if (audlt.size() != 0) {
-				insertList.add(audltIn);
-			}
-
-			GroupOrderPrice childIn = new GroupOrderPrice();
-			childIn.setCreateTime(System.currentTimeMillis());
-			childIn.setCreatorId(WebUtils.getCurUserId(request));
-			childIn.setCreatorName(WebUtils.getCurUser(request).getName());
-			childIn.setMode(0);
-			childIn.setNumPerson(Double.valueOf(child.size()+""));
-			childIn.setUnitPrice(productGroupPrice.getPriceSettlementChild()
-					.doubleValue());
-			childIn.setNumTimes(1.0);
-			totalIncome += child.size()
-					* productGroupPrice.getPriceSettlementChild().doubleValue()
-					* 1;
-			childIn.setTotalPrice(child.size()
-					* productGroupPrice.getPriceSettlementChild().doubleValue()
-					* 1);
-			dicInfo = dicService.getDicInfoByTypeCodeAndDicCode(
-					BasicConstants.GGXX_LYSFXM, BasicConstants.ERT);
-			childIn.setItemId(dicInfo.getId());// 小孩
-			childIn.setItemName(dicInfo.getValue());
-			if (child.size() != 0) {
-				insertList.add(childIn);
-			}
-			if (isSingle > 0) {
-				GroupOrderPrice roomIn = new GroupOrderPrice();
-				roomIn.setCreateTime(System.currentTimeMillis());
-				roomIn.setCreatorId(WebUtils.getCurUserId(request));
-				roomIn.setCreatorName(WebUtils.getCurUser(request).getName());
-				roomIn.setMode(0);
-				roomIn.setNumPerson(Double.valueOf(isSingle+""));
-				roomIn.setUnitPrice(productGroupPrice
-						.getPriceSettlementRoomeSpread().doubleValue());
-				roomIn.setNumTimes(1.0);
-				totalIncome += isSingle
-						* productGroupPrice.getPriceSettlementRoomeSpread()
-								.doubleValue() * 1;
-				roomIn.setTotalPrice(isSingle
-						* productGroupPrice.getPriceSettlementRoomeSpread()
-								.doubleValue() * 1);
-				dicInfo = dicService.getDicInfoByTypeCodeAndDicCode(
-						BasicConstants.GGXX_LYSFXM, BasicConstants.DFC);
-				roomIn.setItemId(dicInfo.getId());
-				roomIn.setItemName(dicInfo.getValue()); // 单房差
-				insertList.add(roomIn);
-			}
-
-			// -------------------成本------------------------
-
-			GroupOrderPrice audltOut = new GroupOrderPrice();
-			audltOut.setCreateTime(System.currentTimeMillis());
-			audltOut.setCreatorId(WebUtils.getCurUserId(request));
-			audltOut.setCreatorName(WebUtils.getCurUser(request).getName());
-			audltOut.setMode(1); // 成本
-			audltOut.setNumPerson(Double.valueOf(audlt.size()+""));
-			audltOut.setUnitPrice(productGroupPrice.getPriceCostAdult()
-					.doubleValue());
-			audltOut.setNumTimes(1.0);
-			audltOut.setTotalPrice(audlt.size()
-					* productGroupPrice.getPriceCostAdult().doubleValue() * 1);
-			dicInfo = dicService.getDicInfoByTypeCodeAndDicCode(
-					BasicConstants.GGXX_LYSFXM, BasicConstants.CR);
-			audltOut.setItemId(dicInfo.getId());
-			audltOut.setItemName(dicInfo.getValue());
-			if (audlt.size() != 0) {
-				insertList.add(audltOut);
-			}
-
-			GroupOrderPrice childOut = new GroupOrderPrice();
-			childOut.setCreateTime(System.currentTimeMillis());
-			childOut.setCreatorId(WebUtils.getCurUserId(request));
-			childOut.setCreatorName(WebUtils.getCurUser(request).getName());
-			childOut.setMode(1); // 成本
-			childOut.setNumPerson(Double.valueOf(child.size()+""));
-			childOut.setUnitPrice(productGroupPrice.getPriceCostChild()
-					.doubleValue());
-			childOut.setNumTimes(1.0);
-			childOut.setTotalPrice(child.size()
-					* productGroupPrice.getPriceCostChild().doubleValue() * 1);
-			dicInfo = dicService.getDicInfoByTypeCodeAndDicCode(
-					BasicConstants.GGXX_LYSFXM, BasicConstants.ERT);
-			childOut.setItemId(dicInfo.getId());
-			childOut.setItemName(dicInfo.getValue());
-			if (child.size() != 0) {
-				insertList.add(childOut);
-			}
-
-			if (isSingle > 0) {
-				GroupOrderPrice roomIn = new GroupOrderPrice();
-				roomIn.setCreateTime(System.currentTimeMillis());
-				roomIn.setCreatorId(WebUtils.getCurUserId(request));
-				roomIn.setCreatorName(WebUtils.getCurUser(request).getName());
-				roomIn.setMode(1);
-				roomIn.setNumPerson(Double.valueOf(isSingle+""));
-				roomIn.setUnitPrice(productGroupPrice.getPriceCostRoomSpread()
-						.doubleValue());
-				roomIn.setNumTimes(1.0);
-				roomIn.setTotalPrice(isSingle
-						* productGroupPrice.getPriceCostRoomSpread()
-								.doubleValue() * 1);
-				dicInfo = dicService.getDicInfoByTypeCodeAndDicCode(
-						BasicConstants.GGXX_LYSFXM, BasicConstants.DFC);
-				roomIn.setItemId(dicInfo.getId());
-				roomIn.setItemName(dicInfo.getValue()); // 单房差
-				insertList.add(roomIn);
-			}
-
-		}
-		List<GroupOrderPrice> groupOrderPriceList = groupOrderVO
-				.getGroupOrderPriceList();
-		if (groupOrderPriceList != null && groupOrderPriceList.size() > 0) {
-			for (GroupOrderPrice groupOrderPrice : groupOrderPriceList) {
-				totalIncome += groupOrderPrice.getUnitPrice()
-						* groupOrderPrice.getNumPerson()
-						* groupOrderPrice.getNumTimes();
-			}
-		}
-		groupOrderVO.getGroupOrder().setTotal(new BigDecimal(totalIncome));
-
-		// modified by gejinjun 2105-11-03 防止出现保存出错但是也更新库存的问题，修改为如下逻辑
-		try {
-			// 修改订单信息
-			groupOrderService.saveGroupOrder(groupOrderVO, groupRouteVO,
-					insertList);
-			// 更新库存信息
-			ProductGroup group = productGroupService
-					.getGroupInfoById(priceGroupId);
-			boolean updateStock = productGroupPriceService.updateStock(priceId,
-					group.getGroupSetting() == 0 ? groupOrderVO.getGroupOrder()
-							.getSupplierId() : null, groupOrderVO
-							.getGroupOrderGuestList().size());
-			log.info("更新库存状态:" + updateStock);
-		} catch (Exception ex) {
-			// 修改订单信息或更新库存报错
-			ex.printStackTrace();
-			log.error(ex.getMessage());
-		}
-
-		return successJson();
-
 	}
 
 	@RequestMapping(value = "toLookGroupOrder.htm", method = RequestMethod.GET)
 	public String toLookGroupOrder(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer id) {
-		GroupOrder groupOrder = groupOrderService.findById(id);
-		groupOrder.setStateFinance(1);
-		model.addAttribute("groupOrder", groupOrder);
-		PlatformEmployeePo saleEmployeePo = sysPlatformEmployeeFacade
-				.findByEmployeeId(groupOrder.getSaleOperatorId()).getPlatformEmployeePo();
-		model.addAttribute("saleEmployeePo", saleEmployeePo);
-
-		PlatformEmployeePo operaEmployeePo = sysPlatformEmployeeFacade
-				.findByEmployeeId(groupOrder.getOperatorId()).getPlatformEmployeePo();
-		model.addAttribute("operaEmployeePo", operaEmployeePo);
-		ProductInfo productInfo = productInfoService
-				.findProductInfoById(groupOrder.getProductId());
-		model.addAttribute("productInfo", productInfo);
-		SupplierInfo supplierInfo = supplierService
-				.selectBySupplierId(groupOrder.getSupplierId());
-		model.addAttribute("supplierInfo", supplierInfo);
-		List<DicInfo> jdxjList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
-		model.addAttribute("jdxjList", jdxjList);
-
-		List<GroupOrderPrice> costList = groupOrderPriceService
-				.selectByOrderAndType(groupOrder.getId(), 0); // mode 0：收入
-		Double income = 0.0;
-		if (costList != null && costList.size() > 0) {
-
-			for (GroupOrderPrice groupOrderPrice : costList) {
-				income += groupOrderPrice.getTotalPrice();
-			}
-
-		}
-		model.addAttribute("income", income);
-
-		List<GroupOrderPrice> budgetList = groupOrderPriceService
-				.selectByOrderAndType(groupOrder.getId(), 1);// 1：预算
-
-		Double budget = 0.0;
-		if (budgetList != null && budgetList.size() > 0) {
-			for (GroupOrderPrice groupOrderPrice : budgetList) {
-				budget += groupOrderPrice.getTotalPrice();
-			}
-		}
-		model.addAttribute("budget", budget);
-
-		model.addAttribute("costList", costList);
-		model.addAttribute("budgetList", budgetList);
-		List<GroupOrderTransport> transportList = groupOrderTransportService
-				.selectByOrderId(groupOrder.getId());
-		model.addAttribute("transportList", transportList);
+		
+//		GroupOrder groupOrder = groupOrderService.findById(id);
+//		groupOrder.setStateFinance(1);
+//		model.addAttribute("groupOrder", groupOrder);
+//		PlatformEmployeePo saleEmployeePo = sysPlatformEmployeeFacade
+//				.findByEmployeeId(groupOrder.getSaleOperatorId()).getPlatformEmployeePo();
+//		model.addAttribute("saleEmployeePo", saleEmployeePo);
+//
+//		PlatformEmployeePo operaEmployeePo = sysPlatformEmployeeFacade
+//				.findByEmployeeId(groupOrder.getOperatorId()).getPlatformEmployeePo();
+//		model.addAttribute("operaEmployeePo", operaEmployeePo);
+//		ProductInfo productInfo = productInfoService
+//				.findProductInfoById(groupOrder.getProductId());
+//		model.addAttribute("productInfo", productInfo);
+//		SupplierInfo supplierInfo = supplierService
+//				.selectBySupplierId(groupOrder.getSupplierId());
+//		model.addAttribute("supplierInfo", supplierInfo);
+//		List<DicInfo> jdxjList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
+//		model.addAttribute("jdxjList", jdxjList);
+//
+//		List<GroupOrderPrice> costList = groupOrderPriceService
+//				.selectByOrderAndType(groupOrder.getId(), 0); // mode 0：收入
+//		Double income = 0.0;
+//		if (costList != null && costList.size() > 0) {
+//
+//			for (GroupOrderPrice groupOrderPrice : costList) {
+//				income += groupOrderPrice.getTotalPrice();
+//			}
+//
+//		}
+//		model.addAttribute("income", income);
+//
+//		List<GroupOrderPrice> budgetList = groupOrderPriceService
+//				.selectByOrderAndType(groupOrder.getId(), 1);// 1：预算
+//
+//		Double budget = 0.0;
+//		if (budgetList != null && budgetList.size() > 0) {
+//			for (GroupOrderPrice groupOrderPrice : budgetList) {
+//				budget += groupOrderPrice.getTotalPrice();
+//			}
+//		}
+//		model.addAttribute("budget", budget);
+//
+//		model.addAttribute("costList", costList);
+//		model.addAttribute("budgetList", budgetList);
+//		List<GroupOrderTransport> transportList = groupOrderTransportService
+//				.selectByOrderId(groupOrder.getId());
+//		model.addAttribute("transportList", transportList);
+//		int bizId = WebUtils.getCurBizId(request);
+//		List<DicInfo> jtfsList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_JTFS, bizId);
+//		model.addAttribute("jtfsList", jtfsList);
+//
+//		List<DicInfo> zjlxList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_ZJLX);
+//		model.addAttribute("zjlxList", zjlxList);
+//
+//		List<DicInfo> lysfxmList = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_LYSFXM, bizId);
+//		model.addAttribute("lysfxmList", lysfxmList);
+//
+//		List<GroupRequirement> restaurantList = groupRequirementService
+//				.selectByOrderAndType(groupOrder.getId(), Constants.HOTEL);// 酒店
+//		List<GroupRequirement> airticketagentList = groupRequirementService
+//				.selectByOrderAndType(groupOrder.getId(),
+//						Constants.AIRTICKETAGENT); // 机票
+//		List<GroupRequirement> trainticketagentList = groupRequirementService
+//				.selectByOrderAndType(groupOrder.getId(),
+//						Constants.TRAINTICKETAGENT);// 火车票
+//
+//		model.addAttribute("restaurantList", restaurantList);
+//		model.addAttribute("airticketagentList", airticketagentList);
+//		model.addAttribute("trainticketagentList", trainticketagentList);
+//
+//		List<GroupOrderGuest> guestList = groupOrderGuestService
+//				.selectByOrderId(groupOrder.getId());
+//		for (GroupOrderGuest guest : guestList) {
+//			List<GroupOrderGuest> guests = groupOrderGuestService
+//					.getGuestByGuestCertificateNum(guest.getCertificateNum(),
+//							guest.getOrderId());
+//			guest.setHistoryNum(guests.size());
+//		}
+//		model.addAttribute("guestList", guestList);
+		
 		int bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> jtfsList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JTFS, bizId);
-		model.addAttribute("jtfsList", jtfsList);
-
-		List<DicInfo> zjlxList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_ZJLX);
-		model.addAttribute("zjlxList", zjlxList);
-
-		List<DicInfo> lysfxmList = dicService.getListByTypeCode(
-				BasicConstants.GYXX_LYSFXM, bizId);
-		model.addAttribute("lysfxmList", lysfxmList);
-
-		List<GroupRequirement> restaurantList = groupRequirementService
-				.selectByOrderAndType(groupOrder.getId(), Constants.HOTEL);// 酒店
-		List<GroupRequirement> airticketagentList = groupRequirementService
-				.selectByOrderAndType(groupOrder.getId(),
-						Constants.AIRTICKETAGENT); // 机票
-		List<GroupRequirement> trainticketagentList = groupRequirementService
-				.selectByOrderAndType(groupOrder.getId(),
-						Constants.TRAINTICKETAGENT);// 火车票
-
-		model.addAttribute("restaurantList", restaurantList);
-		model.addAttribute("airticketagentList", airticketagentList);
-		model.addAttribute("trainticketagentList", trainticketagentList);
-
-		List<GroupOrderGuest> guestList = groupOrderGuestService
-				.selectByOrderId(groupOrder.getId());
-		for (GroupOrderGuest guest : guestList) {
-			List<GroupOrderGuest> guests = groupOrderGuestService
-					.getGuestByGuestCertificateNum(guest.getCertificateNum(),
-							guest.getOrderId());
-			guest.setHistoryNum(guests.size());
-		}
-		model.addAttribute("guestList", guestList);
+		ToLookGroupOrderResult result= groupOrderFacade.toLookGroupOrder(id,bizId);
+		
+		model.addAttribute("groupOrder", result.getGroupOrder());
+		model.addAttribute("saleEmployeePo", result.getSaleEmployeePo());
+		model.addAttribute("operaEmployeePo", result.getOperaEmployeePo());
+		model.addAttribute("productInfo", result.getProductInfo());
+		model.addAttribute("supplierInfo", result.getSupplierInfo());
+		model.addAttribute("jdxjList", result.getJdxjList());
+		model.addAttribute("income", result.getIncome());
+		model.addAttribute("budget", result.getBudget());
+		model.addAttribute("costList", result.getCostList());
+		model.addAttribute("budgetList", result.getBudgetList());
+		model.addAttribute("transportList", result.getTransportList());
+		model.addAttribute("jtfsList", result.getJtfsList());
+		model.addAttribute("zjlxList", result.getZjlxList());
+		model.addAttribute("lysfxmList", result.getLysfxmList());
+		model.addAttribute("restaurantList", result.getRestaurantList());
+		model.addAttribute("airticketagentList", result.getAirticketagentList());
+		model.addAttribute("trainticketagentList", result.getTrainticketagentList());
+		model.addAttribute("guestList", result.getGuestList());
+		
 		return "sales/groupOrder/editGroupOrder";
 	}
 
@@ -1996,150 +2318,177 @@ public class GroupOrderController extends BaseController {
 	public String toEditGroupOrder(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer id) {
 
-		GroupOrder groupOrder = groupOrderService.findById(id);
-
-		model.addAttribute("groupOrder", groupOrder);
-		ProductInfo productInfo = productInfoService
-				.findProductInfoById(groupOrder.getProductId());
-		model.addAttribute("productInfo", productInfo);
-
-		PlatformEmployeePo saleEmployeePo = sysPlatformEmployeeFacade
-				.findByEmployeeId(groupOrder.getSaleOperatorId()).getPlatformEmployeePo();
-		model.addAttribute("saleEmployeePo", saleEmployeePo);
-
-		PlatformEmployeePo operaEmployeePo = sysPlatformEmployeeFacade
-				.findByEmployeeId(groupOrder.getOperatorId()).getPlatformEmployeePo();
-		model.addAttribute("operaEmployeePo", operaEmployeePo);
-
-		SupplierInfo supplierInfo = supplierService
-				.selectBySupplierId(groupOrder.getSupplierId());
-		model.addAttribute("supplierInfo", supplierInfo);
+//		GroupOrder groupOrder = groupOrderService.findById(id);
+//
+//		model.addAttribute("groupOrder", groupOrder);
+//		ProductInfo productInfo = productInfoService
+//				.findProductInfoById(groupOrder.getProductId());
+//		model.addAttribute("productInfo", productInfo);
+//
+//		PlatformEmployeePo saleEmployeePo = sysPlatformEmployeeFacade
+//				.findByEmployeeId(groupOrder.getSaleOperatorId()).getPlatformEmployeePo();
+//		model.addAttribute("saleEmployeePo", saleEmployeePo);
+//
+//		PlatformEmployeePo operaEmployeePo = sysPlatformEmployeeFacade
+//				.findByEmployeeId(groupOrder.getOperatorId()).getPlatformEmployeePo();
+//		model.addAttribute("operaEmployeePo", operaEmployeePo);
+//
+//		SupplierInfo supplierInfo = supplierService
+//				.selectBySupplierId(groupOrder.getSupplierId());
+//		model.addAttribute("supplierInfo", supplierInfo);
+//		
+//		int bizId = WebUtils.getCurBizId(request);
+//		
+//		List<DicInfo> jdxjList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
+//		model.addAttribute("jdxjList", jdxjList);
+//
+//		List<DicInfo> sourceTypeList = dicService
+//				.getListByTypeCode(Constants.GUEST_SOURCE_TYPE,bizId);
+//		model.addAttribute("sourceTypeList", sourceTypeList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+//		List<RegionInfo> cityList = null;
+//		if (groupOrder.getProvinceId() != null
+//				&& groupOrder.getProvinceId() != -1) {
+//			cityList = regionService.getRegionById(groupOrder.getProvinceId()
+//					+ "");
+//		}
+//		model.addAttribute("allCity", cityList);
+//
+//		List<GroupOrderPrice> costList = groupOrderPriceService
+//				.selectByOrderAndType(groupOrder.getId(), 0); // mode 0：收入
+//		Double income = 0.0;
+//		if (costList != null && costList.size() > 0) {
+//
+//			for (GroupOrderPrice groupOrderPrice : costList) {
+//				income += groupOrderPrice.getTotalPrice();
+//			}
+//
+//		}
+//		model.addAttribute("income", income);
+//
+//		List<GroupOrderPrice> budgetList = groupOrderPriceService
+//				.selectByOrderAndType(groupOrder.getId(), 1);// 1：预算
+//
+//		Double budget = 0.0;
+//		if (budgetList != null && budgetList.size() > 0) {
+//			for (GroupOrderPrice groupOrderPrice : budgetList) {
+//				budget += groupOrderPrice.getTotalPrice();
+//			}
+//		}
+//		model.addAttribute("budget", budget);
+//
+//		model.addAttribute("costList", costList);
+//		model.addAttribute("budgetList", budgetList);
+//		List<GroupOrderTransport> transportList = groupOrderTransportService
+//				.selectByOrderId(groupOrder.getId());
+//		model.addAttribute("transportList", transportList);
+//
+//		List<DicInfo> jtfsList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_JTFS, bizId);
+//		model.addAttribute("jtfsList", jtfsList);
+//
+//		List<DicInfo> zjlxList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_ZJLX);
+//		model.addAttribute("zjlxList", zjlxList);
+//
+//		
+//		List<DicInfo> lysfxmList = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_LYSFXM, bizId);
+//		model.addAttribute("lysfxmList", lysfxmList);
+//
+//		List<GroupRequirement> restaurantList = groupRequirementService
+//				.selectByOrderAndType(groupOrder.getId(), Constants.HOTEL);// 酒店
+//		List<GroupRequirement> airticketagentList = groupRequirementService
+//				.selectByOrderAndType(groupOrder.getId(),
+//						Constants.AIRTICKETAGENT); // 机票
+//		List<GroupRequirement> trainticketagentList = groupRequirementService
+//				.selectByOrderAndType(groupOrder.getId(),
+//						Constants.TRAINTICKETAGENT);// 火车票
+//
+//		model.addAttribute("restaurantList", restaurantList);
+//		model.addAttribute("airticketagentList", airticketagentList);
+//		model.addAttribute("trainticketagentList", trainticketagentList);
+//
+//		List<GroupOrderGuest> guestList = groupOrderGuestService
+//				.selectByOrderId(groupOrder.getId());
+//		List<Integer> guestIdList = airTicketRequestService.findIssuedGuestIdList(WebUtils.getCurBizId(request), groupOrder.getId());
+//		for (GroupOrderGuest guest : guestList) {
+//			List<GroupOrderGuest> guests = groupOrderGuestService
+//					.getGuestByGuestCertificateNum(guest.getCertificateNum(),
+//							guest.getOrderId());
+//			guest.setHistoryNum(guests.size());
+//			guest.setEditType(!guestIdList.contains(guest.getId()));
+//		}
+//		model.addAttribute("guestList", guestList);
+//
+//		ProductGroupPrice productGroupPrice = productGroupPriceService
+//				.selectByPrimaryKey(groupOrder.getPriceId()).getGroupPrice();
+//		if(productGroupPrice!=null){
+//		
+//		ProductGroup groductGroup = productGroupService
+//				.getGroupInfoById(productGroupPrice.getGroupId());
+//
+//		if (groductGroup.getGroupSetting() == 0) {
+//
+//			ProductGroupSupplierVo supplierVosToSales = productGroupSupplierService
+//					.selectProductGroupSupplierVosToSales(
+//							productGroupPrice.getGroupId(),
+//							groupOrder.getPriceId(), groupOrder.getSupplierId());
+//			if (supplierVosToSales == null) {
+//				model.addAttribute(
+//						"allowNum",
+//						productGroupPrice.getStockCount()
+//								- productGroupPrice.getReceiveCount());
+//			} else {
+//				if (supplierVosToSales.getStock() == -1) {
+//					model.addAttribute("allowNum",
+//							productGroupPrice.getStockCount()
+//									- productGroupPrice.getReceiveCount());
+//				} else {
+//
+//					model.addAttribute("allowNum",
+//							supplierVosToSales.getStock());
+//				}
+//			}
+//
+//		} else {
+//			model.addAttribute("allowNum", productGroupPrice.getStockCount()
+//					- productGroupPrice.getReceiveCount());
+//		}
+//		}else{
+//			model.addAttribute("allowNum",10000);
+//		}
 		
 		int bizId = WebUtils.getCurBizId(request);
+		ToEditGroupOrderResult result=groupOrderFacade.toEditGroupOrder(id,bizId);
 		
-		List<DicInfo> jdxjList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
-		model.addAttribute("jdxjList", jdxjList);
-
-		List<DicInfo> sourceTypeList = dicService
-				.getListByTypeCode(Constants.GUEST_SOURCE_TYPE,bizId);
-		model.addAttribute("sourceTypeList", sourceTypeList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-		List<RegionInfo> cityList = null;
-		if (groupOrder.getProvinceId() != null
-				&& groupOrder.getProvinceId() != -1) {
-			cityList = regionService.getRegionById(groupOrder.getProvinceId()
-					+ "");
-		}
-		model.addAttribute("allCity", cityList);
-
-		List<GroupOrderPrice> costList = groupOrderPriceService
-				.selectByOrderAndType(groupOrder.getId(), 0); // mode 0：收入
-		Double income = 0.0;
-		if (costList != null && costList.size() > 0) {
-
-			for (GroupOrderPrice groupOrderPrice : costList) {
-				income += groupOrderPrice.getTotalPrice();
-			}
-
-		}
-		model.addAttribute("income", income);
-
-		List<GroupOrderPrice> budgetList = groupOrderPriceService
-				.selectByOrderAndType(groupOrder.getId(), 1);// 1：预算
-
-		Double budget = 0.0;
-		if (budgetList != null && budgetList.size() > 0) {
-			for (GroupOrderPrice groupOrderPrice : budgetList) {
-				budget += groupOrderPrice.getTotalPrice();
-			}
-		}
-		model.addAttribute("budget", budget);
-
-		model.addAttribute("costList", costList);
-		model.addAttribute("budgetList", budgetList);
-		List<GroupOrderTransport> transportList = groupOrderTransportService
-				.selectByOrderId(groupOrder.getId());
-		model.addAttribute("transportList", transportList);
-
-		List<DicInfo> jtfsList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JTFS, bizId);
-		model.addAttribute("jtfsList", jtfsList);
-
-		List<DicInfo> zjlxList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_ZJLX);
-		model.addAttribute("zjlxList", zjlxList);
-
+		model.addAttribute("groupOrder", result.getGroupOrder());
+		model.addAttribute("saleEmployeePo", result.getSaleEmployeePo());
+		model.addAttribute("operaEmployeePo", result.getOperaEmployeePo());
+		model.addAttribute("productInfo", result.getProductInfo());
+		model.addAttribute("supplierInfo", result.getSupplierInfo());
+		model.addAttribute("jdxjList", result.getJdxjList());
+		model.addAttribute("income", result.getIncome());
+		model.addAttribute("budget", result.getBudget());
+		model.addAttribute("costList", result.getCostList());
+		model.addAttribute("budgetList", result.getBudgetList());
+		model.addAttribute("transportList", result.getTransportList());
+		model.addAttribute("jtfsList", result.getJtfsList());
+		model.addAttribute("zjlxList", result.getZjlxList());
+		model.addAttribute("lysfxmList", result.getLysfxmList());
+		model.addAttribute("restaurantList", result.getRestaurantList());
+		model.addAttribute("airticketagentList", result.getAirticketagentList());
+		model.addAttribute("trainticketagentList", result.getTrainticketagentList());
+		model.addAttribute("guestList", result.getGuestList());
 		
-		List<DicInfo> lysfxmList = dicService.getListByTypeCode(
-				BasicConstants.GYXX_LYSFXM, bizId);
-		model.addAttribute("lysfxmList", lysfxmList);
-
-		List<GroupRequirement> restaurantList = groupRequirementService
-				.selectByOrderAndType(groupOrder.getId(), Constants.HOTEL);// 酒店
-		List<GroupRequirement> airticketagentList = groupRequirementService
-				.selectByOrderAndType(groupOrder.getId(),
-						Constants.AIRTICKETAGENT); // 机票
-		List<GroupRequirement> trainticketagentList = groupRequirementService
-				.selectByOrderAndType(groupOrder.getId(),
-						Constants.TRAINTICKETAGENT);// 火车票
-
-		model.addAttribute("restaurantList", restaurantList);
-		model.addAttribute("airticketagentList", airticketagentList);
-		model.addAttribute("trainticketagentList", trainticketagentList);
-
-		List<GroupOrderGuest> guestList = groupOrderGuestService
-				.selectByOrderId(groupOrder.getId());
-		List<Integer> guestIdList = airTicketRequestService.findIssuedGuestIdList(WebUtils.getCurBizId(request), groupOrder.getId());
-		for (GroupOrderGuest guest : guestList) {
-			List<GroupOrderGuest> guests = groupOrderGuestService
-					.getGuestByGuestCertificateNum(guest.getCertificateNum(),
-							guest.getOrderId());
-			guest.setHistoryNum(guests.size());
-			guest.setEditType(!guestIdList.contains(guest.getId()));
-		}
-		model.addAttribute("guestList", guestList);
-
-		ProductGroupPrice productGroupPrice = productGroupPriceService
-				.selectByPrimaryKey(groupOrder.getPriceId()).getGroupPrice();
-		if(productGroupPrice!=null){
+		model.addAttribute("allowNum",result.getAllowNum());
+		model.addAttribute("allCity", result.getCityList());
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("sourceTypeList", result.getSourceTypeList());
 		
-		ProductGroup groductGroup = productGroupService
-				.getGroupInfoById(productGroupPrice.getGroupId());
-
-		if (groductGroup.getGroupSetting() == 0) {
-
-			ProductGroupSupplierVo supplierVosToSales = productGroupSupplierService
-					.selectProductGroupSupplierVosToSales(
-							productGroupPrice.getGroupId(),
-							groupOrder.getPriceId(), groupOrder.getSupplierId());
-			if (supplierVosToSales == null) {
-				model.addAttribute(
-						"allowNum",
-						productGroupPrice.getStockCount()
-								- productGroupPrice.getReceiveCount());
-			} else {
-				if (supplierVosToSales.getStock() == -1) {
-					model.addAttribute("allowNum",
-							productGroupPrice.getStockCount()
-									- productGroupPrice.getReceiveCount());
-				} else {
-
-					model.addAttribute("allowNum",
-							supplierVosToSales.getStock());
-				}
-			}
-
-		} else {
-			model.addAttribute("allowNum", productGroupPrice.getStockCount()
-					- productGroupPrice.getReceiveCount());
-		}
-		}else{
-			model.addAttribute("allowNum",10000);
-		}
-
 		return "sales/groupOrder/editGroupOrder";
 	}
 
@@ -2159,19 +2508,22 @@ public class GroupOrderController extends BaseController {
 			HttpServletResponse reponse, ModelMap model, Integer employeeId,
 			Integer id, Integer num) {
 
-		PlatformEmployeePo platformEmployeePo = sysPlatformEmployeeFacade
-				.findByEmployeeId(employeeId).getPlatformEmployeePo();
-
-		GroupOrder groupOrder = groupOrderService.findById(id);
-		if (num == 1) {
-			groupOrder.setSaleOperatorId(employeeId);
-			groupOrder.setSaleOperatorName(platformEmployeePo.getName());
-		} else {
-			groupOrder.setOperatorId(employeeId);
-			groupOrder.setOperatorName(platformEmployeePo.getName());
-		}
-		groupOrderService.updateGroupOrder(groupOrder);
-
+//		PlatformEmployeePo platformEmployeePo = sysPlatformEmployeeFacade
+//				.findByEmployeeId(employeeId).getPlatformEmployeePo();
+//
+//		GroupOrder groupOrder = groupOrderService.findById(id);
+//		if (num == 1) {
+//			groupOrder.setSaleOperatorId(employeeId);
+//			groupOrder.setSaleOperatorName(platformEmployeePo.getName());
+//		} else {
+//			groupOrder.setOperatorId(employeeId);
+//			groupOrder.setOperatorName(platformEmployeePo.getName());
+//		}
+//		groupOrderService.updateGroupOrder(groupOrder);
+//
+//		return successJson();
+		
+		BaseStateResult result=groupOrderFacade.editGroupOrder(id,employeeId,num);
 		return successJson();
 	}
 

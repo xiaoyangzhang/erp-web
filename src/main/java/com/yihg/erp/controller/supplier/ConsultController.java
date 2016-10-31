@@ -1,39 +1,40 @@
 package com.yihg.erp.controller.supplier;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.supplier.api.ConsultService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.GuestConsult;
-import com.yihg.supplier.po.GuestConsultFollow;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.facade.supplier.query.GuestConsultDTO;
+import com.yimayhd.erpcenter.facade.supplier.query.GuestConsultFollowDTO;
+import com.yimayhd.erpcenter.facade.supplier.result.ConsultGuestListResult;
+import com.yimayhd.erpcenter.facade.supplier.result.FollowConsultResult;
+import com.yimayhd.erpcenter.facade.supplier.result.WebResult;
+import com.yimayhd.erpcenter.facade.supplier.service.ConsultFacade;
+import com.yimayhd.erpresource.dal.constants.Constants;
+import com.yimayhd.erpresource.dal.po.GuestConsult;
+import com.yimayhd.erpresource.dal.po.GuestConsultFollow;
 @Controller
 @RequestMapping("/consult")
 public class ConsultController extends BaseController {
+	
+	private static final Logger log = LoggerFactory
+			.getLogger(ConsultController.class);
 
 	@Autowired
-	private DicService dicService;
-	@Autowired
-	private ConsultService consultService;
-	@Autowired
-	private RegionService regionService;
+	private ConsultFacade consultFacade;
 	/**
 	 * 客户咨询登记
 	 * @param request
@@ -43,12 +44,13 @@ public class ConsultController extends BaseController {
 	 */
 	@RequestMapping("/consultGuestList.htm")
 	public String consultGuestList(HttpServletRequest request,HttpServletResponse response,ModelMap model){
-		//意向游玩
-		List<DicInfo> intentionDestList = dicService.getListByTypeCode(Constants.MSGL_YXYW,WebUtils.getCurBizId(request));
-		//信息渠道
-		List<DicInfo> infoSourceList = dicService.getListByTypeCode(Constants.MSGL_XXQD,WebUtils.getCurBizId(request));
-		model.addAttribute("intentionDestList", intentionDestList);
-		model.addAttribute("infoSourceList", infoSourceList);
+//		//意向游玩
+//		List<DicInfo> intentionDestList = dicService.getListByTypeCode(Constants.MSGL_YXYW,WebUtils.getCurBizId(request));
+//		//信息渠道
+//		List<DicInfo> infoSourceList = dicService.getListByTypeCode(Constants.MSGL_XXQD,WebUtils.getCurBizId(request));
+		ConsultGuestListResult result = consultFacade.consultGuestList(Constants.MSGL_YXYW, Constants.MSGL_XXQD, WebUtils.getCurBizId(request));
+		model.addAttribute("intentionDestList", result.getIntentionDestList());
+		model.addAttribute("infoSourceList", result.getInfoSourceList());
 		return "supplier/consult/consultGuestList";
 		
 	}
@@ -69,45 +71,39 @@ public class ConsultController extends BaseController {
 			pageBean.setPageSize(pageSize);
 		}
 		pageBean.setParameter(consult);
-		pageBean = consultService.getGuestConsultList(pageBean, WebUtils.getCurBizId(request));
+		WebResult<PageBean> result = consultFacade.getGuestConsultList(pageBean, WebUtils.getCurBizId(request));
+		pageBean = result.getValue();
 		model.addAttribute("page", pageBean);
 		return "supplier/consult/consultGuestTable";
 		
 	}
 	@RequestMapping("addConsult.htm")
 	public String addConsult(HttpServletRequest request,HttpServletResponse response,ModelMap model){
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-		List<DicInfo> guestSources = dicService.getListByTypeCode(Constants.MSGL_KRLY,WebUtils.getCurBizId(request));
-		model.addAttribute("guestSources", guestSources);
-		List<DicInfo> intentionDests = dicService.getListByTypeCode(Constants.MSGL_YXYW,WebUtils.getCurBizId(request));
-		model.addAttribute("intentionDests", intentionDests);
-		List<DicInfo> infoSources = dicService.getListByTypeCode(Constants.MSGL_XXQD,WebUtils.getCurBizId(request));
-		model.addAttribute("infoSources", infoSources);
+		
+		FollowConsultResult result = consultFacade.addConsult(Constants.MSGL_KRLY, Constants.MSGL_YXYW, Constants.MSGL_XXQD, WebUtils.getCurBizId(request));
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("guestSources", result.getGuestSources());
+		model.addAttribute("intentionDests", result.getIntentionDests());
+		model.addAttribute("infoSources", result.getInfoSources());
 		model.addAttribute("curDate", new Date());
 		return "/supplier/consult/addConsult";
 		
 	}
 	@RequestMapping("followConsult.htm")
 	public String followConsult(HttpServletRequest request,HttpServletResponse response,ModelMap model,Integer guestId){
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-		List<DicInfo> guestSources = dicService.getListByTypeCode(Constants.MSGL_KRLY,WebUtils.getCurBizId(request));
-		model.addAttribute("guestSources", guestSources);
-		List<DicInfo> intentionDests = dicService.getListByTypeCode(Constants.MSGL_YXYW,WebUtils.getCurBizId(request));
-		model.addAttribute("intentionDests", intentionDests);
-		List<DicInfo> infoSources = dicService.getListByTypeCode(Constants.MSGL_XXQD,WebUtils.getCurBizId(request));
-		model.addAttribute("infoSources", infoSources);
-		List<DicInfo> followWays = dicService.getListByTypeCode(Constants.MSGL_GJFS,WebUtils.getCurBizId(request));
-		model.addAttribute("followWays", followWays);
-		GuestConsult guestConsult = consultService.selectGuestConsultByPrimaryKey(guestId);
-		model.addAttribute("guestConsult", guestConsult);
-		List<GuestConsultFollow> consultFollows = consultService.selectConsultFollowByConsultId(guestId, WebUtils.getCurBizId(request));
-		model.addAttribute("consultFollows", consultFollows);
-		if (guestConsult.getProvinceId()!=null) {
+		FollowConsultResult result = consultFacade.followConsult(Constants.MSGL_KRLY, Constants.MSGL_YXYW, Constants.MSGL_XXQD, Constants.MSGL_GJFS, guestId, WebUtils.getCurBizId(request));
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("guestSources", result.getGuestSources());
+		model.addAttribute("intentionDests", result.getIntentionDests());
+		model.addAttribute("infoSources", result.getInfoSources());
+		model.addAttribute("followWays", result.getFollowWays());
+		model.addAttribute("guestConsult", result.getGuestConsult());
+		model.addAttribute("consultFollows", result.getConsultFollows());
+		if (result.getGuestConsult().getProvinceId()!=null) {
 			
-			List<RegionInfo> cityList = regionService.getRegionById(guestConsult.getProvinceId().toString());
-			model.addAttribute("cityList", cityList);
+			model.addAttribute("cityList", result.getCityList());
 		}
 		
 		model.addAttribute("guestId", guestId);
@@ -116,20 +112,17 @@ public class ConsultController extends BaseController {
 	}
 	@RequestMapping("viewConsult.htm")
 	public String viewConsult(HttpServletRequest request,HttpServletResponse response,ModelMap model,Integer guestId){
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-		List<DicInfo> guestSources = dicService.getListByTypeCode(Constants.MSGL_KRLY,WebUtils.getCurBizId(request));
-		model.addAttribute("guestSources", guestSources);
-		List<DicInfo> intentionDests = dicService.getListByTypeCode(Constants.MSGL_YXYW,WebUtils.getCurBizId(request));
-		model.addAttribute("intentionDests", intentionDests);
-		List<DicInfo> infoSources = dicService.getListByTypeCode(Constants.MSGL_XXQD,WebUtils.getCurBizId(request));
-		model.addAttribute("infoSources", infoSources);
-		GuestConsult guestConsult = consultService.selectGuestConsultByPrimaryKey(guestId);
+		FollowConsultResult webResult = consultFacade.viewConsult(Constants.MSGL_KRLY, Constants.MSGL_YXYW, Constants.MSGL_XXQD, guestId, WebUtils.getCurBizId(request));
+		
+		model.addAttribute("allProvince", webResult.getAllProvince());
+		model.addAttribute("guestSources", webResult.getGuestSources());
+		model.addAttribute("intentionDests", webResult.getIntentionDests());
+		model.addAttribute("infoSources", webResult.getInfoSources());
+		GuestConsult guestConsult = webResult.getGuestConsult();
 		model.addAttribute("guestConsult", guestConsult);
 		if (guestConsult.getProvinceId()!=null) {
 			
-			List<RegionInfo> cityList = regionService.getRegionById(guestConsult.getProvinceId().toString());
-			model.addAttribute("cityList", cityList);
+			model.addAttribute("cityList", webResult.getCityList());
 		}
 		return "/supplier/consult/viewConsult";
 		
@@ -144,7 +137,7 @@ public class ConsultController extends BaseController {
 	@RequestMapping("/commons/validetePhone.htm")
 	@ResponseBody
 	public String validatePhone(HttpServletRequest request,ModelMap model,String phone){
-		return consultService.validatePhone(phone)>0?"false":"true";
+		return consultFacade.validatePhone(phone);
 		//return phone;
 		
 	}
@@ -159,18 +152,22 @@ public class ConsultController extends BaseController {
 	@RequestMapping("saveConsultGuest.do")
 	@ResponseBody
 	public String saveConsultGuest(HttpServletRequest request,HttpServletResponse response,ModelMap model,GuestConsult guestConsult){
-		guestConsult.setBizId(WebUtils.getCurBizId(request));
-		PlatformEmployeePo curUser = WebUtils.getCurUser(request);
-		guestConsult.setReceiverId(curUser.getEmployeeId());
-		guestConsult.setReceiverName(curUser.getName());
-		return consultService.save(guestConsult)>0?successJson():errorJson("保存失败");
+		GuestConsultDTO guestConsultDTO = new GuestConsultDTO();
+		guestConsultDTO.setGuestConsult(guestConsult);
+		WebResult<Integer> webResult = consultFacade.saveConsultGuest(guestConsultDTO);
+		if(webResult.isSuccess()){
+			return webResult.getValue()>0?successJson():errorJson("保存失败");
+		}else{
+			return errorJson("保存失败");
+		}
+		
 		//return successJson();
 		
 	}
 	@RequestMapping("delConsultGuest.do")
 	@ResponseBody
 	public String delConsultGuest(HttpServletRequest request,HttpServletResponse response,Integer guestId){
-		return consultService.delConsultGuest(guestId)>0?successJson():errorJson("删除失败");
+		return consultFacade.delConsultGuest(guestId)>0?successJson():errorJson("删除失败");
 	}
 	/**
 	 * 保存咨询跟进情况
@@ -190,12 +187,11 @@ public class ConsultController extends BaseController {
 		follow.setFollowerName(curUser.getName());
 		
 		 try {
-			 consultService.save(follow,type);
-			// Map<String, Object> map=new HashMap<String, Object>();
-			// map.put("id", followId);
-			 return successJson();
+			 GuestConsultFollowDTO followDTO = new GuestConsultFollowDTO();
+			 followDTO.setGuestConsultFollow(follow);
+			 return consultFacade.saveConsultFollow(type,followDTO)>0?successJson():errorJson("删除失败");
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 			return errorJson("保存失败");
 		}
 		

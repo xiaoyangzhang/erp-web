@@ -1,10 +1,7 @@
 package com.yihg.erp.controller.supplier;
 
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,28 +20,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.RegionInfo;
-import com.yihg.basic.util.NumberUtil;
-import com.yihg.erp.aop.RequiresPermissions;
-import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.po.BookingGuide;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.TourGroupVO;
-import com.yihg.supplier.api.SupplierGuestService;
-import com.yihg.supplier.api.SupplierImgService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierGuest;
-import com.yihg.supplier.po.SupplierGuestLabel;
-import com.yihg.supplier.po.SupplierGuide;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.facade.supplier.query.SupplierGuestDTO;
+import com.yimayhd.erpcenter.facade.supplier.result.GuestLabelEditResult;
+import com.yimayhd.erpcenter.facade.supplier.result.GuestLabelListResult;
+import com.yimayhd.erpcenter.facade.supplier.result.WebResult;
+import com.yimayhd.erpcenter.facade.supplier.service.SupplierGuestFacade;
+import com.yimayhd.erpresource.dal.constants.Constants;
+import com.yimayhd.erpresource.dal.po.SupplierGuest;
 
 @Controller
 @RequestMapping(value = "/supplierGuest")
@@ -52,15 +39,7 @@ public class SupplierGuestController extends BaseController {
 	private static final Logger log = LoggerFactory
 			.getLogger(SupplierGuestController.class);
 	@Autowired
-	private SupplierGuestService supplierGuestService;
-	@Autowired
-	private SupplierImgService supplierImgService;
-	@Autowired
-	private DicService dicService;
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private RegionService regionService;
+	private SupplierGuestFacade supplierGuestFacade;
 
 	@Autowired
 	private SysConfig config;
@@ -75,19 +54,10 @@ public class SupplierGuestController extends BaseController {
 	@RequestMapping(value = "guestLabelList.htm")
 	public String guestLabelList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model) {
-		List<List<SupplierGuestLabel>> lists = new ArrayList<List<SupplierGuestLabel>>();
-		PageBean pageBean = new PageBean();
-		List<SupplierGuestLabel> supplierGuestLabels = supplierGuestService.selectSupplierGuestLabelList(WebUtils.getCurBizId(request));
-		double dou = (double)supplierGuestLabels.size()/5;
-		int length = (int)Math.ceil(dou);
-		for(int i=0;i<length;i++){
-			pageBean.setPage(i+1);
-			pageBean.setPageSize(5);
-			List<SupplierGuestLabel> supplier = supplierGuestService.selectSupplierGuestLabelListPage(WebUtils.getCurBizId(request),pageBean);
-			lists.add(supplier);
-		}
-		model.addAttribute("length", length);
-		model.addAttribute("supplierGuestLabels", lists);
+		GuestLabelListResult webResult = supplierGuestFacade.guestLabelList(WebUtils.getCurBizId(request));
+		
+		model.addAttribute("length", webResult.getLength());
+		model.addAttribute("supplierGuestLabels", webResult.getSupplierGuestLabels());
 		return "supplier/guest/guest-label-list";
 	}
 	
@@ -106,11 +76,15 @@ public class SupplierGuestController extends BaseController {
 			if(StringUtils.isEmpty(id)){
 				return errorJson("要删除的标签ID不能为空");
 			}
-			supplierGuestService.deleteByPrimaryKey(id);
-			supplierGuestService.deleteRelationsByLabelId(id);
-			return successJson("msg", "操作成功");
+			WebResult<Boolean> webResult = supplierGuestFacade.deleteLabel(id);
+			if(webResult.isSuccess()){
+				return successJson("msg", "操作成功");
+			}else{
+				return errorJson("操作失败");
+			}
+			
 		}catch(Exception e){
-			e.printStackTrace();
+			log.error(e.getMessage());
 			return errorJson("操作失败");
 		}	
 	}
@@ -127,22 +101,15 @@ public class SupplierGuestController extends BaseController {
 	@ResponseBody
 	public String addLabel(HttpServletRequest request,HttpServletResponse reponse,ModelMap model, String name) {
 		try{
-			if(StringUtils.isEmpty(name)){
-				return errorJson("标签名称不能为空");
+			WebResult<Boolean> webResult = supplierGuestFacade.addLabel(WebUtils.getCurBizId(request), name);
+			if(webResult.isSuccess()){
+				return successJson("msg", "添加成功");
+			}else{
+				return errorJson(webResult.getResultMsg());
 			}
-			SupplierGuestLabel extLabel = supplierGuestService.selectLabelByName(WebUtils.getCurBizId(request),name.trim());
-			if(null!=extLabel){
-				return errorJson("此标签已存在");
-			}
-			SupplierGuestLabel label = new SupplierGuestLabel();
-			label.setBizId(WebUtils.getCurBizId(request));
-			label.setName(name.trim());
-			label.setNum(0);
-			label.setCreateTime(System.currentTimeMillis());
-			supplierGuestService.addGuestLabel(label);
-			return successJson("msg", "添加成功");
+			
 		}catch(Exception e){
-			e.printStackTrace();
+			log.error(e.getMessage());
 			return errorJson("操作失败");
 		}	
 	}
@@ -157,20 +124,10 @@ public class SupplierGuestController extends BaseController {
 	public String guestList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model) {
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
-		//标签
-		List<List<SupplierGuestLabel>> lists = new ArrayList<List<SupplierGuestLabel>>();
-		PageBean pageBean = new PageBean();
-		List<SupplierGuestLabel> supplierGuestLabels = supplierGuestService.selectSupplierGuestLabelList(WebUtils.getCurBizId(request));
-		double dou = (double)supplierGuestLabels.size()/9;
-		int length = (int)Math.ceil(dou);
-		for(int i=0;i<length;i++){
-			pageBean.setPage(i+1);
-			pageBean.setPageSize(9);
-			List<SupplierGuestLabel> supplier = supplierGuestService.selectSupplierGuestLabelListPage(WebUtils.getCurBizId(request),pageBean);
-			lists.add(supplier);
-		}
-		model.addAttribute("supplierGuestLabels", lists);
-		model.addAttribute("length", length);
+		
+		GuestLabelListResult webResult = supplierGuestFacade.guestList(WebUtils.getCurBizId(request));
+		model.addAttribute("supplierGuestLabels", webResult.getSupplierGuestLabels());
+		model.addAttribute("length", webResult.getLength());
 		return "supplier/guest/guest-list";
 	}
 	/**
@@ -214,9 +171,10 @@ public class SupplierGuestController extends BaseController {
 			pm.put("ids", ids);
 		}
 		pageBean.setParameter(pm);
-		pageBean = supplierGuestService.selectSupplierGuestListPage(pageBean);
+		WebResult<PageBean> webResult = supplierGuestFacade.guestListDo(pageBean);
 		
-		model.addAttribute("pageBean", pageBean);
+		
+		model.addAttribute("pageBean", webResult.getValue());
 		return "supplier/guest/guest-list-table";
 	}
 	
@@ -235,11 +193,14 @@ public class SupplierGuestController extends BaseController {
 			if(StringUtils.isEmpty(id)){
 				return errorJson("操作失败");
 			}
-			supplierGuestService.deleteByGuestPrimaryKey(id);
-			supplierGuestService.deleteRelationsByGuestId(id);
-			//统计标签人数
-			supplierGuestService.tjLabelNum();
-			return successJson("msg", "操作成功");
+			
+			WebResult<Boolean> webResult = supplierGuestFacade.deleteGuest(id);
+			if(webResult.isSuccess()){
+				return successJson("msg", "操作成功");
+			}else{
+				return errorJson("操作失败");
+			}
+			
 		}catch(Exception e){
 			e.printStackTrace();
 			return errorJson("操作失败");
@@ -259,9 +220,10 @@ public class SupplierGuestController extends BaseController {
 		if(StringUtils.isEmpty(idCard)){
 			return "supplier/guest/guest-travel-list";
 		}
-		List<TourGroup> groups = tourGroupService.selectTravelRecordsByIdCard(idCard.trim(),WebUtils.getCurBizId(request));
 		
-		model.addAttribute("groups", groups);
+		WebResult<List<TourGroup>> webResult = supplierGuestFacade.selectTravelRecords(WebUtils.getCurBizId(request), idCard);
+		
+		model.addAttribute("groups", webResult.getValue());
 		return "supplier/guest/guest-travel-list";
 	}
 	
@@ -276,22 +238,11 @@ public class SupplierGuestController extends BaseController {
 	@RequestMapping(value = "addGuest.htm")
 	public String addGuest(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer id) {
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-		//每行5个显示标签
-		List<List<SupplierGuestLabel>> lists = new ArrayList<List<SupplierGuestLabel>>();
-		PageBean pageBean = new PageBean();
-		List<SupplierGuestLabel> supplierGuestLabels = supplierGuestService.selectSupplierGuestLabelList(WebUtils.getCurBizId(request));
-		double dou = (double)supplierGuestLabels.size()/5;
-		int length = (int)Math.ceil(dou);
-		for(int i=0;i<length;i++){
-			pageBean.setPage(i+1);
-			pageBean.setPageSize(5);
-			List<SupplierGuestLabel> supplier = supplierGuestService.selectSupplierGuestLabelListPage(WebUtils.getCurBizId(request),pageBean);
-			lists.add(supplier);
-		}
-		model.addAttribute("length", length);
-		model.addAttribute("supplierGuestLabels", lists);
+		GuestLabelListResult webResult = supplierGuestFacade.addGuest(WebUtils.getCurBizId(request), id);
+		
+		model.addAttribute("allProvince", webResult.getAllProvince());
+		model.addAttribute("length", webResult.getLength());
+		model.addAttribute("supplierGuestLabels", webResult.getSupplierGuestLabels());
 
 		return "supplier/guest/edit-guest";
 	}
@@ -306,44 +257,21 @@ public class SupplierGuestController extends BaseController {
 	@RequestMapping(value = "editGuest.htm")
 	public String editGuest(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer id) {
-		SupplierGuest guest = supplierGuestService.selectGuestListById(id);
 		
+		GuestLabelEditResult webResult = supplierGuestFacade.editGuest(WebUtils.getCurBizId(request), id);
+		SupplierGuest guest = webResult.getGuest();
 		model.addAttribute("guest", guest);
 		
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+		model.addAttribute("allProvince",webResult.getAllProvince());
 		if (guest.getProvinceId() != null) {
-			List<RegionInfo> cityList = regionService.getRegionById(guest
-					.getProvinceId() + "");
-			model.addAttribute("cityList", cityList);
+			model.addAttribute("cityList", webResult.getCityList());
 		}
 		if (guest.getAdProvinceId() != null) {
-			List<RegionInfo> adCityList = regionService.getRegionById(guest
-					.getAdProvinceId() + "");
-			model.addAttribute("adCityList", adCityList);
+			model.addAttribute("adCityList", webResult.getAdCityList());
 		}
 		
-		//每行5个显示标签
-		List<List<SupplierGuestLabel>> lists = new ArrayList<List<SupplierGuestLabel>>();
-		PageBean pageBean = new PageBean();
-		List<SupplierGuestLabel> supplierGuestLabels = supplierGuestService.selectSupplierGuestLabelList(WebUtils.getCurBizId(request));
-		double dou = (double)supplierGuestLabels.size()/5;
-		int length = (int)Math.ceil(dou);
-		for(int i=0;i<length;i++){
-			pageBean.setPage(i+1);
-			pageBean.setPageSize(5);
-			List<SupplierGuestLabel> supplier = supplierGuestService.selectSupplierGuestLabelListPage(WebUtils.getCurBizId(request),pageBean);
-			for (SupplierGuestLabel supplierGuestLabel : supplier) {
-				Map<String,Object> lation = supplierGuestService.selectGuestLabelRelationByGuestIdAndLabelId(id,supplierGuestLabel.getId());
-				if(null != lation){
-					supplierGuestLabel.setChoose(true);
-				}
-			}
-			
-			lists.add(supplier);
-		}
-		model.addAttribute("length", length);
-		model.addAttribute("supplierGuestLabels", lists);
+		model.addAttribute("length", webResult.getLength());
+		model.addAttribute("supplierGuestLabels", webResult.getSupplierGuestLabels());
 
 		return "supplier/guest/edit-guest";
 	}
@@ -364,28 +292,15 @@ public class SupplierGuestController extends BaseController {
 		guest.setUserId(WebUtils.getCurUserId(request));
 		guest.setUserName(WebUtils.getCurUser(request).getName());
 		guest.setBizId(WebUtils.getCurBizId(request));
-		SupplierGuest supplierGuest = supplierGuestService.selectGuestByMobile(WebUtils.getCurBizId(request),guest.getMobile(),guest.getId());
-		if(null!=supplierGuest){
-			return errorJson("已存在应用此手机的乘客！");
+		SupplierGuestDTO guestDTO  = new SupplierGuestDTO();
+		guestDTO.setSupplierGuest(guest);
+		WebResult<Boolean> webResult = supplierGuestFacade.saveGuest(guestDTO, choseIds, WebUtils.getCurBizId(request));
+		if(webResult.isSuccess()){
+			return successJson();
+		}else{
+			return errorJson(webResult.getResultMsg());
 		}
-		if (guest.getId() != null) {
-			supplierGuestService.deleteRelationsByGuestId(guest.getId());
-			supplierGuestService.updateGuest(guest);
-			
-		} else {
-			int id = supplierGuestService.addGuestInfo(guest);
-		}
-		//添加关系
-		SupplierGuest supp = supplierGuestService.selectGuestByMobile(WebUtils.getCurBizId(request),guest.getMobile(),null);
-		if(!StringUtils.isEmpty(choseIds)){
-			String ids[] =choseIds.split(",");
-			for(int i=0;i<ids.length;i++){
-				supplierGuestService.insertRelation(supp.getId(),ids[i]);
-			}
-		}
-		//统计标签人数
-		supplierGuestService.tjLabelNum();
-		return successJson();
+		
 	}
 
 }

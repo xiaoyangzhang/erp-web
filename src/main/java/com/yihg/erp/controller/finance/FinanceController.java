@@ -17,11 +17,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -34,24 +32,60 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
+import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yimayhd.erpcenter.facade.finance.query.AduditStatisticsListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.AuditCommDTO;
+import org.yimayhd.erpcenter.facade.finance.query.AuditDTO;
+import org.yimayhd.erpcenter.facade.finance.query.AuditListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.AuditShopDTO;
+import org.yimayhd.erpcenter.facade.finance.query.CheckBillDTO;
+import org.yimayhd.erpcenter.facade.finance.query.DiatributeBillDTO;
+import org.yimayhd.erpcenter.facade.finance.query.FinAuditDTO;
+import org.yimayhd.erpcenter.facade.finance.query.IncomeJoinTableListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.IncomeOrPayDTO;
+import org.yimayhd.erpcenter.facade.finance.query.PayDTO;
+import org.yimayhd.erpcenter.facade.finance.query.QuerySettleCommissionDTO;
+import org.yimayhd.erpcenter.facade.finance.query.QuerySettleListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.QueryShopCommissionStatsDTO;
+import org.yimayhd.erpcenter.facade.finance.query.ReceiveOrderListSelectDTO;
+import org.yimayhd.erpcenter.facade.finance.query.SaveDistributeBillDTO;
+import org.yimayhd.erpcenter.facade.finance.query.SaveVerifyBillDTO;
+import org.yimayhd.erpcenter.facade.finance.query.SettleListPageDTO;
+import org.yimayhd.erpcenter.facade.finance.query.SettleSealListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.StatementCheckPreviewDTO;
+import org.yimayhd.erpcenter.facade.finance.query.SubjectSummaryDTO;
+import org.yimayhd.erpcenter.facade.finance.query.ToBookingShopVerifyListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.UnsealDTO;
+import org.yimayhd.erpcenter.facade.finance.query.VerifyBillDTO;
+import org.yimayhd.erpcenter.facade.finance.result.CheckBillResult;
+import org.yimayhd.erpcenter.facade.finance.result.DiatributeBillResult;
+import org.yimayhd.erpcenter.facade.finance.result.IncomeOrPaytResult;
+import org.yimayhd.erpcenter.facade.finance.result.QuerySettleCommissionResult;
+import org.yimayhd.erpcenter.facade.finance.result.QuerySettleListResult;
+import org.yimayhd.erpcenter.facade.finance.result.QueryShopCommissionStatsResult;
+import org.yimayhd.erpcenter.facade.finance.result.ReceiveOrderListSelectResult;
+import org.yimayhd.erpcenter.facade.finance.result.ResultSupport;
+import org.yimayhd.erpcenter.facade.finance.result.SettleCommissionListResult;
+import org.yimayhd.erpcenter.facade.finance.result.SettleListPageResult;
+import org.yimayhd.erpcenter.facade.finance.result.SettleSealListResult;
+import org.yimayhd.erpcenter.facade.finance.result.StatementCheckPreviewResult;
+import org.yimayhd.erpcenter.facade.finance.result.SubjectSummaryResult;
+import org.yimayhd.erpcenter.facade.finance.result.ToBookingShopVerifyListlResult;
+import org.yimayhd.erpcenter.facade.finance.result.TourGroupDetiailsResult;
+import org.yimayhd.erpcenter.facade.finance.result.VerifyBillResult;
+import org.yimayhd.erpcenter.facade.finance.result.ViewShopCommissionStatsListResult;
 import org.yimayhd.erpcenter.facade.finance.service.FinanceFacade;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.util.TypeUtils;
-import com.yihg.basic.api.CommonService;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.util.NumberUtil;
 import com.yihg.erp.aop.PostHandler;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
@@ -60,47 +94,19 @@ import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.DateUtils;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
-import com.yihg.finance.api.FinanceBillService;
-import com.yihg.finance.api.FinanceGuideService;
-import com.yihg.finance.api.FinanceService;
-import com.yihg.finance.po.FinanceGuide;
-import com.yihg.finance.po.FinancePay;
-import com.yihg.finance.po.FinancePayDetail;
-import com.yihg.finance.po.InfoBean;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.api.BookingDeliveryPriceService;
-import com.yihg.operation.api.BookingDeliveryService;
-import com.yihg.operation.api.BookingGuideService;
-import com.yihg.operation.api.BookingShopDetailService;
-import com.yihg.operation.api.BookingShopService;
-import com.yihg.operation.api.BookingSupplierDetailService;
-import com.yihg.operation.api.BookingSupplierService;
-import com.yihg.operation.po.BookingDelivery;
-import com.yihg.operation.po.BookingDeliveryPrice;
-import com.yihg.operation.po.BookingGuide;
-import com.yihg.operation.po.BookingShop;
-import com.yihg.operation.po.BookingShopDetail;
-import com.yihg.operation.po.BookingSupplier;
-import com.yihg.operation.po.BookingSupplierDetail;
-import com.yihg.sales.api.GroupOrderPriceService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.FinanceBillDetail;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderPrice;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.TourGroupVO;
-import com.yihg.supplier.api.SupplierGuideService;
-import com.yihg.supplier.api.SupplierService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.constants.SupplierConstant;
-import com.yihg.supplier.po.SupplierGuide;
-import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.api.SysBizBankAccountService;
-import com.yihg.sys.po.SysBizBankAccount;
+import com.yimayhd.erpcenter.common.util.NumberUtil;
+import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePay;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplierDetail;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrice;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpresource.dal.constants.SupplierConstant;
 
 /**
  * 财务管理
@@ -112,48 +118,7 @@ import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 @RequestMapping(value = "/finance")
 public class FinanceController extends BaseController {
 
-	@Autowired
-	private FinanceService financeService;
-	@Autowired
-	private DicService dicService;
-	@Autowired
-	private SupplierService supplierService;
-	@Autowired
-	private SysBizBankAccountService sysBizBankAccountService;
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private GroupOrderService groupOrderService;
-	@Autowired
-	private BookingShopService bookingShopService;
-	@Autowired
-	private BookingSupplierService bookingSupplierService;
-	@Autowired
-	private BookingSupplierDetailService bookingSupplierDetailService;
-	@Autowired
-	private BookingDeliveryService bookingDeliveryService;
-	@Autowired
-	private GroupOrderPriceService groupOrderPriceService;
-	@Autowired
-	private FinanceBillService financeBillService;
-	@Autowired
-	private ApplicationContext appContext;
-	@Autowired
-	private BookingGuideService bookingGuideService;
-	@Autowired
-	private SupplierGuideService supplierGuideService;
-	@Autowired
-	private FinanceGuideService financeGuideService;
-
-	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private PlatformOrgService orgService;
-
-	@Autowired
-	private BookingDeliveryPriceService bookingDeliveryPriceService;
-	@Autowired
-	private BookingShopDetailService bookingShopDetailService;
+	
 	@Resource
 	private BizSettingCommon bizSettingCommon;
 	
@@ -175,14 +140,18 @@ public class FinanceController extends BaseController {
 	 */
 	@RequestMapping(value = "calcTourGroupAmount.do")
 	@ResponseBody
-	public String calcTourGroupAmount(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, Integer groupId){
-		if(groupId != null){
-			financeService.calcTourGroupAmount(groupId);
-		}
+	public String calcTourGroupAmount(HttpServletRequest request,HttpServletResponse reponse, ModelMap model, Integer groupId){
+		
+		ResultSupport result = financeFacade.calcTourGroupAmount(groupId);
+		
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("success", "true");
-		map.put("msg", "calculate over!");
+		map.put("success", result.isSuccess());
+		if(result.isSuccess()){
+			map.put("msg", "calculate over!");
+		}else{
+			map.put("msg", "calculate failure!");
+		}
+		
 		return JSON.toJSONString(map);
 	}
 	
@@ -199,24 +168,18 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "batchCalcTourGroupAmount.do")
 	@ResponseBody
 	public String batchCalcTourGroupAmount(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer bizId){
-		PageBean pb = new PageBean();
-		Map pm = WebUtils.getRequestParamters(request);
-		if(bizId != null){
-			pm.put("bizId", bizId);
-		}
-		pb.setParameter(pm);
-		List<TourGroup> results = tourGroupService.selectIdList(pb);
 		
-		if(results != null && results.size() > 0){
-			TourGroup group = null;
-			for(int i = 0; i < results.size(); i++){
-				group = results.get(i);
-				financeService.calcTourGroupAmount(group.getId());
-			}
-		}
+		Map paramters = WebUtils.getRequestParamters(request);
+		ResultSupport result = financeFacade.batchCalcTourGroupAmount(bizId, paramters);
+
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("success", "true");
-		map.put("msg", "calculate over! fixed "+ results.size() +" tour groups");
+		map.put("success", result.isSuccess());
+		if(result.isSuccess()){
+			map.put("msg", result.getResultMsg());
+		}else{
+			map.put("msg", "calculate failure!");
+		}
+		
 		return JSON.toJSONString(map);
 	}
 	
@@ -239,13 +202,17 @@ public class FinanceController extends BaseController {
 		}
 		
 		String startDate = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-		financeService.calcBookingSupplierTotalCash(bookingSupplierId);
+		ResultSupport result = financeFacade.calcBookingSupplierTotalCash(bookingSupplierId);
 		String endDate = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
 		
-		map.put("success", "true");
-		map.put("startDate", startDate);
-		map.put("endDate", endDate);
-		map.put("msg", "calculate over!");
+		map.put("success", result.isSuccess());
+		if(result.isSuccess()){
+			map.put("startDate", startDate);
+			map.put("endDate", endDate);
+			map.put("msg", "calculate over!");
+		}else{
+			map.put("msg", "calculate failure!");
+		}
 		
 		return JSON.toJSONString(map);
 	}
@@ -267,13 +234,13 @@ public class FinanceController extends BaseController {
 		out.flush();
 		
 		String startDate = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-		List<BookingSupplier> results = bookingSupplierService.selectIdList();
+		List<BookingSupplier> results = financeFacade.getBookingSupplierIdList();
 		
 		if(results != null && results.size() > 0){
 			BookingSupplier bookingSupplier = null;
 			for(int i = 0; i < results.size(); i++){
 				bookingSupplier = results.get(i);
-				financeService.calcBookingSupplierTotalCash(bookingSupplier.getId());
+				financeFacade.calcBookingSupplierTotalCash(bookingSupplier.getId());
 				
 				if (i%100==0){
 					out.write(".");
@@ -308,13 +275,17 @@ public class FinanceController extends BaseController {
 		}
 		
 		String startDate = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-		financeService.calcGroupOrderTotalCash(groupOrderId);
+		ResultSupport result = financeFacade.calcGroupOrderTotalCash(groupOrderId);
 		String endDate = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
 		
-		map.put("success", "true");
-		map.put("startDate", startDate);
-		map.put("endDate", endDate);
-		map.put("msg", "calculate over!");
+		map.put("success", result.isSuccess());
+		if(result.isSuccess()){
+			map.put("startDate", startDate);
+			map.put("endDate", endDate);
+			map.put("msg", "calculate over!");
+		}else{
+			map.put("msg", "calculate failure!");
+		}
 		
 		return JSON.toJSONString(map);
 	}
@@ -336,13 +307,13 @@ public class FinanceController extends BaseController {
 		out.flush();
 		
 		String startDate = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-		List<GroupOrder> results = groupOrderService.selectIdList(supplierId);
+		List<GroupOrder> results = financeFacade.getGroupOrderIdList(supplierId);
 		
 		if(results != null && results.size() > 0){
 			GroupOrder order = null;
 			for(int i = 0; i < results.size(); i++){
 				order = results.get(i);
-				financeService.calcGroupOrderTotalCash(order.getId());
+				financeFacade.calcGroupOrderTotalCash(order.getId());
 				
 				if (i%100==0){
 					out.write(".");
@@ -363,14 +334,17 @@ public class FinanceController extends BaseController {
 	public String calcGroupTotalCash(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer groupId){
 		long time = System.currentTimeMillis();
-		if(groupId != null){
-			financeService.calcTotalCash_collection(groupId);
-		}
-        time = System.currentTimeMillis() - time;  
+		ResultSupport result = financeFacade.calcGroupTotalCash(groupId);
+        time = System.currentTimeMillis() - time;
+        
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("success", "true");
-		map.put("msg", "completed!");
-		map.put("result", "groupId="+groupId.toString()+", process times="+Long.toString(time)+" ms");
+		map.put("success", result.isSuccess());
+		if(result.isSuccess()){
+			map.put("msg", "completed!");
+			map.put("result", "groupId="+groupId.toString()+", process times="+Long.toString(time)+" ms");
+		}else{
+			map.put("msg", "calculate failure!");
+		}
 		return JSON.toJSONString(map);
 	}
 	
@@ -386,13 +360,13 @@ public class FinanceController extends BaseController {
 		out.flush();
 		
 		String startDate = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-		List<TourGroup> results = tourGroupService.selectGroupByDateZone(startTime, endTime, bizId);
+		List<TourGroup> results = financeFacade.selectGroupByDateZone(startTime, endTime, bizId);
 		
 		if(results != null && results.size() > 0){
 			TourGroup tg = null;
 			for(int i = 0; i < results.size(); i++){
 				tg = results.get(i);
-				financeService.calcTotalCash_collection(tg.getId());
+				financeFacade.calcGroupTotalCash(tg.getId());
 				
 				if (i%100==0){
 					out.write(".");
@@ -412,12 +386,9 @@ public class FinanceController extends BaseController {
 	 * 跳转到收款明细页面
 	 */
 	@RequestMapping(value = "inrecord.htm")
-	public String inrecord(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model) {
-		model.addAttribute("sup_type_map_in",
-				SupplierConstant.supplierTypeMapIn);
-		model.addAttribute("sup_type_map_pay",
-				SupplierConstant.supplierTypeMapPay);
+	public String inrecord(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
+		model.addAttribute("sup_type_map_in", SupplierConstant.supplierTypeMapIn);
+		model.addAttribute("sup_type_map_pay", SupplierConstant.supplierTypeMapPay);
 		return "finance/record/income-list";
 	}
 
@@ -425,10 +396,8 @@ public class FinanceController extends BaseController {
 	 * 跳转到付款明细页面
 	 */
 	@RequestMapping(value = "payrecord.htm")
-	public String payrecord(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model) {
-		model.addAttribute("sup_type_map_pay",
-				SupplierConstant.supplierTypeMapPay);
+	public String payrecord(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
+		model.addAttribute("sup_type_map_pay", SupplierConstant.supplierTypeMapPay);
 		return "finance/record/pay-list";
 	}
 
@@ -438,11 +407,16 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "settleList.htm")
 	public String settleList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model) {
-		List<TourGroup> auditorList = tourGroupService.getAuditorList();
+		List<TourGroup> auditorList = financeFacade.getAuditorList();
 		model.addAttribute("auditorList", auditorList);
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
 		return "finance/settle-list";
 	}
@@ -455,133 +429,47 @@ public class FinanceController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping("statementCheckPreview.htm")
-	public String statementCheckPreview(HttpServletRequest request,HttpServletResponse response,ModelMap model,TourGroupVO group,String sl,String svc){
+	public String statementCheckPreview(HttpServletRequest request, HttpServletResponse response,
+			ModelMap model, TourGroupVO group, String sl, String svc){
+		
+		StatementCheckPreviewDTO queryDTO = new StatementCheckPreviewDTO();
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setOrgIds(group.getOrgIds());
+		queryDTO.setParamters(WebUtils.getQueryParamters(request));
+		queryDTO.setSaleOperatorIds(group.getSaleOperatorIds());
+		queryDTO.setSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		
+		StatementCheckPreviewResult result = financeFacade.statementCheckPreview(queryDTO);
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
-
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
-		PageBean pb = new PageBean();
-		pb.setPage(1);
-		pb.setPageSize(100000);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pms  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pms.put("operator_id", group.getSaleOperatorIds());
-		}
-		pms.put("set", WebUtils.getDataUserIdSet(request));
-		pb.setParameter(pms);
-		pb = getCommonService(svc).queryListPage(sl, pb);
-		model.addAttribute("pageBean", pb);
-		
-		Map<Integer, String> guideMap = new HashMap<Integer, String>();
-		List<Map> results = pb.getResult();
-		Map item = null;
-		for (int i = 0; i < results.size(); i++) {
-			item = results.get(i);
-			Integer groupId = Integer.parseInt(item.get("id").toString());
-			List<BookingGuide> bookingGuides = bookingGuideService.selectGuidesByGroupId(groupId);
-			StringBuffer s = new StringBuffer();
-			for (int j = 0; j < bookingGuides.size(); j++) {
-				if (j == (bookingGuides.size() - 1)) {
-					s.append(bookingGuides.get(j).getGuideName());
-				} else {
-					s.append(bookingGuides.get(j).getGuideName() + ",");
-				}
-				item.put("userName", bookingGuides.get(j).getUserName());
-			}
-			guideMap.put(groupId, s.toString());
-			
-			BigDecimal totalIncome = NumberUtil.parseObj2Num(item.get("total_income"));
-			BigDecimal totalCost = NumberUtil.parseObj2Num(item.get("total_cost"));
-			
-			//团收入 = 团收入 - 购物汇总
-			InfoBean shop = financeService.statsShopWithCommInfoBean(groupId);
-			totalIncome = totalIncome.subtract(shop.getNum());
-			
-			item.put("total_income", totalIncome);
-			item.put("total_cost", totalCost);
-			item.put("total_profit", totalIncome.subtract(totalCost));
-
-		}
-		model.addAttribute("guideMap", guideMap);
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("guideMap", result.getGuideMap());
 		return "finance/statementCheckPreview";
 		
 	}
 	@RequestMapping("statementCheckExportExcel.htm")
 	public void statementCheckExportExcel(HttpServletRequest request,HttpServletResponse response,TourGroupVO group,String sl,String svc){
-		PageBean pb = new PageBean();
-		pb.setPage(1);
-		pb.setPageSize(100000);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pms  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pms.put("operator_id", group.getSaleOperatorIds());
-		}
-		pms.put("set", WebUtils.getDataUserIdSet(request));
-		pb.setParameter(pms);
-		pb = getCommonService(svc).queryListPage(sl, pb);
 		
-		Map<Integer, String> guideMap = new HashMap<Integer, String>();
-		List<Map> results = pb.getResult();
-		Map item = null;
-		for (int i = 0; i < results.size(); i++) {
-			item = results.get(i);
-			Integer groupId = Integer.parseInt(item.get("id").toString());
-			List<BookingGuide> bookingGuides = bookingGuideService.selectGuidesByGroupId(groupId);
-			StringBuffer s = new StringBuffer();
-			for (int j = 0; j < bookingGuides.size(); j++) {
-				if (j == (bookingGuides.size() - 1)) {
-					s.append(bookingGuides.get(j).getGuideName());
-				} else {
-					s.append(bookingGuides.get(j).getGuideName() + ",");
-				}
-				//item.put("userName", bookingGuides.get(j).getUserName());
-				s.append("（"+bookingGuides.get(j).getUserName()+"）");
-			}
-			guideMap.put(groupId, s.toString());
-			
-			BigDecimal totalIncome = NumberUtil.parseObj2Num(item.get("total_income"));
-			BigDecimal totalCost = NumberUtil.parseObj2Num(item.get("total_cost"));
-			
-			//团收入 = 团收入 - 购物汇总
-			InfoBean shop = financeService.statsShopWithCommInfoBean(groupId);
-			totalIncome = totalIncome.subtract(shop.getNum());
-			
-			item.put("total_income", totalIncome);
-			item.put("total_cost", totalCost);
-			item.put("total_profit", totalIncome.subtract(totalCost));
+		StatementCheckPreviewDTO queryDTO = new StatementCheckPreviewDTO();
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setOrgIds(group.getOrgIds());
+		queryDTO.setParamters(WebUtils.getQueryParamters(request));
+		queryDTO.setSaleOperatorIds(group.getSaleOperatorIds());
+		queryDTO.setSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		StatementCheckPreviewResult result = financeFacade.statementCheckPreview(queryDTO);
 
+		PageBean pb = result.getPageBean();
+		Map<Integer, String> guideMap = new HashMap<Integer, String>();
+		if(result.getGuideMap() != null){
+			guideMap = result.getGuideMap();
 		}
+		
+		Map item = null;
 		String path = "";
 		Integer guideCount = 0;
 		Integer adultCount = 0;
@@ -809,12 +697,18 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "settleSealList.htm")
 	public String settleSealList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model) {
-		List<TourGroup> auditorList = tourGroupService.getAuditorList();
-		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
+		List<TourGroup> auditorList = financeFacade.getAuditorList();
 		model.addAttribute("auditorList", auditorList);
+		
+		Integer bizId = WebUtils.getCurBizId(request);
+		model.addAttribute("bizId", bizId); // 过滤B商家
+		
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		
 		return "finance/seal/settle-list";
 	}
 	
@@ -822,67 +716,26 @@ public class FinanceController extends BaseController {
 	public String settleSealList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String sl, String ssl,
 			String rp, Integer page, Integer pageSize, String svc,TourGroupVO group) {
-
-		PageBean pb = new PageBean();
-		pb.setPage(page);
-		if (pageSize == null) {
-			pageSize = Constants.PAGESIZE;
+		
+		SettleSealListDTO queryDTO = new SettleSealListDTO();
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setOrgIds(group.getOrgIds());
+		if(page != null){
+			queryDTO.setPage(page);
 		}
-		pb.setPageSize(pageSize);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
+		if(pageSize != null){
+			queryDTO.setPageSize(pageSize);
 		}
-		Map<String,Object> pms  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pms.put("operator_id", group.getSaleOperatorIds());
-		}
-		pms.put("set", WebUtils.getDataUserIdSet(request));
-		pb.setParameter(pms);
-		pb = getCommonService(svc).queryListPage(sl, pb);
-		Map<Integer, String> guideMap = new HashMap<Integer, String>();
-		List<Map> results = pb.getResult();
-		Map item = null;
-		for (int i = 0; i < results.size(); i++) {
-			item = results.get(i);
-			Integer groupId = Integer.parseInt(item.get("id").toString());
-			
-			List<BookingGuide> bookingGuides = bookingGuideService.selectGuidesByGroupId(groupId);
-			StringBuffer s = new StringBuffer();
-			for (int j = 0; j < bookingGuides.size(); j++) {
-				if (j == (bookingGuides.size() - 1)) {
-					s.append(bookingGuides.get(j).getGuideName());
-				} else {
-					s.append(bookingGuides.get(j).getGuideName() + ",");
-				}
-			}
-			guideMap.put(groupId, s.toString());
-			
-			BigDecimal totalIncome = NumberUtil.parseObj2Num(item.get("total_income"));
-			BigDecimal totalIncomeShop = NumberUtil.parseObj2Num(item.get("total_income_shop"));
-			BigDecimal totalCost = NumberUtil.parseObj2Num(item.get("total_cost"));
-			
-			//团收入 = 团收入 - 购物收入
-			totalIncome = totalIncome.subtract(totalIncomeShop);
-			
-			item.put("total_income", totalIncome);
-			item.put("total_profit", totalIncome.subtract(totalCost));
-
-		}
-		model.addAttribute("guideMap", guideMap);
-		model.addAttribute("pageBean", pb);
+		queryDTO.setParamters(WebUtils.getQueryParamters(request));
+		queryDTO.setRp(rp);
+		queryDTO.setSaleOperatorIds(group.getSaleOperatorIds());
+		queryDTO.setSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setSl(ssl);
+		queryDTO.setSsl(ssl);
+		queryDTO.setSvc(svc);
+		SettleSealListResult result = financeFacade.settleSealList(queryDTO);
+		model.addAttribute("guideMap", result.getGuideMap());
+		model.addAttribute("pageBean", result.getPageBean());
 		return rp;
 	}
 
@@ -893,8 +746,22 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "incomeView.htm")
 	public String incomeView(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer payId) {
-		handResponse(request, model);
-		model.addAttribute("pay", financeService.queryPayById(payId));
+		
+		IncomeOrPayDTO dto = new IncomeOrPayDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setPayId(payId);
+		IncomeOrPaytResult result = financeFacade.incomeView(dto);
+		model.addAttribute("pay", result.getPay());
+		model.addAttribute("bizAccountList", result.getBizAccountList());
+		model.addAttribute("payTypeList", result.getPayTypeList());
+		model.addAttribute("supplierTypeMapIn", SupplierConstant.supplierTypeMapIn);
+		model.addAttribute("supplierTypeMapPay", SupplierConstant.supplierTypeMapPay);
+		
+		PlatformEmployeePo employee = WebUtils.getCurUser(request);
+		if (employee != null) {
+			model.addAttribute("operatePerson", employee.getName());
+		}
+		
 		return "finance/cash/income-view";
 	}
 
@@ -902,9 +769,12 @@ public class FinanceController extends BaseController {
 	 * 跳转到付款记录详情页面
 	 */
 	@RequestMapping(value = "payView.htm")
-	public String payView(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, Integer payId) {
-		model.addAttribute("pay", financeService.queryPayById(payId));
+	public String payView(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer payId) {
+		
+		IncomeOrPayDTO dto = new IncomeOrPayDTO();
+		dto.setPayId(payId);
+		IncomeOrPaytResult result = financeFacade.payView(dto);
+		model.addAttribute("pay", result.getPay());
 		return "finance/cash/pay-view";
 	}
 
@@ -912,14 +782,14 @@ public class FinanceController extends BaseController {
 	 * 跳转到收款订单关联页面
 	 */
 	@RequestMapping(value = "incomeJoinList.htm")
-	public String incomeJoinList(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model) {
+	public String incomeJoinList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
 		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
 		
 		return "finance/cash/income-join-list";
 	}
@@ -936,41 +806,21 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/incomeJoinTableList.do")
 	public String incomeJoinTableList(HttpServletRequest request, ModelMap model, 
 			Integer pageSize, Integer page, TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		if(page==null){
-			pageBean.setPage(1);
-		}else{
-			pageBean.setPage(page);
-		}
-		if(pageSize==null){
-			pageBean.setPageSize(Constants.PAGESIZE);
-		}else{
-			pageBean.setPageSize(pageSize);
-		}
 		
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
+		IncomeJoinTableListDTO queryDTO = new IncomeJoinTableListDTO();
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setOrgIds(group.getOrgIds());
+		if(page != null){
+			queryDTO.setPage(page);
 		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("saleOperatorIds", group.getSaleOperatorIds());
+		if(pageSize != null){
+			queryDTO.setPageSize(pageSize);
 		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = financeService.selectIncomeJoinTableListPage(pageBean, WebUtils.getCurBizId(request));
+		queryDTO.setParamters(WebUtils.getQueryParamters(request));
+		queryDTO.setSaleOperatorIds(group.getSaleOperatorIds());
+		queryDTO.setSet(WebUtils.getDataUserIdSet(request));
+		
+		PageBean pageBean = financeFacade.incomeJoinTableList(queryDTO);
 		model.addAttribute("pageBean", pageBean);
 		
 		return "finance/cash/income-join-list-table";
@@ -980,16 +830,16 @@ public class FinanceController extends BaseController {
 	 * 跳转到付款订单关联页面
 	 */
 	@RequestMapping(value = "payJoinList.htm")
-	public String payJoinList(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model) {
+	public String payJoinList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
 		model.addAttribute("start_min", DateUtils.getMonthFirstDay());
 		model.addAttribute("start_max", DateUtils.getMonthLastDay());
 		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
 		
 		return "finance/cash/pay-join-list";
 	}
@@ -998,11 +848,17 @@ public class FinanceController extends BaseController {
 	 * 跳转到收款新增页面
 	 */
 	@RequestMapping(value = "incomeAdd.htm")
-	public String incomeAdd(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, Integer payId) {
-		handResponse(request, model);
+	public String incomeAdd(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer payId) {
+		
+		IncomeOrPayDTO dto = new IncomeOrPayDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setPayId(payId);
+		
+		IncomeOrPaytResult result = financeFacade.incomeAdd(dto);
+		this.handResponse(request, model, result);
+		
 		if (payId != null) {
-			model.addAttribute("pay", financeService.queryPayById(payId));
+			model.addAttribute("pay", result.getPay());
 		}else{
 			model.addAttribute("currDate", new Date());
 		}
@@ -1013,11 +869,15 @@ public class FinanceController extends BaseController {
 	 * 跳转到付款新增页面
 	 */
 	@RequestMapping(value = "payAdd.htm")
-	public String payAdd(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, Integer payId) {
-		handResponse(request, model);
+	public String payAdd(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer payId) {
+		IncomeOrPayDTO dto = new IncomeOrPayDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setPayId(payId);
+		
+		IncomeOrPaytResult result = financeFacade.incomeAdd(dto);
+		this.handResponse(request, model, result);
 		if (payId != null) {
-			model.addAttribute("pay", financeService.queryPayById(payId));
+			model.addAttribute("pay", result.getPay());
 		}else{
 			model.addAttribute("currDate", new Date());
 		}
@@ -1028,9 +888,14 @@ public class FinanceController extends BaseController {
 	 * 跳转收款记录页面
 	 */
 	@RequestMapping(value = "incomeRecordList.htm")
-	public String incomeRecordList(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model) {
-		handResponse(request, model);
+	public String incomeRecordList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
+		
+		IncomeOrPayDTO dto = new IncomeOrPayDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		
+		IncomeOrPaytResult result = financeFacade.incomeRecordList(dto);
+		this.handResponse(request, model, result);
+		
 		return "finance/cash/income-list";
 	}
 
@@ -1038,9 +903,12 @@ public class FinanceController extends BaseController {
 	 * 跳转付款记录页面
 	 */
 	@RequestMapping(value = "payRecordList.htm")
-	public String cashRecordList(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model) {
-		handResponse(request, model);
+	public String cashRecordList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
+		IncomeOrPayDTO dto = new IncomeOrPayDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		
+		IncomeOrPaytResult result = financeFacade.payRecordList(dto);
+		this.handResponse(request, model, result);
 		return "finance/cash/pay-list";
 	}
 
@@ -1049,10 +917,8 @@ public class FinanceController extends BaseController {
 	 */
 	@RequestMapping(value = "auditList.htm")
 	@RequiresPermissions(PermissionConstants.CWGL_JSDSH)
-	public String auditList(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, Integer groupId) {
-		model.addAttribute("group",
-				tourGroupService.selectByPrimaryKey(groupId));
+	public String auditList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer groupId) {
+		model.addAttribute("group", financeFacade.auditList(groupId));
 		return "finance/audit-list";
 	}
 
@@ -1061,10 +927,9 @@ public class FinanceController extends BaseController {
 	 */
 	@RequestMapping(value = "auditGroup.htm")
 	@RequiresPermissions(PermissionConstants.CWGL_JSDSH)
-	public String auditGroup(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, Integer groupId) {
+	public String auditGroup(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer groupId) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAllAttributes(financeService.queryAuditViewInfo(groupId, bizId));
+		model.addAllAttributes(financeFacade.queryAuditViewInfo(groupId, bizId));
 		return "finance/audit-group";
 	}
 	
@@ -1073,10 +938,9 @@ public class FinanceController extends BaseController {
 	 */
 	@RequestMapping(value = "auditGroupList.htm")
 	@RequiresPermissions(PermissionConstants.CWGL_JSDSH)
-	public String auditGroupList(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, Integer groupId) {
+	public String auditGroupList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer groupId) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAllAttributes(financeService.queryAuditViewInfo(groupId, bizId));
+		model.addAllAttributes(financeFacade.queryAuditViewInfo(groupId, bizId));
 		return "finance/audit-group-list";
 	}
 	
@@ -1084,10 +948,9 @@ public class FinanceController extends BaseController {
 	 * 跳转到审核汇总打印页面
 	 */
 	@RequestMapping(value = "auditGroupListPrint.htm")
-	public String auditGroupListPrint(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, Integer groupId) {
+	public String auditGroupListPrint(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer groupId) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAllAttributes(financeService.queryAuditViewInfo(groupId, bizId));
+		model.addAllAttributes(financeFacade.queryAuditViewInfo(groupId, bizId));
 		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" 打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		return "finance/audit-group-list-print";
 	}
@@ -1096,13 +959,17 @@ public class FinanceController extends BaseController {
 	 * 跳转到审核查询页面
 	 */
 	@RequestMapping(value = "aduditStatisticsList.htm")
-	public String aduditStatisticsList(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model) {
-		List<TourGroup> auditorList = tourGroupService.getAuditorList();
+	public String aduditStatisticsList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
+		List<TourGroup> auditorList = financeFacade.getAuditorList();
 		model.addAttribute("auditorList", auditorList);
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		
 		return "finance/aduditStatisticsList-list";
 	}
 	
@@ -1110,36 +977,26 @@ public class FinanceController extends BaseController {
 	public String aduditStatisticsList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String sl, String ssl,
 			String rp, Integer page, Integer pageSize, String svc,TourGroupVO group) {
-
-		PageBean pb = new PageBean();
-		pb.setPage(page);
-		if (pageSize == null) {
-			pageSize = Constants.PAGESIZE;
+		
+		AduditStatisticsListDTO dto = new AduditStatisticsListDTO();
+		
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
 		}
-		pb.setPageSize(pageSize);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
 		}
-		Map<String,Object> pms  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pms.put("operator_id", group.getSaleOperatorIds());
-		}
-		pms.put("set", WebUtils.getDataUserIdSet(request));
-		pb.setParameter(pms);
-		pb = getCommonService(svc).queryListPage(sl, pb);
+		
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setRp(rp);
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		dto.setSl(ssl);
+		dto.setSsl(ssl);
+		dto.setSvc(svc);
+		PageBean pb = financeFacade.aduditStatisticsList(dto);
 		model.addAttribute("pageBean", pb);
 		
 		return rp;
@@ -1156,12 +1013,11 @@ public class FinanceController extends BaseController {
 	 */
 	@RequestMapping(value = "getAuditUserList.do", method = RequestMethod.GET)
 	@ResponseBody
-	public String getAuditUserList(HttpServletRequest request,
-			HttpServletResponse reponse, String name)
+	public String getAuditUserList(HttpServletRequest request, HttpServletResponse reponse, String name)
 			throws UnsupportedEncodingException {
-		List<Map<String, String>> list = tourGroupService.getAuditUserList(
-				WebUtils.getCurBizId(request),
-				java.net.URLDecoder.decode(name, "UTF-8"));
+		
+		List<Map<String, String>> list = financeFacade.getAuditUserList(java.net.URLDecoder.decode(name, "UTF-8"), 
+				WebUtils.getCurBizId(request));
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("success", "true");
 		map.put("result", list);
@@ -1174,7 +1030,7 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "operateLog.htm")
 	public String operateLog(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer groupId) {
-		List<TourGroup> operateLogs = financeService.getOperateLogs(groupId);
+		List<TourGroup> operateLogs = financeFacade.operateLog(groupId);
 		model.addAttribute("operateLogs", operateLogs);
 		return "finance/operate-log";
 	}
@@ -1190,30 +1046,23 @@ public class FinanceController extends BaseController {
 			String feeType, String checkedIds, String unCheckedIds,
 			String comCheckedIds, String comUnCheckedIds, String financeGuides,
 			String priceCheckedIds, String priceUnCheckedIds) {
+		
+		
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		//处理审核
-		financeService.audit(groupId, feeType, checkedIds, unCheckedIds,comCheckedIds, 
-				comUnCheckedIds, emp.getEmployeeId(),emp.getName());
+		AuditDTO dto = new AuditDTO();
+		dto.setGroupId(groupId);
+		dto.setFeeType(feeType);
+		dto.setCheckedIds(priceUnCheckedIds);
+		dto.setUnCheckedIds(priceUnCheckedIds);
+		dto.setComCheckedIds(comCheckedIds);
+		dto.setComUnCheckedIds(comUnCheckedIds);
+		dto.setFinanceGuides(financeGuides);
+		dto.setPriceCheckedIds(priceCheckedIds);
+		dto.setPriceUnCheckedIds(priceUnCheckedIds);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
 		
-		if(StringUtils.isNotEmpty(financeGuides)){
-			//处理导游报账
-			List<FinanceGuide> list = JSONArray.parseArray(financeGuides, FinanceGuide.class);
-			financeGuideService.financeBatchSave(list);
-			
-			//修改订单结算方式
-			FinanceGuide fg = null;
-			for(int i = 0; i < list.size(); i++){
-				fg = list.get(i);
-				BookingSupplier supplier = new BookingSupplier();
-				supplier.setId(fg.getBookingIdLink());
-				supplier.setCashType(fg.getCashType());
-				bookingSupplierService.updateByPrimaryKeySelective(supplier);
-			}
-		}
-		
-		//审核订单价格
-		groupOrderPriceService.auditPriceByIds(priceCheckedIds, priceUnCheckedIds);
-		
+		financeFacade.audit(dto);
 		return null;
 	}
 	
@@ -1226,25 +1075,14 @@ public class FinanceController extends BaseController {
 	public String auditList(HttpServletRequest request, HttpServletResponse reponse, 
 			ModelMap model, String data, String financeGuides) {
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		//处理审核
-		financeService.audit(data, emp.getEmployeeId(), emp.getName());
 		
-		if(StringUtils.isNotEmpty(financeGuides)){
-			
-			//处理导游报账
-			List<FinanceGuide> list = JSONArray.parseArray(financeGuides, FinanceGuide.class);
-			financeGuideService.financeBatchSave(list);
-			
-			//修改订单结算方式
-			FinanceGuide fg = null;
-			for(int i = 0; i < list.size(); i++){
-				fg = list.get(i);
-				BookingSupplier supplier = new BookingSupplier();
-				supplier.setId(fg.getBookingIdLink());
-				supplier.setCashType(fg.getCashType());
-				bookingSupplierService.updateByPrimaryKeySelective(supplier);
-			}
-		}
+		AuditListDTO dto = new AuditListDTO();
+		dto.setData(data);
+		dto.setFinanceGuides(financeGuides);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		
+		financeFacade.auditList(dto);
 		return null;
 	}
 
@@ -1254,10 +1092,14 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "finAudit.do")
 	@ResponseBody
 	@PostHandler
-	public String finAudit(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, Integer groupId) {
+	public String finAudit(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer groupId) {
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		financeService.audit(groupId, emp.getEmployeeId(), emp.getName());
+		
+		FinAuditDTO dto = new FinAuditDTO();
+		dto.setGroupId(groupId);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		financeFacade.finAudit(dto);
 		return null;
 	}
 
@@ -1270,7 +1112,12 @@ public class FinanceController extends BaseController {
 	public String finUnAudit(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer groupId) {
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		financeService.unAudit(groupId, emp.getName());
+		
+		FinAuditDTO dto = new FinAuditDTO();
+		dto.setGroupId(groupId);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		financeFacade.finUnAudit(dto);
 		return null;
 	}
 
@@ -1280,10 +1127,13 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "batchSeal.do")
 	@ResponseBody
 	@PostHandler
-	public String batchSeal(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, String groupIds) {
+	public String batchSeal(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String groupIds) {
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		financeService.batchSeal(groupIds, emp.getEmployeeId(), emp.getName());
+		UnsealDTO dto = new UnsealDTO();
+		dto.setGroupIds(groupIds);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		financeFacade.batchSeal(dto);
 		return null;
 	}
 
@@ -1293,10 +1143,14 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "unseal.do")
 	@ResponseBody
 	@PostHandler
-	public String unseal(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, String groupId) {
+	public String unseal(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String groupId) {
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		financeService.unseal(groupId, emp.getEmployeeId(), emp.getName());
+		
+		UnsealDTO dto = new UnsealDTO();
+		dto.setGroupIds(groupId);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		financeFacade.unseal(dto);
 		return null;
 	}
 
@@ -1313,21 +1167,15 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "pay.do")
 	@ResponseBody
 	@PostHandler
-	public String pay(HttpServletRequest request, HttpServletResponse reponse,
-			ModelMap model, FinancePay pay) {
+	public String pay(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, FinancePay pay) {
+		
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		pay.setUserId(emp.getEmployeeId());
-		pay.setUserName(emp.getName());
-		pay.setBizId(WebUtils.getCurBizId(request));
-		
-//		以下几句获得收付款当前商家的类别，因为其它收入，其它支出是共用一个商家类别，代码里面求各是需要判断用到 ou
-		SupplierInfo sInfo = supplierService.selectBySupplierId(pay.getSupplierId());
-		int SupplierType = pay.getSupplierType();
-		if (sInfo != null)
-			SupplierType = sInfo.getSupplierType();
-		
-		FinancePay rt = financeService.pay(pay,	JSON.parseArray(pay.getDetails(), FinancePayDetail.class), SupplierType);
-		return String.valueOf(rt.getId());
+		PayDTO dto = new PayDTO();
+		dto.setFinancePay(pay);
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		return financeFacade.pay(dto);
 	}
 
 	/**
@@ -1343,24 +1191,19 @@ public class FinanceController extends BaseController {
 	@ResponseBody
 	public String querySupplierBankAccountList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer sid) {
+		
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("success", "true");
-		map.put("accountList", supplierService.selectBankBySupplierId(sid));
+		map.put("accountList", financeFacade.querySupplierBankAccountList(sid));
 		return JSON.toJSONString(map);
 	}
 
-	private void handResponse(HttpServletRequest request, ModelMap model) {
-		List<DicInfo> payTypeList = dicService
-				.getListByTypeCode(BasicConstants.CW_ZFFS);
-		model.addAttribute("payTypeList", payTypeList);
-		Integer biz_id = WebUtils.getCurBizId(request);
-		List<SysBizBankAccount> bizAccountList = sysBizBankAccountService
-				.getListByBizId(biz_id);
-		model.addAttribute("bizAccountList", bizAccountList);
-		model.addAttribute("supplierTypeMapIn",
-				SupplierConstant.supplierTypeMapIn);
-		model.addAttribute("supplierTypeMapPay",
-				SupplierConstant.supplierTypeMapPay);
+	private void handResponse(HttpServletRequest request, ModelMap model, IncomeOrPaytResult result) {
+		
+		model.addAttribute("payTypeList", result.getPayTypeList());
+		model.addAttribute("bizAccountList", result.getBizAccountList());
+		model.addAttribute("supplierTypeMapIn", SupplierConstant.supplierTypeMapIn);
+		model.addAttribute("supplierTypeMapPay", SupplierConstant.supplierTypeMapPay);
 		PlatformEmployeePo employee = WebUtils.getCurUser(request);
 		if (employee != null) {
 			model.addAttribute("operatePerson", employee.getName());
@@ -1403,9 +1246,11 @@ public class FinanceController extends BaseController {
 		String receive = "re";
 		String unreceive = "un";
 		String cash_type = "cash_type";
-
+		
+		TourGroupDetiailsResult result = financeFacade.getTourGroupDetails(groupId);
+		
 		// 旅行团信息
-		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
+		TourGroup tourGroup = result.getTourGroup();
 
 		Integer totalAdult = tourGroup.getTotalAdult(), totalChild = tourGroup
 				.getTotalChild(), totalGuide = tourGroup.getTotalGuide();
@@ -1440,21 +1285,15 @@ public class FinanceController extends BaseController {
 		String print_time = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
 		commonMap.put("print_time", print_time);
 		// 销售订单
-		List<GroupOrder> orderList = groupOrderService
-				.selectOrderByGroupId(groupId);
+		List<GroupOrder> orderList = result.getOrderList();
 		// 购物店收入
-		List<BookingShop> shoppingList = bookingShopService
-				.getShopListByGroupId(groupId);
+		List<BookingShop> shoppingList = result.getShoppingList();
 		// 其他收入
-		List<BookingSupplier> otherList = bookingSupplierService
-				.getBookingSupplierByGroupIdAndSupplierType(groupId,
-						com.yihg.supplier.constants.Constants.OTHERINCOME);
+		List<BookingSupplier> otherList = result.getOtherList();
 		// 地接社支出
-		List<BookingDelivery> deliveryList = bookingDeliveryService
-				.getDeliveryListByGroupId(groupId);
+		List<BookingDelivery> deliveryList = result.getDeliveryList();
 		// 供应商支出
-		List<BookingSupplier> paymentList = bookingSupplierService
-				.selectByPrimaryGroupId(groupId);
+		List<BookingSupplier> paymentList = result.getPaymentList();
 
 		// 总计
 		Map<String, Object> totalMap = new HashMap<String, Object>();
@@ -1487,8 +1326,7 @@ public class FinanceController extends BaseController {
 			int numChild = order.getNumChild() == null ? 0 : order
 					.getNumChild();
 			map.put(person_num, (numAdult + numChild) + blankStr);
-			List<GroupOrderPrice> priceList = groupOrderPriceService
-					.selectByOrder(order.getId());
+			List<GroupOrderPrice> priceList = financeFacade.getOrderPriceByOrder(order.getId());
 			int i = 1;
 			StringBuilder descStr = new StringBuilder();
 			for (GroupOrderPrice orderPrice : priceList) {
@@ -1603,8 +1441,7 @@ public class FinanceController extends BaseController {
 			map.put(cash_type, bookingSupplier.getCashType() == null ? ""
 					: bookingSupplier.getCashType());
 
-			List<BookingSupplierDetail> detailList = bookingSupplierDetailService
-					.selectByPrimaryBookId(bookingSupplier.getId());
+			List<BookingSupplierDetail> detailList = financeFacade.getBookingSupplierDetailById(bookingSupplier.getId());
 			int i = 1;
 			StringBuilder descStr = new StringBuilder();
 			for (BookingSupplierDetail detail : detailList) {
@@ -1677,9 +1514,7 @@ public class FinanceController extends BaseController {
 		List<Map<String, String>> paymentSwitcherList = new ArrayList<Map<String, String>>();
 		for (BookingDelivery delivery : deliveryList) {
 			Map<String, String> map = new HashMap<String, String>();
-			map.put(type, SupplierConstant.supplierTypeMap.get(supplierService
-					.selectBySupplierId(delivery.getSupplierId())
-					.getSupplierType()));
+			map.put(type, SupplierConstant.supplierTypeMap.get(financeFacade.getSupplierById(delivery.getSupplierId()).getSupplierType()));
 			map.put(supplier_name, delivery.getSupplierName());
 			map.put(cash_type, "");
 			BigDecimal t1 = delivery.getTotal();
@@ -1710,13 +1545,11 @@ public class FinanceController extends BaseController {
 		// 商家支出
 		for (BookingSupplier bookingSupplier : paymentList) {
 			if (bookingSupplier.getSupplierType().equals(
-					com.yihg.sales.constants.Constants.OTHER)) {
+					com.yimayhd.erpcenter.dal.sales.client.constants.Constants.OTHER)) {
 				continue;
 			}
 			Map<String, String> map = new HashMap<String, String>();
-			map.put(type, SupplierConstant.supplierTypeMap.get(supplierService
-					.selectBySupplierId(bookingSupplier.getSupplierId())
-					.getSupplierType()));
+			map.put(type, SupplierConstant.supplierTypeMap.get(financeFacade.getSupplierById(bookingSupplier.getSupplierId()).getSupplierType()));
 			map.put(supplier_name, bookingSupplier.getSupplierName());
 			map.put(cash_type, bookingSupplier.getCashType() == null ? blankStr
 					: bookingSupplier.getCashType());
@@ -1730,8 +1563,7 @@ public class FinanceController extends BaseController {
 							.doubleValue()));
 			map.put(unreceive, t1 == null || t2 == null ? blankStr
 					: WordReporter.getPoint2(t1.subtract(t2).doubleValue()));
-			List<BookingSupplierDetail> detailList = bookingSupplierDetailService
-					.selectByPrimaryBookId(bookingSupplier.getId());
+			List<BookingSupplierDetail> detailList = financeFacade.getBookingSupplierDetailById(bookingSupplier.getId());
 			int i = 1;
 			StringBuilder descStr = new StringBuilder();
 			for (BookingSupplierDetail detail : detailList) {
@@ -1827,13 +1659,16 @@ public class FinanceController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping("/billList.htm")
-	public String receiveOrderList(HttpServletRequest request,
-			HttpServletResponse response, ModelMap model, TourGroup group,
-			Integer page) {
+	public String receiveOrderList(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroup group, Integer page) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		model.addAttribute("bizId", bizId); // 过滤B商家
+		
 		return "finance/bill/receiveBillList";
 	}
 
@@ -1848,49 +1683,26 @@ public class FinanceController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping(value = "/billList.do")
-	public String receiveOrderListSelect(HttpServletRequest request,
-			ModelMap model, Integer pageSize, Integer page,TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
-		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
-		}
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("saleOperatorIds", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = financeBillService.selectreceiveOrderListSelectPage(
-				pageBean, WebUtils.getCurBizId(request), "finance", WebUtils.getDataUserIdSet(request));
-		model.addAttribute("pageBean", pageBean);
-
+	public String receiveOrderListSelect(HttpServletRequest request, ModelMap model, Integer pageSize, Integer page,TourGroupVO group) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> billTypeList = dicService.getListByTypeCode(
-				BasicConstants.LD_DJLX, bizId);
-		model.addAttribute("billTypeList", billTypeList);
+		
+		ReceiveOrderListSelectDTO dto = new ReceiveOrderListSelectDTO();
+		dto.setBizId(bizId);
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
+		}
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
+		}
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		
+		ReceiveOrderListSelectResult result = financeFacade.receiveOrderListSelect(dto);
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("billTypeList", result.getBillTypeList());
 		return "finance/bill/receiveBillList-table";
 	}
 
@@ -1905,12 +1717,9 @@ public class FinanceController extends BaseController {
 	 */
 	@RequestMapping(value = "fuzzyApplicantList.do", method = RequestMethod.GET)
 	@ResponseBody
-	public String fuzzyApplicantList(HttpServletRequest request,
-			HttpServletResponse reponse, String name)
-			throws UnsupportedEncodingException {
-		List<Map<String, String>> list = financeBillService
-				.getFuzzyApplicantList(WebUtils.getCurBizId(request),
-						java.net.URLDecoder.decode(name, "UTF-8"));
+	public String fuzzyApplicantList(HttpServletRequest request, HttpServletResponse reponse, String name){
+		
+		List<Map<String, String>> list = financeFacade.fuzzyApplicantList(WebUtils.getCurBizId(request), name);
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("success", "true");
 		map.put("result", list);
@@ -1926,25 +1735,23 @@ public class FinanceController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping("/diatributeBill.htm")
-	public String diatributeBill(HttpServletRequest request,
-			HttpServletResponse response, ModelMap model, String id,
+	public String diatributeBill(HttpServletRequest request, HttpServletResponse response, ModelMap model, String id,
 			String guideId, String groupCode) {
-		List<FinanceBillDetail> financeBillDetailList = financeBillService
-				.getbillListByIdAndGuideId(WebUtils.getCurBizId(request), id,
-						guideId);
-		if (null != financeBillDetailList && financeBillDetailList.size() > 0) {
-			Map financeBillDetail = (Map) financeBillDetailList.get(0);
-			model.put("guideName", financeBillDetail.get("guide_name"));
-			model.put("applicant", financeBillDetail.get("applicant"));
-			model.put("appliTime", financeBillDetail.get("appli_time"));
-			model.put("financeBillDetailList", financeBillDetailList);
-		}
-		model.put("nowDate", new Date());
-
-		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> billTypeList = dicService.getListByTypeCode(
-				BasicConstants.LD_DJLX, bizId);
-		model.addAttribute("billTypeList", billTypeList);
+		
+		DiatributeBillDTO dto = new DiatributeBillDTO();
+		
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setGroupCode(groupCode);
+		dto.setGuideId(guideId);
+		dto.setId(id);
+		
+		DiatributeBillResult result = financeFacade.diatributeBill(dto);
+		model.put("guideName", result.getGuideName());
+		model.put("applicant", result.getApplicant());
+		model.put("appliTime", result.getAppliTime());
+		model.put("financeBillDetailList", result.getFinanceBillDetailList());
+		model.put("nowDate", result.getNowDate());
+		model.addAttribute("billTypeList", result.getBillTypeList());
 
 		return "finance/bill/distributeBill";
 	}
@@ -1959,25 +1766,22 @@ public class FinanceController extends BaseController {
 	 */
 	@RequestMapping("/verifyBill.htm")
 	public String verifyBill(HttpServletRequest request,
-			HttpServletResponse response, ModelMap model, String id,
-			String guideId, String groupCode) {
-		List<FinanceBillDetail> financeBillDetailList = financeBillService
-				.getbillListByIdAndGuideId(WebUtils.getCurBizId(request), id,
-						guideId);
-		if (null != financeBillDetailList && financeBillDetailList.size() > 0) {
-			Map financeBillDetail = (Map) financeBillDetailList.get(0);
-			model.put("guideName", financeBillDetail.get("guide_name"));
-			model.put("applicant", financeBillDetail.get("applicant"));
-			model.put("appliTime", financeBillDetail.get("appli_time"));
-			model.put("apprTime", financeBillDetail.get("appr_time"));
-			model.put("financeBillDetailList", financeBillDetailList);
-		}
-		model.put("nowDate", new Date());
-
-		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> billTypeList = dicService.getListByTypeCode(
-				BasicConstants.LD_DJLX, bizId);
-		model.addAttribute("billTypeList", billTypeList);
+			HttpServletResponse response, ModelMap model, String id, String guideId, String groupCode) {
+		
+		VerifyBillDTO dto = new VerifyBillDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setGroupCode(groupCode);
+		dto.setGuideId(guideId);
+		dto.setId(id);
+		VerifyBillResult result = financeFacade.verifyBill(dto);
+		
+		model.put("guideName", result.getGuideName());
+		model.put("applicant", result.getApplicant());
+		model.put("appliTime", result.getAppliTime());
+		model.put("apprTime", result.getApprTime());
+		model.put("financeBillDetailList", result.getFinanceBillDetailList());
+		model.put("nowDate", result.getNowDate());
+		model.addAttribute("billTypeList", result.getBillTypeList());
 		return "finance/bill/verifyBill";
 	}
 
@@ -1993,23 +1797,24 @@ public class FinanceController extends BaseController {
 	public String checkBill(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model, String id,
 			String guideId, String groupCode, String appliState) {
-		List<FinanceBillDetail> financeBillDetailList = financeBillService
-				.getbillListByIdAndGuideId(WebUtils.getCurBizId(request), id,
-						guideId);
-		if (null != financeBillDetailList && financeBillDetailList.size() > 0) {
-			Map financeBillDetail = (Map) financeBillDetailList.get(0);
-			model.put("guideName", financeBillDetail.get("guide_name"));
-			model.put("applicant", financeBillDetail.get("applicant"));
-			model.put("appliTime", financeBillDetail.get("appli_time"));
-			model.put("apprTime", financeBillDetail.get("appr_time"));
-			model.put("veriTime", financeBillDetail.get("veri_time"));
-			model.put("appliState", appliState);
-			model.put("financeBillDetailList", financeBillDetailList);
-		}
-		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> billTypeList = dicService.getListByTypeCode(
-				BasicConstants.LD_DJLX, bizId);
-		model.addAttribute("billTypeList", billTypeList);
+		
+		CheckBillDTO dto = new CheckBillDTO();
+		dto.setAppliState(appliState);
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setGroupCode(groupCode);
+		dto.setGuideId(guideId);
+		dto.setId(id);
+		
+		CheckBillResult result = financeFacade.checkBill(dto);
+		
+		model.put("guideName", result.getGuideName());
+		model.put("applicant", result.getApplicant());
+		model.put("appliTime", result.getAppliTime());
+		model.put("apprTime", result.getApprTime());
+		model.put("veriTime", result.getVeriTime());
+		model.put("appliState", appliState);
+		model.put("financeBillDetailList", result.getFinanceBillDetailList());
+		model.addAttribute("billTypeList", result.getBillTypeList());
 		return "finance/bill/checkBill";
 	}
 	
@@ -2025,25 +1830,24 @@ public class FinanceController extends BaseController {
 	public String checkBillPrint(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model, String id,
 			String guideId, String groupCode, String appliState) {
-		List<FinanceBillDetail> financeBillDetailList = financeBillService
-				.getbillListByIdAndGuideId(WebUtils.getCurBizId(request), id,
-						guideId);
-		if (null != financeBillDetailList && financeBillDetailList.size() > 0) {
-			Map financeBillDetail = (Map) financeBillDetailList.get(0);
-			model.put("guideName", financeBillDetail.get("guide_name"));
-			model.put("applicant", financeBillDetail.get("applicant"));
-			model.put("appliTime", financeBillDetail.get("appli_time"));
-			model.put("apprTime", financeBillDetail.get("appr_time"));
-			model.put("veriTime", financeBillDetail.get("veri_time"));
-			model.put("appliState", appliState);
-			model.put("financeBillDetailList", financeBillDetailList);
-		}
-		TourGroup tour = tourGroupService.selectByPrimaryKey(Integer.parseInt(id));
-		model.addAttribute("tour", tour);
-		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> billTypeList = dicService.getListByTypeCode(
-				BasicConstants.LD_DJLX, bizId);
-		model.addAttribute("billTypeList", billTypeList);
+		
+		CheckBillDTO dto = new CheckBillDTO();
+		dto.setAppliState(appliState);
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setGroupCode(groupCode);
+		dto.setGuideId(guideId);
+		dto.setId(id);
+		CheckBillResult result = financeFacade.checkBillPrint(dto);
+		
+		model.put("guideName", result.getGuideName());
+		model.put("applicant", result.getApplicant());
+		model.put("appliTime", result.getAppliTime());
+		model.put("apprTime", result.getApprTime());
+		model.put("veriTime", result.getVeriTime());
+		model.put("appliState", appliState);
+		model.put("financeBillDetailList", result.getFinanceBillDetailList());
+		model.addAttribute("tour", result.getTourGroup());
+		model.addAttribute("billTypeList", result.getBillTypeList());
 		return "finance/bill/checkBillPrint";
 	}
 
@@ -2060,10 +1864,19 @@ public class FinanceController extends BaseController {
 	@PostHandler
 	public String saveDistributeBill(HttpServletRequest request,
 			String billList, String groupId, String guideId, String type) {
-		financeBillService.saveDistributeBill(billList);
-		financeBillService.updateFinanceOrder(WebUtils.getCurUser(request)
-				.getLoginName(), new Integer(groupId), new Integer(guideId),
-				new Date(), type);
+		
+		SaveDistributeBillDTO dto = new SaveDistributeBillDTO();
+		dto.setBillList(billList);
+		if(StringUtils.isNotEmpty(groupId)){
+			dto.setGroupId(Integer.parseInt(groupId));
+		}
+		if(StringUtils.isNotEmpty(guideId)){
+			dto.setGuideId(Integer.parseInt(guideId));
+		}
+		dto.setLoginName(WebUtils.getCurUser(request).getLoginName());
+		dto.setType(type);
+		
+		financeFacade.saveDistributeBill(dto);
 		return null;
 	}
 
@@ -2079,10 +1892,18 @@ public class FinanceController extends BaseController {
 	@PostHandler
 	public String saveVerifyBill(HttpServletRequest request, String billList,
 			String groupId, String guideId, String type) {
-		financeBillService.saveVerifyBill(billList);
-		financeBillService.updateFinanceOrder(WebUtils.getCurUser(request)
-				.getLoginName(), new Integer(groupId), new Integer(guideId),
-				new Date(), type);
+		
+		SaveVerifyBillDTO dto = new SaveVerifyBillDTO();
+		dto.setBillList(billList);
+		if(StringUtils.isNotEmpty(groupId)){
+			dto.setGroupId(Integer.parseInt(groupId));
+		}
+		if(StringUtils.isNotEmpty(guideId)){
+			dto.setGuideId(Integer.parseInt(guideId));
+		}
+		dto.setLoginName(WebUtils.getCurUser(request).getLoginName());
+		dto.setType(type);
+		financeFacade.saveVerifyBill(dto);
 		return null;
 	}
 	
@@ -2097,7 +1918,7 @@ public class FinanceController extends BaseController {
 	@ResponseBody
 	@PostHandler
 	public String delVerify(HttpServletRequest request, String order_id,String type) {
-		financeBillService.delVerify(order_id,type);
+		financeFacade.delVerify(order_id, type);
 		return null;
 	}
 	
@@ -2112,7 +1933,7 @@ public class FinanceController extends BaseController {
 	@ResponseBody
 	@PostHandler
 	public String delReceived(HttpServletRequest request, String group_id,String guide_id) {
-		financeBillService.delReceived(group_id,guide_id);
+		financeFacade.delReceived(group_id,guide_id);
 		return null;
 	}
 
@@ -2127,12 +1948,9 @@ public class FinanceController extends BaseController {
 	 */
 	@RequestMapping(value = "getUserNameList.do", method = RequestMethod.GET)
 	@ResponseBody
-	public String getUserNameList(HttpServletRequest request,
-			HttpServletResponse reponse, String name)
-			throws UnsupportedEncodingException {
-		List<Map<String, String>> list = financeBillService.getUserNameList(
-				WebUtils.getCurBizId(request),
-				java.net.URLDecoder.decode(name, "UTF-8"));
+	public String getUserNameList(HttpServletRequest request,HttpServletResponse reponse, String name){
+		
+		List<Map<String, String>> list = financeFacade.getUserNameList(WebUtils.getCurBizId(request), name);
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("success", "true");
 		map.put("result", list);
@@ -2157,75 +1975,31 @@ public class FinanceController extends BaseController {
 	public String settleListPage(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String sl, String ssl,
 			String rp, Integer page, Integer pageSize, String svc,TourGroupVO group) {
-
-		PageBean pb = new PageBean();
-		pb.setPage(page);
-		if (pageSize == null) {
-			pageSize = Constants.PAGESIZE;
-		}
-		pb.setPageSize(pageSize);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pms  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pms.put("operator_id", group.getSaleOperatorIds());
-		}
-		pms.put("set", WebUtils.getDataUserIdSet(request));
-		pb.setParameter(pms);
-		pb = getCommonService(svc).queryListPage(sl, pb);
-		model.addAttribute("pageBean", pb);
 		
-		Map<Integer, String> guideMap = new HashMap<Integer, String>();
-		List<Map> results = pb.getResult();
-		Map item = null;
-		for (int i = 0; i < results.size(); i++) {
-			item = results.get(i);
-			Integer groupId = Integer.parseInt(item.get("id").toString());
-			List<BookingGuide> bookingGuides = bookingGuideService.selectGuidesByGroupId(groupId);
-			StringBuffer s = new StringBuffer();
-			for (int j = 0; j < bookingGuides.size(); j++) {
-				if (j == (bookingGuides.size() - 1)) {
-					s.append(bookingGuides.get(j).getGuideName());
-				} else {
-					s.append(bookingGuides.get(j).getGuideName() + ",");
-				}
-				item.put("userName", bookingGuides.get(j).getUserName());
-			}
-			guideMap.put(groupId, s.toString());
-			
-			BigDecimal totalIncome = NumberUtil.parseObj2Num(item.get("total_income"));
-			BigDecimal totalCost = NumberUtil.parseObj2Num(item.get("total_cost"));
-			
-			//团收入 = 团收入 - 购物汇总
-			InfoBean shop = financeService.statsShopWithCommInfoBean(groupId);
-			totalIncome = totalIncome.subtract(shop.getNum());
-			
-			item.put("total_income", totalIncome);
-			item.put("total_profit", totalIncome.subtract(totalCost));
-
+		SettleListPageDTO dto = new SettleListPageDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
 		}
-		model.addAttribute("guideMap", guideMap);
-
-		// 总计查询
-		if (StringUtils.isNotBlank(ssl)) {
-			Map pm = (Map) pb.getParameter();
-			pm.put("parameter", pm);
-			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
 		}
+		
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setRp(rp);
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		dto.setSl(ssl);
+		dto.setSsl(ssl);
+		dto.setSvc(svc);
+		
+		SettleListPageResult result = financeFacade.settleListPage(dto);
+		
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("guideMap", result.getGuideMap());
+		model.addAttribute("sum", result.getSumMap());
+		
 		return "finance/settle-list-table";
 	}
 
@@ -2247,84 +2021,43 @@ public class FinanceController extends BaseController {
 	public String querySettleList(HttpServletRequest request,HttpServletResponse reponse, 
 			ModelMap model, String sl, String rp,String svc,String edit) {
 		
-		String feeType = request.getParameter("feeType");
-		Map<String, Object> pm = WebUtils.getQueryParamters(request);
-		List<Map<String, Object>> list = getCommonService(svc).queryList(sl, pm);
-		Integer bizId = WebUtils.getCurBizId(request);
-		if(list != null && list.size() > 0 ){
-			
-			for(Map<String, Object> item : list){
-				Integer bookingId = Integer.parseInt(item.get("id").toString());
-				String details = "";
-				if("order".equals(feeType)){
-					boolean isShow = pm.get("isShow") != null ? Boolean.parseBoolean(pm.get("isShow").toString()) : false;
-					List<GroupOrderPrice> priceList = groupOrderPriceService.selectByOrderAndType(bookingId, 0);
-					details = groupOrderPriceService.concatDetailTable(priceList, isShow,edit);
-				}else if("shop".equals(feeType)){
-					List<BookingShopDetail> detailList = bookingShopDetailService.getShopDetailListByBookingId(bookingId);
-					details = bookingShopDetailService.concatDetailTable(detailList);
-				}else if("del".equals(feeType)){
-					List<BookingDeliveryPrice> priceList = bookingDeliveryPriceService.getPriceListByBookingId(bookingId);
-					details = bookingDeliveryPriceService.concatDetailTable(priceList);
-				}else if("sup".equals(feeType) || "otherin".equals(feeType)){
-					Integer supType = Integer.parseInt(request.getParameter("supType"));
-					String remark = item.get("remark") != null ? item.get("remark").toString() : "";
-					List<BookingSupplierDetail> detailList = bookingSupplierDetailService.selectByPrimaryBookId(bookingId);
-					details = bookingSupplierDetailService.concatDetailTable(supType, remark, detailList);
-				}
-				item.put("details", details);
-			}
-		}
 		
-		model.addAttribute("list", list);
-		if("sup".equals(feeType) || "otherin".equals(feeType)){
-			String groupId = request.getParameter("groupId");
-			if(StringUtils.isNotEmpty(groupId)){
-				List<BookingGuide> bookingGuides = bookingGuideService.selectGuidesByGroupId(Integer.parseInt(groupId));
-				model.put("bookingGuides", bookingGuides);
-			}
-			
-			//从字典中查询结算方式
-			List<DicInfo> cashTypes = null;
-			if("otherin".equals(feeType)){
-				cashTypes = dicService.getListByTypeCode(BasicConstants.QTSR_JSFS,bizId);
-			}else{
-				cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS,bizId);
-			}
-			model.addAttribute("cashTypes", cashTypes);
+		QuerySettleListDTO dto = new QuerySettleListDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setEdit(edit);
+		dto.setFeeType(request.getParameter("feeType"));
+		dto.setGroupId(request.getParameter("groupId"));
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setRp(rp);
+		dto.setSl(sl);
+		
+		String supType = request.getParameter("supType");
+		if(StringUtils.isNotEmpty(supType)){
+			dto.setSupType(Integer.parseInt(supType));
 		}
+		dto.setSvc(svc);
+		
+		QuerySettleListResult result = financeFacade.querySettleList(dto);
+		
+		model.addAttribute("list", result.getList());
+		model.put("bookingGuides", result.getBookingGuides());
+		model.addAttribute("cashTypes", result.getCashTypes());
 		
 		return rp;
 	}
-
-	/**
-	 * 获取查询服务
-	 * 
-	 * @author Jing.Zhuo
-	 * @create 2015年8月18日 上午9:34:25
-	 * @param svc
-	 * @return
-	 */
-	private CommonService getCommonService(String svc) {
-		if (StringUtils.isBlank(svc)) {
-			svc = "commonsaleService";
-		}
-		return appContext.getBean(svc, CommonService.class);
-	}
-
+	
 	/**
 	 * 删除财务-收款付款
 	 */
 	@RequestMapping(value = "deleteFinancePay.do")
 	@ResponseBody
 	@PostHandler
-	public String deleteFinancePay(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, Integer id) {
-		try {
-			financeService.deletePayById(id);
+	public String deleteFinancePay(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer id) {
+		
+		ResultSupport result = financeFacade.deleteFinancePay(id);
+		if(result.isSuccess()){
 			return successJson("msg", "操作成功");
-		} catch (Exception e) {
-			e.printStackTrace();
+		}else{
 			return errorJson("操作失败");
 		}
 	}
@@ -2337,11 +2070,10 @@ public class FinanceController extends BaseController {
 	@PostHandler
 	public String deleteFinancePayDetail(HttpServletRequest request, HttpServletResponse reponse, 
 			ModelMap model, Integer supplierType, Integer locOrderId, Integer payId) {
-		try {
-			financeService.deletePayDetail(supplierType, locOrderId, payId);
+		ResultSupport result = financeFacade.deleteFinancePayDetail(supplierType, locOrderId, payId);
+		if(result.isSuccess()){
 			return successJson("msg", "操作成功");
-		} catch (Exception e) {
-			e.printStackTrace();
+		}else{
 			return errorJson("操作失败");
 		}
 	}
@@ -2359,19 +2091,10 @@ public class FinanceController extends BaseController {
 			return successJson("msg", "操作成功");
 		}
 		
-		try {
-			String[] idArr = locOrderIds.split(",");
-			for(int i = 0; i < idArr.length; i++){
-				String locOrderId = idArr[i];
-				if(StringUtils.isEmpty(locOrderId)){
-					continue;
-				}
-				financeService.deletePayDetail(supplierType, Integer.parseInt(locOrderId), payId);
-			}
-			
+		ResultSupport result = financeFacade.batchDeleteFinancePayDetail(supplierType, locOrderIds, payId);
+		if(result.isSuccess()){
 			return successJson("msg", "操作成功");
-		} catch (Exception e) {
-			e.printStackTrace();
+		}else{
 			return errorJson("操作失败");
 		}
 	}
@@ -2385,11 +2108,14 @@ public class FinanceController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping("shopVerifyList.htm")
-	public String shopVerifyList(HttpServletRequest request,
-			HttpServletResponse response, ModelMap model) {
+	public String shopVerifyList(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
 		return "finance/shopVerify/shopVerifyList";
 	}
@@ -2407,49 +2133,26 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/toBookingShopVerifyList.do")
 	public String toBookingShopVerifyList(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group,String guideName) {
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
-		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
-		}
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = bookingShopService.selectShopVerifyListPage(pageBean,
-				WebUtils.getCurBizId(request));
-		model.addAttribute("pageBean", pageBean);
 		
-		//合计
-		Map<String,Object> map = bookingShopService.selectShopVerifySum(pageBean,
-				WebUtils.getCurBizId(request));
-		model.addAttribute("map", map);
-		List<SupplierGuide> supplierGuides = supplierGuideService.getAllGuide();
-		model.addAttribute("supplierGuides", supplierGuides);
+		ToBookingShopVerifyListDTO dto = new ToBookingShopVerifyListDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setGuideName(guideName);
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
+		}
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
+		}
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		
+		ToBookingShopVerifyListlResult result = financeFacade.toBookingShopVerifyList(dto);
+		
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("map", result.getSumMap());
+		model.addAttribute("supplierGuides", result.getSupplierGuides());
 
 		return "finance/shopVerify/shopVerifyList-table";
 	}
@@ -2467,41 +2170,23 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/toBookingShopVerifyPrint.do")
 	public String toBookingShopVerifyPrint(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group,String guideName) {
-		PageBean pageBean = new PageBean();
-		pageBean.setPage(1);
-		pageBean.setPageSize(10000);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = bookingShopService.selectShopVerifyListPage(pageBean,
-				WebUtils.getCurBizId(request));
-		model.addAttribute("pageBean", pageBean);
 		
-		//合计
-		Map<String,Object> map = bookingShopService.selectShopVerifySum(pageBean,
-				WebUtils.getCurBizId(request));
-		model.addAttribute("map", map);
-		List<SupplierGuide> supplierGuides = supplierGuideService.getAllGuide();
-		model.addAttribute("supplierGuides", supplierGuides);
+		
+		ToBookingShopVerifyListDTO dto = new ToBookingShopVerifyListDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setGuideName(guideName);
+		dto.setOrgIds(group.getOrgIds());
+		dto.setPage(1);
+		dto.setPageSize(100000);
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		
+		ToBookingShopVerifyListlResult result = financeFacade.toBookingShopVerifyList(dto);
+		
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("map", result.getSumMap());
+		model.addAttribute("supplierGuides", result.getSupplierGuides());
 		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" 打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 
 		return "finance/shopVerify/shopVerifyList-print";
@@ -2513,11 +2198,17 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "auditShop.do")
 	@ResponseBody
 	public String auditShop(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, String checkedIds,
-			String unCheckedIds) {
+			HttpServletResponse reponse, ModelMap model, String checkedIds, String unCheckedIds) {
+		
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		financeService.auditShop(checkedIds, unCheckedIds, emp.getEmployeeId(),
-				emp.getName());
+		
+		AuditShopDTO dto = new AuditShopDTO();
+		dto.setCheckedIds(unCheckedIds);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		dto.setUnCheckedIds(unCheckedIds);
+		
+		financeFacade.auditShop(dto);
 		return null;
 	}
 
@@ -2530,16 +2221,20 @@ public class FinanceController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping("shopCommissionStatsList.htm")
-	public String shopStatisticsList(HttpServletRequest request,
-			HttpServletResponse response, ModelMap model) {
-		model.addAttribute("bizId", WebUtils.getCurBizId(request));
+	public String shopStatisticsList(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("projectTypeJsonStr", 
-				dicService.getCommProjectTypeTreeJsonStr(BasicConstants.YJ_XMLX, WebUtils.getCurBizId(request)));
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		String projectTypeJsonStr = financeFacade.shopCommissionStatsList(bizId);
+		
+		model.addAttribute("projectTypeJsonStr", projectTypeJsonStr);
+		model.addAttribute("bizId", WebUtils.getCurBizId(request));
+		
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		
 		return "finance/commission/shopCommissionStats-list";
 	}
 	
@@ -2554,53 +2249,53 @@ public class FinanceController extends BaseController {
 	@RequestMapping("shopCommissionDeductionStatsList.htm")
 	public String shopCommissionDeductionStatsList(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
-		model.addAttribute("bizId", WebUtils.getCurBizId(request));
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("projectTypeJsonStr", 
-				dicService.getCommProjectTypeTreeJsonStr(BasicConstants.YJ_KKXM, WebUtils.getCurBizId(request)));
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		String projectTypeJsonStr = financeFacade.shopCommissionDeductionStatsList(bizId);
+		
+		model.addAttribute("projectTypeJsonStr", projectTypeJsonStr);
+		model.addAttribute("bizId", WebUtils.getCurBizId(request));
+		
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
 		return "finance/commission/shopCommissionDeductionStats-list";
 	}
 
 	@RequestMapping("viewShopCommissionStatsList.htm")
-	public String viewhopStatisticsList(HttpServletRequest request,
-			HttpServletResponse response, ModelMap model) {
+	public String viewhopStatisticsList(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
 		
-		//产品品牌下拉列表数据
-		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
-				WebUtils.getCurBizId(request));
-		model.addAttribute("pp", pp);
-		
-		model.addAttribute("bizId", WebUtils.getCurBizId(request));
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("projectTypeJsonStr", 
-				dicService.getCommProjectTypeTreeJsonStr(BasicConstants.YJ_XMLX, WebUtils.getCurBizId(request)));
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		model.addAttribute("bizId", bizId);
+		
+		ViewShopCommissionStatsListResult viewResult = financeFacade.viewShopCommissionStatsList(bizId);
+		model.addAttribute("pp", viewResult.getBrand());
+		model.addAttribute("projectTypeJsonStr", viewResult.getProjectTypeJsonStr());
+		
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
 		return "finance/commission/viewShopCommissionStats-list";
 	}
 	
 	@RequestMapping("viewShopCommissionDeductionStatsList.htm")
 	public String viewShopCommissionDeductionStatsList(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
-		//产品品牌下拉列表数据
-		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
-				WebUtils.getCurBizId(request));
-		model.addAttribute("pp", pp);
-		
-		model.addAttribute("bizId", WebUtils.getCurBizId(request));
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("projectTypeJsonStr", 
-				dicService.getCommProjectTypeTreeJsonStr(BasicConstants.YJ_KKXM, WebUtils.getCurBizId(request)));
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		model.addAttribute("bizId", bizId);
+		
+		ViewShopCommissionStatsListResult viewResult = financeFacade.viewShopCommissionDeductionStatsList(bizId);
+		model.addAttribute("pp", viewResult.getBrand());
+		model.addAttribute("projectTypeJsonStr", viewResult.getProjectTypeJsonStr());
+		
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
 		return "finance/commission/viewShopCommissionDeductionStats-list";
 	}
 
@@ -2618,63 +2313,25 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/queryShopCommissionStats.do")
 	public String toShopStatisticsList(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
-		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
-		}
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = financeGuideService.getCommisionStatsListPage(pageBean);
-		List<Map<String, Object>> data = pageBean.getResult();
-		List<BookingGuide> guides = new ArrayList<BookingGuide>();
-		if(data != null && data.size() > 0){
-			for(int i = 0 ; i < data.size(); i++){
-				BookingGuide guide = financeGuideService.parseDataToGuide(data.get(i), pageBean, false);
-				guides.add(guide);
-				
-				SupplierGuide sg = supplierGuideService.getGuideInfoById(guide.getGuideId());
-				if(sg != null){
-					guide.setBankAccount(sg.getBankAccount());
-				}
-			}
-		}
-		pageBean.setResult(guides);
-		model.addAttribute("pageBean", pageBean);
-
-		List<DicInfo> dicInfoList = dicService.getListByTypeCode(
-				BasicConstants.YJ_XMLX, WebUtils.getCurBizId(request));
-		model.addAttribute("dicInfoList", dicInfoList);
 		
-		//总合计
-		Map<String, Object> sums = financeGuideService.getCommisionsSum(pageBean);
-		model.addAttribute("sums", sums);
+		QueryShopCommissionStatsDTO dto = new QueryShopCommissionStatsDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
+		}
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
+		}
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		
+		QueryShopCommissionStatsResult result = financeFacade.queryShopCommissionStats(dto);
+		
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("dicInfoList", result.getDicInfoList());
+		model.addAttribute("sums", result.getSums());
 
 		return "finance/commission/shopCommissionStats-table";
 	}
@@ -2693,63 +2350,24 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/queryShopCommissionDeductionStats.do")
 	public String queryShopCommissionDeductionStats(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
+		QueryShopCommissionStatsDTO dto = new QueryShopCommissionStatsDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
 		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
 		}
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = financeGuideService.getCommisionDeductionStatsListPage(pageBean);
-		List<Map<String, Object>> data = pageBean.getResult();
-		List<BookingGuide> guides = new ArrayList<BookingGuide>();
-		if(data != null && data.size() > 0){
-			for(int i = 0 ; i < data.size(); i++){
-				BookingGuide guide = financeGuideService.parseDataToGuide(data.get(i), pageBean, true);
-				guides.add(guide);
-				
-				SupplierGuide sg = supplierGuideService.getGuideInfoById(guide.getGuideId());
-				if(sg != null){
-					guide.setBankAccount(sg.getBankAccount());
-				}
-			}
-		}
-		pageBean.setResult(guides);
-		model.addAttribute("pageBean", pageBean);
-
-		List<DicInfo> dicInfoList = dicService.getListByTypeCode(
-				BasicConstants.YJ_KKXM, WebUtils.getCurBizId(request));
-		model.addAttribute("dicInfoList", dicInfoList);
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
 		
-		//总合计
-		Map<String, Object> sums = financeGuideService.getCommisionsDeductionSum(pageBean);
-		model.addAttribute("sums", sums);
+		QueryShopCommissionStatsResult result = financeFacade.queryShopCommissionDeductionStats(dto);
+		
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("dicInfoList", result.getDicInfoList());
+		model.addAttribute("sums", result.getSums());
 
 		return "finance/commission/shopCommissionDeductionStats-table";
 	}
@@ -2758,76 +2376,25 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/queryShopCommissionStats2.do")
 	public String toShopStatisticsList2(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
+		QueryShopCommissionStatsDTO dto = new QueryShopCommissionStatsDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
 		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
 		}
-		Map paramters = WebUtils.getQueryParamters(request);
-		String carInfo = (String)WebUtils.getQueryParamters(request).get("carInfo");
-		if (StringUtils.isNotBlank(carInfo)) {
-			List<Integer> groupIds = bookingSupplierService.getGroupIdByCarInfo(carInfo);
-			if (groupIds!=null && groupIds.size()>0) {
-				String groupIdStr = groupIds.toString().substring(1,groupIds.toString().length()-1);
-				paramters.put("groupIds", groupIdStr);
-				//bookingDeliveryPrice.setGroupIds(groupIdStr);
-			}else{
-				paramters.put("groupIds", "9999999999");
-			}
-		}
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
 		
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			paramters.put("operator_id", group.getSaleOperatorIds());
-		}
-		paramters.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(paramters);
-		pageBean = financeGuideService.getCommisionStatsListPage(pageBean);
-		List<Map<String, Object>> data = pageBean.getResult();
-		List<BookingGuide> guides = new ArrayList<BookingGuide>();
-		if(data != null && data.size() > 0){
-			for(int i = 0 ; i < data.size(); i++){
-				BookingGuide guide = financeGuideService.parseDataToGuide(data.get(i), pageBean, false);
-				guides.add(guide);
-				
-				SupplierGuide sg = supplierGuideService.getGuideInfoById(guide.getGuideId());
-				if(sg != null){
-					guide.setBankAccount(sg.getBankAccount());
-				}
-			}
-		}
+		QueryShopCommissionStatsResult result = financeFacade.queryShopCommissionStats2(dto);
 		
-		pageBean.setResult(guides);
-		model.addAttribute("pageBean", pageBean);
-		
-		//总合计
-		Map<String, Object> sums = financeGuideService.getCommisionsSum(pageBean);
-		model.addAttribute("sums", sums);
-		
-		List<DicInfo> dicInfoList = dicService.getListByTypeCode(
-				BasicConstants.YJ_XMLX, WebUtils.getCurBizId(request));
-		model.addAttribute("dicInfoList", dicInfoList);
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("dicInfoList", result.getDicInfoList());
+		model.addAttribute("sums", result.getSums());
+
 
 		return "finance/commission/viewShopCommissionStats-table";
 	}
@@ -2836,76 +2403,24 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/queryShopCommissionDeductionStats2.do")
 	public String queryShopCommissionDeductionStats2(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
+		QueryShopCommissionStatsDTO dto = new QueryShopCommissionStatsDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
 		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
 		}
-		Map paramters = WebUtils.getQueryParamters(request);
-		String carInfo = (String)WebUtils.getQueryParamters(request).get("carInfo");
-		if (StringUtils.isNotBlank(carInfo)) {
-			List<Integer> groupIds = bookingSupplierService.getGroupIdByCarInfo(carInfo);
-			if (groupIds!=null && groupIds.size()>0) {
-				String groupIdStr = groupIds.toString().substring(1,groupIds.toString().length()-1);
-				paramters.put("groupIds", groupIdStr);
-				//bookingDeliveryPrice.setGroupIds(groupIdStr);
-			}else{
-				paramters.put("groupIds", "9999999999");
-			}
-		}
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
 		
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			paramters.put("operator_id", group.getSaleOperatorIds());
-		}
-		paramters.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(paramters);
-		pageBean = financeGuideService.getCommisionDeductionStatsListPage(pageBean);
-		List<Map<String, Object>> data = pageBean.getResult();
-		List<BookingGuide> guides = new ArrayList<BookingGuide>();
-		if(data != null && data.size() > 0){
-			for(int i = 0 ; i < data.size(); i++){
-				BookingGuide guide = financeGuideService.parseDataToGuide(data.get(i), pageBean, true);
-				guides.add(guide);
-				
-				SupplierGuide sg = supplierGuideService.getGuideInfoById(guide.getGuideId());
-				if(sg != null){
-					guide.setBankAccount(sg.getBankAccount());
-				}
-			}
-		}
-		pageBean.setResult(guides);
-		model.addAttribute("pageBean", pageBean);
+		QueryShopCommissionStatsResult result = financeFacade.queryShopCommissionDeductionStats2(dto);
 		
-		//总合计
-		Map<String, Object> sums = financeGuideService.getCommisionsDeductionSum(pageBean);
-		model.addAttribute("sums", sums);
-		
-		List<DicInfo> dicInfoList = dicService.getListByTypeCode(
-				BasicConstants.YJ_KKXM, WebUtils.getCurBizId(request));
-		model.addAttribute("dicInfoList", dicInfoList);
-
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("dicInfoList", result.getDicInfoList());
+		model.addAttribute("sums", result.getSums());
 		return "finance/commission/viewShopCommissionDeductionStats-table";
 	}
 
@@ -2915,11 +2430,17 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "auditComm.do")
 	@ResponseBody
 	public String auditComm(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, String checkedIds,
-			String unCheckedIds) {
+			HttpServletResponse reponse, ModelMap model, String checkedIds, String unCheckedIds) {
+		
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		financeService.auditComm(checkedIds, unCheckedIds, emp.getEmployeeId(),
-				emp.getName());
+		
+		AuditCommDTO dto = new AuditCommDTO();
+		dto.setCheckedIds(unCheckedIds);
+		dto.setUnCheckedIds(unCheckedIds);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		
+		financeFacade.auditComm(dto);
 		return null;
 	}
 	
@@ -2929,11 +2450,16 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "auditCommDeduction.do")
 	@ResponseBody
 	public String auditCommDeduction(HttpServletRequest request,
-			HttpServletResponse reponse, ModelMap model, String checkedIds,
-			String unCheckedIds) {
+			HttpServletResponse reponse, ModelMap model, String checkedIds, String unCheckedIds) {
+		
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
-		financeService.auditCommDeduction(checkedIds, unCheckedIds, emp.getEmployeeId(),
-				emp.getName());
+		AuditCommDTO dto = new AuditCommDTO();
+		dto.setCheckedIds(unCheckedIds);
+		dto.setUnCheckedIds(unCheckedIds);
+		dto.setEmployeeId(emp.getEmployeeId());
+		dto.setEmployeeName(emp.getName());
+		
+		financeFacade.auditCommDeduction(dto);
 		return null;
 	}
 
@@ -2948,32 +2474,23 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/settleCommissionList.htm")
 	public String settleCommissionList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer groupId) {
-
-		List<DicInfo> payTypeList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JSFS);
-		model.addAttribute("payTypeList", payTypeList);
-
-		Integer biz_id = WebUtils.getCurBizId(request);
-		List<SysBizBankAccount> bizAccountList = sysBizBankAccountService
-				.getListByBizId(biz_id);
-		model.addAttribute("bizAccountList", bizAccountList);
-
-		List<DicInfo> bankList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_BANK);
-		model.addAttribute("bankList", bankList);
-
-		List<BookingGuide> guideList = bookingGuideService
-				.selectDistinctListByGroupId(groupId);
-		model.addAttribute("guideList", guideList);
-
-		model.addAttribute("projectTypeJsonStr", 
-				dicService.getCommProjectTypeTreeJsonStr(BasicConstants.YJ_XMLX, WebUtils.getCurBizId(request)));
 		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		
+		SettleCommissionListResult settleResult = financeFacade.settleCommissionList(bizId, groupId);
+		
+		model.addAttribute("payTypeList", settleResult.getPayTypeList());
+		model.addAttribute("bizAccountList", settleResult.getBizAccountList());
+		model.addAttribute("bankList", settleResult.getBankList());
+		model.addAttribute("guideList", settleResult.getGuideList());
+		model.addAttribute("projectTypeJsonStr", settleResult.getProjectTypeJsonStr());
+		
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		
 		return "finance/commission/settle-list";
 	}
 	
@@ -2989,31 +2506,22 @@ public class FinanceController extends BaseController {
 	public String settleCommissionDeductionList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer groupId) {
 
-		List<DicInfo> payTypeList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JSFS);
-		model.addAttribute("payTypeList", payTypeList);
-
-		Integer biz_id = WebUtils.getCurBizId(request);
-		List<SysBizBankAccount> bizAccountList = sysBizBankAccountService
-				.getListByBizId(biz_id);
-		model.addAttribute("bizAccountList", bizAccountList);
-
-		List<DicInfo> bankList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_BANK);
-		model.addAttribute("bankList", bankList);
-
-		List<BookingGuide> guideList = bookingGuideService
-				.selectDistinctListByGroupId(groupId);
-		model.addAttribute("guideList", guideList);
-
-		model.addAttribute("projectTypeJsonStr", 
-				dicService.getCommProjectTypeTreeJsonStr(BasicConstants.YJ_KKXM, WebUtils.getCurBizId(request)));
-		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		
+		SettleCommissionListResult settleResult = financeFacade.settleCommissionDeductionList(bizId, groupId);
+		
+		model.addAttribute("payTypeList", settleResult.getPayTypeList());
+		model.addAttribute("bizAccountList", settleResult.getBizAccountList());
+		model.addAttribute("bankList", settleResult.getBankList());
+		model.addAttribute("guideList", settleResult.getGuideList());
+		model.addAttribute("projectTypeJsonStr", settleResult.getProjectTypeJsonStr());
+		
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		
 		return "finance/commission/settle-deduction-list";
 	}
 
@@ -3031,59 +2539,23 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/querySettleCommission.do")
 	public String querySettleCommission(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
+		
+		QuerySettleCommissionDTO dto = new QuerySettleCommissionDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
 		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
 		}
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = financeGuideService.getCommisionStatsListPage(pageBean);
-		List<Map<String, Object>> data = pageBean.getResult();
-		List<BookingGuide> guides = new ArrayList<BookingGuide>();
-		if(data != null && data.size() > 0){
-			for(int i = 0 ; i < data.size(); i++){
-				BookingGuide guide = financeGuideService.parseDataToGuide(data.get(i), pageBean, false);
-				guides.add(guide);
-				
-				SupplierGuide sg = supplierGuideService.getGuideInfoById(guide.getGuideId());
-				if(sg != null){
-					guide.setBankAccount(sg.getBankAccount());
-				}
-			}
-		}
-		pageBean.setResult(guides);
-		model.addAttribute("pageBean", pageBean);
-
-		List<DicInfo> dicInfoList = dicService.getListByTypeCode(
-				BasicConstants.YJ_XMLX, WebUtils.getCurBizId(request));
-		model.addAttribute("dicInfoList", dicInfoList);
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		
+		QuerySettleCommissionResult result = financeFacade.querySettleCommission(dto);
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("dicInfoList", result.getDicInfoList());
 
 		return "finance/commission/settle-list-table";
 	}
@@ -3102,59 +2574,22 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/querySettleCommissionDeduction.do")
 	public String querySettleCommissionDeduction(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
+		QuerySettleCommissionDTO dto = new QuerySettleCommissionDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
 		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
 		}
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = financeGuideService.getCommisionDeductionStatsListPage(pageBean);
-		List<Map<String, Object>> data = pageBean.getResult();
-		List<BookingGuide> guides = new ArrayList<BookingGuide>();
-		if(data != null && data.size() > 0){
-			for(int i = 0 ; i < data.size(); i++){
-				BookingGuide guide = financeGuideService.parseDataToGuide(data.get(i), pageBean, true);
-				guides.add(guide);
-				
-				SupplierGuide sg = supplierGuideService.getGuideInfoById(guide.getGuideId());
-				if(sg != null){
-					guide.setBankAccount(sg.getBankAccount());
-				}
-			}
-		}
-		pageBean.setResult(guides);
-		model.addAttribute("pageBean", pageBean);
-
-		List<DicInfo> dicInfoList = dicService.getListByTypeCode(
-				BasicConstants.YJ_KKXM, WebUtils.getCurBizId(request));
-		model.addAttribute("dicInfoList", dicInfoList);
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		
+		QuerySettleCommissionResult result = financeFacade.querySettleCommissionDeduction(dto);
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("dicInfoList", result.getDicInfoList());
 
 		return "finance/commission/settle-deduction-list-table";
 	}
@@ -3168,13 +2603,17 @@ public class FinanceController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping("subjectSummary.htm")
-	public String subjectSummary(HttpServletRequest request,
-			HttpServletResponse response, ModelMap model) {
+	public String subjectSummary(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		model.addAttribute("bizId", bizId); // 过滤B商家
 		model.addAttribute("sup_type_map",SupplierConstant.supplierTypeSubjectSummary);
+		
 		return "finance/subjectSummary/subjectSummaryList";
 	}
 	
@@ -3189,80 +2628,23 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value="/subjectSummary.do")
 	public String subjectSummary(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group){
-
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
+		
+		SubjectSummaryDTO dto = new SubjectSummaryDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
 		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
 		}
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = financeService.getsubjectSummaryListPage(pageBean);
-		List<Map<String,Object>> lists = (List<Map<String,Object>>)pageBean.getResult();
-		for (Map<String, Object> map : lists) {
-			Map<String,Object> qdyj=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_QDYJ);
-			map.put("qd_total_cash", qdyj==null?0:qdyj.get("total_cash"));
-			map.put("qd_total", qdyj==null?0:qdyj.get("total"));
-			
-			Map<String,Object> dyxf=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_DYXF);
-			map.put("dy_total_cash", dyxf==null?0:dyxf.get("total_cash"));
-			map.put("dy_total", dyxf==null?0:dyxf.get("total"));
-			
-			Map<String,Object> gsxf=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_GSXF);
-			map.put("gs_total_cash", gsxf==null?0:gsxf.get("total_cash"));
-			map.put("gs_total", gsxf==null?0:gsxf.get("total"));
-			
-			Map<String,Object> qt=financeService.getsubjectSummaryQT(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_GSXF,Constants.SUMJECT_SUMMARY_QDYJ,Constants.SUMJECT_SUMMARY_DYXF);
-			map.put("qt_total_cash", qt==null?0:qt.get("total_cash"));
-			map.put("qt_total", qt==null?0:qt.get("total"));
-			
-			//Map<String,Object> dybz=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),null);
-
-			
-			BigDecimal dy_total=new BigDecimal(map.get("dy_total").toString());
-			/**
-			 * 导游报账只针对导游现付才有效
-			 * 比如：订单金额车费8300，结算方式是：导游现付，导游报账5000，那么：结果就是：导游现付=5000，签单月结=3300
-			 */
-			BigDecimal qd_total=new BigDecimal(map.get("qd_total").toString());
-			if(null != dyxf){
-				BigDecimal dybz_total=new BigDecimal(dyxf.get("dybz_total").toString());
-				qd_total = dy_total.subtract(dybz_total).add(qd_total);
-				map.put("dy_total",dybz_total);
-			}
-			map.put("qd_total",qd_total);
-		}
-		model.addAttribute("pageBean", pageBean);
-
-		List<DicInfo> dicInfoList = dicService.getListByTypeCode(
-				BasicConstants.YJ_XMLX, WebUtils.getCurBizId(request));
-		model.addAttribute("dicInfoList", dicInfoList);
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		SubjectSummaryResult result = financeFacade.subjectSummary(dto);
+		
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("dicInfoList", result.getDicInfoList());
 
 		return "finance/subjectSummary/subjectSummaryList-table";
 	}
@@ -3278,73 +2660,21 @@ public class FinanceController extends BaseController {
 	@RequestMapping("sumjectSummaryPrint.htm")
 	public String sumjectSummaryPrint(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		pageBean.setPage(1);
-		pageBean.setPageSize(1000000);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
 		
-		pageBean = financeService.getsubjectSummaryListPage(pageBean);
-		List<Map<String,Object>> lists = (List<Map<String,Object>>)pageBean.getResult();
-		for (Map<String, Object> map : lists) {
-			Map<String,Object> qdyj=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_QDYJ);
-			map.put("qd_total_cash", qdyj==null?0:qdyj.get("total_cash"));
-			map.put("qd_total", qdyj==null?0:qdyj.get("total"));
-			
-			Map<String,Object> dyxf=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_DYXF);
-			map.put("dy_total_cash", dyxf==null?0:dyxf.get("total_cash"));
-			map.put("dy_total", dyxf==null?0:dyxf.get("total"));
-			
-			Map<String,Object> gsxf=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_GSXF);
-			map.put("gs_total_cash", gsxf==null?0:gsxf.get("total_cash"));
-			map.put("gs_total", gsxf==null?0:gsxf.get("total"));
-			
-			Map<String,Object> qt=financeService.getsubjectSummaryQT(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_GSXF,Constants.SUMJECT_SUMMARY_QDYJ,Constants.SUMJECT_SUMMARY_DYXF);
-			map.put("qt_total_cash", qt==null?0:qt.get("total_cash"));
-			map.put("qt_total", qt==null?0:qt.get("total"));
-			
-			//Map<String,Object> dybz=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),null);
-
-			
-			BigDecimal dy_total=new BigDecimal(map.get("dy_total").toString());
-			/**
-			 * 导游报账只针对导游现付才有效
-			 * 比如：订单金额车费8300，结算方式是：导游现付，导游报账5000，那么：结果就是：导游现付=5000，签单月结=3300
-			 */
-			BigDecimal qd_total=new BigDecimal(map.get("qd_total").toString());
-			if(null != dyxf){
-				BigDecimal dybz_total=new BigDecimal(dyxf.get("dybz_total").toString());
-				qd_total = dy_total.subtract(dybz_total).add(qd_total);
-				map.put("dy_total",dybz_total);
-			}
-			map.put("qd_total",qd_total);
-		}
-		model.addAttribute("pageBean", pageBean);
-
+		SubjectSummaryDTO dto = new SubjectSummaryDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		dto.setPage(1);
+		dto.setPageSize(1000000);
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		SubjectSummaryResult result = financeFacade.subjectSummary(dto);
+		
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
-		model.addAttribute("pageBean", pageBean);
+		model.addAttribute("pageBean", result.getPageBean());
 		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" 打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		return "finance/subjectSummary/subjectSummary-print";
 	}
@@ -3353,68 +2683,17 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/sumjectSummaryExcl.do")
 	@ResponseBody
 	public void sumjectSummaryExcl(HttpServletRequest request,HttpServletResponse response,TourGroupVO group){
-		PageBean pageBean = new PageBean();
-		pageBean.setPage(1);
-		pageBean.setPageSize(1000000);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = financeService.getsubjectSummaryListPage(pageBean);
-		List<Map<String,Object>> lists = (List<Map<String,Object>>)pageBean.getResult();
-		for (Map<String, Object> map : lists) {
-			Map<String,Object> qdyj=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_QDYJ);
-			map.put("qd_total_cash", qdyj==null?0:qdyj.get("total_cash"));
-			map.put("qd_total", qdyj==null?0:qdyj.get("total"));
-			
-			Map<String,Object> dyxf=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_DYXF);
-			map.put("dy_total_cash", dyxf==null?0:dyxf.get("total_cash"));
-			map.put("dy_total", dyxf==null?0:dyxf.get("total"));
-			
-			Map<String,Object> gsxf=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_GSXF);
-			map.put("gs_total_cash", gsxf==null?0:gsxf.get("total_cash"));
-			map.put("gs_total", gsxf==null?0:gsxf.get("total"));
-			
-			Map<String,Object> qt=financeService.getsubjectSummaryQT(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_GSXF,Constants.SUMJECT_SUMMARY_QDYJ,Constants.SUMJECT_SUMMARY_DYXF);
-			map.put("qt_total_cash", qt==null?0:qt.get("total_cash"));
-			map.put("qt_total", qt==null?0:qt.get("total"));
-			
-			//Map<String,Object> dybz=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),null);
-
-			
-			BigDecimal dy_total=new BigDecimal(map.get("dy_total").toString());
-			/**
-			 * 导游报账只针对导游现付才有效
-			 * 比如：订单金额车费8300，结算方式是：导游现付，导游报账5000，那么：结果就是：导游现付=5000，签单月结=3300
-			 */
-			BigDecimal qd_total=new BigDecimal(map.get("qd_total").toString());
-			if(null != dyxf){
-				BigDecimal dybz_total=new BigDecimal(dyxf.get("dybz_total").toString());
-				qd_total = dy_total.subtract(dybz_total).add(qd_total);
-				map.put("dy_total",dybz_total);
-			}
-			map.put("qd_total",qd_total);
-		}
+		SubjectSummaryDTO dto = new SubjectSummaryDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		dto.setPage(1);
+		dto.setPageSize(1000000);
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		SubjectSummaryResult result = financeFacade.subjectSummary(dto);
 		
-		List list = pageBean.getResult();
+		List list = result.getPageBean().getResult();
 		String path ="";
 		
 		try {
@@ -3591,9 +2870,12 @@ public class FinanceController extends BaseController {
 	public String subjectSummary2(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		model.addAttribute("bizId", bizId); // 过滤B商家
 		model.addAttribute("sup_type_map",SupplierConstant.supplierTypeSubjectSummaryQT);
 		return "finance/subjectSummary/subjectSummary2List";
 	}
@@ -3609,43 +2891,22 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value="/subjectSummary2.do")
 	public String subjectSummary2(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group){
-
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
-		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
-		}
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = financeService.getsubjectSummary2ListPage(pageBean,"");
 		
-		model.addAttribute("pageBean", pageBean);
+		SubjectSummaryDTO dto = new SubjectSummaryDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
+		}
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
+		}
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		SubjectSummaryResult result = financeFacade.subjectSummary2(dto);
+		
+		model.addAttribute("pageBean", result.getPageBean());
 
 		return "finance/subjectSummary/subjectSummary2List-table";
 	}
@@ -3662,39 +2923,20 @@ public class FinanceController extends BaseController {
 	@RequestMapping("sumjectSummary2Print.htm")
 	public String sumjectSummary2Print(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		pageBean.setPage(1);
-		pageBean.setPageSize(1000000);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		
-		pageBean = financeService.getsubjectSummary2ListPage(pageBean,"");
-		model.addAttribute("pageBean", pageBean);
+		SubjectSummaryDTO dto = new SubjectSummaryDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		dto.setPage(1);
+		dto.setPageSize(1000000);
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		SubjectSummaryResult result = financeFacade.subjectSummary2(dto);
 
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
-		model.addAttribute("pageBean", pageBean);
+		model.addAttribute("pageBean", result.getPageBean());
 		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" 打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		return "finance/subjectSummary/subjectSummary2-print";
 	}
@@ -3702,37 +2944,23 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/sumjectSummary2Excl.do")
 	@ResponseBody
 	public void sumjectSummary2Excl(HttpServletRequest request,HttpServletResponse response,TourGroupVO group){
-		PageBean pageBean = new PageBean();
-		pageBean.setPage(1);
-		pageBean.setPageSize(1000000);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = financeService.getsubjectSummary2ListPage(pageBean,"");
+		SubjectSummaryDTO dto = new SubjectSummaryDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		dto.setPage(1);
+		dto.setPageSize(1000000);
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		SubjectSummaryResult result = financeFacade.subjectSummary2(dto);
+		
+		
+		PageBean pageBean = result.getPageBean();
 		//合计
 		PageBean pageBean2 = new PageBean();
 		List list = pageBean.getResult();
 		
-		pageBean2 = financeService.getsubjectSummary2ListPage(pageBean,"sum");
+		pageBean2 = result.getPageBeanSum();
 		List list2 = pageBean2.getResult();
 		Map<String, Object> sum_result =null;
 		if(list2!=null){
@@ -3857,9 +3085,12 @@ public class FinanceController extends BaseController {
 	public String subjectSummary3(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		model.addAttribute("bizId", bizId); // 过滤B商家
 		return "finance/subjectSummary/subjectSummary3List";
 	}
 	
@@ -3874,61 +3105,22 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value="/subjectSummary3.do")
 	public String subjectSummary3(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group){
-
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
+		
+		SubjectSummaryDTO dto = new SubjectSummaryDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
 		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
 		}
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = financeService.getsubjectSummaryListPage(pageBean);
-		List<Map<String,Object>> lists = (List<Map<String,Object>>)pageBean.getResult();
-		for (Map<String, Object> map : lists) {
-			Map<String,Object> dyxs=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_DYXS);
-			map.put("dy_total_cash", dyxs==null?0:dyxs.get("total_cash"));
-			map.put("dy_total", dyxs==null?0:dyxs.get("total"));
-			
-			Map<String,Object> gsxs=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_GSXS);
-			map.put("gs_total_cash", gsxs==null?0:gsxs.get("total_cash"));
-			map.put("gs_total", gsxs==null?0:gsxs.get("total"));
-			
-			Map<String,Object> qt=financeService.getsubjectSummaryQT(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_GSXS,Constants.SUMJECT_SUMMARY_DYXS,null);
-			map.put("qt_total_cash", qt==null?0:qt.get("total_cash"));
-			map.put("qt_total", qt==null?0:qt.get("total"));
-			
-		}
-		model.addAttribute("pageBean", pageBean);
-
-		List<DicInfo> dicInfoList = dicService.getListByTypeCode(
-				BasicConstants.YJ_XMLX, WebUtils.getCurBizId(request));
-		model.addAttribute("dicInfoList", dicInfoList);
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		SubjectSummaryResult result = financeFacade.subjectSummary3(dto);
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("dicInfoList", result.getDicInfoList());
 
 		return "finance/subjectSummary/subjectSummary3List-table";
 	}
@@ -3944,54 +3136,19 @@ public class FinanceController extends BaseController {
 	@RequestMapping("sumjectSummaryPrint3.htm")
 	public String sumjectSummaryPrint3(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		pageBean.setPage(1);
-		pageBean.setPageSize(1000000);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		
-		pageBean = financeService.getsubjectSummaryListPage(pageBean);
-		List<Map<String,Object>> lists = (List<Map<String,Object>>)pageBean.getResult();
-		for (Map<String, Object> map : lists) {
-			Map<String,Object> dyxs=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_DYXS);
-			map.put("dy_total_cash", dyxs==null?0:dyxs.get("total_cash"));
-			map.put("dy_total", dyxs==null?0:dyxs.get("total"));
-			
-			Map<String,Object> gsxs=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_GSXS);
-			map.put("gs_total_cash", gsxs==null?0:gsxs.get("total_cash"));
-			map.put("gs_total", gsxs==null?0:gsxs.get("total"));
-			
-			Map<String,Object> qt=financeService.getsubjectSummaryQT(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_GSXS,Constants.SUMJECT_SUMMARY_DYXS,null);
-			map.put("qt_total_cash", qt==null?0:qt.get("total_cash"));
-			map.put("qt_total", qt==null?0:qt.get("total"));
-			
-		}
-		model.addAttribute("pageBean", pageBean);
-
+		SubjectSummaryDTO dto = new SubjectSummaryDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		dto.setPage(1);
+		dto.setPageSize(1000000);
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		SubjectSummaryResult result = financeFacade.subjectSummary3(dto);
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
-		model.addAttribute("pageBean", pageBean);
+		model.addAttribute("pageBean", result.getPageBean());
 		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" 打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		return "finance/subjectSummary/subjectSummary3-print";
 	}
@@ -4000,49 +3157,17 @@ public class FinanceController extends BaseController {
 	@RequestMapping(value = "/sumjectSummaryExcl3.do")
 	@ResponseBody
 	public void sumjectSummaryExcl3(HttpServletRequest request,HttpServletResponse response,TourGroupVO group){
-		PageBean pageBean = new PageBean();
-		pageBean.setPage(1);
-		pageBean.setPageSize(1000000);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = financeService.getsubjectSummaryListPage(pageBean);
-		List<Map<String,Object>> lists = (List<Map<String,Object>>)pageBean.getResult();
-		for (Map<String, Object> map : lists) {
-			Map<String,Object> dyxs=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_DYXS);
-			map.put("dy_total_cash", dyxs==null?0:dyxs.get("total_cash"));
-			map.put("dy_total", dyxs==null?0:dyxs.get("total"));
-			
-			Map<String,Object> gsxs=financeService.getsubjectSummaryQDYJ(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_GSXS);
-			map.put("gs_total_cash", gsxs==null?0:gsxs.get("total_cash"));
-			map.put("gs_total", gsxs==null?0:gsxs.get("total"));
-			
-			Map<String,Object> qt=financeService.getsubjectSummaryQT(pageBean,Integer.parseInt(map.get("supplier_id").toString()),Constants.SUMJECT_SUMMARY_GSXS,Constants.SUMJECT_SUMMARY_DYXS,null);
-			map.put("qt_total_cash", qt==null?0:qt.get("total_cash"));
-			map.put("qt_total", qt==null?0:qt.get("total"));
-			
-		}
+		SubjectSummaryDTO dto = new SubjectSummaryDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		dto.setPage(1);
+		dto.setPageSize(1000000);
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		SubjectSummaryResult result = financeFacade.subjectSummary3(dto);
 		
-		List list = pageBean.getResult();
+		List list = result.getPageBean().getResult();
 		String path ="";
 		
 		try {

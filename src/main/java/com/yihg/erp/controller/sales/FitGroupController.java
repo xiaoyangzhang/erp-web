@@ -30,11 +30,11 @@ import com.yimayhd.erpcenter.facade.sales.query.FitGroupInfoQueryDTO;
 import com.yimayhd.erpcenter.facade.sales.query.FitGroupInfoUpdateDTO;
 import com.yimayhd.erpcenter.facade.sales.query.FitTotalSKGroupQueryDTO;
 import com.yimayhd.erpcenter.facade.sales.query.FitUpdateTourGroupDTO;
-import com.yimayhd.erpcenter.facade.sales.query.ToSecImpNotGroupListDTO;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToSecImpNotGroupListDTO;
 import com.yimayhd.erpcenter.facade.sales.result.BaseStateResult;
 import com.yimayhd.erpcenter.facade.sales.result.FitGroupInfoQueryResult;
 import com.yimayhd.erpcenter.facade.sales.result.FitTotalSKGroupQueryResult;
-import com.yimayhd.erpcenter.facade.sales.result.ToSecImpNotGroupListResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToSecImpNotGroupListResult;
 import com.yimayhd.erpcenter.facade.sales.service.FitGroupFacade;
 
 @Controller
