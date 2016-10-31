@@ -28,6 +28,22 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.common.util.NumberUtil;
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
+import com.yimayhd.erpcenter.dal.product.vo.ProductGroupSupplierVo;
+import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.*;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.OtherInfoVO;
+import com.yimayhd.erpcenter.dal.sys.po.SysBizBankAccount;
+import com.yimayhd.erpcenter.facade.sales.query.*;
+import com.yimayhd.erpcenter.facade.sales.result.*;
+import com.yimayhd.erpcenter.facade.sales.service.*;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
+import com.yimayhd.erpresource.dal.po.SupplierContactMan;
+import com.yimayhd.erpresource.dal.po.SupplierInfo;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -55,12 +71,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.RegionInfo;
-import com.yihg.basic.util.NumberUtil;
 import com.yihg.customer.api.CustomerService;
 import com.yihg.customer.po.Customer;
 import com.yihg.erp.aop.RequiresPermissions;
@@ -77,89 +87,15 @@ import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
 import com.yihg.erp.utils.WordReporter.NumberToCN;
-import com.yihg.finance.api.FinanceService;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.api.BookingGuideService;
-import com.yihg.operation.api.BookingShopService;
-import com.yihg.operation.api.BookingSupplierDetailService;
-import com.yihg.operation.api.BookingSupplierService;
-import com.yihg.operation.po.BookingGuide;
-import com.yihg.operation.po.BookingShop;
-import com.yihg.operation.po.BookingSupplier;
-import com.yihg.operation.po.BookingSupplierDetail;
-import com.yihg.product.api.ProductGroupService;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.po.ProductGroup;
-import com.yihg.product.po.ProductGroupSupplier;
-import com.yihg.product.vo.ProductGroupSupplierVo;
-import com.yihg.product.vo.ProductSupplierCondition;
-import com.yihg.sales.api.GroupOrderGuestService;
-import com.yihg.sales.api.GroupOrderPriceService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.GroupOrderTransportService;
-import com.yihg.sales.api.GroupRequirementService;
-import com.yihg.sales.api.GroupRouteService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.AssistantGroup;
-import com.yihg.sales.po.AssistantGroupGuide;
-import com.yihg.sales.po.AssistantGroupOrder;
-import com.yihg.sales.po.AssistantGroupOrderGuest;
-import com.yihg.sales.po.AssistantGroupOrderTransport;
-import com.yihg.sales.po.AssistantGroupRoute;
-import com.yihg.sales.po.AssistantGroupRouteAttachment;
-import com.yihg.sales.po.AssistantGroupRouteSupplier;
-import com.yihg.sales.po.AssistantSupplier;
-import com.yihg.sales.po.AssistantSupplierImg;
-import com.yihg.sales.po.AssistantSupplierImgType;
-import com.yihg.sales.po.AutocompleteInfo;
-//import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupOrderPrice;
-//import com.yihg.sales.po.GroupOrderPrintPo;
-import com.yihg.sales.po.GroupOrderTransport;
-import com.yihg.sales.po.GroupRequirement;
-import com.yihg.sales.po.GroupRoute;
-import com.yihg.sales.po.GroupRouteAttachment;
-import com.yihg.sales.po.GroupRouteSupplier;
-//import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.AssistantGroupVO;
-import com.yihg.sales.vo.AssistantSupplierVO;
-//import com.yihg.sales.vo.GroupPriceVo;
-//import com.yihg.sales.vo.GroupRouteDayVO;
-import com.yihg.sales.vo.GroupRouteVO;
-import com.yihg.sales.vo.OtherInfoVO;
-import com.yihg.supplier.api.SupplierDriverService;
-import com.yihg.supplier.api.SupplierGuideService;
-import com.yihg.supplier.api.SupplierImgService;
-import com.yihg.supplier.api.SupplierService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierContactMan;
-import com.yihg.supplier.po.SupplierDriver;
-import com.yihg.supplier.po.SupplierGuide;
-import com.yihg.supplier.po.SupplierImg;
-import com.yihg.supplier.po.SupplierImgType;
-import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.api.SysBizBankAccountService;
-import com.yihg.sys.po.SysBizBankAccount;
-import com.yihg.travel.api.TravelHistoryRouteService;
-import com.yihg.travel.po.TravelHistoryRoute;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupPriceVo;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupRouteDayVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.facade.sales.query.ProfitQueryByTourDTO;
 import com.yimayhd.erpcenter.facade.sales.query.ToSKConfirmPreviewDTO;
-import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToOrderLockTableDTO;
 import com.yimayhd.erpcenter.facade.sales.result.ProfitQueryByTourResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToProfitQueryTableResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToSKConfirmPreviewResult;
-import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToOrderLockListResult;
-import com.yimayhd.erpcenter.facade.sales.service.bak.GroupOrderLockFacade;
-import com.yimayhd.erpcenter.facade.sales.service.bak.GroupProfitFacade;
-import com.yimayhd.erpcenter.facade.sales.service.bak.GroupQueryPrintFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 
 @Controller
@@ -171,79 +107,12 @@ public class TourGroupController extends BaseController {
 
 	private static final org.apache.log4j.Logger log = org.apache.log4j.Logger
 			.getLogger(TourGroupController.class);
-	@Autowired
-	private SupplierGuideService guideService;
-	@Autowired
-	private ProductGroupSupplierService productGroupSupplierService;
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private GroupOrderService groupOrderService;
 
-	@Autowired
-	private RegionService regionService;
-
-	@Autowired
-	private GroupOrderPriceService groupOrderPriceService;
-
-	@Autowired
-	private GroupOrderTransportService groupOrderTransportService;
-
-	@Autowired
-	private GroupOrderGuestService groupOrderGuestService;
-
-	@Autowired
-	private GroupRequirementService groupRequirementService;
-	@Autowired
-	private ProductGroupService productGroupService;
-	@Autowired
-	private DicService dicService;
 	@Autowired
 	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
-//	private sysPlatformEmployeeFacade sysPlatformEmployeeFacade;
+	private SysPlatformOrgFacade sysPlatformOrgFacade;
 
-	@Autowired
-	private PlatformOrgService orgService;
 
-	@Autowired
-	private SupplierService supplierService;
-
-	@Autowired
-	private GroupRouteService groupRouteService;
-
-	@Autowired
-	private SysBizBankAccountService bizBankAccountService;
-	@Autowired
-	private CustomerService customerService;
-	@Autowired
-	private TravelHistoryRouteService travelHistoryRouteService;
-	@Autowired
-	private BookingGuideService bookingGuideService;
-	@Autowired
-	private SupplierGuideService supplierGuideService;
-	@Autowired
-	private SupplierDriverService supplierDriverService;
-	@Autowired
-	private BizSettingCommon settingCommon;
-
-	@Autowired
-	private SupplierImgService imgService;
-
-	@Autowired
-	private SysConfig config;
-	@Autowired
-	private BookingSupplierDetailService bookingSupplierDetailService;
-	@Autowired
-	private BookingSupplierService bookingSupplierService;
-	@Resource
-	private BizSettingCommon bizSettingCommon;
-
-	@Autowired
-	private BookingShopService bookingShopService;
-	
-	@Autowired
-	private FinanceService financeService;
-	
 	@Autowired
 	private GroupProfitFacade  tourGroupProfitFacade;//利润
 	
@@ -255,18 +124,30 @@ public class TourGroupController extends BaseController {
 	
 	@Autowired
 	private GroupQueryPrintFacade groupQueryPrintFacade;//查询打印
-	
+
+	@Autowired
+	private TourGroupFacade tourGroupFacade;//
+
+	@Autowired
+	private TeamGroupFacade teamGroupFacade;//
+
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
-		model.addAttribute("orgUserJsonStr", sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
+		//model.addAttribute("orgJsonStr", SysPlatformOrgFacade.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
+		//model.addAttribute("orgUserJsonStr", sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		DepartmentTuneQueryResult departmentTuneQueryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", departmentTuneQueryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", departmentTuneQueryResult.getOrgUserJsonStr());
+
 	}
 	/**
 	 * 变更团
 	 * 
 	 * @param request
 	 * @param groupId
-	 * @param orderId
+	 * @param
 	 * @param model
 	 * @return
 	 */
@@ -275,7 +156,7 @@ public class TourGroupController extends BaseController {
 			Model model) {
 		model.addAttribute("groupId", groupId);
 
-		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
+		/*TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
 		List<GroupOrder> orderList = null;
 		tourGroup.setGroupCode(tourGroup.getGroupCode() + "变更");
 		tourGroup.setGroupCodeMark(tourGroup.getGroupCodeMark());
@@ -284,7 +165,12 @@ public class TourGroupController extends BaseController {
 			orderList = groupOrderService.selectOrderByGroupId(groupId);
 		}
 		model.addAttribute("orderList", orderList);
-		model.addAttribute("tourGroup", tourGroup);
+		model.addAttribute("tourGroup", tourGroup);*/
+
+		ToChangeGroupResult toChangeGroupResult = tourGroupFacade.toChangeGroup(groupId);
+		model.addAttribute("orderList", toChangeGroupResult.getOrderList());
+		model.addAttribute("tourGroup", toChangeGroupResult.getTourGroup());
+
 		return "sales/tourGroup/changeGroupInfo";
 	}
 
@@ -292,11 +178,18 @@ public class TourGroupController extends BaseController {
 	@ResponseBody
 	public String changeGroup(HttpServletRequest request, TourGroup tourGroup,
 			Integer groupId, String orderIds,String info) throws Exception {
-		groupId = tourGroupService.changeGroup(groupId, tourGroup, orderIds,WebUtils.getCurUserId(request),WebUtils.getCurUser(request).getName(),info);
+		/*groupId = tourGroupService.changeGroup(groupId, tourGroup, orderIds,WebUtils.getCurUserId(request),WebUtils.getCurUser(request).getName(),info);
 		financeService.calcTourGroupAmount(groupId);                         // 增加计算
-		TourGroup group = tourGroupService.selectByPrimaryKey(groupId); 
-		return successJson("groupId", groupId + "", "mode",
-				group.getGroupMode() + "");
+		TourGroup group = tourGroupService.selectByPrimaryKey(groupId); */
+		ChangeGroupDTO changeGroupDTO = new ChangeGroupDTO();
+		changeGroupDTO.setGroupId(groupId);
+		changeGroupDTO.setOrderIds(orderIds);
+		changeGroupDTO.setInfo(info);
+		changeGroupDTO.setCurUserId(WebUtils.getCurUserId(request));
+		changeGroupDTO.setCurUserName(WebUtils.getCurUser(request).getName());
+		ToChangeGroupResult toChangeGroupResult = tourGroupFacade.changeGroup(changeGroupDTO);
+		return successJson("groupId", toChangeGroupResult.getGroupId() + "", "mode",
+				toChangeGroupResult.getTourGroup().getGroupMode() + "");
 	}
 
 	/**
@@ -332,7 +225,7 @@ public class TourGroupController extends BaseController {
 			Integer orderId, Integer groupId, GroupOrder groupOrder,
 			TourGroup tourGroup) {
 
-		TourGroup group = tourGroupService.selectByPrimaryKey(groupId);
+		/*TourGroup group = tourGroupService.selectByPrimaryKey(groupId);
 		group.setId(null);
 		group.setCreateTime(System.currentTimeMillis());
 		group.setTotalAdult(tourGroup.getTotalAdult());
@@ -367,14 +260,21 @@ public class TourGroupController extends BaseController {
 		go.setSupplierId(groupOrder.getSupplierId());
 		go.setTotalCash(new BigDecimal(0));
 		tourGroupService.copyGroup(group, go, groupId, orderId, info,WebUtils.getCurUserId(request),WebUtils.getCurUser(request).getName());
-
+*/
+		CopyTourGroupDTO copyTourGroupDTO = new CopyTourGroupDTO();
+		copyTourGroupDTO.setInfo(info);
+		copyTourGroupDTO.setOrderId(orderId);
+		copyTourGroupDTO.setGroupId(groupId);
+		copyTourGroupDTO.setGroupOrder(groupOrder);
+		copyTourGroupDTO.setTourGroup(tourGroup);
+		teamGroupFacade.copyTourGroup(copyTourGroupDTO);
 		return successJson();
 	}
 
 	@RequestMapping(value = "/getPushInfo.htm")
 	public String getPushInfo(HttpServletRequest request, Model model,
 			Integer groupId) {
-		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
+		/*TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
 		model.addAttribute("tourGroup", tourGroup);
 		GroupRouteVO groupRouteVO = groupRouteService
 				.findGroupRouteByGroupId(groupId);
@@ -410,7 +310,18 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("supplierDetail", supplierDetail);
 		model.addAttribute("groupId", groupId);
 		model.addAttribute("driverList", driverList);
-		model.addAttribute("guides", guides);
+		model.addAttribute("guides", guides);*/
+		GetPushInfoResult getPushInfoResult = tourGroupFacade.getPushInfo(groupId);
+		model.addAttribute("tourGroup", getPushInfoResult.getTourGroup());
+		model.addAttribute("routeList", getPushInfoResult.getRouteDayVOList());
+		model.addAttribute("guestList", getPushInfoResult.getGuestList());
+		model.addAttribute("bookingShops", getPushInfoResult.getBookingShops());
+		model.addAttribute("guide", getPushInfoResult.getGuide());
+		model.addAttribute("supplierDetail", getPushInfoResult.getSupplierDetail());
+		model.addAttribute("groupId", groupId);
+		model.addAttribute("driverList", getPushInfoResult.getDriverList());
+		model.addAttribute("guides", getPushInfoResult.getGuides());
+
 		return "sales/tourGroup/pushInfo";
 	}
 
@@ -418,14 +329,15 @@ public class TourGroupController extends BaseController {
 	@ResponseBody
 	public String updateGuide(HttpServletRequest request, ModelMap model,
 			Integer groupId, Integer driverId, Integer guideId) {
-		BookingGuide guide = new BookingGuide();
+		/*BookingGuide guide = new BookingGuide();
 		if (driverId == null) {
 			driverId = -1;
 		}
 		guide.setId(guideId);
 		guide.setBookingDetailId(driverId);
 		guide.setGroupId(groupId);
-		bookingGuideService.updateByPrimaryKeySelective(guide);
+		bookingGuideService.updateByPrimaryKeySelective(guide);*/
+		ResultSupport resultSupport = tourGroupFacade.updateGuide(groupId, driverId,guideId);
 		return successJson();
 	}
 
@@ -433,21 +345,22 @@ public class TourGroupController extends BaseController {
 	@ResponseBody
 	public String updateShop(HttpServletRequest request, ModelMap model,
 			String guideName, Integer guideId, Integer shopId) {
-		if (guideId == null) {
+	/*	if (guideId == null) {
 			guideId = -1;
 		}
 		BookingShop bs = new BookingShop();
 		bs.setId(shopId);
 		bs.setGuideId(guideId);
 		bs.setGuideName(guideName);
-		bookingShopService.updateByPrimaryKeySelective(bs);
+		bookingShopService.updateByPrimaryKeySelective(bs);*/
+		ResultSupport resultSupport = tourGroupFacade.updateShop(guideName, guideId, shopId);
 		return successJson();
 	}
 
 	@RequestMapping(value = "/pushInfo.do")
 	@ResponseBody
 	public String pushInfo(HttpServletRequest request, Integer groupId) {
-		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
+		/*TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
 
 		List<Customer> customerList = new ArrayList<Customer>();
 
@@ -548,8 +461,9 @@ public class TourGroupController extends BaseController {
 		} catch (Exception e) {
 			log.error("推送APP错误信息:" + e.getMessage());
 			return errorJson("推送信息失败,请检查行程信息是否正确");
-		}
+		}*/
 
+		ResultSupport resultSupport = tourGroupFacade.pushInfo(groupId);
 		return successJson();
 
 	}
@@ -557,7 +471,7 @@ public class TourGroupController extends BaseController {
 	@RequestMapping(value = "/pushWap.do")
 	@ResponseBody
 	public String pushWap(HttpServletRequest request, Integer groupId) {
-		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
+		/*TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
 		
 		//团信息
 		AssistantGroupVO groupVo = new AssistantGroupVO();
@@ -891,8 +805,55 @@ public class TourGroupController extends BaseController {
 		} catch (Exception e) {
 			log.error("推送APP错误信息:" + e.getMessage());
 			return errorJson("推送信息失败"+e.getMessage());
-		}
+		}*/
 
+		PushWapResult pushWapResult = tourGroupFacade.pushWap(groupId);
+		String resultString = "{result: 'success',resultCode: '0',msg: ''}";
+		try {
+			String appKey = OpenPlatformConstannt.openAPI_AssistantMap.get("appKey");
+			String secretKey = OpenPlatformConstannt.openAPI_AssistantMap.get("secretKey");
+			String timeStamp = DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
+			String jsonStr = JSON.toJSONString(pushWapResult.getGroupVo());
+			String supplierInfo = JSON.toJSONString(pushWapResult.getSupplierVo());
+			//签名
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("appKey", appKey);
+			params.put("timestamp", timeStamp);
+			String getSign = MD5Util.getSign_Taobao(secretKey, params);
+
+			// 访问接口
+			CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
+			HttpPost httpPost = new HttpPost(OpenPlatformConstannt.openAPI_AssistantMap.get("Url")
+					+ OpenPlatformConstannt.openAPI_AssistantMap.get("pushMethod"));
+
+			// 设置连接超时时间
+			RequestConfig requestConfig = RequestConfig.custom()
+					.setConnectTimeout(5000).setConnectionRequestTimeout(1000)
+					.setSocketTimeout(5000).build();
+			httpPost.setConfig(requestConfig);
+
+			// 访问参数
+			List<NameValuePair> nameValuePairList = new ArrayList<NameValuePair>();
+			nameValuePairList.add(new BasicNameValuePair("appKey", appKey));
+			nameValuePairList.add(new BasicNameValuePair("timestamp", timeStamp));
+			nameValuePairList.add(new BasicNameValuePair("sign", getSign));
+			nameValuePairList.add(new BasicNameValuePair("jsonStr", jsonStr));
+			nameValuePairList.add(new BasicNameValuePair("supplierInfo", supplierInfo));
+			httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairList, "utf-8"));
+
+			CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpPost);
+
+			try {
+				HttpEntity httpEntity = closeableHttpResponse.getEntity();
+				resultString = EntityUtils.toString(httpEntity);
+			} finally {
+				closeableHttpResponse.close();
+			}
+
+		} catch (Exception e) {
+			log.error("推送APP错误信息:" + e.getMessage());
+			return errorJson("推送信息失败"+e.getMessage());
+		}
 		return resultString;
 
 	}
@@ -907,9 +868,13 @@ public class TourGroupController extends BaseController {
 	@RequestMapping(value = "/toEditGroup.do")
 	@ResponseBody
 	public String toEditGroup(HttpServletRequest request, Integer groupId) {
-		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
+		/*TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
 		Gson gson = new Gson();
-		String json = gson.toJson(tourGroup);
+		String json = gson.toJson(tourGroup);*/
+
+		ToChangeGroupResult toChangeGroupResult = tourGroupFacade.toEditGroup(groupId);
+		Gson gson = new Gson();
+		String json = gson.toJson(toChangeGroupResult.getTourGroup());
 		return json;
 	}
 
@@ -926,7 +891,7 @@ public class TourGroupController extends BaseController {
 		/**
 		 * 如果订单id==null,团id!=null，多查询一次订单id
 		 */
-		if (orderId == null && groupId != null) {
+	/*	if (orderId == null && groupId != null) {
 			// 定制团中团和订单一对一的关系
 			List<GroupOrder> orders = groupOrderService
 					.selectOrderByGroupId(groupId);
@@ -950,9 +915,9 @@ public class TourGroupController extends BaseController {
 			groupOrder = (GroupOrder) map.get("groupOrder");
 			tourGroup = (TourGroup) map.get("tourGroup");
 			if (null != state && state.equals(4)) {
-				/**
+				*//**
 				 * state=0的时候，只能查看，所以可以在这里设置财务状态等于1，财务状态=1的时候也只能查看
-				 */
+				 *//*
 				model.addAttribute("stateFinance", 1);
 				model.addAttribute("state", state);
 			} else {
@@ -962,9 +927,9 @@ public class TourGroupController extends BaseController {
 				} else {
 					model.addAttribute("stateFinance", 0);
 				}
-				/**
+				*//**
 				 * 将团状态放到model中是为了：当团状态为已确认团的时候，控制成本为不可维护
-				 */
+				 *//*
 				model.addAttribute("state", state);
 			}
 			List<RegionInfo> cityList = null;
@@ -975,15 +940,15 @@ public class TourGroupController extends BaseController {
 			}
 			model.addAttribute("allCity", cityList);
 		} else if (groupId != null && orderId == null) {
-			/**
+			*//**
 			 * 操作计调和销售计调默认为当前登陆用户
-			 */
+			 *//*
 			groupOrder = new GroupOrder();
 			tourGroup = tourGroupService.selectByPrimaryKey(groupId);
 			groupOrder.setOperatorName(WebUtils.getCurUser(request).getName());
-			/**
+			*//**
 			 * 新增的时候财务默认状态未审核
-			 */
+			 *//*
 			if (null != state && state.equals(4)) {
 				model.addAttribute("stateFinance", 1);
 			} else {
@@ -991,9 +956,9 @@ public class TourGroupController extends BaseController {
 				model.addAttribute("state", state);
 			}
 		} else {
-			/**
+			*//**
 			 * 操作计调和销售计调默认为当前登陆用户
-			 */
+			 *//*
 			groupOrder = new GroupOrder();
 			tourGroup = new TourGroup();
 			groupOrder.setOperatorName(WebUtils.getCurUser(request).getName());
@@ -1001,9 +966,9 @@ public class TourGroupController extends BaseController {
 			groupOrder.setSaleOperatorId(WebUtils.getCurUserId(request));
 			groupOrder.setSaleOperatorName(WebUtils.getCurUser(request)
 					.getName());
-			/**
+			*//**
 			 * 新增的时候财务默认状态未审核
-			 */
+			 *//*
 			if (null != state && state.equals(4)) {
 				model.addAttribute("stateFinance", 1);
 			} else {
@@ -1019,7 +984,18 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("sourceTypeList", sourceTypeList);
 
 		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+		model.addAttribute("allProvince", allProvince);*/
+
+
+		ToAddTourGroupOrderResult toAddTourGroupOrderResult = tourGroupFacade.toAddTourGroupOrder(groupId, orderId, state, WebUtils.getCurUser(request).getName(), WebUtils.getCurUserId(request), WebUtils.getCurBizId(request));
+		model.addAttribute("allCity", toAddTourGroupOrderResult.getCityList());
+		model.addAttribute("stateFinance", toAddTourGroupOrderResult.getStateFinance());
+		model.addAttribute("state", toAddTourGroupOrderResult.getState());
+		model.addAttribute("typeList", toAddTourGroupOrderResult.getTypeList());
+		model.addAttribute("groupOrder", toAddTourGroupOrderResult.getGroupOrder());
+		model.addAttribute("tourGroup", toAddTourGroupOrderResult.getTourGroup());
+		model.addAttribute("sourceTypeList", toAddTourGroupOrderResult.getSourceTypeList());
+		model.addAttribute("allProvince", toAddTourGroupOrderResult.getAllProvince());
 
 		logger.info("跳转到添加旅行团订单信息页面");
 		return "sales/tourGroup/groupOrderDetail";
@@ -1037,10 +1013,10 @@ public class TourGroupController extends BaseController {
 	@ResponseBody
 	public String saveTourGroupOrder(HttpServletRequest request,
 			TourGroup tourGroup, GroupOrder groupOrder, Model model) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-		/**
-		 * 页面传过来的订单id不为空的时候新增，为空的时候修改
-		 */
+	/*	SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+
+		 // 页面传过来的订单id不为空的时候新增，为空的时候修改
+
 		if (groupOrder.getId() == null) {
 			tourGroup.setBizId(WebUtils.getCurBizId(request)); // 用当前登陆用户ID表示商家ID
 			tourGroup.setGroupCode(settingCommon.getMyBizCode(request));//
@@ -1088,7 +1064,11 @@ public class TourGroupController extends BaseController {
 			logger.info("后台更新旅行团和旅行团订单信息成功");
 		}
 		Gson gson = new Gson();
-		String string = gson.toJson(groupOrder);
+		String string = gson.toJson(groupOrder);*/
+
+		ToChangeGroupResult toChangeGroupResult = tourGroupFacade.saveTourGroupOrder(tourGroup, groupOrder, WebUtils.getCurBizId(request), WebUtils.getCurUser(request).getOrgId(), WebUtils.getCurUserId(request), WebUtils.getCurUser(request).getName());
+		Gson gson = new Gson();
+		String string = gson.toJson(toChangeGroupResult.getGroupOrde());
 		return string;
 	}
 
@@ -1097,7 +1077,7 @@ public class TourGroupController extends BaseController {
 	public String unifiedSaveOtherInfo(HttpServletRequest request,
 			OtherInfoVO otherInfoVO) {
 
-		List<GroupOrderPrice> priceList = otherInfoVO.getGroupOrderPriceList();
+		/*List<GroupOrderPrice> priceList = otherInfoVO.getGroupOrderPriceList();
 		if (priceList != null && priceList.size() > 0) {
 			for (GroupOrderPrice groupOrderPrice : priceList) {
 				groupOrderPrice.setCreateTime(System.currentTimeMillis());
@@ -1138,7 +1118,9 @@ public class TourGroupController extends BaseController {
 			for (GroupOrderGuest groupOrderGuest : guestList) {
 				groupOrderGuestService.insertSelective(groupOrderGuest);
 			}
-		}
+		}*/
+
+		ResultSupport resultSupport = tourGroupFacade.unifiedSaveOtherInfo(otherInfoVO, WebUtils.getCurUser(request).getName(), WebUtils.getCurUserId(request));
 		return successJson();
 
 	}
@@ -1154,7 +1136,7 @@ public class TourGroupController extends BaseController {
 	public String toOtherInfo(HttpServletRequest request, Integer orderId,
 			Integer stateFinance, Model model, Integer state) {
 
-		int bizId = WebUtils.getCurBizId(request);
+		/*int bizId = WebUtils.getCurBizId(request);
 		
 		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
 		List<DicInfo> jtfsList = dicService
@@ -1195,14 +1177,28 @@ public class TourGroupController extends BaseController {
 			guest.setHistoryNum(guests.size());
 			// sb.append(guest.getCertificateNum()+",") ;
 		}
-		/* model.addAttribute("cerNums", sb.toString()); */
+		*//* model.addAttribute("cerNums", sb.toString()); *//*
 		model.addAttribute("groupOrderGuests", groupOrderGuests);
 		model.addAttribute("orderId", orderId);
 		model.addAttribute("groupOrder", groupOrder);
 		model.addAttribute("stateFinance", stateFinance);
 		model.addAttribute("groupId", groupOrder.getGroupId());
 		model.addAttribute("state", state);
-		logger.info("跳转到添加旅行团其他信息页面");
+		logger.info("跳转到添加旅行团其他信息页面");*/
+
+		ToOtherInfoResult toOtherInfoResult = tourGroupFacade.toOtherInfo(orderId, stateFinance, state, WebUtils.getCurBizId(request));
+		model.addAttribute("jtfsList", toOtherInfoResult.getJtfsList());
+		model.addAttribute("zjlxList", toOtherInfoResult.getZjlxList());
+		model.addAttribute("lysfxmList", toOtherInfoResult.getLysfxmList());
+		model.addAttribute("incomeList", toOtherInfoResult.getGroupOrderPricesZero());
+		model.addAttribute("costList", toOtherInfoResult.getGroupOrderPricesOne());
+		model.addAttribute("groupOrderTransports", toOtherInfoResult.getGroupOrderTransports());
+		model.addAttribute("groupOrderGuests", toOtherInfoResult.getGroupOrderGuests());
+		model.addAttribute("orderId", orderId);
+		model.addAttribute("groupOrder", toOtherInfoResult.getGroupOrder());
+		model.addAttribute("stateFinance", stateFinance);
+		model.addAttribute("groupId", toOtherInfoResult.getGroupOrder().getId());
+		model.addAttribute("state", state);
 		return "sales/tourGroup/otherInfo";
 	}
 
@@ -1217,7 +1213,7 @@ public class TourGroupController extends BaseController {
 	public String togroupRequirement(Integer orderId, Integer stateFinance,
 			Model model, Integer state) {
 
-		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
+		/*GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
 		// 车辆型号
 		List<DicInfo> ftcList = dicService
 				.getListByTypeCode(Constants.FLEET_TYPE_CODE);
@@ -1254,7 +1250,27 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("stateFinance", stateFinance);
 		model.addAttribute("groupId", groupOrder.getGroupId());
 		model.addAttribute("state", state);
-		logger.info("跳转到添加旅行团计调需求页面");
+		logger.info("跳转到添加旅行团计调需求页面");*/
+
+		TogroupRequirementResult togroupRequirementResult = tourGroupFacade.togroupRequirement(orderId, stateFinance,state);
+		model.addAttribute("ftcList", togroupRequirementResult.getFtcList());
+		model.addAttribute("jdxjList", togroupRequirementResult.getJdxjList());
+		// 酒店信息
+		model.addAttribute("grogShopList", togroupRequirementResult.getGrogShopList());
+		// 车队信息
+		model.addAttribute("motorcadeList", togroupRequirementResult.getMotorcadeList());
+		// 机票信息
+		model.addAttribute("airTicketList", togroupRequirementResult.getAirTicketList());
+		// 火车信息
+		model.addAttribute("railwayTicketList", togroupRequirementResult.getRailwayTicketList());
+		// 导游信息
+		model.addAttribute("guideList", togroupRequirementResult.getGuideList());
+		// 餐厅信息
+		model.addAttribute("restaurantList", togroupRequirementResult.getRestaurantList());
+		model.addAttribute("orderId", orderId);
+		model.addAttribute("stateFinance", stateFinance);
+		model.addAttribute("groupId", togroupRequirementResult.getGroupId());
+		model.addAttribute("state", state);
 		return "sales/tourGroup/groupRequirement";
 	}
 
@@ -1267,7 +1283,7 @@ public class TourGroupController extends BaseController {
 	 */
 	@RequestMapping(value = "toGroupList.htm")
 	public String toGroupList(HttpServletRequest request, Model model) {
-		Integer bizId = WebUtils.getCurBizId(request);
+	/*	Integer bizId = WebUtils.getCurBizId(request);
 		List<RegionInfo> allProvince = regionService.getAllProvince();
 		model.addAttribute("allProvince", allProvince);
 		model.addAttribute("orgJsonStr",
@@ -1277,7 +1293,13 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
-				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));*/
+		ToGroupListResult toGroupListResult = teamGroupFacade.toGroupList(WebUtils.getCurBizId(request));
+		model.addAttribute("allProvince", toGroupListResult.getAllProvince());
+		model.addAttribute("orgJsonStr",
+				toGroupListResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",
+				toGroupListResult.getOrgUserJsonStr());
 		return "sales/tourGroup/groupList";
 	}
 
@@ -1293,11 +1315,11 @@ public class TourGroupController extends BaseController {
 	@RequiresPermissions(PermissionConstants.SALE_TEAM_GROUP)
 	public String findTourGroupByCondition(HttpServletRequest request,
 			String yesOrNo, GroupOrder groupOrder, Model model) {
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+	/*	List<RegionInfo> allProvince = regionService.getAllProvince();
 		model.addAttribute("allProvince", allProvince);
-		/**
+		*//**
 		 * yesOrNo 确认团和未确认团的标记
-		 */
+		 *//*
 		String url = "sales/tourGroup/groupOrderManageUnconfirmed";
 		if (null != yesOrNo && yesOrNo.equals("yes")) {
 			url = "sales/tourGroup/groupOrderManageConfirmed";
@@ -1321,8 +1343,30 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
-				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));
+				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(bizId));*/
 
+		ToGroupListResult toGroupListResult = tourGroupFacade.findTourGroupByCondition(yesOrNo, groupOrder, WebUtils.getCurBizId(request));
+		String url = "sales/tourGroup/groupOrderManageUnconfirmed";
+		if (null != yesOrNo && yesOrNo.equals("yes")) {
+			url = "sales/tourGroup/groupOrderManageConfirmed";
+		}
+		// 团开始日期默认当前月第一天到最后一天
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		// 获取当前月第一天：
+		Calendar c = Calendar.getInstance();
+		c.add(Calendar.MONTH, 0);
+		c.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
+		String first = format.format(c.getTime());
+		model.addAttribute("first", first);
+		// 获取当前月最后一天
+		Calendar ca = Calendar.getInstance();
+		ca.set(Calendar.DAY_OF_MONTH,
+				ca.getActualMaximum(Calendar.DAY_OF_MONTH));
+		String last = format.format(ca.getTime());
+		model.addAttribute("last", last);
+		model.addAttribute("allProvince", toGroupListResult.getAllProvince());
+		model.addAttribute("orgJsonStr",toGroupListResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",toGroupListResult.getOrgUserJsonStr());
 		return url;
 	}
 
@@ -1331,6 +1375,7 @@ public class TourGroupController extends BaseController {
 	public String findTourGroupByConditionLoadModel(HttpServletRequest request,
 			GroupOrder groupOrder, Model model) throws ParseException {
 
+/*
 		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
 
 		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
@@ -1417,14 +1462,31 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("totalGuide",
 				order == null ? 0 : order.getNumGuide());
 
-		/**
+		*//**
 		 * 根据组团社id获取组团社名称
-		 */
+		 *//*
 		List<GroupOrder> groupList = pageBean.getResult();
 		model.addAttribute("groupList", groupList);
 		model.addAttribute("groupOrder", groupOrder);
-		model.addAttribute("page", pageBean);
+		model.addAttribute("page", pageBean);*/
 
+		FindTourGroupByConditionDTO findTourGroupByConditionDTO = new FindTourGroupByConditionDTO();
+		findTourGroupByConditionDTO.setGroupOrder(groupOrder);
+		findTourGroupByConditionDTO.setCurBizId(WebUtils.getCurBizId(request));
+		findTourGroupByConditionDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
+		FindTourGroupByConditionResult findTourGroupByConditionResult = teamGroupFacade.findTourGroupByConditionLoadModel(findTourGroupByConditionDTO);
+
+		model.addAttribute("pageTotalAudit", findTourGroupByConditionResult.getPageTotalAudit());
+		model.addAttribute("pageTotalChild", findTourGroupByConditionResult.getPageTotalChild());
+		model.addAttribute("pageTotalGuide", findTourGroupByConditionResult.getPageTotalGuide());
+
+		model.addAttribute("totalAudit",findTourGroupByConditionResult.getOrder() == null ? 0 : findTourGroupByConditionResult.getOrder().getNumAdult());
+		model.addAttribute("totalChild",findTourGroupByConditionResult.getOrder() == null ? 0 : findTourGroupByConditionResult.getOrder().getNumChild());
+		model.addAttribute("totalGuide",findTourGroupByConditionResult.getOrder() == null ? 0 : findTourGroupByConditionResult.getOrder().getNumGuide());
+
+		model.addAttribute("groupList", findTourGroupByConditionResult.getPageBean().getResult());
+		model.addAttribute("groupOrder", groupOrder);
+		model.addAttribute("page", findTourGroupByConditionResult.getPageBean());
 		return "sales/tourGroup/groupTable";
 	}
 
@@ -1537,11 +1599,11 @@ public class TourGroupController extends BaseController {
 	/**
 	 * 生成销售订单
 	 * 
-	 * @param model
+	 * @param
 	 * @return
 	 */
 	public String createSalesConfirm(HttpServletRequest request, Integer orderId,Integer agency) {
-		String url = request.getSession().getServletContext().getRealPath("/")
+		/*String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
 		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
 		List<GroupOrderGuest> guests = groupOrderGuestService
@@ -1576,13 +1638,13 @@ public class TourGroupController extends BaseController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		/**
+		*//**
 		 * logo图标和标题
-		 */
-		/*
+		 *//*
+		*//*
 		 * String imgPath = WebUtils.getCurBizLogo(config.getImgServerUrl(),
 		 * request);
-		 */
+		 *//*
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		Map<String, Object> params1 = new HashMap<String, Object>();
 		params1.put("print_time", DateUtils.format(new Date()));
@@ -1668,9 +1730,9 @@ public class TourGroupController extends BaseController {
 						+ (groupOrder.getProductName() == null ? ""
 								: groupOrder.getProductName()));
 
-		/**
+		*//**
 		 * 行程列表表格
-		 */
+		 *//*
 		List<Map<String, String>> routeList = new ArrayList<Map<String, String>>();
 		for (GroupRoute groupRoute : routes) {
 			Map<String, String> map = new HashMap<String, String>();
@@ -1686,9 +1748,9 @@ public class TourGroupController extends BaseController {
 			map.put("hotel_name", groupRoute.getHotelName());
 			routeList.add(map);
 		}
-		/**
+		*//**
 		 * 收入表格
-		 */
+		 *//*
 		List<Map<String, String>> priceList = new ArrayList<Map<String, String>>();
 		Double totalNum = new Double(0);
 		int i = 1;
@@ -1723,9 +1785,9 @@ public class TourGroupController extends BaseController {
 			priceList.add(priceTotalMap);
 		}
 
-		/**
+		*//**
 		 * 客人信息
-		 */
+		 *//*
 		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
 
 		for (int x = 0; x < guests.size(); x++) {
@@ -1787,6 +1849,214 @@ public class TourGroupController extends BaseController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return url;*/
+
+
+
+		String url = request.getSession().getServletContext().getRealPath("/")
+				+ "/download/" + System.currentTimeMillis() + ".doc";
+
+		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesConfirm(orderId, agency, WebUtils.getCurBizId(request));
+		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
+		List<GroupOrderPrice> prices = toPreviewResult.getPriceList();
+		List<GroupRoute> routes = toPreviewResult.getRouteList();
+		SupplierInfo supplier = toPreviewResult.getSupplier();
+		String realPath = request.getSession().getServletContext()
+				.getRealPath("/template/sales_confirm.docx");
+		if (groupOrder.getOrderType() != 1) {
+			realPath = request.getSession().getServletContext()
+					.getRealPath("/template/sales_skconfirm.docx");
+		}
+		if(agency==1){
+			realPath = request.getSession().getServletContext()
+					.getRealPath("/template/agency_sales_confirm.docx");
+		}
+		WordReporter export = new WordReporter(realPath);
+		try {
+			export.init();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		// logo图标和标题
+		String imgPath = toPreviewResult.getImgPath();
+		Map<String, Object> params1 = new HashMap<String, Object>();
+		params1.put("print_time", DateUtils.format(new Date()));
+		params1.put("product", groupOrder.getProductName());
+		params1.put("printName", WebUtils.getCurUser(request).getName());
+		if (imgPath != null) {
+			Map<String, String> picMap = new HashMap<String, String>();
+			picMap.put("width", BizConfigConstant.BIZ_LOGO_WIDTH);
+			picMap.put("height", BizConfigConstant.BIZ_LOGO_HEIGHT);
+			picMap.put("type", "jpg");
+			picMap.put("path", imgPath);
+			params1.put("logo", picMap);
+		} else {
+			params1.put("logo", "");
+		}
+
+		Map<String, Object> map0 = new HashMap<String, Object>();
+		// 收件方信息
+		map0.put("supplier_name", supplier.getNameShort());
+		map0.put("contact", groupOrder.getContactName());
+		map0.put("contact_tel", groupOrder.getContactTel());
+		map0.put("contact_fax", groupOrder.getContactFax());
+		// 发件方信息（定制团显示为销售）
+		// 销售计调的组织机构信息
+		PlatformEmployeePo employee = toPreviewResult.getEmployee();
+		map0.put("company", toPreviewResult.getCompany()); // 当前单位
+		map0.put("user_name", employee.getName());
+		map0.put("user_tel", employee.getMobile());
+		map0.put("user_fax", employee.getFax());
+
+		// 统计订单下的全陪
+		String guestGuideString = toPreviewResult.getGuestGuideString();
+		// 订单所属团下的所有导游
+		String guideString = toPreviewResult.getGuideString();
+		// 根据散客订单统计客人信息
+
+		Map<String, Object> map1 = new HashMap<String, Object>();
+		if (null == groupOrder.getTourGroup()) {
+			map1.put("groupCode", "");
+		} else {
+			map1.put("groupCode", groupOrder.getTourGroup().getGroupCode());
+		}
+		map1.put("person",groupOrder.getNumAdult()+"+"+groupOrder.getNumChild()+"+"+groupOrder.getNumGuide());
+		map1.put("departureDate", groupOrder.getDepartureDate());
+		map1.put("receiveMode", groupOrder.getReceiveMode());
+		map1.put(
+				"place",
+				(groupOrder.getProvinceName() == null ? "" : groupOrder
+						.getProvinceName())
+						+ (groupOrder.getCityName() == null ? "" : groupOrder
+								.getCityName()));
+		map1.put("guideString", guideString);
+		map1.put("guestGuideString", guestGuideString);
+		map1.put("productName",
+				"【"
+						+ (groupOrder.getProductBrandName() == null ? ""
+								: groupOrder.getProductBrandName())
+						+ "】"
+						+ (groupOrder.getProductName() == null ? ""
+								: groupOrder.getProductName()));
+
+
+		// 行程列表表格
+		List<Map<String, String>> routeList = new ArrayList<Map<String, String>>();
+		for (GroupRoute groupRoute : routes) {
+			Map<String, String> map = new HashMap<String, String>();
+			if (null != groupRoute.getGroupDate()) {
+				map.put("day_num", DateUtils.format(groupRoute.getGroupDate()));
+			} else {
+				map.put("day_num", "");
+			}
+			map.put("route_desp", groupRoute.getRouteDesp());
+			map.put("breakfast", groupRoute.getBreakfast());
+			map.put("lunch", groupRoute.getLunch());
+			map.put("supper", groupRoute.getSupper());
+			map.put("hotel_name", groupRoute.getHotelName());
+			routeList.add(map);
+		}
+
+		// 收入表格
+
+		List<Map<String, String>> priceList = new ArrayList<Map<String, String>>();
+		Double totalNum = new Double(0);
+		int i = 1;
+		if (null != prices && prices.size() > 0) {
+			for (GroupOrderPrice price : prices) {
+				Map<String, String> map = new HashMap<String, String>();
+				map.put("seq", "" + i++);
+				map.put("item_name", price.getItemName());
+				map.put("remark", price.getRemark());
+				map.put("unit_price",
+						NumberUtil.formatDouble(price.getUnitPrice()));
+				map.put("num_times",
+						NumberUtil.formatDouble(price.getNumTimes()));
+				map.put("num_person",
+						NumberUtil.formatDouble(price.getNumPerson()));
+				map.put("total_price",
+						NumberUtil.formatDouble(price.getTotalPrice()));
+				totalNum += new Double(NumberUtil.formatDouble(price
+						.getUnitPrice()
+						* price.getNumTimes()
+						* price.getNumPerson()));
+				priceList.add(map);
+			}
+			Map<String, String> priceTotalMap = new HashMap<String, String>() ;
+			priceTotalMap.put("total","应收:"+NumberUtil.formatDouble(totalNum)+",已收:"+
+					NumberUtil.formatDouble(prices.get(prices.size()-1).getTotalPrice())+
+					",余额:" +(NumberUtil.formatDouble(totalNum-prices.get(prices.size()-1).getTotalPrice()))) ;
+			priceList.add(priceTotalMap) ;
+		}else {
+			Map<String, String> priceTotalMap = new HashMap<String, String>();
+			priceTotalMap.put("total", " ");
+			priceList.add(priceTotalMap);
+		}
+
+
+		// 客人信息
+
+		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
+
+		for (int x = 0; x < guests.size(); x++) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("guestName", (guests.get(x).getName() == null ? "" : guests
+					.get(x).getName()));
+			map.put("mobile", (guests.get(x).getMobile() == null ? "" : guests
+					.get(x).getMobile()));
+			map.put("gender", guests.get(x).getGender() == 1 ? "男" : "女");
+			map.put("age", (guests.get(x).getAge() == null ? "" : guests.get(x)
+					.getAge()) + "");
+			map.put("cerNum", (guests.get(x).getCertificateNum() == null ? ""
+					: guests.get(x).getCertificateNum()));
+			map.put("place", (guests.get(x).getNativePlace() == null ? ""
+					: guests.get(x).getNativePlace()));
+			guestList.add(map);
+		}
+		Map<String, Object> map6 = new HashMap<String, Object>();
+		// 根据散客订单统计酒店信息
+		List<GroupRequirement> grogShopList = toPreviewResult.getGrogShopList();
+		// 根据散客订单统计接机信息
+		List<GroupOrderTransport> groupOrderTransports = toPreviewResult.getGroupOrderTransports();
+		if (null != grogShopList && grogShopList.size() > 0) {
+			map6.put("hotelNum", getHotelNum(grogShopList));
+		} else {
+			map6.put("hotelNum", "");
+		}
+		if(agency!=1){
+			if (null != groupOrderTransports && groupOrderTransports.size() > 0) {
+				map6.put("upAndOff", "接机：" + getAirInfo(groupOrderTransports, 0)
+						+ "\n" + "送机：" + getAirInfo(groupOrderTransports, 1) + "\n"
+						+ "省内交通：" + getSourceType(groupOrderTransports));
+			} else {
+				map6.put("upAndOff", "");
+			}
+		}
+		map6.put("Remark", groupOrder.getRemark());
+		map6.put("Service", groupOrder.getServiceStandard());
+		try {
+			export.export(params1);
+			export.export(map0, 0);
+			export.export(map1, 1);
+			export.export(routeList, 2);
+			if(agency!=1){
+				export.export(priceList, 3, true);
+			}else{
+				export.export(priceList, 3);
+			}
+
+			if (groupOrder.getOrderType() != 1 && agency!=1) {
+				export.export(guestList, 4);
+				export.export(map6, 5);
+			} else {
+				export.export(map6, 4);
+			}
+			export.generate(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return url;
 	}
 
@@ -1799,7 +2069,7 @@ public class TourGroupController extends BaseController {
 	 */
 	public String createSalesChargeNoRoute(HttpServletRequest request,
 			Integer orderId) {
-		String url = request.getSession().getServletContext().getRealPath("/")
+		/*String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
 		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
 		List<GroupOrderGuest> guests = groupOrderGuestService
@@ -1826,6 +2096,161 @@ public class TourGroupController extends BaseController {
 			e.printStackTrace();
 		}
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
+		Map<String, Object> params1 = new HashMap<String, Object>();
+		params1.put("print_time", DateUtils.format(new Date()));
+		params1.put("printName", WebUtils.getCurUser(request).getName());
+		params1.put("product", groupOrder.getProductName());
+		if (imgPath != null) {
+			Map<String, String> picMap = new HashMap<String, String>();
+			picMap.put("width", BizConfigConstant.BIZ_LOGO_WIDTH);
+			picMap.put("height", BizConfigConstant.BIZ_LOGO_HEIGHT);
+			picMap.put("type", "jpg");
+			picMap.put("path", imgPath);
+			params1.put("logo", picMap);
+		} else {
+			params1.put("logo", "");
+		}
+
+		*//**
+		 * 第一个表格
+		 *//*
+		Map<String, Object> map0 = new HashMap<String, Object>();
+		map0.put("supplier_name", supplier.getNameShort());
+		map0.put("contact", groupOrder.getContactName());
+		map0.put("contact_tel", groupOrder.getContactTel());
+		map0.put("contact_fax", groupOrder.getContactFax());
+		map0.put("company", WebUtils.getCurBizInfo(request).getName()); // 当前单位
+		map0.put("user_name", employeePo.getName());
+		map0.put("user_tel", employeePo.getMobile());
+		map0.put("user_fax", employeePo.getFax());
+		*//**
+		 * 第二个表格
+		 *//*
+		Map<String, Object> map1 = new HashMap<String, Object>();
+		if (null == groupOrder.getTourGroup()) {
+			map1.put("group_code", "待定");
+		} else {
+			map1.put("group_code", groupOrder.getTourGroup().getGroupCode());
+		}
+		map1.put("supplier_code", groupOrder.getSupplierCode());
+		map1.put("departure_date", groupOrder.getDepartureDate());
+		map1.put("person",groupOrder.getNumAdult()+"+"+groupOrder.getNumChild()+"+"+groupOrder.getNumGuide());
+		map1.put("guest_guide", toGetGuideString(guests)); // 姓名和电话
+		map1.put("guest_leader", toGetLeaderString(guests)); // 姓名和电话
+		*//**
+		 * 第三个表格
+		 *//*
+		*//**
+		 * 行程列表表格
+		 *//*
+		*//*
+		 * List<Map<String, String>> routeList = new ArrayList<Map<String,
+		 * String>>(); for (GroupRoute groupRoute : routes) { Map<String,
+		 * String> map = new HashMap<String, String>(); if
+		 * (groupRoute.getGroupDate() != null) { map.put("day_num",
+		 * DateUtils.format(groupRoute.getGroupDate())); } else {
+		 * map.put("day_num", ""); } map.put("route_desp",
+		 * groupRoute.getRouteDesp()); map.put("breakfast",
+		 * groupRoute.getBreakfast()); map.put("lunch", groupRoute.getLunch());
+		 * map.put("supper", groupRoute.getSupper()); map.put("hotel_name",
+		 * groupRoute.getHotelName()); routeList.add(map); }
+		 *//*
+		*//**
+		 * 第四个表格
+		 *//*
+		*//**
+		 * 成本表格
+		 *//*
+		List<Map<String, String>> priceList = new ArrayList<Map<String, String>>();
+		Double totalNum = new Double(0);
+		int i = 1;
+		if (null != prices && prices.size() > 0) {
+			for (GroupOrderPrice price : prices) {
+				Map<String, String> map = new HashMap<String, String>();
+				map.put("seq", "" + i++);
+				map.put("item_name", price.getItemName());
+				map.put("remark", price.getRemark());
+				map.put("unit_price",
+						NumberUtil.formatDouble(price.getUnitPrice()));
+				map.put("num_times",
+						NumberUtil.formatDouble(price.getNumTimes()));
+				map.put("num_person",
+						NumberUtil.formatDouble(price.getNumPerson()));
+				map.put("total_price",
+						NumberUtil.formatDouble(price.getTotalPrice()));
+				totalNum += new Double(NumberUtil.formatDouble(price
+						.getUnitPrice()
+						* price.getNumTimes()
+						* price.getNumPerson()));
+				priceList.add(map);
+			}
+			Map<String, String> priceTotalMap = new HashMap<String, String>() ;
+			priceTotalMap.put("total","应收:"+NumberUtil.formatDouble(totalNum)+",已付:"+
+					NumberUtil.formatDouble(prices.get(prices.size()-1).getTotalPrice())+
+					",余额:" +(NumberUtil.formatDouble(totalNum-prices.get(prices.size()-1).getTotalPrice()))) ;
+			priceList.add(priceTotalMap) ;
+		}else {
+			Map<String, String> priceTotalMap = new HashMap<String, String>();
+			priceTotalMap.put("total", " ");
+			priceList.add(priceTotalMap);
+		}
+
+		*//**
+		 * 第四个表格
+		 *//*
+		List<SysBizBankAccount> sysBizBankAccountList = bizBankAccountService
+				.getListByBizId(WebUtils.getCurBizId(request));
+		List<Map<String, String>> sbba = new ArrayList<Map<String, String>>();
+		for (SysBizBankAccount sysBizBankAccount : sysBizBankAccountList) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("account_type",
+					sysBizBankAccount.getAccountType() == 1 ? "个人账户" : "对公账户");
+			map.put("account_name", sysBizBankAccount.getAccountName());
+			map.put("bank_account", sysBizBankAccount.getBankAccount());
+			map.put("account_no", sysBizBankAccount.getAccountNo());
+			sbba.add(map);
+		}
+		*//**
+		 * 第五个表格
+		 *//*
+		Map<String, Object> map5 = new HashMap<String, Object>();
+		if (null != groupOrder.getTourGroup()) {
+			map5.put("Remark", groupOrder.getRemark());
+			map5.put("Service", groupOrder.getServiceStandard());
+		}
+		try {
+			export.export(params1);
+			export.export(map0, 0);
+			export.export(map1, 1);
+			// export.export(routeList, 2);
+			export.export(priceList, 2, true);
+			export.export(sbba, 3);
+			export.export(map5, 4);
+			export.generate(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return url;*/
+
+
+		String url = request.getSession().getServletContext().getRealPath("/")
+				+ "/download/" + System.currentTimeMillis() + ".doc";
+		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesChargeNoRoute(orderId,  WebUtils.getCurBizId(request));
+		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
+		List<GroupOrderPrice> prices = toPreviewResult.getPriceList();
+		List<GroupRoute> routes = toPreviewResult.getRouteList();
+		PlatformEmployeePo employeePo = WebUtils.getCurUser(request);
+		SupplierInfo supplier = toPreviewResult.getSupplier();
+		String realPath = request.getSession().getServletContext()
+				.getRealPath("/template/sales_charge_noRoute.docx");
+		WordReporter export = new WordReporter(realPath);
+		try {
+			export.init();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String imgPath = toPreviewResult.getImgPath();
 		Map<String, Object> params1 = new HashMap<String, Object>();
 		params1.put("print_time", DateUtils.format(new Date()));
 		params1.put("printName", WebUtils.getCurUser(request).getName());
@@ -1928,8 +2353,7 @@ public class TourGroupController extends BaseController {
 		/**
 		 * 第四个表格
 		 */
-		List<SysBizBankAccount> sysBizBankAccountList = bizBankAccountService
-				.getListByBizId(WebUtils.getCurBizId(request));
+		List<SysBizBankAccount> sysBizBankAccountList = toPreviewResult.getSysBizBankAccountList();
 		List<Map<String, String>> sbba = new ArrayList<Map<String, String>>();
 		for (SysBizBankAccount sysBizBankAccount : sysBizBankAccountList) {
 			Map<String, String> map = new HashMap<String, String>();
@@ -1966,12 +2390,12 @@ public class TourGroupController extends BaseController {
 	/**
 	 * 生成销售订单确认单-无行程
 	 * 
-	 * @param model
+	 * @param
 	 * @return
 	 */
 	public String createSalesConfirmNoRoute(HttpServletRequest request,
 			Integer orderId) {
-		String url = request.getSession().getServletContext().getRealPath("/")
+		/*String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
 		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
 		List<GroupOrderGuest> guests = groupOrderGuestService
@@ -2004,9 +2428,9 @@ public class TourGroupController extends BaseController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		/**
+		*//**
 		 * logo图标和标题
-		 */
+		 *//*
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		Map<String, Object> params1 = new HashMap<String, Object>();
 		params1.put("print_time", DateUtils.format(new Date()));
@@ -2089,6 +2513,188 @@ public class TourGroupController extends BaseController {
 						+ (groupOrder.getProductName() == null ? ""
 								: groupOrder.getProductName()));
 
+		*//**
+		 * 收入表格
+		 *//*
+		List<Map<String, String>> priceList = new ArrayList<Map<String, String>>();
+		Double totalNum = new Double(0);
+		int i = 1;
+		if (null != prices && prices.size() > 0) {
+			for (GroupOrderPrice price : prices) {
+				Map<String, String> map = new HashMap<String, String>();
+				map.put("seq", "" + i++);
+				map.put("item_name", price.getItemName());
+				map.put("remark", price.getRemark());
+				map.put("unit_price",
+						NumberUtil.formatDouble(price.getUnitPrice()));
+				map.put("num_times",
+						NumberUtil.formatDouble(price.getNumTimes()));
+				map.put("num_person",
+						NumberUtil.formatDouble(price.getNumPerson()));
+				map.put("total_price",
+						NumberUtil.formatDouble(price.getTotalPrice()));
+				totalNum += new Double(NumberUtil.formatDouble(price
+						.getUnitPrice()
+						* price.getNumTimes()
+						* price.getNumPerson()));
+				priceList.add(map);
+			}
+			Map<String, String> priceTotalMap = new HashMap<String, String>() ;
+			priceTotalMap.put("total","应收:"+NumberUtil.formatDouble(totalNum)+",已收:"+
+					NumberUtil.formatDouble(prices.get(prices.size()-1).getTotalPrice())+
+					",余额:" +(NumberUtil.formatDouble(totalNum-prices.get(prices.size()-1).getTotalPrice()))) ;
+			priceList.add(priceTotalMap) ;
+		}else {
+			Map<String, String> priceTotalMap = new HashMap<String, String>();
+			priceTotalMap.put("total", " ");
+			priceList.add(priceTotalMap);
+		}
+		*//**//**
+		 * 客人信息
+		 *//**//*
+		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
+		for (int x = 0; x < guests.size(); x++) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("guestName", (guests.get(x).getName() == null ? "" : guests
+					.get(x).getName()));
+			map.put("mobile", (guests.get(x).getMobile() == null ? "" : guests
+					.get(x).getMobile()));
+			map.put("gender", guests.get(x).getGender() == 1 ? "男" : "女");
+			map.put("age", (guests.get(x).getAge() == null ? "" : guests.get(x)
+					.getAge()) + "");
+			map.put("cerNum", (guests.get(x).getCertificateNum() == null ? ""
+					: guests.get(x).getCertificateNum()));
+			map.put("place", (guests.get(x).getNativePlace() == null ? ""
+					: guests.get(x).getNativePlace()));
+			guestList.add(map);
+		}
+
+		Map<String, Object> map5 = new HashMap<String, Object>();
+		// 根据散客订单统计酒店信息
+		List<GroupRequirement> grogShopList = groupRequirementService
+				.selectByOrderAndType(groupOrder.getId(), 3);
+		// 根据散客订单统计接机信息
+		List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
+				.selectByOrderId(groupOrder.getId());
+		if (null != grogShopList && grogShopList.size() > 0) {
+			map5.put("hotelNum", getHotelNum(grogShopList));
+		} else {
+			map5.put("hotelNum", "");
+		}
+		if (null != groupOrderTransports && groupOrderTransports.size() > 0) {
+			map5.put("upAndOff", "接机：" + getAirInfo(groupOrderTransports, 0)
+					+ "\n" + "送机：" + getAirInfo(groupOrderTransports, 1) + "\n"
+					+ "省内交通：" + getSourceType(groupOrderTransports));
+		} else {
+			map5.put("upAndOff", "");
+		}
+		map5.put("Remark", groupOrder.getRemark());
+		map5.put("Service", groupOrder.getServiceStandard());
+		try {
+			export.export(params1);
+			export.export(map0, 0);
+			export.export(map1, 1);
+			export.export(priceList, 2, true);
+			if (groupOrder.getOrderType() != 1) {
+				export.export(guestList, 3);
+				export.export(map5, 4);
+			} else {
+				export.export(map5, 3);
+			}
+
+			export.generate(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return url;*/
+
+
+
+
+		String url = request.getSession().getServletContext().getRealPath("/")
+				+ "/download/" + System.currentTimeMillis() + ".doc";
+		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesConfirmNoRoute(orderId, WebUtils.getCurBizId(request));
+		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
+		List<GroupOrderPrice> prices = toPreviewResult.getPriceList();
+		SupplierInfo supplier = toPreviewResult.getSupplier();
+		PlatformEmployeePo employee = toPreviewResult.getEmployee();
+		String realPath = request.getSession().getServletContext()
+				.getRealPath("/template/sales_confirm_noRoute.docx");
+		if (groupOrder.getOrderType() != 1) {
+			realPath = request.getSession().getServletContext()
+					.getRealPath("/template/sales_skconfirm_noRoute.docx");
+		}
+		WordReporter export = new WordReporter(realPath);
+
+		try {
+			export.init();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		/**
+		 * logo图标和标题
+		 */
+		String imgPath = toPreviewResult.getImgPath();
+		Map<String, Object> params1 = new HashMap<String, Object>();
+		params1.put("print_time", DateUtils.format(new Date()));
+		params1.put("printName", WebUtils.getCurUser(request).getName());
+		params1.put("product", groupOrder.getProductName());
+		params1.put("seal", "");
+		if (imgPath != null) {
+			Map<String, String> picMap = new HashMap<String, String>();
+			picMap.put("width", BizConfigConstant.BIZ_LOGO_WIDTH);
+			picMap.put("height", BizConfigConstant.BIZ_LOGO_HEIGHT);
+			picMap.put("type", "jpg");
+			picMap.put("path", imgPath);
+			params1.put("logo", picMap);
+		} else {
+			params1.put("logo", "");
+		}
+
+		Map<String, Object> map0 = new HashMap<String, Object>();
+		map0.put("supplier_name", supplier.getNameShort());
+		map0.put("contact", groupOrder.getContactName());
+		map0.put("contact_tel", groupOrder.getContactTel());
+		map0.put("contact_fax", groupOrder.getContactFax());
+		map0.put("company", toPreviewResult.getCompany()); // 当前单位
+		map0.put("user_name", employee.getName());
+		map0.put("user_tel", employee.getMobile());
+		map0.put("user_fax", employee.getFax());
+
+		Map<String, Object> map1 = new HashMap<String, Object>();
+		map1.put("supplier_code", groupOrder.getSupplierCode());
+		if (null == groupOrder.getTourGroup()) {
+			map1.put("groupCode", "待定");
+		} else {
+			map1.put("groupCode", groupOrder.getTourGroup().getGroupCode());
+		}
+
+		// 统计订单下的全陪
+		String guestGuideString = toPreviewResult.getGuestGuideString();
+		// 订单所属团下的所有导游
+		String guideString = toPreviewResult.getGuideString();
+		// 根据散客订单统计客人信息
+
+		map1.put("person",groupOrder.getNumAdult()+"+"+groupOrder.getNumChild()+"+"+groupOrder.getNumGuide());
+		map1.put("departureDate", groupOrder.getDepartureDate());
+		map1.put("receiveMode", groupOrder.getReceiveMode());
+		map1.put(
+				"place",
+				(groupOrder.getProvinceName() == null ? "" : groupOrder
+						.getProvinceName())
+						+ (groupOrder.getCityName() == null ? "" : groupOrder
+						.getCityName()));
+		map1.put("guideString", guideString);
+		map1.put("guestGuideString", guestGuideString);
+		map1.put("productName",
+				"【"
+						+ (groupOrder.getProductBrandName() == null ? ""
+						: groupOrder.getProductBrandName())
+						+ "】"
+						+ (groupOrder.getProductName() == null ? ""
+						: groupOrder.getProductName()));
+
 		/**
 		 * 收入表格
 		 */
@@ -2147,11 +2753,9 @@ public class TourGroupController extends BaseController {
 
 		Map<String, Object> map5 = new HashMap<String, Object>();
 		// 根据散客订单统计酒店信息
-		List<GroupRequirement> grogShopList = groupRequirementService
-				.selectByOrderAndType(groupOrder.getId(), 3);
+		List<GroupRequirement> grogShopList = toPreviewResult.getGrogShopList();
 		// 根据散客订单统计接机信息
-		List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
-				.selectByOrderId(groupOrder.getId());
+		List<GroupOrderTransport> groupOrderTransports = toPreviewResult.getGroupOrderTransports();
 		if (null != grogShopList && grogShopList.size() > 0) {
 			map5.put("hotelNum", getHotelNum(grogShopList));
 		} else {
@@ -2193,7 +2797,7 @@ public class TourGroupController extends BaseController {
 	 * @return
 	 */
 	public String createSalesCharge(HttpServletRequest request, Integer orderId) {
-		String url = request.getSession().getServletContext().getRealPath("/")
+	/*	String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
 		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
 		List<GroupOrderGuest> guests = groupOrderGuestService
@@ -2220,6 +2824,162 @@ public class TourGroupController extends BaseController {
 			e.printStackTrace();
 		}
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
+		Map<String, Object> params1 = new HashMap<String, Object>();
+		params1.put("print_time", DateUtils.format(new Date()));
+		params1.put("printName", WebUtils.getCurUser(request).getName());
+		params1.put("product", groupOrder.getProductName());
+		if (imgPath != null) {
+			Map<String, String> picMap = new HashMap<String, String>();
+			picMap.put("width", BizConfigConstant.BIZ_LOGO_WIDTH);
+			picMap.put("height", BizConfigConstant.BIZ_LOGO_HEIGHT);
+			picMap.put("type", "jpg");
+			picMap.put("path", imgPath);
+			params1.put("logo", picMap);
+		} else {
+			params1.put("logo", "");
+		}
+
+		*//**
+		 * 第一个表格
+		 *//*
+		Map<String, Object> map0 = new HashMap<String, Object>();
+		map0.put("supplier_name", supplier.getNameShort());
+		map0.put("contact", groupOrder.getContactName());
+		map0.put("contact_tel", groupOrder.getContactTel());
+		map0.put("contact_fax", groupOrder.getContactFax());
+		map0.put("company", WebUtils.getCurBizInfo(request).getName()); // 当前单位
+		map0.put("user_name", employeePo.getName());
+		map0.put("user_tel", employeePo.getMobile());
+		map0.put("user_fax", employeePo.getFax());
+		*//**
+		 * 第二个表格
+		 *//*
+		Map<String, Object> map1 = new HashMap<String, Object>();
+		if (null == groupOrder.getTourGroup()) {
+			map1.put("group_code", "待定");
+		} else {
+			map1.put("group_code", groupOrder.getTourGroup().getGroupCode());
+		}
+		map1.put("supplier_code", groupOrder.getSupplierCode());
+		map1.put("departure_date", groupOrder.getDepartureDate());
+		map1.put("person",groupOrder.getNumAdult()+"+"+groupOrder.getNumChild()+"+"+groupOrder.getNumGuide());
+		map1.put("guest_guide", toGetGuideString(guests)); // 姓名和电话
+		map1.put("guest_leader", toGetLeaderString(guests)); // 姓名和电话
+		*//**
+		 * 第三个表格
+		 *//*
+		*//**
+		 * 行程列表表格
+		 *//*
+		List<Map<String, String>> routeList = new ArrayList<Map<String, String>>();
+		for (GroupRoute groupRoute : routes) {
+			Map<String, String> map = new HashMap<String, String>();
+			if (groupRoute.getGroupDate() != null) {
+				map.put("day_num", DateUtils.format(groupRoute.getGroupDate()));
+			} else {
+				map.put("day_num", "");
+			}
+			map.put("route_desp", groupRoute.getRouteDesp());
+			map.put("breakfast", groupRoute.getBreakfast());
+			map.put("lunch", groupRoute.getLunch());
+			map.put("supper", groupRoute.getSupper());
+			map.put("hotel_name", groupRoute.getHotelName());
+			routeList.add(map);
+		}
+		*//**
+		 * 成本表格
+		 *//*
+		List<Map<String, String>> priceList = new ArrayList<Map<String, String>>();
+		Double totalNum = new Double(0);
+		int i = 1;
+		if (null != prices && prices.size() > 0) {
+			for (GroupOrderPrice price : prices) {
+				Map<String, String> map = new HashMap<String, String>();
+				map.put("seq", "" + i++);
+				map.put("item_name", price.getItemName());
+				map.put("remark", price.getRemark());
+				map.put("unit_price",
+						NumberUtil.formatDouble(price.getUnitPrice()));
+				map.put("num_times",
+						NumberUtil.formatDouble(price.getNumTimes()));
+				map.put("num_person",
+						NumberUtil.formatDouble(price.getNumPerson()));
+				map.put("total_price",
+						NumberUtil.formatDouble(price.getTotalPrice()));
+				totalNum += new Double(NumberUtil.formatDouble(price
+						.getUnitPrice()
+						* price.getNumTimes()
+						* price.getNumPerson()));
+				priceList.add(map);
+			}
+			Map<String, String> priceTotalMap = new HashMap<String, String>() ;
+			priceTotalMap.put("total","应收:"+ NumberUtil.formatDouble(totalNum)+",已收:"+
+					NumberUtil.formatDouble(prices.get(prices.size()-1).getTotalPrice())+
+					",余额:" +(NumberUtil.formatDouble(totalNum-prices.get(prices.size()-1).getTotalPrice()))) ;
+			priceList.add(priceTotalMap) ;
+		}else {
+			Map<String, String> priceTotalMap = new HashMap<String, String>();
+			priceTotalMap.put("total", " ");
+			priceList.add(priceTotalMap);
+		}
+
+		*//**
+		 * 第四个表格
+		 *//*
+		List<SysBizBankAccount> sysBizBankAccountList = bizBankAccountService
+				.getListByBizId(WebUtils.getCurBizId(request));
+		List<Map<String, String>> sbba = new ArrayList<Map<String, String>>();
+		for (SysBizBankAccount sysBizBankAccount : sysBizBankAccountList) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("account_type",
+					sysBizBankAccount.getAccountType() == 1 ? "个人账户" : "对公账户");
+			map.put("account_name", sysBizBankAccount.getAccountName());
+			map.put("bank_account", sysBizBankAccount.getBankAccount());
+			map.put("account_no", sysBizBankAccount.getAccountNo());
+			sbba.add(map);
+		}
+		*//**
+		 * 第五个表格
+		 *//*
+		Map<String, Object> map5 = new HashMap<String, Object>();
+		if (null != groupOrder.getTourGroup()) {
+			map5.put("Remark", groupOrder.getRemark());
+			map5.put("Service", groupOrder.getServiceStandard());
+		}
+		try {
+			export.export(params1);
+			export.export(map0, 0);
+			export.export(map1, 1);
+			export.export(routeList, 2);
+			export.export(priceList, 3, true);
+			export.export(sbba, 4);
+			export.export(map5, 5);
+			export.generate(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return url;*/
+
+
+		String url = request.getSession().getServletContext().getRealPath("/")
+				+ "/download/" + System.currentTimeMillis() + ".doc";
+		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesCharge(orderId, WebUtils.getCurBizId(request));
+
+		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
+		List<GroupOrderPrice> prices = toPreviewResult.getPriceList();
+		List<GroupRoute> routes = toPreviewResult.getRouteList();
+		PlatformEmployeePo employeePo = WebUtils.getCurUser(request);
+		SupplierInfo supplier = toPreviewResult.getSupplier();
+		String realPath = request.getSession().getServletContext()
+				.getRealPath("/template/sales_charge.docx");
+		WordReporter export = new WordReporter(realPath);
+		try {
+			export.init();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String imgPath = toPreviewResult.getImgPath();
 		Map<String, Object> params1 = new HashMap<String, Object>();
 		params1.put("print_time", DateUtils.format(new Date()));
 		params1.put("printName", WebUtils.getCurUser(request).getName());
@@ -2309,7 +3069,7 @@ public class TourGroupController extends BaseController {
 				priceList.add(map);
 			}
 			Map<String, String> priceTotalMap = new HashMap<String, String>() ;
-			priceTotalMap.put("total","应收:"+NumberUtil.formatDouble(totalNum)+",已收:"+
+			priceTotalMap.put("total","应收:"+ NumberUtil.formatDouble(totalNum)+",已收:"+
 					NumberUtil.formatDouble(prices.get(prices.size()-1).getTotalPrice())+
 					",余额:" +(NumberUtil.formatDouble(totalNum-prices.get(prices.size()-1).getTotalPrice()))) ;
 			priceList.add(priceTotalMap) ;
@@ -2322,8 +3082,7 @@ public class TourGroupController extends BaseController {
 		/**
 		 * 第四个表格
 		 */
-		List<SysBizBankAccount> sysBizBankAccountList = bizBankAccountService
-				.getListByBizId(WebUtils.getCurBizId(request));
+		List<SysBizBankAccount> sysBizBankAccountList = toPreviewResult.getSysBizBankAccountList();
 		List<Map<String, String>> sbba = new ArrayList<Map<String, String>>();
 		for (SysBizBankAccount sysBizBankAccount : sysBizBankAccountList) {
 			Map<String, String> map = new HashMap<String, String>();
@@ -2365,7 +3124,7 @@ public class TourGroupController extends BaseController {
 	 * @return
 	 */
 	public String createGuestNames(HttpServletRequest request, Integer orderId) {
-		String url = request.getSession().getServletContext().getRealPath("/")
+		/*String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
 		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
 		List<GroupOrderGuest> guests = groupOrderGuestService
@@ -2379,6 +3138,56 @@ public class TourGroupController extends BaseController {
 			e.printStackTrace();
 		}
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
+		Map<String, Object> params1 = new HashMap<String, Object>();
+		params1.put("printTime", DateUtils.format(new Date()));
+		params1.put("printName", WebUtils.getCurUser(request).getName());
+		params1.put("groupCode", groupOrder.getTourGroup().getGroupCode());
+		if (imgPath != null) {
+			Map<String, String> picMap = new HashMap<String, String>();
+			picMap.put("width", BizConfigConstant.BIZ_LOGO_WIDTH);
+			picMap.put("height", BizConfigConstant.BIZ_LOGO_HEIGHT);
+			picMap.put("type", "jpg");
+			picMap.put("path", imgPath);
+			params1.put("logo", picMap);
+		} else {
+			params1.put("logo", "");
+		}
+		*//**
+		 * 客人名单
+		 *//*
+		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
+		for (GroupOrderGuest guest : guests) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("name", guest.getName());
+			map.put("certificateNum", guest.getCertificateNum());
+			guestList.add(map);
+		}
+
+		try {
+			export.export(params1);
+			export.export(guestList, 0);
+			export.generate(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return url;*/
+
+
+
+		String url = request.getSession().getServletContext().getRealPath("/")
+				+ "/download/" + System.currentTimeMillis() + ".doc";
+		ToPreviewResult toPreviewResult = tourGroupFacade.createGuestNames(orderId, WebUtils.getCurBizId(request));
+		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
+		String realPath = request.getSession().getServletContext()
+				.getRealPath("/template/guest_names.docx");
+		WordReporter export = new WordReporter(realPath);
+		try {
+			export.init();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String imgPath = toPreviewResult.getImgPath();
 		Map<String, Object> params1 = new HashMap<String, Object>();
 		params1.put("printTime", DateUtils.format(new Date()));
 		params1.put("printName", WebUtils.getCurUser(request).getName());
@@ -2421,7 +3230,7 @@ public class TourGroupController extends BaseController {
 	 * @return
 	 */
 	public String saleTravelContract(HttpServletRequest request, Integer orderId) {
-		String url = request.getSession().getServletContext().getRealPath("/")
+	/*	String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
 		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
 		List<GroupOrderGuest> guests = groupOrderGuestService
@@ -2445,9 +3254,9 @@ public class TourGroupController extends BaseController {
 		map0.put("total", NumberUtil.formatDouble(groupOrder.getTotal())+"");
 		map0.put("totals", NumberToCN.number2CNMontrayUnit(groupOrder.getTotal()));
 		
-		/**
+		*//**
 		 * 参团名单
-		 */
+		 *//*
 		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
 		for (int x = 0; x < guests.size(); x++) {
 			Map<String, String> map = new HashMap<String, String>();
@@ -2483,6 +3292,72 @@ public class TourGroupController extends BaseController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return url;*/
+
+
+
+		String url = request.getSession().getServletContext().getRealPath("/")
+				+ "/download/" + System.currentTimeMillis() + ".doc";
+		ToPreviewResult toPreviewResult = tourGroupFacade.saleTravelContract(orderId, WebUtils.getCurBizId(request));
+		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
+		GroupRoute groupRoute=toPreviewResult.getGroupRoute();
+		GroupOrderGuest genderSum=toPreviewResult.getGroupOrderGuest();
+		String realPath = request.getSession().getServletContext()
+				.getRealPath("/template/travel_contract.docx");
+		WordReporter export = new WordReporter(realPath);
+		try {
+			export.init();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Map<String, Object> map0 = new HashMap<String, Object>();
+		map0.put("groupCode", groupOrder.getTourGroup().getGroupCode());
+		map0.put("person",(groupOrder.getNumAdult()+groupOrder.getNumChild()+groupOrder.getNumGuide())+ "");
+		map0.put("child", groupOrder.getNumChild()+ "");
+		map0.put("man", genderSum.getMan()+"");
+		map0.put("woman", genderSum.getWoman()+"");
+		map0.put("total", NumberUtil.formatDouble(groupOrder.getTotal())+"");
+		map0.put("totals", NumberToCN.number2CNMontrayUnit(groupOrder.getTotal()));
+
+		/**
+		 * 参团名单
+		 */
+		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
+		for (int x = 0; x < guests.size(); x++) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("guestName", (guests.get(x).getName() == null ? "" : guests
+					.get(x).getName()));
+			map.put("mobile", (guests.get(x).getMobile() == null ? "" : guests
+					.get(x).getMobile()));
+			map.put("gender", guests.get(x).getGender() == 1 ? "男" : "女");
+			map.put("age", (guests.get(x).getAge() == null ? "" : guests.get(x)
+					.getAge()) + "");
+			map.put("cerNum", (guests.get(x).getCertificateNum() == null ? ""
+					: guests.get(x).getCertificateNum()));
+			guestList.add(map);
+		}
+
+		Map<String, Object> map1 = new HashMap<String, Object>();
+		map1.put("groupCode1", groupOrder.getTourGroup().getGroupCode());
+		map1.put("person1",(groupOrder.getNumAdult()+groupOrder.getNumChild()+groupOrder.getNumGuide())+ "");
+		map1.put("child1", groupOrder.getNumChild()+ "");
+		map1.put("departureDate", groupOrder.getDepartureDate());
+		map1.put("man1", genderSum.getMan()+"");
+		map1.put("woman1", genderSum.getWoman()+"");
+		map1.put("maxDay",groupRoute.getMaxDay() );
+		map1.put("numDay",groupRoute.getNumDay()+"");
+		map1.put("numNig",(groupRoute.getNumDay()-1)+"");
+		map1.put("total1", NumberUtil.formatDouble(groupOrder.getTotal())+"");
+		map1.put("totals1", NumberToCN.number2CNMontrayUnit(groupOrder.getTotal()));
+		try {
+			export.export(map0);
+			export.export(guestList, 1);
+			export.export(map1,2);
+			export.generate(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return url;
 	}
 
@@ -2494,7 +3369,7 @@ public class TourGroupController extends BaseController {
 	 * @return
 	 */
 	public String saleInsurance(HttpServletRequest request, Integer orderId) {
-		String url = request.getSession().getServletContext().getRealPath("/")
+		/*String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
 		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
 		List<GroupOrderGuest> guests = groupOrderGuestService
@@ -2523,6 +3398,59 @@ public class TourGroupController extends BaseController {
 		map0.put("opTel",WebUtils.getCurUser(request).getMobile());
 		map0.put("guide", groupOrder.getNumGuide()+ "");
 		
+		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
+		for (int x = 0; x < guests.size(); x++) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("number", x+1+"");
+			map.put("guestName", (guests.get(x).getName() == null ? "" : guests
+					.get(x).getName()));
+			map.put("cerNum", (guests.get(x).getCertificateNum() == null ? ""
+					: guests.get(x).getCertificateNum()));
+			map.put("nativePlace", (guests.get(x).getNativePlace() == null ? "" : guests
+					.get(x).getNativePlace()));
+			map.put("gender", guests.get(x).getGender() == 1 ? "男" : "女");
+			guestList.add(map);
+		}
+		try {
+			export.export(map0,0);
+			export.export(guestList, 1);
+			export.generate(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return url;*/
+
+
+
+		String url = request.getSession().getServletContext().getRealPath("/")
+				+ "/download/" + System.currentTimeMillis() + ".doc";
+		ToPreviewResult toPreviewResult = tourGroupFacade.saleInsurance(orderId, WebUtils.getCurBizId(request));
+		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
+		GroupRoute groupRoute=toPreviewResult.getGroupRoute();
+		String realPath = request.getSession().getServletContext()
+				.getRealPath("/template/insurance.docx");
+		WordReporter export = new WordReporter(realPath);
+		try {
+			export.init();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Map<String, Object> map0 = new HashMap<String, Object>();
+		map0.put("company", WebUtils.getCurBizInfo(request).getName()); // 当前单位
+		map0.put("groupCode", groupOrder.getTourGroup().getGroupCode());
+		map0.put("person",(groupOrder.getNumAdult()+groupOrder.getNumChild()+groupOrder.getNumGuide())+ "");
+		map0.put("child", groupOrder.getNumChild()+ "");
+		map0.put("departureDate", groupOrder.getDepartureDate());
+		map0.put("maxDay",groupRoute.getMaxDay() );
+		map0.put("numDay",groupRoute.getNumDay()+"");
+		map0.put("numNig",(groupRoute.getNumDay()-1)+"");
+		map0.put("total", groupOrder.getTotal()+"");
+		map0.put("printTime", DateUtils.format(new Date()));
+		map0.put("operator",WebUtils.getCurUser(request).getName());
+		map0.put("opTel",WebUtils.getCurUser(request).getMobile());
+		map0.put("guide", groupOrder.getNumGuide()+ "");
+
 		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
 		for (int x = 0; x < guests.size(); x++) {
 			Map<String, String> map = new HashMap<String, String>();
@@ -2716,7 +3644,7 @@ public class TourGroupController extends BaseController {
 	@RequiresPermissions(PermissionConstants.ZT_LRCX)
 	public String toProfitQueryTableZT(HttpServletRequest request, Model model,
 			GroupOrder order) {
-		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+		/*PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
 		pageBean.setPage(order.getPage());
 		pageBean.setPageSize(order.getPageSize() == null ? Constants.PAGESIZE
 				: order.getPageSize());
@@ -2753,6 +3681,13 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("staticInfo", staticInfo);
 		model.addAttribute("page", pageBean);
 		model.addAttribute("groupList", pageBean.getResult());
+		return "sales/profit/profitQueryTable";*/
+
+		ToPreviewResult toPreviewResult = tourGroupFacade.toProfitQueryTableZT( order,WebUtils.getDataUserIdSet(request) ,"", WebUtils.getCurBizId(request));
+		model.addAttribute("groupOrder", toPreviewResult.getGroupOrder());
+		model.addAttribute("staticInfo", toPreviewResult.getStaticInfo());
+		model.addAttribute("page", toPreviewResult.getPageBean());
+		model.addAttribute("groupList", toPreviewResult.getPageBean().getResult());
 		return "sales/profit/profitQueryTable";
 	}
 	
@@ -2975,8 +3910,8 @@ public class TourGroupController extends BaseController {
 	 * 省内交通
 	 * 
 	 * @param groupOrderTransports
-	 * @param flag
-	 *            0表示接信息 1表示送信息
+	 * @param
+	 *
 	 * @return
 	 */
 	public String getSourceType(List<GroupOrderTransport> groupOrderTransports) {
@@ -3046,7 +3981,7 @@ public class TourGroupController extends BaseController {
 	@ResponseBody
 	public String getSupplier(HttpServletRequest request,
 			HttpServletResponse response, String prefixText, String supplierType) {
-		List<SupplierInfo> supplierInfos = supplierService
+	/*	List<SupplierInfo> supplierInfos = supplierService
 				.findSupplierListByTypeAndName(supplierType, prefixText,
 						WebUtils.getCurBizId(request));
 		List<AutocompleteInfo> infoList = new ArrayList<AutocompleteInfo>();
@@ -3059,6 +3994,20 @@ public class TourGroupController extends BaseController {
 			infoList.add(info);
 			}
 		}
+		return JSON.toJSONString(infoList);*/
+
+		ToPreviewResult toPreviewResult = tourGroupFacade.getSupplier(prefixText, supplierType, WebUtils.getCurBizId(request));
+		List<SupplierInfo> supplierInfos = toPreviewResult.getSupplierInfos();
+		List<AutocompleteInfo> infoList = new ArrayList<AutocompleteInfo>();
+		AutocompleteInfo info = null;
+		for (SupplierInfo supplier : supplierInfos) {
+			if(supplier.getState()==1){
+				info = new AutocompleteInfo();
+				info.setId(supplier.getId() + "");
+				info.setText(supplier.getNameFull());
+				infoList.add(info);
+			}
+		}
 		return JSON.toJSONString(infoList);
 	}
 
@@ -3067,12 +4016,24 @@ public class TourGroupController extends BaseController {
 	public String getSupplierName(HttpServletRequest request,
 			HttpServletResponse response, String keyword, Integer productId) {
 
-		ProductSupplierCondition psc = new ProductSupplierCondition();
+		/*ProductSupplierCondition psc = new ProductSupplierCondition();
 		psc.setPageSize(10);
 		psc.setSupplierName(keyword);
 		psc.setProductId(productId);
 		List<ProductGroupSupplier> supplierList = productGroupSupplierService
 				.selectSupplierList(psc);
+		HashMap<String, Object> json = new HashMap<String, Object>();
+		json.put("result", supplierList);
+		json.put("success", "true");
+		return JSON.toJSONString(json);*/
+
+
+		ProductSupplierCondition psc = new ProductSupplierCondition();
+		psc.setPageSize(10);
+		psc.setSupplierName(keyword);
+		psc.setProductId(productId);
+		ToPreviewResult toPreviewResult = tourGroupFacade.getPriceSupplierName(keyword, productId, 0);
+		List<ProductGroupSupplier> supplierList = toPreviewResult.getSupplierList();
 		HashMap<String, Object> json = new HashMap<String, Object>();
 		json.put("result", supplierList);
 		json.put("success", "true");
@@ -3084,7 +4045,7 @@ public class TourGroupController extends BaseController {
 	public String getSupplierNameForAgency(HttpServletRequest request,
 			HttpServletResponse response, String keyword, Integer groupId,
 			Integer priceId, String supplierType) throws IllegalAccessException, InvocationTargetException {
-		List<ProductGroupSupplierVo> groupSuppliersList = null;
+	/*	List<ProductGroupSupplierVo> groupSuppliersList = null;
 		ProductGroup group = productGroupService.getGroupInfoById(groupId);
 		HashMap<String, Object> json = new HashMap<String, Object>();
 		if (group.getGroupSetting() == 0) {
@@ -3099,14 +4060,18 @@ public class TourGroupController extends BaseController {
 			json.put("type", 1);
 		}
 		json.put("success", "true");
-		return JSON.toJSONString(json);
+		return JSON.toJSONString(json);*/
+
+		ToPreviewResult toPreviewResult = tourGroupFacade.getSupplierNameForAgency( keyword,  groupId,  priceId,  supplierType,  WebUtils.getCurBizId(request));
+		toPreviewResult.getJson().put("success", "true");
+		return JSON.toJSONString(toPreviewResult.getJson());
 	}
 
 	@RequestMapping(value = "/getSupplierName", method = RequestMethod.POST)
 	@ResponseBody
 	public String getSupplierName(HttpServletRequest request,
 			HttpServletResponse response, String keyword, String supplierType) {
-		List<SupplierInfo> supplierInfos = supplierService
+		/*List<SupplierInfo> supplierInfos = supplierService
 				.findSupplierListByTypeAndName(supplierType, keyword,
 						WebUtils.getCurBizId(request));
 
@@ -3124,6 +4089,25 @@ public class TourGroupController extends BaseController {
 		HashMap<String, Object> json = new HashMap<String, Object>();
 		json.put("result", supplierInfos);
 		json.put("success", "true");
+		return JSON.toJSONString(json);*/
+
+
+		ToPreviewResult toPreviewResult = tourGroupFacade.getSupplierName( keyword,  supplierType,  WebUtils.getCurBizId(request));
+		List<SupplierInfo> supplierInfos = toPreviewResult.getSupplierInfos();
+		if(supplierInfos!=null){
+			Iterator<SupplierInfo> iterator = supplierInfos.iterator();
+			while(iterator.hasNext()){
+				SupplierInfo next = iterator.next();
+				if(next.getState()!=1){
+					iterator.remove();
+				}
+			}
+		}
+
+
+		HashMap<String, Object> json = new HashMap<String, Object>();
+		json.put("result", supplierInfos);
+		json.put("success", "true");
 		return JSON.toJSONString(json);
 	}
 
@@ -3131,9 +4115,22 @@ public class TourGroupController extends BaseController {
 	@ResponseBody
 	public String getSupplierAndContact(HttpServletRequest request,
 			HttpServletResponse response, String prefixText, Integer supplierId) {
-		List<SupplierContactMan> list = supplierService
+		/*List<SupplierContactMan> list = supplierService
 				.selectPrivateManBySupplierIdAndName(
 						WebUtils.getCurBizId(request), supplierId, prefixText);
+		List<AutocompleteInfo> infoList = new ArrayList<AutocompleteInfo>();
+		AutocompleteInfo info = null;
+		for (SupplierContactMan contact : list) {
+			info = new AutocompleteInfo();
+			info.setId(contact.getMobile());
+			info.setText(contact.getName());
+			info.setTag(contact.getTel() + "@" + contact.getFax());
+			infoList.add(info);
+		}
+		return JSON.toJSONString(infoList);
+*/
+		ToPreviewResult toPreviewResult = tourGroupFacade.getSupplierAndContact( prefixText,  supplierId,   WebUtils.getCurBizId(request));
+		List<SupplierContactMan> list = toPreviewResult.getSupplierContactManList();
 		List<AutocompleteInfo> infoList = new ArrayList<AutocompleteInfo>();
 		AutocompleteInfo info = null;
 		for (SupplierContactMan contact : list) {
@@ -3150,9 +4147,16 @@ public class TourGroupController extends BaseController {
 	@ResponseBody
 	public String getContactName(HttpServletRequest request,
 			HttpServletResponse response, String keyword, Integer supplierId) {
-		List<SupplierContactMan> list = supplierService
+	/*	List<SupplierContactMan> list = supplierService
 				.selectPrivateManBySupplierIdAndName(
 						WebUtils.getCurBizId(request), supplierId, keyword);
+		HashMap<String, Object> json = new HashMap<String, Object>();
+		json.put("result", list);
+		json.put("success", "true");
+		return JSON.toJSONString(json);*/
+
+		ToPreviewResult toPreviewResult = tourGroupFacade.getContactName( keyword,  supplierId,   WebUtils.getCurBizId(request));
+		List<SupplierContactMan> list = toPreviewResult.getSupplierContactManList();
 		HashMap<String, Object> json = new HashMap<String, Object>();
 		json.put("result", list);
 		json.put("success", "true");
@@ -3165,7 +4169,7 @@ public class TourGroupController extends BaseController {
 			String supplierName, Integer supplierId) {
 		// if (supplierName == null) {
 		// return errorJson("请选择供应商！");
-		if (StringUtils.isBlank(supplierName)) {
+	/*	if (StringUtils.isBlank(supplierName)) {
 			return errorJson("商家不能不空，请选择！");
 		}
 		if (supplierId == null) {
@@ -3182,13 +4186,34 @@ public class TourGroupController extends BaseController {
 		} else {
 			return successJson();
 		}
+
+
+		if (StringUtils.isBlank(supplierName)) {
+			return errorJson("商家不能不空，请选择！");
+		}
+		if (supplierId == null) {
+			// return errorJson("该供应商不存在！");
+			return errorJson(supplierName + "不存在，请选择！");
+		}*/
+
+		ToPreviewResult toPreviewResult = tourGroupFacade.validatorSupplier(supplierName, supplierId);
+		SupplierInfo supplier = toPreviewResult.getSupplier();
+		if (!supplier.getNameFull().equals(supplierName)) {
+			// return errorJson("该供应商不存在！");
+			// } else {
+			return errorJson(supplierName + "不存在，请重新选择！");
+		} else if (supplier.getState().intValue() != 1) {
+			return errorJson(supplierName + "不可用，请重新选择！");
+		} else {
+			return successJson();
+		}
 	}
 
 	@RequestMapping(value = "/getSelSupplier", method = RequestMethod.POST)
 	@ResponseBody
 	public String getSelSupplier(HttpServletRequest request, Integer groupId,
 			Integer priceId, String prefixText, String supplierType) {
-		List<ProductGroupSupplierVo> groupSuppliersList = productGroupSupplierService
+	/*	List<ProductGroupSupplierVo> groupSuppliersList = productGroupSupplierService
 				.selectProductGroupSupplierVos(groupId, priceId);
 		List<AutocompleteInfo> infoList = new ArrayList<AutocompleteInfo>();
 		AutocompleteInfo info = null;
@@ -3198,7 +4223,9 @@ public class TourGroupController extends BaseController {
 			info.setText(vo.getSupplierName());
 			infoList.add(info);
 		}
-		return JSON.toJSONString(infoList);
+		return JSON.toJSONString(infoList);*/
+		ToPreviewResult toPreviewResult = tourGroupFacade.getSelSupplier( groupId,  priceId,  prefixText,  supplierType);
+		return JSON.toJSONString(toPreviewResult.getInfoList());
 	}
 
 	/**
@@ -3207,7 +4234,7 @@ public class TourGroupController extends BaseController {
 	@RequestMapping(value = "/toPreview.htm")
 	public String toPreview(HttpServletRequest request, Model model,
 			Integer orderId, Integer num,Integer agency) {
-		if(null==agency){
+		/*if(null==agency){
 			agency = 0 ;
 		}
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
@@ -3351,13 +4378,51 @@ public class TourGroupController extends BaseController {
 		if (num != 1) {
 			url = "sales/preview/sales_confirm_noRoute";
 		}
+		return url;*/
+
+		ToPreviewResult toPreviewResult = tourGroupFacade.toPreview( orderId,  num,  agency,  WebUtils.getCurBizId(request));
+		model.addAttribute("agency", agency);
+		model.addAttribute("guideString", toPreviewResult.getGuideString());
+		model.addAttribute("guestGuideString", toPreviewResult.getGuestGuideString());
+		model.addAttribute("printTime", DateUtils.format(new Date()));
+		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
+		model.addAttribute("imgPath", toPreviewResult.getImgPath());
+		model.addAttribute("groupOrder", toPreviewResult.getGroupOrder());
+		model.addAttribute("supplier", toPreviewResult.getSupplier());
+		model.addAttribute("company",toPreviewResult.getCompany()); // 当前单位
+		model.addAttribute("employee", toPreviewResult.getEmployee());
+		model.addAttribute("person","");
+		model.addAttribute("routeList", toPreviewResult.getRouteList());
+		if (null != toPreviewResult.getPriceList() && toPreviewResult.getPriceList().size() > 0) {
+			model.addAttribute("otherPrice", toPreviewResult.getPriceList()
+					.get(toPreviewResult.getPriceList().size() - 1).getTotalPrice());
+		} else {
+			model.addAttribute("otherPrice", 0);
+		}
+
+		model.addAttribute("priceList", toPreviewResult.getPriceList());
+		model.addAttribute("gopp", toPreviewResult.getGopp());
+		model.addAttribute("guestList", toGetGuestString(toPreviewResult.getGuests()));
+		model.addAttribute("orderId", orderId);
+		model.addAttribute("guests", toPreviewResult.getGuests());
+		model.addAttribute("orderType", toPreviewResult.getGroupOrder().getOrderType());
+		model.addAttribute("hotelNum", getHotelNum(toPreviewResult.getGrogShopList()));
+		model.addAttribute("upAndOff",
+				"接机：" + getAirInfo(toPreviewResult.getGroupOrderTransports(), 0) + "\n" + "送机："
+						+ getAirInfo(toPreviewResult.getGroupOrderTransports(), 1) + "\n" + "省内:"
+						+ getSourceType(toPreviewResult.getGroupOrderTransports()));
+		model.addAttribute("bankCount", getBankInfo(request));
+		String url = "sales/preview/preview";
+		if (num != 1) {
+			url = "sales/preview/sales_confirm_noRoute";
+		}
 		return url;
 	}
 
 	@RequestMapping(value = "/toSaleCharge.htm")
 	public String toSaleCharge(HttpServletRequest request, Model model,
 			Integer orderId, Integer num) {
-		String imgPath = bizSettingCommon.getMyBizLogo(request);
+		/*String imgPath = bizSettingCommon.getMyBizLogo(request);
 		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
 		SupplierInfo supplier = supplierService.selectBySupplierId(groupOrder
 				.getSupplierId());
@@ -3405,7 +4470,31 @@ public class TourGroupController extends BaseController {
 		if (num != 2) {
 			url = "sales/preview/sales_charge_noRoute";
 		}
+		return url;*/
+
+		ToSaleChargeResult toPreviewResult = tourGroupFacade.toSaleCharge( orderId,  num, WebUtils.getCurUserId(request), WebUtils.getCurBizId(request));
+		model.addAttribute("person", toPreviewResult.getGroupOrder().getNumAdult() + "+" + toPreviewResult.getGroupOrder().getNumChild() + "+" + toPreviewResult.getGroupOrder().getNumGuide());
+		model.addAttribute("guest_guide", toGetGuideString(toPreviewResult.getGuests())); // 姓名和电话
+		model.addAttribute("guest_leader", toGetLeaderString(toPreviewResult.getGuests())); // 姓名和电话
+		model.addAttribute("printTime", DateUtils.format(new Date()));
+		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
+		model.addAttribute("imgPath", toPreviewResult.getImgPath());
+		model.addAttribute("groupOrder", toPreviewResult.getGroupOrder());
+		model.addAttribute("supplier", toPreviewResult.getSupplier());
+		model.addAttribute("company",toPreviewResult.getCompany()); // 当前单位
+		model.addAttribute("employee", toPreviewResult.getEmployee());
+		model.addAttribute("routeList", toPreviewResult.getRouteList());
+		model.addAttribute("priceList", toPreviewResult.getPriceList());
+		model.addAttribute("guestList", toGetGuestString(toPreviewResult.getGuests()));
+		model.addAttribute("orderId", orderId);
+		model.addAttribute("accountList", toPreviewResult.getAccountList());
+		String url = "sales/preview/sales_charge";
+		if (num != 2) {
+			url = "sales/preview/sales_charge_noRoute";
+		}
 		return url;
+
+
 	}
 
 	/**
@@ -3570,7 +4659,7 @@ public class TourGroupController extends BaseController {
 	@RequestMapping(value = "/toSKChargePreview.htm")
 	public String toSKChargePreview(HttpServletRequest request,
 			Integer groupId, Integer supplierId, Model model) {
-		String imgPath = bizSettingCommon.getMyBizLogo(request);
+	/*	String imgPath = bizSettingCommon.getMyBizLogo(request);
 		TourGroup tour = tourGroupService.selectByPrimaryKey(groupId);
 		PlatformEmployeePo po = sysPlatformEmployeeFacade
 				.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
@@ -3663,6 +4752,25 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("po", po);
 		model.addAttribute("imgPath", imgPath);
 		model.addAttribute("tour", tour);
+		model.addAttribute("printTime", DateUtils.format(new Date()));
+		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
+		return "sales/preview/skcharge";*/
+
+		ToSKChargePreviewResult toSKChargePreviewResult = tourGroupFacade.toSKChargePreview( groupId,  WebUtils.getCurUserId(request),  WebUtils.getCurUserId(request),  supplierId);
+
+		model.addAttribute("supplier", toSKChargePreviewResult.getSupplier());
+		model.addAttribute("groupId", groupId);
+		model.addAttribute("supplierId", supplierId);
+		model.addAttribute("guide", getGuides(toSKChargePreviewResult.getGuides()));
+		Collections.reverse(toSKChargePreviewResult.getGopps());
+		model.addAttribute("gopps", toSKChargePreviewResult.getGopps());
+		model.addAttribute("vos", toSKChargePreviewResult.getVos());
+		model.addAttribute("guides", toSKChargePreviewResult.getGuides());
+		// model.addAttribute("groupRouteDayVOs", groupRouteDayVOs);
+		model.addAttribute("supplierList", toSKChargePreviewResult.getSupplier());
+		model.addAttribute("po", toSKChargePreviewResult.getPo());
+		model.addAttribute("imgPath", toSKChargePreviewResult.getImgPath());
+		model.addAttribute("tour", toSKChargePreviewResult.getTour());
 		model.addAttribute("printTime", DateUtils.format(new Date()));
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
 		return "sales/preview/skcharge";
@@ -3999,7 +5107,7 @@ public class TourGroupController extends BaseController {
 		PlatformEmployeePo employee = sysPlatformEmployeeFacade.findByEmployeeId(WebUtils.getCurUserId(request)).getPlatformEmployeePo();
 
 		//FIXME 待修复
-		map0.put("company", orgService.findByOrgId(employee.getOrgId()).getName()); // 当前单位
+		map0.put("company", sysPlatformOrgFacade.findByOrgId(employee.getOrgId()).getPlatformOrgPo().getName()); // 当前单位
 
 		map0.put("user_name", employee.getName());
 		map0.put("user_tel", employee.getMobile());
@@ -4136,9 +5244,16 @@ public class TourGroupController extends BaseController {
 	@ResponseBody
 	public String getSupplierInfo(HttpServletRequest request,
 			Integer supplierId, Model model) {
-		SupplierInfo supplierInfo = supplierService
+		/*SupplierInfo supplierInfo = supplierService
 				.selectBySupplierId(supplierId);
 		Gson gson = new Gson();
+		String string = gson.toJson(supplierInfo);
+		return string;*/
+		BookingProfitTableResult bookingProfitTableResult = tourGroupFacade.getSupplierInfo(supplierId);
+		//SupplierInfo supplierInfo = supplierService
+		//		.selectBySupplierId(supplierId);
+		SupplierInfo supplierInfo = bookingProfitTableResult.getSupplierInfo();
+				Gson gson = new Gson();
 		String string = gson.toJson(supplierInfo);
 		return string;
 	}
@@ -4159,13 +5274,26 @@ public class TourGroupController extends BaseController {
 	}
 	
 	public String getBankInfo(HttpServletRequest request){
-		List<SysBizBankAccount> sysBizBankAccountList = bizBankAccountService
+	/*	List<SysBizBankAccount> sysBizBankAccountList = bizBankAccountService
 				.getListByBizId(WebUtils.getCurBizId(request));
 		StringBuilder sb = new StringBuilder() ;
 		for (SysBizBankAccount sysBizBankAccount : sysBizBankAccountList) {
 			sb.append("类别:"
 					+ (sysBizBankAccount.getAccountType() == 1 ? "个人账户"
 							: "对公账户") + " 银行名称："
+					+ sysBizBankAccount.getBankName()
+					+ sysBizBankAccount.getBankAccount() + " 开户全称："
+					+ sysBizBankAccount.getAccountName() + " 公司账号："
+					+ sysBizBankAccount.getAccountNo() + "\n");
+		}
+		return sb.toString() ;*/
+		BookingProfitTableResult bookingProfitTableResult = tourGroupFacade.getBankInfo(WebUtils.getCurBizId(request));
+		List<SysBizBankAccount> sysBizBankAccountList = bookingProfitTableResult.getSysBizBankAccountList();
+		StringBuilder sb = new StringBuilder() ;
+		for (SysBizBankAccount sysBizBankAccount : sysBizBankAccountList) {
+			sb.append("类别:"
+					+ (sysBizBankAccount.getAccountType() == 1 ? "个人账户"
+					: "对公账户") + " 银行名称："
 					+ sysBizBankAccount.getBankName()
 					+ sysBizBankAccount.getBankAccount() + " 开户全称："
 					+ sysBizBankAccount.getAccountName() + " 公司账号："
@@ -4180,7 +5308,7 @@ public class TourGroupController extends BaseController {
 	}
 	@RequestMapping("bookingProfit.do")
 	public String bookingProfitTable(HttpServletRequest request,HttpServletResponse response,ModelMap model,TourGroup tourGroup){
-		PageBean pageBean=new PageBean();
+	/*	PageBean pageBean=new PageBean();
 		if (tourGroup.getPage()==null) {
 			pageBean.setPage(1);
 		}
@@ -4236,7 +5364,11 @@ public class TourGroupController extends BaseController {
 			//}
 			}
 		}
-		model.addAttribute("page", pageBean);
+		model.addAttribute("page", pageBean);*/
+
+		BookingProfitTableResult bookingProfitTableResult = tourGroupFacade.bookingProfitTable(tourGroup, WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
+		model.addAttribute("sum", bookingProfitTableResult.getSum());
+		model.addAttribute("page", bookingProfitTableResult.getPageBean());
 		return "/sales/bookingProfit/bookingProfitTable";
 		
 	}

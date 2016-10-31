@@ -1,22 +1,11 @@
 package com.yihg.erp.controller.sales;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
-import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
-import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
-import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -33,14 +22,12 @@ import com.google.gson.Gson;
 //import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
-import com.yihg.erp.common.MergeGroupUtils;
 import com.yihg.erp.contant.BizConfigConstant;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.DateUtils;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.FitOrderVO;
@@ -119,8 +106,11 @@ public class FitOrderController extends BaseController {
 //	private ProductGroupService productGroupService;
 //	@Autowired
 //	private SpecialGroupOrderService specialGroupOrderService;
+	
+	//FIXME 特别暂放
 	@Autowired
-	private SysConfig config;//FIXME 特别暂放
+	private SysConfig config;
+	
 //	@Autowired
 //	private BizSettingCommon settingCommon;
 //	@Autowired
@@ -1099,7 +1089,7 @@ public class FitOrderController extends BaseController {
 //		List<DicInfo> lysfxmList = dicService.getListByTypeCode(BasicConstants.GYXX_LYSFXM, bizId);
 //		model.addAttribute("lysfxmList", lysfxmList);
 		
-		//FIXME  这里公用toEditFirOrder
+		//这里公用toEditFirOrder
 		model.addAttribute("operType", operType);
 		model.addAttribute("config", config);
 		model.addAttribute("editType", false);
@@ -1198,7 +1188,7 @@ public class FitOrderController extends BaseController {
 //				BasicConstants.GYXX_LYSFXM, bizId);
 //		model.addAttribute("lysfxmList", lysfxmList);
 		
-		//FIXME  这里公用toEditFirOrder
+		//这里公用toEditFirOrder
 		model.addAttribute("operType", operType);
 		model.addAttribute("config", config);
 		model.addAttribute("editType", false);
