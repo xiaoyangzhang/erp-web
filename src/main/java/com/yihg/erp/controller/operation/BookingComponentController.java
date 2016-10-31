@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.management.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,72 +19,21 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.api.BookingSupplierDetailService;
-import com.yihg.sales.api.GroupOrderGuestService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.GroupOrderTransportService;
-import com.yihg.sales.api.GroupRequirementService;
-import com.yihg.sales.api.GroupRouteService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupOrderTransport;
-import com.yihg.sales.po.GroupRequirement;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.GroupRouteDayVO;
-import com.yihg.sales.vo.GroupRouteVO;
-import com.yihg.supplier.api.BizSupplierRelationService;
-import com.yihg.supplier.api.ContractService;
-import com.yihg.supplier.api.SupplierCarService;
-import com.yihg.supplier.api.SupplierImgService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.BizSupplierRelation;
-import com.yihg.supplier.po.SupplierCar;
-import com.yihg.supplier.po.SupplierContract;
-import com.yihg.supplier.po.SupplierContractPrice;
-import com.yihg.supplier.po.SupplierContractPriceDateInfo;
-import com.yihg.supplier.vo.SupplierCarVO;
 import com.yimayhd.erpcenter.facade.sales.query.BookingDeliveryQueryDTO;
 import com.yimayhd.erpcenter.facade.sales.query.ContractQueryDTO;
 import com.yimayhd.erpcenter.facade.sales.result.operation.BookingSupplierResult;
 import com.yimayhd.erpcenter.facade.sales.result.operation.TourGroupInfoResult;
 import com.yimayhd.erpcenter.facade.sales.service.BookingComponentFacade;
+import com.yimayhd.erpresource.dal.po.SupplierCar;
 
 @Controller
 @RequestMapping("/booking")
 public class BookingComponentController extends BaseController {
 	
-	@Autowired
-	private GroupOrderTransportService groupOrderTransportService;
-	@Autowired
-	private GroupOrderGuestService groupOrderGuestService;
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private GroupRequirementService groupRequirementService;
-	@Autowired
-	private GroupRouteService groupRouteService;
-	@Autowired
-	private GroupOrderService groupOrderService;
-	@Autowired
-	private ContractService contractService;
-	@Autowired
-	private DicService dicService;
-	@Autowired
-	private SupplierCarService supplierCarService;
-	@Autowired
-	private SupplierImgService supplierImgService;
-	@Autowired
-	private BookingSupplierDetailService detailService;
-	@Autowired
-    private BizSupplierRelationService bizSupplierRelationService;
 	@Autowired
 	private BookingComponentFacade bookingComponentFacade;
 	@Autowired

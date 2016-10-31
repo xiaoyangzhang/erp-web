@@ -12,16 +12,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
@@ -36,9 +33,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.contant.BizConfigConstant;
@@ -47,45 +41,9 @@ import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
-import com.yihg.finance.api.FinanceGuideService;
-import com.yihg.finance.po.FinanceGuide;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.api.BookingDeliveryService;
-import com.yihg.operation.api.BookingGuideService;
-import com.yihg.operation.api.BookingShopService;
-import com.yihg.operation.api.BookingSupplierDetailService;
-import com.yihg.operation.api.BookingSupplierService;
-import com.yihg.operation.po.BookingDelivery;
-import com.yihg.operation.po.BookingGuide;
-import com.yihg.operation.po.BookingGuideListCount;
-import com.yihg.operation.po.BookingGuideListSelect;
-import com.yihg.operation.po.BookingShop;
-import com.yihg.operation.po.BookingSupplier;
-import com.yihg.operation.po.BookingSupplierDetail;
-import com.yihg.operation.vo.BookingGroup;
-import com.yihg.operation.vo.BookingGuidesVO;
-import com.yihg.sales.api.GroupOrderGuestService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.GroupOrderTransportService;
-import com.yihg.sales.api.GroupRequirementService;
-import com.yihg.sales.api.GroupRouteService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.GroupGuidePrintPo;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupOrderPrintPo;
-import com.yihg.sales.po.GroupOrderTransport;
-import com.yihg.sales.po.GroupRequirement;
-import com.yihg.sales.po.GroupRoute;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.TourGroupVO;
-import com.yihg.supplier.api.SupplierGuideService;
-import com.yihg.supplier.api.SupplierService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierGuide;
-import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuideListCount;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuideListSelect;
 import com.yimayhd.erpcenter.dal.sys.po.UserSession;
 import com.yimayhd.erpcenter.facade.sales.query.BookingGuideQueryDTO;
 import com.yimayhd.erpcenter.facade.sales.result.BookingGuideResult;
@@ -93,6 +51,8 @@ import com.yimayhd.erpcenter.facade.sales.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.sales.result.WebResult;
 import com.yimayhd.erpcenter.facade.sales.service.BookingGuideFacade;
 import com.yimayhd.erpcenter.facade.sales.service.BookingGuideFinanceFacade;
+import com.yimayhd.erpresource.dal.constants.Constants;
+import com.yimayhd.erpresource.dal.po.SupplierGuide;
 /**
  * @author : xuzejun
  * @date : 2015年7月25日 下午2:31:01
@@ -102,47 +62,9 @@ import com.yimayhd.erpcenter.facade.sales.service.BookingGuideFinanceFacade;
 @RequestMapping("/bookingGuideFinance")
 public class BookingGuideFinanceController extends BaseController {
 	@Autowired
-	private SupplierGuideService guideService;
-	@Autowired
-	private RegionService regionService;
-	@Autowired
-	private BookingGuideService bookingGuideService;
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private SupplierService supplierSerivce;
-	@Autowired
-	private BookingSupplierService bookingSupplierService;
-	@Autowired
-	private GroupRouteService routeService;
-	@Autowired
-	private BookingSupplierDetailService detailService;
-	@Autowired
 	private SysConfig config;
-	@Autowired
-	private FinanceGuideService financeGuideService;
-	@Autowired
-	private GroupOrderService groupOrderService;
-	@Autowired
-	private GroupRequirementService groupRequirementService;
 	@Resource
 	private BizSettingCommon bizSettingCommon;
-	@Autowired
-	private GroupOrderGuestService groupOrderGuestService ;
-	@Autowired
-	private BookingDeliveryService deliveryService ;
-	@Autowired
-	private BookingShopService shopService ;
-	@Autowired
-	private BookingSupplierService supplierService ;
-	@Autowired
-	private DicService dicService ;
-	@Autowired
-	private GroupOrderTransportService groupOrderTransportService ;
-	@Autowired
-	private PlatformOrgService orgService;
-	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
 	@Autowired

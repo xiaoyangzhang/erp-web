@@ -22,31 +22,22 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.yihg.basic.api.DicService;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.finance.api.FinanceService;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.api.BookingGuideService;
-import com.yihg.operation.api.BookingShopDetailDeployService;
-import com.yihg.operation.api.BookingShopDetailService;
-import com.yihg.operation.api.BookingShopService;
-import com.yihg.operation.api.BookingSupplierDetailService;
-import com.yihg.operation.po.BookingShopDetail;
-import com.yihg.operation.po.BookingShopDetailDeploy;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.vo.TourGroupVO;
-import com.yihg.supplier.api.SupplierService;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShopDetail;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShopDetailDeploy;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
+import com.yimayhd.erpcenter.facade.sales.query.BookingShopDTO;
+import com.yimayhd.erpcenter.facade.sales.query.BookingShopDetailDeployDTO;
 import com.yimayhd.erpcenter.facade.sales.query.BookingShopListDTO;
 import com.yimayhd.erpcenter.facade.sales.result.BookingShopResult;
 import com.yimayhd.erpcenter.facade.sales.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.sales.result.ToFactShopResult;
 import com.yimayhd.erpcenter.facade.sales.result.operation.BookingFinanceShopFacade;
 import com.yimayhd.erpcenter.facade.sales.service.BookingGuestShopFacade;
 import com.yimayhd.erpcenter.facade.sales.service.BookingShopFacade;
@@ -60,32 +51,7 @@ import com.yimayhd.erpcenter.facade.sales.service.BookingShopFacade;
 public class BookingGuestShopController extends BaseController {
 
 	
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private SupplierService supplierSerivce;
-	@Autowired
-	private BookingShopService bookingShopService;
-	@Autowired
-	private BookingGuideService bookingGuideService;
-	@Autowired
-	private DicService dicService;
-	@Autowired
-	private BookingShopDetailService shopDetailService;
-	@Autowired
-	private BookingShopDetailDeployService shopDetailDeployService;
-	@Autowired
-	private FinanceService financeService;
-	@Autowired
-	private GroupOrderService groupOrderService;
 	@Resource
-	private BizSettingCommon bizSettingCommon;
-	@Autowired
-	private BookingSupplierDetailService detailService;
-	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private PlatformOrgService orgService;
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
 	@Autowired
@@ -96,6 +62,8 @@ public class BookingGuestShopController extends BaseController {
 	private BookingFinanceShopFacade bookingFinanceShopFacade;
 	@Autowired
 	private SaleCommonFacade saleCommonFacade;
+	@Autowired
+	private BizSettingCommon bizSettingCommon;
 	/**
 	 * @author : xuzejun
 	 * @date : 2015年7月25日 下午2:31:01
