@@ -255,12 +255,6 @@ public class GroupOrderController extends BaseController {
 //	
 //	@Autowired
 //	private SupplierService supplierInfoService;
-//	
-//	@Autowired
-//	private GroupOrderLockFacade groupOrderLockFacade; //锁单
-//
-//	@Autowired
-//	private GroupQueryPrintFacade groupQueryPrintFacade;//查询打印
 	
 	@Autowired
 	private GroupOrderFacade groupOrderFacade;
@@ -3934,9 +3928,9 @@ public class GroupOrderController extends BaseController {
 	public String createShoppingDetail(HttpServletRequest request,
 			Integer groupId) {
 		
-//		String url = request.getSession().getServletContext().getRealPath("/")
-//				+ "/download/" + System.currentTimeMillis() + ".doc";
-//		
+		String url = request.getSession().getServletContext().getRealPath("/")
+				+ "/download/" + System.currentTimeMillis() + ".doc";
+		
 //		TourGroup tg = tourGroupService.selectByPrimaryKey(groupId);
 //		List<BookingGuide> guides = bookingGuideService
 //				.selectGuidesByGroupId(groupId);
@@ -3960,102 +3954,80 @@ public class GroupOrderController extends BaseController {
 //			gop.setPlace(order.getProvinceName() + order.getCityName());
 //			gops.add(gop);
 //		}
-//		String realPath = request.getSession().getServletContext()
-//				.getRealPath("/template/individual_shopping_detail.docx");
-//		WordReporter export = new WordReporter(realPath);
-//		try {
-//			export.init();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		String imgPath = bizSettingCommon.getMyBizLogo(request);
-//		Map<String, Object> params1 = new HashMap<String, Object>();
-//		params1.put("printTime", DateUtils.format(new Date()));
-//		params1.put("printName", WebUtils.getCurUser(request).getName());
-//		params1.put("groupCode", tg.getGroupCode());
-//		if (imgPath != null) {
-//			Map<String, String> picMap = new HashMap<String, String>();
-//			picMap.put("width", BizConfigConstant.BIZ_LOGO_WIDTH);
-//			picMap.put("height", BizConfigConstant.BIZ_LOGO_HEIGHT);
-//			picMap.put("type", "jpg");
-//			picMap.put("path", imgPath);
-//			params1.put("logo", picMap);
-//		} else {
-//			params1.put("logo", "");
-//		}
-//		/**
-//		 * 第一个表格
-//		 */
-//		Map<String, Object> map0 = new HashMap<String, Object>();
-//		map0.put("groupCode", tg.getGroupCode());
-//		map0.put("totalNum", tg.getTotalAdult() + "大" + tg.getTotalChild()
-//				+ "小");
-//		map0.put("guide", guideString);
-//		map0.put(
-//				"productName",
-//				"【"
-//						+ tg.getProductBrandName()
-//						+ "】"
-//						+ (tg.getProductName() == null ? "" : tg
-//								.getProductName()));
-//		/**
-//		 * 客人信息
-//		 */
-//		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
-//		int i = 1;
-//		for (GroupOrderPrintPo po : gops) {
-//			Map<String, String> map = new HashMap<String, String>();
-//			map.put("n", "" + i++);
-//			map.put("rm", po.getReceiveMode());
-//			map.put("pn", po.getPersonNum());
-//			map.put("p", po.getPlace());
-//			map.put("zg", "");
-//			map.put("rj", "");
-//			map.put("yd", "");
-//			map.put("fc", "");
-//			map.put("y", "");
-//			map.put("c", "");
-//			map.put("hly", "");
-//			map.put("qt", "");
-//			map.put("bz", "");
-//			guestList.add(map);
-//		}
-//		try {
-//			export.export(params1);
-//			export.export(map0, 0);
-//			export.export(guestList, 1);
-//			export.generate(url);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return url;
 		
-		String url = request.getSession().getServletContext().getRealPath("/")
-				+ "/download/" + System.currentTimeMillis() + ".doc";
+		CreateShoppingDetailResult result=groupOrderFacade.createShoppingDetail(groupId,WebUtils.getCurUser(request).getName());
+		TourGroup tg = result.getTg();
+		List<GroupOrderPrintPo> gops = result.getGops();
+		String guideString = result.getGuideString();
 		
 		String realPath = request.getSession().getServletContext()
 				.getRealPath("/template/individual_shopping_detail.docx");
-		
 		WordReporter export = new WordReporter(realPath);
 		try {
 			export.init();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 		String imgPath = settingCommon.getMyBizLogo(request);
-		
-		CreateShoppingDetailResult result=groupOrderFacade.createShoppingDetail(groupId,imgPath,WebUtils.getCurUser(request).getName());
-		
+		Map<String, Object> params1 = new HashMap<String, Object>();
+		params1.put("printTime", DateUtils.format(new Date()));
+		params1.put("printName", WebUtils.getCurUser(request).getName());
+		params1.put("groupCode", tg.getGroupCode());
+		if (imgPath != null) {
+			Map<String, String> picMap = new HashMap<String, String>();
+			picMap.put("width", BizConfigConstant.BIZ_LOGO_WIDTH);
+			picMap.put("height", BizConfigConstant.BIZ_LOGO_HEIGHT);
+			picMap.put("type", "jpg");
+			picMap.put("path", imgPath);
+			params1.put("logo", picMap);
+		} else {
+			params1.put("logo", "");
+		}
+		/**
+		 * 第一个表格
+		 */
+		Map<String, Object> map0 = new HashMap<String, Object>();
+		map0.put("groupCode", tg.getGroupCode());
+		map0.put("totalNum", tg.getTotalAdult() + "大" + tg.getTotalChild()
+				+ "小");
+		map0.put("guide", guideString);
+		map0.put(
+				"productName",
+				"【"
+						+ tg.getProductBrandName()
+						+ "】"
+						+ (tg.getProductName() == null ? "" : tg
+								.getProductName()));
+		/**
+		 * 客人信息
+		 */
+		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
+		int i = 1;
+		for (GroupOrderPrintPo po : gops) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("n", "" + i++);
+			map.put("rm", po.getReceiveMode());
+			map.put("pn", po.getPersonNum());
+			map.put("p", po.getPlace());
+			map.put("zg", "");
+			map.put("rj", "");
+			map.put("yd", "");
+			map.put("fc", "");
+			map.put("y", "");
+			map.put("c", "");
+			map.put("hly", "");
+			map.put("qt", "");
+			map.put("bz", "");
+			guestList.add(map);
+		}
 		try {
-			export.export(result.getParams1());
-			export.export(result.getMap0(), 0);
-			export.export(result.getGuestList(), 1);
+			export.export(params1);
+			export.export(map0, 0);
+			export.export(guestList, 1);
 			export.generate(url);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 		return url;
 	}
 
@@ -4142,12 +4114,12 @@ public class GroupOrderController extends BaseController {
 		return "sales/preview/individual_shopping_detail2";
 	}
 	
-	
-	public List<GroupOrderGuest> getGuestList(String guestInfo) {
-		
-		
-		return null;
-	}
+	//废代码 by gtp
+//	public List<GroupOrderGuest> getGuestList(String guestInfo) {
+//		
+//		
+//		return null;
+//	}
 	
 	/**
 	 * 散客购物明细表2
@@ -4159,7 +4131,9 @@ public class GroupOrderController extends BaseController {
 	//@SuppressWarnings("unchecked")
 	public String createShoppingDetail2(HttpServletRequest request, Integer groupId) {
 		
-//		String url = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis() + ".doc";
+		String url = request.getSession().getServletContext().getRealPath("/") 
+				+ "/download/" + System.currentTimeMillis() + ".doc";
+		
 //		TourGroup tg = tourGroupService.selectByPrimaryKey(groupId);
 //		List<BookingGuide> guides = bookingGuideService.selectGuidesByGroupId(groupId);
 //		String guideString = "";
@@ -4181,87 +4155,67 @@ public class GroupOrderController extends BaseController {
 //			gop.setGuests(guests);
 //			gops.add(gop);
 //		}
-//		String realPath = request.getSession().getServletContext().getRealPath("/template/individual_shopping_detail2.docx");
-//		WordReporter export = new WordReporter(realPath);
-//		try {
-//			export.init();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		String imgPath = bizSettingCommon.getMyBizLogo(request);
-//		Map<String, Object> params1 = new HashMap<String, Object>();
-//		params1.put("printTime", DateUtils.format(new Date()));
-//		params1.put("printName", WebUtils.getCurUser(request).getName());
-//		params1.put("groupCode", tg.getGroupCode());
-//		if (imgPath != null) {
-//			Map<String, String> picMap = new HashMap<String, String>();
-//			picMap.put("width", BizConfigConstant.BIZ_LOGO_WIDTH);
-//			picMap.put("height", BizConfigConstant.BIZ_LOGO_HEIGHT);
-//			picMap.put("type", "jpg");
-//			picMap.put("path", imgPath);
-//			params1.put("logo", picMap);
-//		} else {
-//			params1.put("logo", "");
-//		}
-//		/**
-//		 * 第一个表格
-//		 */
-//		Map<String, Object> map0 = new HashMap<String, Object>();
-//		map0.put("groupCode", tg.getGroupCode());
-//		map0.put("totalNum", tg.getTotalAdult() + "大" + tg.getTotalChild() + "小");
-//		map0.put("guide", guideString);
-//		map0.put("productName", "【" + tg.getProductBrandName() + "】" + (tg.getProductName() == null ? "" : tg.getProductName()));
-//		/**
-//		 * 客人信息
-//		 */
-//		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
-//		int i = 1;
-//		for (GroupOrderPrintPo po : gops) {
-//			Map<String, String> map = new HashMap<String, String>();
-//			map.put("n", "" + i++);
-//			map.put("rm", po.getReceiveMode());
-//			map.put("pn", po.getPersonNum());
-//			map.put("kr", po.getGuestInfo());
-//			map.put("rj", "");
-//			map.put("yd", "");
-//			map.put("fc", "");
-//			map.put("y", "");
-//			map.put("c", "");
-//			map.put("hly", "");
-//			map.put("qt", "");
-//			map.put("bz", "");
-//			guestList.add(map);
-//		}
-//		try {
-//			export.export(params1);
-//			export.export(map0, 0);
-//			export.export(guestList, 1);
-//			export.generate(url);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return url;
 		
-		String imgPath = settingCommon.getMyBizLogo(request);
+		CreateShoppingDetailResult result=groupOrderFacade.createShoppingDetail2(groupId,WebUtils.getCurUser(request).getName());
+		TourGroup tg = result.getTg();
+		List<GroupOrderPrintPo> gops = result.getGops();
+		String guideString = result.getGuideString();
 		
-		String url = request.getSession().getServletContext().getRealPath("/") + 
-				"/download/" + System.currentTimeMillis() + ".doc";
-		String realPath = request.getSession().getServletContext()
-				.getRealPath("/template/individual_shopping_detail2.docx");
-		
+		String realPath = request.getSession().getServletContext().getRealPath("/template/individual_shopping_detail2.docx");
 		WordReporter export = new WordReporter(realPath);
 		try {
 			export.init();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		CreateShoppingDetailResult result=groupOrderFacade.createShoppingDetail2(groupId,imgPath,
-				WebUtils.getCurUser(request).getName());
+		String imgPath = settingCommon.getMyBizLogo(request);
+		Map<String, Object> params1 = new HashMap<String, Object>();
+		params1.put("printTime", DateUtils.format(new Date()));
+		params1.put("printName", WebUtils.getCurUser(request).getName());
+		params1.put("groupCode", tg.getGroupCode());
+		if (imgPath != null) {
+			Map<String, String> picMap = new HashMap<String, String>();
+			picMap.put("width", BizConfigConstant.BIZ_LOGO_WIDTH);
+			picMap.put("height", BizConfigConstant.BIZ_LOGO_HEIGHT);
+			picMap.put("type", "jpg");
+			picMap.put("path", imgPath);
+			params1.put("logo", picMap);
+		} else {
+			params1.put("logo", "");
+		}
+		/**
+		 * 第一个表格
+		 */
+		Map<String, Object> map0 = new HashMap<String, Object>();
+		map0.put("groupCode", tg.getGroupCode());
+		map0.put("totalNum", tg.getTotalAdult() + "大" + tg.getTotalChild() + "小");
+		map0.put("guide", guideString);
+		map0.put("productName", "【" + tg.getProductBrandName() + "】" + (tg.getProductName() == null ? "" : tg.getProductName()));
+		/**
+		 * 客人信息
+		 */
+		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
+		int i = 1;
+		for (GroupOrderPrintPo po : gops) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("n", "" + i++);
+			map.put("rm", po.getReceiveMode());
+			map.put("pn", po.getPersonNum());
+			map.put("kr", po.getGuestInfo());
+			map.put("rj", "");
+			map.put("yd", "");
+			map.put("fc", "");
+			map.put("y", "");
+			map.put("c", "");
+			map.put("hly", "");
+			map.put("qt", "");
+			map.put("bz", "");
+			guestList.add(map);
+		}
 		try {
-			export.export(result.getParams1());
-			export.export(result.getMap0(), 0);
-			export.export(result.getGuestList(), 1);
+			export.export(params1);
+			export.export(map0, 0);
+			export.export(guestList, 1);
 			export.generate(url);
 		} catch (Exception e) {
 			e.printStackTrace();
