@@ -18,8 +18,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,7 +40,6 @@ import com.yihg.erp.contant.BizConfigConstant;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.DateUtils;
-import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
 import com.yimayhd.erpcenter.dal.product.po.ProductGroupPrice;
@@ -181,7 +178,7 @@ import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
 @RequestMapping(value = "/groupOrder")
 public class GroupOrderController extends BaseController {
 	
-	private static final Logger log = LoggerFactory.getLogger(GroupOrderController.class);
+	//private static final Logger log = LoggerFactory.getLogger(GroupOrderController.class);
 
 //	@Autowired
 //	private SupplierGuideService guideService;
@@ -219,11 +216,8 @@ public class GroupOrderController extends BaseController {
 //	private GroupRouteService groupRouteService;
 //	@Autowired
 //	private TourGroupService tourGroupService;
-	
-	//FIXME 特殊暂放
-	@Autowired
-	private SysConfig config;
-	
+//	@Autowired
+//	private SysConfig config;
 //	@Autowired
 //	private PlatformOrgService orgService;
 //	@Autowired
@@ -233,7 +227,7 @@ public class GroupOrderController extends BaseController {
 //	@Autowired
 //	private BookingGuideService bookingGuideService;
 //	
-//	//FIXME 两个service，名称不同
+//	//两个service，名称不同
 //	@Autowired
 //	private BookingSupplierDetailService bookingSupplierDetailService;
 //
@@ -1668,6 +1662,10 @@ public class GroupOrderController extends BaseController {
 		toImpNotGroupListDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 		
 		ToImpNotGroupListResult result=groupOrderFacade.toImpNotGroupList(toImpNotGroupListDTO);
+		model.addAttribute("idLists", idLists);
+		model.addAttribute("pp", result.getPp());
+		model.addAttribute("groupOrder", result.getGroupOrder());
+		model.addAttribute("page", result.getPageBean());
 		
 		return "sales/groupOrder/impNotGroupOrder";
 	}
@@ -2534,7 +2532,7 @@ public class GroupOrderController extends BaseController {
 //
 //		return successJson();
 		
-		BaseStateResult result=groupOrderFacade.editGroupOrder(id,employeeId,num);
+		groupOrderFacade.editGroupOrder(id,employeeId,num);
 		return successJson();
 	}
 
@@ -3237,7 +3235,6 @@ public class GroupOrderController extends BaseController {
 //		model.addAttribute("productName","【"+ tg.getProductBrandName()+ "】"+ (tg.getProductName() == null ? "" : tg
 //								.getProductName()));
 		
-		//FIXME 待修复
 		String imgPath = settingCommon.getMyBizLogo(request);
 		
 		ToIndividualGuestTicklingResult result=groupOrderFacade.toIndividualGuestTickling(groupId);
@@ -4159,7 +4156,7 @@ public class GroupOrderController extends BaseController {
 	 * @param groupId
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	public String createShoppingDetail2(HttpServletRequest request, Integer groupId) {
 		
 //		String url = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis() + ".doc";
