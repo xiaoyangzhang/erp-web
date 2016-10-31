@@ -12,6 +12,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
+import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
@@ -20,36 +23,31 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yimayhd.erpcenter.facade.finance.query.AddCommission2DTO;
+import org.yimayhd.erpcenter.facade.finance.query.FinanceGuideAuditListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.PayGuideBillPlusDTO;
+import org.yimayhd.erpcenter.facade.finance.query.PayRecordDetailsDTO;
+import org.yimayhd.erpcenter.facade.finance.query.QuerySettleListPageDTO;
+import org.yimayhd.erpcenter.facade.finance.query.SaveCommissionDTO;
+import org.yimayhd.erpcenter.facade.finance.result.CommissionListResult;
+import org.yimayhd.erpcenter.facade.finance.result.QuerySettleListPageResult;
+import org.yimayhd.erpcenter.facade.finance.result.ResultSupport;
+import org.yimayhd.erpcenter.facade.finance.result.SettleListResult;
+import org.yimayhd.erpcenter.facade.finance.result.ToAddCommission2Result;
+import org.yimayhd.erpcenter.facade.finance.result.ToAddCommissionResult;
+import org.yimayhd.erpcenter.facade.finance.service.FinanceGuideFacade;
 
 import com.alibaba.fastjson.JSON;
-import com.yihg.basic.api.CommonService;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.exception.ClientException;
-import com.yihg.basic.po.DicInfo;
 import com.yihg.erp.aop.PostHandler;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.finance.api.FinanceGuideService;
-import com.yihg.finance.po.FinanceCommission;
-import com.yihg.finance.po.FinancePay;
-import com.yihg.images.util.DateUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.api.BookingGuideService;
-import com.yihg.operation.api.BookingSupplierDetailService;
-import com.yihg.operation.po.BookingGuide;
-import com.yihg.operation.po.BookingSupplierDetail;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.TourGroupVO;
-import com.yihg.supplier.api.SupplierGuideService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierGuide;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.api.SysBizBankAccountService;
-import com.yihg.sys.po.SysBizBankAccount;
+import com.yimayhd.erpcenter.dal.basic.utils.DateUtils;
+import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePay;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TeamGroupVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpresource.dal.constants.BasicConstants;
 
 /**
  * 导游报账
@@ -60,27 +58,12 @@ import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 @Controller
 @RequestMapping(value = "/finance/guide")
 public class FinanceGuideController extends BaseController {
-
+	
 	@Autowired
-	private FinanceGuideService financeGuideService;
+	private ProductCommonFacade productCommonFacade;
+	
 	@Autowired
-	private DicService dicService;
-	@Autowired
-	private SysBizBankAccountService sysBizBankAccountService;
-	@Autowired
-	private BookingGuideService bookingGuideService;
-	@Autowired
-	private PlatformOrgService orgService;
-	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private SupplierGuideService supplierGuideService;
-	@Autowired
-	private BookingSupplierDetailService bookingSupplierDetailService;
-	@Autowired
-	private ApplicationContext appContext;
+	private FinanceGuideFacade financeGuideFacade; 
 	
 	
 	/**
@@ -89,8 +72,12 @@ public class FinanceGuideController extends BaseController {
 	@RequestMapping(value = "auditList.htm")
 	public String auditList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
 		return "finance/guide/audit-list";
 	}
@@ -99,63 +86,27 @@ public class FinanceGuideController extends BaseController {
 	public String auditList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String sl, String ssl,
 			String rp, Integer page, Integer pageSize, String svc,TourGroupVO group) {
-
-		PageBean pb = new PageBean();
-		pb.setPage(page);
-		if (pageSize == null) {
-			pageSize = Constants.PAGESIZE;
+		
+		
+		FinanceGuideAuditListDTO dto = new FinanceGuideAuditListDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
 		}
-		pb.setPageSize(pageSize);
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(org.apache.commons.lang.StringUtils.isBlank(group.getSaleOperatorIds()) && org.apache.commons.lang.StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
 		}
-		Map<String,Object> pms  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pms.put("operator_id", group.getSaleOperatorIds());
-		}
-		pms.put("set", WebUtils.getDataUserIdSet(request));
-		pb.setParameter(pms);
-		pb = getCommonService(svc).queryListPage(sl, pb);
-		List<Map<String, Object>> results = pb.getResult();
-		if(results != null){
-			for(Map<String, Object> item : results){
-				Integer groupId = Integer.parseInt(item.get("group_id").toString());
-				Integer guideId = Integer.parseInt(item.get("guide_id").toString());
-				Integer commTotal = financeGuideService.getCommisionTotalSum(groupId, guideId);
-				item.put("comm_total", commTotal != null ? commTotal : 0);
-			}
-		}
-
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setRp(rp);
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		dto.setSl(ssl);
+		dto.setSsl(ssl);
+		dto.setSvc(svc);
+		PageBean pb = financeGuideFacade.auditList(dto);
 		model.addAttribute("pageBean", pb);
 		return rp;
-	}
-	
-	/**
-	 * 获取查询服务
-	 * 
-	 * @author Jing.Zhuo
-	 * @create 2015年8月18日 上午9:34:25
-	 * @param svc
-	 * @return
-	 */
-	private CommonService getCommonService(String svc) {
-		if (org.apache.commons.lang.StringUtils.isBlank(svc)) {
-			svc = "commonsaleService";
-		}
-		return appContext.getBean(svc, CommonService.class);
 	}
 	
 	/**
@@ -164,8 +115,11 @@ public class FinanceGuideController extends BaseController {
 	@RequestMapping(value = "payRecordList.htm")
 	public String payRecordList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
 		return "finance/guide/pay-list";
 	}
 	
@@ -176,47 +130,8 @@ public class FinanceGuideController extends BaseController {
 	public String payRecordDetails(HttpServletRequest request, HttpServletResponse reponse, 
 			ModelMap model, Integer payId, Integer type, boolean isDeduction) {
 		
-		Map<String, Object> payMap = null;
-		
-		 //佣金报账
-		if(type == 1){
-			if(isDeduction){
-				payMap = financeGuideService.selectCommPayDeductionInfo(payId);
-			}else{
-				payMap = financeGuideService.selectCommPayInfo(payId);
-			}
-		}
-		//导游报账
-		else if(type == 2){ 
-			payMap = financeGuideService.selectGuidePayInfo(payId);
-		}
-		
-		if(payMap != null){
-			
-			List<Map<String, Object>> list =null;
-			if(type == 1){
-				if(isDeduction){
-					list = financeGuideService.selectCommPayDetailsDeductionByPayId(payId);
-				}else{
-					list = financeGuideService.selectCommPayDetailsByPayId(payId);
-				}
-			}else if(type == 2){
-				list = financeGuideService.selectGuidePayDetailsByPayId(payId);
-				if(list != null && list.size() > 0){
-					Map<String, Object> item = null;
-					for(int i = 0; i < list.size(); i++){
-						item = list.get(i);
-						Integer bookingId = Integer.parseInt(item.get("supplier_id").toString());
-						Integer supType = Integer.parseInt(item.get("supplier_type").toString());
-						String remark = item.get("remark") != null ? item.get("remark").toString() : "";
-						List<BookingSupplierDetail> detailList = bookingSupplierDetailService.selectByPrimaryBookId(bookingId);
-						String details = bookingSupplierDetailService.concatDetail(supType, remark, detailList);
-						item.put("details", details);
-					}
-				}
-			}
-			request.setAttribute("list", list);
-		}
+		List<Map<String, Object>> list = financeGuideFacade.payRecordDetails(payId, type, isDeduction);
+		request.setAttribute("list", list);
 		
 		return "finance/guide/pay-detail-list-table";
 	}
@@ -227,36 +142,20 @@ public class FinanceGuideController extends BaseController {
 	@RequestMapping(value = "payRecordListPage.do")
 	public String payRecordListPage(HttpServletRequest request, HttpServletResponse reponse, 
 			ModelMap model, Integer page, Integer pageSize) {
-		PageBean pb = new PageBean();
-		pb.setPage(page);
-		if(pageSize==null){
-			pb.setPageSize(Constants.PAGESIZE);
-		}else{
-			pb.setPageSize(pageSize);
+		
+		PayRecordDetailsDTO dto = new PayRecordDetailsDTO();
+		dto.setBizId(dto.getBizId());
+		dto.setOrgIds(dto.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
 		}
-		String saleOperatorIds = request.getParameter("saleOperatorIds");
-		String orgIds = request.getParameter("orgIds");
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isEmpty(saleOperatorIds) && !StringUtils.isEmpty(orgIds)){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = orgIds.split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				saleOperatorIds = salesOperatorIds.substring(0, salesOperatorIds.length()-1);
-			}
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
 		}
-		Map pm = WebUtils.getQueryParamters(request);
-		pm.put("saleOperatorIds", saleOperatorIds);
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pb.setParameter(pm);
-		pb = financeGuideService.selectGuideCashRecordListPage(pb);
+		dto.setParamters(dto.getParamters());
+		dto.setSaleOperatorIds(dto.getSaleOperatorIds());
+		dto.setSet(dto.getSet());
+		PageBean pb = financeGuideFacade.payRecordListPage(dto);
 		model.addAttribute("pageBean", pb);
 		return "finance/guide/pay-list-table";
 	}
@@ -266,19 +165,18 @@ public class FinanceGuideController extends BaseController {
 	 */
 	@RequestMapping(value = "settleList.htm")
 	public String settleList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
-		Integer biz_id = WebUtils.getCurBizId(request);
 		
-		List<DicInfo> payTypeList = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS,biz_id);
-		model.addAttribute("payTypeList", payTypeList);
-		
-		List<SysBizBankAccount> bizAccountList = sysBizBankAccountService.getListByBizId(biz_id);
-		List<DicInfo> bankList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_BANK);
-		model.addAttribute("bizAccountList", bizAccountList);
-		model.addAttribute("bankList", bankList);
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		SettleListResult settleResult = financeGuideFacade.settleList(bizId);
+		model.addAttribute("payTypeList", settleResult.getPayTypeList());
+		model.addAttribute("bizAccountList", settleResult.getBizAccountList());
+		model.addAttribute("bankList", settleResult.getBankList());
+		
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
 		return "finance/guide/settle-list";
 	}
@@ -290,14 +188,13 @@ public class FinanceGuideController extends BaseController {
 	@ResponseBody
 	@PostHandler
 	public String auditGuideBill(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer billId) {
-		try{
-			financeGuideService.auditGuideBill(billId);
-		}catch(ClientException ex){
-			return errorJson(ex.getMessage());
-		}catch(Exception ex){
-			return errorJson("审核出错");
+			
+		ResultSupport result = financeGuideFacade.auditGuideBill(billId);
+		if(result.isSuccess()){
+			return successJson("msg", "审核成功");
+		}else{
+			return errorJson(result.getResultMsg());
 		}
-		return successJson("msg", "审核成功");
 	}
 	
 	/**
@@ -307,7 +204,7 @@ public class FinanceGuideController extends BaseController {
 	@ResponseBody
 	@PostHandler
 	public String delAuditGuideBill(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer billId) {
-		financeGuideService.delAuditGuideBill(billId);
+		financeGuideFacade.delAuditGuideBill(billId);
 		return null;
 	}
 
@@ -319,7 +216,7 @@ public class FinanceGuideController extends BaseController {
 	@ResponseBody
 	@PostHandler
 	public String rejectGuideBill(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer billId) {
-		financeGuideService.rejectGuideBill(billId);
+		financeGuideFacade.rejectGuideBill(billId);
 		return null;
 	}
 
@@ -333,7 +230,7 @@ public class FinanceGuideController extends BaseController {
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
 		pay.setUserId(emp.getEmployeeId());
 		pay.setUserName(emp.getName());
-		financeGuideService.payGuideBill(pay);
+		financeGuideFacade.payGuideBill(pay);
 		return null;
 	}
 	
@@ -348,15 +245,11 @@ public class FinanceGuideController extends BaseController {
 		pay.setUserId(emp.getEmployeeId());
 		pay.setUserName(emp.getName());
 		pay.setBizId(emp.getBizId());
-		financeGuideService.payGuideBill(pay,checkedArr,WebUtils.getCurUser(request).getName());
 		
-		//佣金发放付款
-		pay.setBookingGuideId(null);
-		financeGuideService.payCommBill(pay);
-		
-		//佣金扣除付款
-		pay.setCommissionIds(pay.getCommissionDeductionIds());
-		financeGuideService.payCommDeductionBill(pay);
+		PayGuideBillPlusDTO dto = new PayGuideBillPlusDTO();
+		dto.setPay(pay);
+		dto.setCheckedArr(checkedArr);
+		financeGuideFacade.payGuideBillPlus(dto);
 		return null;
 	}
 	
@@ -367,7 +260,7 @@ public class FinanceGuideController extends BaseController {
 	@ResponseBody
 	@PostHandler
 	public String deletePay(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer payId) {
-		financeGuideService.deletePayById(payId);
+		financeGuideFacade.deletePay(payId);
 		return null;
 	}
 	
@@ -378,7 +271,7 @@ public class FinanceGuideController extends BaseController {
 	@ResponseBody
 	@PostHandler
 	public String deleteCommPay(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer payId) {
-		financeGuideService.deletePayCommById(payId);
+		financeGuideFacade.deleteCommPay(payId);
 		return null;
 	}
 	
@@ -389,7 +282,7 @@ public class FinanceGuideController extends BaseController {
 	@ResponseBody
 	@PostHandler
 	public String deletePayCommDeduction(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer payId) {
-		financeGuideService.deletePayCommDeductionById(payId);
+		financeGuideFacade.deletePayCommDeduction(payId);
 		return null;
 	}
 //
@@ -411,7 +304,7 @@ public class FinanceGuideController extends BaseController {
 	@ResponseBody
 	@PostHandler
 	public String submit2fin(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer billId) {
-		financeGuideService.submit(billId, 2);
+		financeGuideFacade.submit2fin(billId);
 		return null;
 	}
 	
@@ -425,8 +318,8 @@ public class FinanceGuideController extends BaseController {
 	 */
 	@RequestMapping(value = "getGuideNameList.do" ,method = RequestMethod.GET)
 	@ResponseBody
-	public String getUserNameList(HttpServletRequest request, HttpServletResponse reponse, String name) throws UnsupportedEncodingException{
- 		List<Map<String,String>> list = financeGuideService.getGuideNameList(WebUtils.getCurBizId(request),java.net.URLDecoder.decode(name,"UTF-8"));
+	public String getUserNameList(HttpServletRequest request, HttpServletResponse reponse, String name){
+ 		List<Map<String,String>> list = financeGuideFacade.getGuideNameList(WebUtils.getCurBizId(request), name);
 		Map<String,Object> map = new HashMap<String,Object>();
 		map.put("success", "true");
 		map.put("result", list);
@@ -441,13 +334,12 @@ public class FinanceGuideController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping(value = "/addCommission.htm")
-	public String shopDetailList(HttpServletRequest request,HttpServletResponse reponse,ModelMap model, Integer groupId) {
-		List<FinanceCommission> comList = financeGuideService.selectCommissionByGroupId(groupId);
-		List<BookingGuide> guideList = bookingGuideService.selectDistinctListByGroupId(groupId);
-		List<DicInfo> dicInfoList = dicService.getListByTypeCode(BasicConstants.YJ_XMLX, WebUtils.getCurBizId(request));
-		model.addAttribute("guideList", guideList);
-		model.addAttribute("comList", comList);
-		model.addAttribute("dicInfoList", dicInfoList);
+	public String addCommission(HttpServletRequest request,HttpServletResponse reponse,ModelMap model, Integer groupId) {
+		
+		ToAddCommissionResult result = financeGuideFacade.addCommission(WebUtils.getCurBizId(request), groupId, BasicConstants.YJ_XMLX);
+		model.addAttribute("guideList", result.getGuideList());
+		model.addAttribute("comList", result.getComList());
+		model.addAttribute("dicInfoList", result.getDicInfoList());
 		return "finance/commission/add-commission";
 	}
 	
@@ -460,42 +352,31 @@ public class FinanceGuideController extends BaseController {
 	 */
 	@RequestMapping(value = "/addCommissionDeduction.htm")
 	public String addCommissionDeduction(HttpServletRequest request,HttpServletResponse reponse,ModelMap model, Integer groupId) {
-		List<FinanceCommission> comList = financeGuideService.selectCommissionDeductionByGroupId(groupId);
-		List<BookingGuide> guideList = bookingGuideService.selectDistinctListByGroupId(groupId);
-		List<DicInfo> dicInfoList = dicService.getListByTypeCode(BasicConstants.YJ_KKXM, WebUtils.getCurBizId(request));
-		model.addAttribute("guideList", guideList);
-		model.addAttribute("comList", comList);
-		model.addAttribute("dicInfoList", dicInfoList);
+		
+		ToAddCommissionResult result = financeGuideFacade.addCommission(WebUtils.getCurBizId(request), groupId, BasicConstants.YJ_KKXM);
+		
+		model.addAttribute("guideList", result.getGuideList());
+		model.addAttribute("comList", result.getComList());
+		model.addAttribute("dicInfoList", result.getDicInfoList());
 		return "finance/commission/addCommissionDeduction";
 	}
 	
 	@RequestMapping(value = "/addCommission2.htm")
-	public String shopDetailList2(HttpServletRequest request,HttpServletResponse reponse,ModelMap model, Integer groupId,Integer guideId) {
-		List<FinanceCommission> comList = financeGuideService.selectCommissionByGroupId(groupId);
-		List<BookingGuide> guideList = bookingGuideService.selectDistinctListByGroupId(groupId);
-		List<DicInfo> dicInfoList = dicService.getListByTypeCode(BasicConstants.YJ_XMLX, WebUtils.getCurBizId(request));
-		List<DicInfo> dicInfoList2 = dicService.getListByTypeCode(BasicConstants.YJ_KKXM, WebUtils.getCurBizId(request));
+	public String addCommission2(HttpServletRequest request,HttpServletResponse reponse,ModelMap model, Integer groupId,Integer guideId) {
+		AddCommission2DTO dto = new AddCommission2DTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setGroupId(groupId);
+		dto.setGuideId(guideId);
+		ToAddCommission2Result result = financeGuideFacade.addCommission2(dto);
 		
-		TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);
-		if(guideId==null){
-			if(guideList.size()>0){
-				guideId=guideList.get(0).getGuideId();
-			}
-		}
-		//根据团id和导游Id查询佣金
-		List<FinanceCommission> financeCommissions = financeGuideService.getFinanceCommisionByGroupIdAndGuideId(WebUtils.getCurBizId(request),groupId,guideId);
-		List<FinanceCommission> financeCommissionDeductions = financeGuideService.getFinanceCommisionDeductionByGroupIdAndGuideId(WebUtils.getCurBizId(request),groupId,guideId);
-		//导游信息
-		SupplierGuide supplierGuide = supplierGuideService.getGuideInfoById(guideId);
-		
-		model.addAttribute("supplierGuide", supplierGuide);
-		model.addAttribute("financeCommissions", financeCommissions);
-		model.addAttribute("financeCommissionDeductions", financeCommissionDeductions);
-		model.addAttribute("tourGroup", tourGroup);
-		model.addAttribute("guideList", guideList);
-		model.addAttribute("comList", comList);
-		model.addAttribute("dicInfoList", dicInfoList);
-		model.addAttribute("dicInfoList2", dicInfoList2);
+		model.addAttribute("supplierGuide", result.getSupplierGuide());
+		model.addAttribute("financeCommissions", result.getFinanceCommissions());
+		model.addAttribute("financeCommissionDeductions", result.getFinanceCommissionDeductions());
+		model.addAttribute("tourGroup", result.getTourGroup());
+		model.addAttribute("guideList", result.getGuideList());
+		model.addAttribute("comList", result.getComList());
+		model.addAttribute("dicInfoList", result.getDicInfoList());
+		model.addAttribute("dicInfoList2", result.getDicInfoList2());
 		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" 打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		return "finance/commission/add-commission2";
 	}
@@ -509,12 +390,11 @@ public class FinanceGuideController extends BaseController {
 	 */
 	@RequestMapping(value = "/commissionList.htm")
 	public String commissionList(HttpServletRequest request,HttpServletResponse reponse,ModelMap model, Integer groupId) {
-		List<FinanceCommission> comList = financeGuideService.selectCommissionByGroupId(groupId);
-		List<BookingGuide> guideList = bookingGuideService.selectDistinctListByGroupId(groupId);
-		List<DicInfo> dicInfoList = dicService.getListByTypeCode(BasicConstants.YJ_XMLX, WebUtils.getCurBizId(request));
-		model.addAttribute("guideList", guideList);
-		model.addAttribute("comList", comList);
-		model.addAttribute("dicInfoList", dicInfoList);
+		
+		CommissionListResult result = financeGuideFacade.commissionList(WebUtils.getCurBizId(request), groupId);
+		model.addAttribute("guideList", result.getGuideList());
+		model.addAttribute("comList", result.getComList());
+		model.addAttribute("dicInfoList", result.getDicInfoList());
 		return "finance/commission/commission-list";
 	}
 	
@@ -528,19 +408,21 @@ public class FinanceGuideController extends BaseController {
 	@RequestMapping(value = "/saveCommission.do")
 	@ResponseBody
 	public String saveCommission(HttpServletRequest request,HttpServletResponse reponse,ModelMap model, Integer groupId, String content) {
-		try{
-			PlatformEmployeePo employ = WebUtils.getCurUser(request);
-			if(StringUtils.isEmpty(content) || "[]".equals(content)){
-				financeGuideService.deleteCommissionByGroupId(employ.getBizId(), groupId);
-				return successJson("msg", "操作成功");
-			}
-			List<FinanceCommission> list = JSON.parseArray(content, FinanceCommission.class);
-			financeGuideService.batchInsertCommission(employ.getBizId(), employ.getEmployeeId(), employ.getName(), list);
+		
+		PlatformEmployeePo employ = WebUtils.getCurUser(request);
+		
+		SaveCommissionDTO dto = new SaveCommissionDTO();
+		dto.setBizId(employ.getBizId());
+		dto.setContent(content);
+		dto.setEmployeeId(employ.getEmployeeId());
+		dto.setEmployeeName(employ.getName());
+		dto.setGroupId(groupId);
+		ResultSupport result = financeGuideFacade.saveCommission(dto);
+		
+		if(result.isSuccess()){
 			return successJson("msg", "操作成功");
-		}catch(Exception e){
-			e.printStackTrace();
-			return errorJson("操作失败");
-		}	
+		}
+		return errorJson("操作失败");
 	}
 	
 	/**
@@ -553,19 +435,20 @@ public class FinanceGuideController extends BaseController {
 	@RequestMapping(value = "/saveCommissionDeduction.do")
 	@ResponseBody
 	public String saveCommissionDeduction(HttpServletRequest request,HttpServletResponse reponse,ModelMap model, Integer groupId, String content) {
-		try{
-			PlatformEmployeePo employ = WebUtils.getCurUser(request);
-			if(StringUtils.isEmpty(content) || "[]".equals(content)){
-				financeGuideService.deleteCommissionDeductionByGroupId(employ.getBizId(), groupId);
-				return successJson("msg", "操作成功");
-			}
-			List<FinanceCommission> list = JSON.parseArray(content, FinanceCommission.class);
-			financeGuideService.batchInsertCommissionDeduction(employ.getBizId(), employ.getEmployeeId(), employ.getName(), list);
+		
+		PlatformEmployeePo employ = WebUtils.getCurUser(request);
+		SaveCommissionDTO dto = new SaveCommissionDTO();
+		dto.setBizId(employ.getBizId());
+		dto.setContent(content);
+		dto.setEmployeeId(employ.getEmployeeId());
+		dto.setEmployeeName(employ.getName());
+		dto.setGroupId(groupId);
+		ResultSupport result = financeGuideFacade.saveCommissionDeduction(dto);
+		
+		if(result.isSuccess()){
 			return successJson("msg", "操作成功");
-		}catch(Exception e){
-			e.printStackTrace();
-			return errorJson("操作失败");
-		}	
+		}
+		return errorJson("操作失败");
 	}
 	
 	/**
@@ -578,92 +461,38 @@ public class FinanceGuideController extends BaseController {
 	@RequestMapping(value = "/deleteCommission.do")
 	@ResponseBody
 	public String deleteCommission(HttpServletRequest request,HttpServletResponse reponse,ModelMap model, Integer id) {
-		try{
-			if(StringUtils.isEmpty(id)){
-				return errorJson("要删除的佣金ID不能为空");
-			}
-			financeGuideService.deleteByPrimaryKey(id);
+		
+		ResultSupport result = financeGuideFacade.deleteCommission(id);
+		if(result.isSuccess()){
 			return successJson("msg", "操作成功");
-		}catch(Exception e){
-			e.printStackTrace();
-			return errorJson("操作失败");
-		}	
+		}
+		return successJson("msg", result.getResultMsg());
 	}
 	
 	
 	
 	@RequestMapping(value = "/querySettleListPage.htm")
 	public String querySettleListPage(HttpServletRequest request, ModelMap model,Integer pageSize,Integer page,TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		if(page==null){
-			pageBean.setPage(1);
-		}else{
-			pageBean.setPage(page);
-		}
-		if(pageSize==null){
-			pageBean.setPageSize(Constants.PAGESIZE);
-		}else{
-			pageBean.setPageSize(pageSize);
-		}
 		
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(org.apache.commons.lang.StringUtils.isBlank(group.getSaleOperatorIds()) && org.apache.commons.lang.StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
+		QuerySettleListPageDTO dto = new QuerySettleListPageDTO();
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(group.getOrgIds());
+		if(page != null){
+			dto.setPage(page);
 		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operator_id", group.getSaleOperatorIds());
+		if(pageSize != null){
+			dto.setPageSize(pageSize);
 		}
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(group.getSaleOperatorIds());
+		dto.setSet(WebUtils.getDataUserIdSet(request));
+		QuerySettleListPageResult result = financeGuideFacade.querySettleListPage(dto);
 		
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		
-		pageBean = financeGuideService.querySettleListPage(pageBean, WebUtils.getCurBizId(request));
-		List<Map<String, Object>> results = pageBean.getResult();
-		if(results != null){
-			for(Map<String, Object> item : results){
-				
-				Integer groupId = Integer.parseInt(item.get("group_id").toString());
-				Integer guideId = Integer.parseInt(item.get("guide_id").toString());
-				Map<String, Object> commMap = financeGuideService.getCommisionTotalSumAndTotalCashSum(groupId, guideId);
-				if(commMap != null){
-					BigDecimal total = new BigDecimal(commMap.get("total").toString());
-					BigDecimal totalCash = new BigDecimal(commMap.get("total_cash").toString());
-					item.put("comm_total", total);
-					item.put("comm_total_cash", totalCash);
-				}else{
-					item.put("comm_total", 0);
-					item.put("comm_total_cash", 0);
-				}
-			}
-		}
-		
-		BigDecimal sumTotalAmount = financeGuideService.getSumTotal(pageBean, WebUtils.getCurBizId(request));
-		BigDecimal sumTotalCash = financeGuideService.getSumTotalCash(pageBean, WebUtils.getCurBizId(request));
-		model.addAttribute("sumTotalAmount", sumTotalAmount);
-		model.addAttribute("sumTotalCash", sumTotalCash);
-		
-		Map<String, Object>	allCommTotalMap = financeGuideService.getAllTotalSumAndTotalCashSum(pageBean);
-		if(allCommTotalMap != null){
-			BigDecimal total = new BigDecimal(allCommTotalMap.get("total").toString());
-			BigDecimal totalCash = new BigDecimal(allCommTotalMap.get("total_cash").toString());
-			model.addAttribute("sumCommTotal", total);
-			model.addAttribute("sumCommTotalCash", totalCash);
-		}
-		
-		model.addAttribute("pageBean", pageBean);
+		model.addAttribute("sumTotalAmount", result.getSumTotalAmount());
+		model.addAttribute("sumTotalCash", result.getSumTotalCash());
+		model.addAttribute("sumCommTotal", result.getSumCommTotal());
+		model.addAttribute("sumCommTotalCash", result.getSumCommTotalCash());
+		model.addAttribute("pageBean", result.getPageBean());
 		
 		return "finance/guide/settle-list-table";
 	}
@@ -679,7 +508,7 @@ public class FinanceGuideController extends BaseController {
 		pay.setUserId(emp.getEmployeeId());
 		pay.setUserName(emp.getName());
 		pay.setBizId(emp.getBizId());
-		financeGuideService.payCommBill(pay);
+		financeGuideFacade.payCommBill(pay);
 		return null;
 	}
 	
@@ -694,7 +523,7 @@ public class FinanceGuideController extends BaseController {
 		pay.setUserId(emp.getEmployeeId());
 		pay.setUserName(emp.getName());
 		pay.setBizId(emp.getBizId());
-		financeGuideService.payCommDeductionBill(pay);
+		financeGuideFacade.payCommDeductionBill(pay);
 		return null;
 	}
 }
