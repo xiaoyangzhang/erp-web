@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -71,9 +72,7 @@ import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
 import com.yihg.mybatis.utility.PageBean;
-import com.yimayhd.erpcenter.dal.basic.constant.BasicConstants;
-import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
-import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
+import com.yimayhd.erpcenter.common.contants.BasicConstants;
 import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
 import com.yimayhd.erpcenter.dal.product.po.ProductGroupSeller;
 import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
@@ -87,6 +86,7 @@ import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.facade.query.ProductPriceListDTO;
 import com.yimayhd.erpcenter.facade.query.ProductSaveDTO;
 import com.yimayhd.erpcenter.facade.query.ToSearchListStateDTO;
+import com.yimayhd.erpcenter.facade.result.ProductInfoResult;
 import com.yimayhd.erpcenter.facade.result.ProductPriceListResult;
 import com.yimayhd.erpcenter.facade.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.result.ToProductAddResult;
@@ -378,8 +378,8 @@ public class ProductInfoController extends BaseController {
 		parameters.put("productName", productName);
 		parameters.put("orgId", WebUtils.getCurUser(request).getOrgId());
 		parameters.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean = productInfoService.findProductInfos2(pageBean, parameters);
-
+//		pageBean = productInfoService.findProductInfos2(pageBean, parameters);
+		pageBean = productFacade.productAYList(pageBean, parameters);
 		//model.addAttribute("allProvince", allProvince);
 		model.addAttribute("brandList", brandQueryResult.getBrandList());
 		model.addAttribute("page", pageBean);
@@ -471,7 +471,8 @@ public class ProductInfoController extends BaseController {
 		parameters.put("productName", productName);
 		parameters.put("orgId", WebUtils.getCurUser(request).getOrgId());
 		parameters.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean = productInfoService.findProductInfos2(pageBean, parameters);
+//		pageBean = productInfoService.findProductInfos2(pageBean, parameters);
+		pageBean = productFacade.productAYList(pageBean, parameters);
 		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
 		model.addAttribute("allProvince", allProvince);
 		model.addAttribute("brandList", brandQueryResult.getBrandList());
@@ -509,7 +510,8 @@ public class ProductInfoController extends BaseController {
 	@RequestMapping(value = "/updateAYSysId.do")
 	@ResponseBody
 	public String updateAYSysId(HttpServletRequest request,Integer productId ,Integer productSysId) {
-		productInfoService.updateProductSysId(productId, productSysId);
+//		productInfoService.updateProductSysId(productId, productSysId);
+		ResultSupport resultSupport = productFacade.updateProductSysId(productId, productSysId);
 		return "product/productAY_list_table";
 	}
 	
@@ -607,112 +609,113 @@ public class ProductInfoController extends BaseController {
        	if (!"".equals(resultString)){
        		JSONArray jsonAry = JSON.parseArray(resultString);
        		//TODO 
-       		ProductInfo info =null;
-       		ProductRemark remark=null;
-       		ProductRoute route=null;
-       		for(int i = 0;i < jsonAry.size();i++){
-       		JSONObject lineObj = jsonAry.getJSONObject(i);
-       		ProductInfo product=productInfoService.selectProductInfoByPsId(lineObj.getInteger("pid"));
-       		if(product!=null&&product.getId()>0){	
-       			product.setCode(lineObj.getString("pcode"));
-       			product.setNameCity(lineObj.getString("pname"));
-       			product.setTravelDays(lineObj.getInteger("pday"));
-       			product.setState((byte) 2);
-       			product.setProductSysId(lineObj.getInteger("pid"));
-       			product.setBizId(WebUtils.getCurBizId(request));
-       			product.setCreatorName(WebUtils.getCurUser(request).getName());
-       			product.setCreatorId(WebUtils.getCurUserId(request));
-       			product.setCreateTime(new Date().getTime());
-           		productInfoService.updateProductInfo(product);
-           		// product_remark表
-           		ProductRemark proRe= productRemarkService.findProductRemarkByProductId(product.getId());
-           		if(proRe!=null&&proRe.getId()>0){
-           			proRe.setGuestNote(lineObj.getString("r_detail"));
-           			proRe.setProductFeature(lineObj.getString("pkind"));
-           			proRe.setItemInclude(lineObj.getString("r_include"));
-           			proRe.setChildPlan(lineObj.getString("r_child"));
-           			proRe.setShoppingPlan(lineObj.getString("r_shopping"));
-           			proRe.setItemCharge(lineObj.getString("r_selfpay"));
-           			proRe.setItemFree(lineObj.getString("r_donate"));
-           			proRe.setAttention(lineObj.getString("r_rule"));
-               		proRe.setItemOther(lineObj.getString("r_hotel"));
-               		proRe.setItemExclude(lineObj.getString("r_include_not"));
-               		proRe.setEatNote(lineObj.getString("r_food"));
-               		proRe.setCarNote(lineObj.getString("r_car"));
-               		proRe.setGuideNote(lineObj.getString("r_guide"));
-               		proRe.setInsuranceNote(lineObj.getString("r_insure"));
-               		proRe.setAppointRule(lineObj.getString("r_booking_rule"));
-               		proRe.setRemarkInfo(lineObj.getString("r_other"));
-               		productRemarkService.saveProductRemark(proRe);
-           		}else{
-           			remark=new ProductRemark();
-               		remark.setGuestNote(lineObj.getString("r_detail"));
-               		remark.setProductFeature(lineObj.getString("pkind"));
-               		remark.setItemInclude(lineObj.getString("r_include"));
-               		remark.setChildPlan(lineObj.getString("r_child"));
-               		remark.setShoppingPlan(lineObj.getString("r_shopping"));
-               		remark.setItemCharge(lineObj.getString("r_selfpay"));
-               		remark.setItemFree(lineObj.getString("r_donate"));
-               		remark.setAttention(lineObj.getString("r_rule"));
-               		remark.setItemOther(lineObj.getString("r_hotel"));
-               		remark.setItemExclude(lineObj.getString("r_include_not"));
-               		remark.setEatNote(lineObj.getString("r_food"));
-               		remark.setCarNote(lineObj.getString("r_car"));
-               		remark.setGuideNote(lineObj.getString("r_guide"));
-               		remark.setInsuranceNote(lineObj.getString("r_insure"));
-               		remark.setAppointRule(lineObj.getString("r_booking_rule"));
-               		remark.setRemarkInfo(lineObj.getString("r_other"));
-             		remark.setProductId(product.getId());
-               		productRemarkService.saveProductRemark(remark);
-           		}
-       		}else{
-       		info=new ProductInfo();
-       		info.setCode(lineObj.getString("pcode"));
-       		info.setNameCity(lineObj.getString("pname"));
-       		info.setTravelDays(lineObj.getInteger("pday"));
-       		info.setState((byte) 2);
-       		info.setProductSysId(lineObj.getInteger("pid"));
-       		info.setBizId(WebUtils.getCurBizId(request));
-       		info.setCreatorName(WebUtils.getCurUser(request).getName());
-       		info.setCreatorId(WebUtils.getCurUserId(request));
-       		info.setCreateTime(new Date().getTime());
-     		remark=new ProductRemark();
-       		remark.setGuestNote(lineObj.getString("r_detail"));
-       		remark.setProductFeature(lineObj.getString("pkind"));
-       		remark.setItemInclude(lineObj.getString("r_include"));
-       		remark.setChildPlan(lineObj.getString("r_child"));
-       		remark.setShoppingPlan(lineObj.getString("r_shopping"));
-       		remark.setItemCharge(lineObj.getString("r_selfpay"));
-       		remark.setItemFree(lineObj.getString("r_donate"));
-       		remark.setAttention(lineObj.getString("r_rule"));
-       		remark.setItemOther(lineObj.getString("r_hotel"));
-       		remark.setItemExclude(lineObj.getString("r_include_not"));
-       		remark.setEatNote(lineObj.getString("r_food"));
-       		remark.setCarNote(lineObj.getString("r_car"));
-       		remark.setGuideNote(lineObj.getString("r_guide"));
-       		remark.setInsuranceNote(lineObj.getString("r_insure"));
-       		remark.setAppointRule(lineObj.getString("r_booking_rule"));
-       		remark.setRemarkInfo(lineObj.getString("r_other"));
-       		int id=productInfoService.insertSelective(info);
-       		// product_remark表
-       		remark.setProductId(id);
-       		productRemarkService.saveProductRemark(remark);
-       		for(int a=0;a<info.getTravelDays();a++){
-           		route =new ProductRoute();
-           		route.setProductId(id);
-           		route.setDayNum(a+1);
-           		route.setBreakfast("");
-           		route.setLunch("");
-           		route.setSupper("");
-           		route.setHotelId(0);
-           		route.setHotelName("");
-           		route.setRouteDesp("");
-           		route.setRouteTip("");
-           		route.setRouteShort("");
-       			productRouteService.saveProductRoute1(route);
-       		}   	
-   			}
-       		}
+       		productFacade.productAY_GetProductImport(jsonAry, WebUtils.getCurUserId(request), WebUtils.getCurUser(request));
+//       		ProductInfo info =null;
+//       		ProductRemark remark=null;
+//       		ProductRoute route=null;
+//       		for(int i = 0;i < jsonAry.size();i++){
+//       		JSONObject lineObj = jsonAry.getJSONObject(i);
+//       		ProductInfo product=productInfoService.selectProductInfoByPsId(lineObj.getInteger("pid"));
+//       		if(product!=null&&product.getId()>0){	
+//       			product.setCode(lineObj.getString("pcode"));
+//       			product.setNameCity(lineObj.getString("pname"));
+//       			product.setTravelDays(lineObj.getInteger("pday"));
+//       			product.setState((byte) 2);
+//       			product.setProductSysId(lineObj.getInteger("pid"));
+//       			product.setBizId(WebUtils.getCurBizId(request));
+//       			product.setCreatorName(WebUtils.getCurUser(request).getName());
+//       			product.setCreatorId(WebUtils.getCurUserId(request));
+//       			product.setCreateTime(new Date().getTime());
+//           		productInfoService.updateProductInfo(product);
+//           		// product_remark表
+//           		ProductRemark proRe= productRemarkService.findProductRemarkByProductId(product.getId());
+//           		if(proRe!=null&&proRe.getId()>0){
+//           			proRe.setGuestNote(lineObj.getString("r_detail"));
+//           			proRe.setProductFeature(lineObj.getString("pkind"));
+//           			proRe.setItemInclude(lineObj.getString("r_include"));
+//           			proRe.setChildPlan(lineObj.getString("r_child"));
+//           			proRe.setShoppingPlan(lineObj.getString("r_shopping"));
+//           			proRe.setItemCharge(lineObj.getString("r_selfpay"));
+//           			proRe.setItemFree(lineObj.getString("r_donate"));
+//           			proRe.setAttention(lineObj.getString("r_rule"));
+//               		proRe.setItemOther(lineObj.getString("r_hotel"));
+//               		proRe.setItemExclude(lineObj.getString("r_include_not"));
+//               		proRe.setEatNote(lineObj.getString("r_food"));
+//               		proRe.setCarNote(lineObj.getString("r_car"));
+//               		proRe.setGuideNote(lineObj.getString("r_guide"));
+//               		proRe.setInsuranceNote(lineObj.getString("r_insure"));
+//               		proRe.setAppointRule(lineObj.getString("r_booking_rule"));
+//               		proRe.setRemarkInfo(lineObj.getString("r_other"));
+//               		productRemarkService.saveProductRemark(proRe);
+//           		}else{
+//           			remark=new ProductRemark();
+//               		remark.setGuestNote(lineObj.getString("r_detail"));
+//               		remark.setProductFeature(lineObj.getString("pkind"));
+//               		remark.setItemInclude(lineObj.getString("r_include"));
+//               		remark.setChildPlan(lineObj.getString("r_child"));
+//               		remark.setShoppingPlan(lineObj.getString("r_shopping"));
+//               		remark.setItemCharge(lineObj.getString("r_selfpay"));
+//               		remark.setItemFree(lineObj.getString("r_donate"));
+//               		remark.setAttention(lineObj.getString("r_rule"));
+//               		remark.setItemOther(lineObj.getString("r_hotel"));
+//               		remark.setItemExclude(lineObj.getString("r_include_not"));
+//               		remark.setEatNote(lineObj.getString("r_food"));
+//               		remark.setCarNote(lineObj.getString("r_car"));
+//               		remark.setGuideNote(lineObj.getString("r_guide"));
+//               		remark.setInsuranceNote(lineObj.getString("r_insure"));
+//               		remark.setAppointRule(lineObj.getString("r_booking_rule"));
+//               		remark.setRemarkInfo(lineObj.getString("r_other"));
+//             		remark.setProductId(product.getId());
+//               		productRemarkService.saveProductRemark(remark);
+//           		}
+//       		}else{
+//       		info=new ProductInfo();
+//       		info.setCode(lineObj.getString("pcode"));
+//       		info.setNameCity(lineObj.getString("pname"));
+//       		info.setTravelDays(lineObj.getInteger("pday"));
+//       		info.setState((byte) 2);
+//       		info.setProductSysId(lineObj.getInteger("pid"));
+//       		info.setBizId(WebUtils.getCurBizId(request));
+//       		info.setCreatorName(WebUtils.getCurUser(request).getName());
+//       		info.setCreatorId(WebUtils.getCurUserId(request));
+//       		info.setCreateTime(new Date().getTime());
+//     		remark=new ProductRemark();
+//       		remark.setGuestNote(lineObj.getString("r_detail"));
+//       		remark.setProductFeature(lineObj.getString("pkind"));
+//       		remark.setItemInclude(lineObj.getString("r_include"));
+//       		remark.setChildPlan(lineObj.getString("r_child"));
+//       		remark.setShoppingPlan(lineObj.getString("r_shopping"));
+//       		remark.setItemCharge(lineObj.getString("r_selfpay"));
+//       		remark.setItemFree(lineObj.getString("r_donate"));
+//       		remark.setAttention(lineObj.getString("r_rule"));
+//       		remark.setItemOther(lineObj.getString("r_hotel"));
+//       		remark.setItemExclude(lineObj.getString("r_include_not"));
+//       		remark.setEatNote(lineObj.getString("r_food"));
+//       		remark.setCarNote(lineObj.getString("r_car"));
+//       		remark.setGuideNote(lineObj.getString("r_guide"));
+//       		remark.setInsuranceNote(lineObj.getString("r_insure"));
+//       		remark.setAppointRule(lineObj.getString("r_booking_rule"));
+//       		remark.setRemarkInfo(lineObj.getString("r_other"));
+//       		int id=productInfoService.insertSelective(info);
+//       		// product_remark表
+//       		remark.setProductId(id);
+//       		productRemarkService.saveProductRemark(remark);
+//       		for(int a=0;a<info.getTravelDays();a++){
+//           		route =new ProductRoute();
+//           		route.setProductId(id);
+//           		route.setDayNum(a+1);
+//           		route.setBreakfast("");
+//           		route.setLunch("");
+//           		route.setSupper("");
+//           		route.setHotelId(0);
+//           		route.setHotelName("");
+//           		route.setRouteDesp("");
+//           		route.setRouteTip("");
+//           		route.setRouteShort("");
+//       			productRouteService.saveProductRoute1(route);
+//       		}   	
+//   			}
+//       		}
        	}
        	
 		return resultString;
@@ -964,7 +967,7 @@ public class ProductInfoController extends BaseController {
 //				.findProductInfos(productId);
 		WebResult<Map<String, Object>> webResult = productFacade.toExportProduct(productId);
 		path = createProductInfo(preivew, request, productId, webResult.getValue());
-		com.yimayhd.erpcenter.dal.product.po.ProductInfo productInfo = (com.yimayhd.erpcenter.dal.product.po.ProductInfo) webResult.getValue().get("productInfo");
+		ProductInfo productInfo = (ProductInfo) webResult.getValue().get("productInfo");
 		if (productInfo != null) {
 			productCode = productInfo.getCode();
 		}
@@ -1083,13 +1086,13 @@ public class ProductInfoController extends BaseController {
 			String type) {
 		PlatformEmployeePo employeePo = WebUtils.getCurUser(request);
 
-		com.yimayhd.erpcenter.dal.product.po.ProductInfo productInfo = (com.yimayhd.erpcenter.dal.product.po.ProductInfo) map.get("productInfo");
-		com.yimayhd.erpcenter.dal.product.po.ProductRemark productRemark = (com.yimayhd.erpcenter.dal.product.po.ProductRemark) map.get("productRemark");
+		ProductInfo productInfo = (ProductInfo) map.get("productInfo");
+		ProductRemark productRemark = (ProductRemark) map.get("productRemark");
 		if (productRemark == null) {
-			productRemark = new com.yimayhd.erpcenter.dal.product.po.ProductRemark();
+			productRemark = new ProductRemark();
 		}
 		@SuppressWarnings("unchecked")
-		List<com.yimayhd.erpcenter.dal.product.po.ProductRoute> productRouteList = (List<com.yimayhd.erpcenter.dal.product.po.ProductRoute>) map
+		List<ProductRoute> productRouteList = (List<ProductRoute>) map
 				.get("productRoutes");
 
 		// request);
@@ -1275,9 +1278,9 @@ public class ProductInfoController extends BaseController {
 			StockStaticCondition condition) throws ParseException {
 		// loadStockStatics(request,model,condition);
 
-		String groupDate = org.apache.commons.lang.time.DateFormatUtils.format(
+		String groupDate = DateFormatUtils.format(
 				new Date(), "yyyy-MM-dd");
-		String toGroupDate = org.apache.commons.lang.time.DateFormatUtils
+		String toGroupDate = DateFormatUtils
 				.format(org.apache.commons.lang.time.DateUtils.addDays(
 						new Date(), 6), "yyyy-MM-dd");
 		model.addAttribute("groupDate", groupDate);
@@ -1309,7 +1312,8 @@ public class ProductInfoController extends BaseController {
 		}
 		condition.setOrgId(WebUtils.getCurUser(request).getOrgId());
 		condition.setBizId(WebUtils.getCurBizId(request));
-		PageBean page = productInfoService.getStockStaticsList(condition);
+//		PageBean page = productInfoService.getStockStaticsList(condition);
+		PageBean page = productFacade.getStockStaticsList(condition);
 		model.addAttribute("page", page);
 	}
 
@@ -1388,7 +1392,8 @@ public class ProductInfoController extends BaseController {
 	@RequestMapping(value = "/getProductInfo.do")
 	@ResponseBody
 	public String getProductInfo(Integer productId) {
-		ProductInfo info = productInfoService.findProductInfoById(productId);
+//		ProductInfo info = productInfoService.findProductInfoById(productId);
+		ProductInfo info = productFacade.findProductInfoById(productId);
 		Gson gson = new Gson();
 		return gson.toJson(info);
 	}
@@ -1396,7 +1401,7 @@ public class ProductInfoController extends BaseController {
 	@RequestMapping(value = "/getStockCount.do")
 	@ResponseBody
 	public String getStockCount(Integer productId,String itemDate) {
-		ProductInfo info = productInfoService.selectStockCount(productId, itemDate);
+		ProductInfo info = productFacade.selectStockCount(productId, itemDate);
 		int a=info.getStockCount()-info.getReceiveCount();
 		info.setStockCount(a);
 		Gson gson = new Gson();
@@ -1406,7 +1411,9 @@ public class ProductInfoController extends BaseController {
 	@RequestMapping(value = "/getProductMarks.do")
 	@ResponseBody
 	public String getProductMarks(Integer productId) {
-		ProductRemark productRemark = productRemarkService
+//		ProductRemark productRemark = productRemarkService
+//				.findProductRemarkByProductId(Integer.valueOf(productId));
+		ProductRemark productRemark = productFacade
 				.findProductRemarkByProductId(Integer.valueOf(productId));
 		Gson gson = new Gson();
 		return gson.toJson(productRemark);
@@ -1943,14 +1950,16 @@ public class ProductInfoController extends BaseController {
 		productInfo.setBizId(WebUtils.getCurBizId(request));
 		pageBean.setParameter(productInfo);
 		pageBean.setPage(page);
-
-		pageBean = productInfoService.findProductAndPriceGroup(pageBean);
-		// 用户
 		String operatorIds = productInfo.getOperatorIds();
-		if (operatorIds != null && operatorIds.length() > 0) {
-			List<ProductGroupSeller> groupSellers = sellerService
-					.selectGroupSellers(WebUtils.getCurBizId(request),
-							operatorIds);
+		ProductInfoResult productInfoResult = productFacade.productInfoList(pageBean, WebUtils.getCurBizId(request), operatorIds);
+//		pageBean = productInfoService.findProductAndPriceGroup(pageBean);
+		pageBean = productInfoResult.getPageBean();
+		List<ProductGroupSeller> groupSellers = productInfoResult.getGroupSellers();
+		// 用户
+//		if (operatorIds != null && operatorIds.length() > 0) {
+//			List<ProductGroupSeller> groupSellers = sellerService
+//					.selectGroupSellers(WebUtils.getCurBizId(request),
+//							operatorIds);
 			List result = pageBean.getResult();
 			for (Object obj : result) {
 				ProductInfo pInfo = (ProductInfo) obj;
@@ -1980,7 +1989,6 @@ public class ProductInfoController extends BaseController {
 					}
 				}
 			}
-		}
 		
 		model.addAttribute("page", pageBean);
 		return "/product/price/addUser_list";
@@ -2047,7 +2055,7 @@ public class ProductInfoController extends BaseController {
 //			for (ProductGroupSeller pgSeller : productInfoDel.getGroupSellers()) {
 //				sellerService.delSellerBatch(pgSeller.getGroupId(), pgSeller.getProductId(), pgSeller.getOperatorId());
 //			}
-//			productFacade.u
+			ResultSupport resultSupport = productFacade.updateUser(productInfoIns, productInfoDel, WebUtils.getCurBizId(request));
 			return successJson();
 		} catch (Exception e) {
 

@@ -530,7 +530,7 @@
 			<artifactId>erpcenterFacade-tj-client</artifactId>
 			<version>0.0.8-SNAPSHOT</version>
 		</dependency>
-		<dependency>
+		<dependency>  
 		    <groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-dataAnalysis-client</artifactId>
 			<name>erpcenterFacade-dataAnalysis-client</name>
