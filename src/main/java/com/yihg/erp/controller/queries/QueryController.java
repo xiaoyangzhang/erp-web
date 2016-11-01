@@ -144,8 +144,12 @@ import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.dal.sys.po.SysBizBankAccount;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.AirTicketDetailQueriesDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.DeliveryDetailListDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.GetAgeListByProductDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.GetAirTicketDetailDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.GetEmployeeIdsDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.GetPaymentDataDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.GetUserIdsDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.OpearteGroupListDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.PaymentStaticPreviewDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.SaleOperatorExcelDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.ShopInfoDetailDTO;
@@ -156,12 +160,17 @@ import com.yimayhd.erpcenter.facade.dataanalysis.client.query.ToSaleOperatorOrde
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.ToSaleOperatorPreviewDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.AirTicketDetailQueriesResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.AllProvinceResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.BookingSupplierDetailListResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.DeliveryDetailListResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.GetAgeListByProductResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.GetAirTicketDetailResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.GetLevelNameResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.GetNumAndOrderResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.GetOrdersResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.GetOrgAndUserTreeJsonStrResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.GetPaymentDataResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.HotelQueriesResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.OpearteGroupListResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.PaymentStaticPreviewResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.RestaurantQueriesResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.SaleOperatorExcelResult;
@@ -175,6 +184,7 @@ import com.yimayhd.erpcenter.facade.dataanalysis.client.result.ToSaleOperatorLis
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.ToSaleOperatorOrderStaticTableResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.ToSaleOperatorPreviewResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.ToSaleOperatorTableResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.TranportListResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.service.DataAnalysisFacade;
 import com.yimayhd.erpcenter.facade.sales.query.BookingShopListDTO;
 import com.yimayhd.erpcenter.facade.sales.result.GuestShopListResult;
@@ -3831,7 +3841,7 @@ public class QueryController extends BaseController {
 	public String getAirTicketDetail(HttpServletRequest request,
 			HttpServletResponse reponse, Integer flag, ModelMap model,
 			String sl, String ssl, String svc, Integer visit) {
-
+		
 		Integer page = 1;
 		Integer pageSize = 15;
 		try {
@@ -3840,6 +3850,7 @@ public class QueryController extends BaseController {
 		} catch (NumberFormatException e) {
 			// log.error(e);
 		}
+		
 		String supplierType = request.getParameter("supplierType");
 		String dateType = request.getParameter("dateType");
 		String dateFrom = request.getParameter("dateFrom");
@@ -3896,16 +3907,25 @@ public class QueryController extends BaseController {
 			parameter.put("cashType", cashType);
 		}
 
-		PageBean<BookingAirTicket> pageBean = new PageBean<BookingAirTicket>();
-		pageBean.setPage(page);
-		pageBean.setPageSize(pageSize);
-		pageBean.setParameter(parameter);
-
-		model.addAttribute("sum",
-				bookingSupplierService.sumAirTicketBooking(pageBean));
-		pageBean = bookingSupplierService
-				.selectAirTicketBookingListPage(pageBean);
-		model.addAttribute("pageBean", pageBean);
+//		PageBean<BookingAirTicket> pageBean = new PageBean<BookingAirTicket>();
+//		pageBean.setPage(page);
+//		pageBean.setPageSize(pageSize);
+//		pageBean.setParameter(parameter);
+//
+//		model.addAttribute("sum",
+//				bookingSupplierService.sumAirTicketBooking(pageBean));
+//		pageBean = bookingSupplierService
+//				.selectAirTicketBookingListPage(pageBean);
+		
+		GetAirTicketDetailDTO getAirTicketDetailDTO=new GetAirTicketDetailDTO();
+		getAirTicketDetailDTO.setPage(page);
+		getAirTicketDetailDTO.setPageSize(pageSize);
+		getAirTicketDetailDTO.setParameter(parameter);
+		
+		GetAirTicketDetailResult result=dataAnalysisFacade.getAirTicketDetail(getAirTicketDetailDTO);
+		PageBean<BookingAirTicket> pageBean=result.getPageBean();
+		model.addAttribute("pageBean",pageBean);
+		model.addAttribute("sum",result.getSum());
 
 		// 取得订单明细
 		/*
@@ -4012,16 +4032,27 @@ public class QueryController extends BaseController {
 			parameter.put("cashType", cashType);
 		}
 
-		PageBean<BookingAirTicket> pageBean = new PageBean<BookingAirTicket>();
-		pageBean.setPage(page);
-		pageBean.setPageSize(pageSize);
-		pageBean.setParameter(parameter);
-
-		model.addAttribute("sum",
-				bookingSupplierService.sumAirTicketBooking(pageBean));
-		pageBean = bookingSupplierService
-				.selectAirTicketBookingListPage(pageBean);
-		model.addAttribute("pageBean", pageBean);
+//		PageBean<BookingAirTicket> pageBean = new PageBean<BookingAirTicket>();
+//		pageBean.setPage(page);
+//		pageBean.setPageSize(pageSize);
+//		pageBean.setParameter(parameter);
+//
+//		model.addAttribute("sum",
+//				bookingSupplierService.sumAirTicketBooking(pageBean));
+//		pageBean = bookingSupplierService
+//				.selectAirTicketBookingListPage(pageBean);
+//		
+//		model.addAttribute("pageBean", pageBean);
+		
+		GetAirTicketDetailDTO getAirTicketDetailDTO=new GetAirTicketDetailDTO();
+		getAirTicketDetailDTO.setPage(page);
+		getAirTicketDetailDTO.setPageSize(pageSize);
+		getAirTicketDetailDTO.setParameter(parameter);
+		
+		GetAirTicketDetailResult result=dataAnalysisFacade.getTrainTicketDetail(getAirTicketDetailDTO);
+		PageBean<BookingAirTicket> pageBean=result.getPageBean();
+		model.addAttribute("pageBean",pageBean);
+		model.addAttribute("sum",result.getSum());
 
 		// 取得订单明细
 		/*
@@ -4089,6 +4120,7 @@ public class QueryController extends BaseController {
 	public String getNumAndOrder(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String sl, String ssl,
 			String rp, Integer page, Integer pageSize, String svc, Integer visit) {
+		
 		@SuppressWarnings("rawtypes")
 		Map paramters = WebUtils.getQueryParamters(request);
 
@@ -4100,11 +4132,16 @@ public class QueryController extends BaseController {
 		map.put("supplierType", paramters.get("supplierType"));
 		map.put("level", paramters.get("level"));
 		map.put("bizId", paramters.get("bizId"));
+		
 		if (paramters.get("provinceId") != null) {
 			StringBuilder supplierIds = new StringBuilder();
-			List<Map<String, Integer>> supplier_province = supplierSerivce
-					.searchSupplierByArea(map); // map需要包含 procinceId, cityId,
-												// supplier三个参数
+			
+//			List<Map<String, Integer>> supplier_province = supplierSerivce
+//					.searchSupplierByArea(map); // map需要包含 procinceId, cityId,
+//												// supplier三个参数
+			GetNumAndOrderResult result=dataAnalysisFacade.searchSupplierByArea(map);
+			List<Map<String, Integer>> supplier_province=result.getSupplierProvince();
+			
 			if (supplier_province != null && supplier_province.size() > 0) {
 				for (Map<String, Integer> item : supplier_province) {
 					supplierIds.append(item.get("id") + ",");
@@ -4116,11 +4153,16 @@ public class QueryController extends BaseController {
 			else
 				request.setAttribute("citysSupplierIds", "0");
 		}
+		
 		// 如果选择了【商家类别】作为查询条件
 		if (paramters.get("level") != null) {
 			StringBuilder supplierIds = new StringBuilder();
-			List<SupplierInfo> supplier_level = supplierSerivce
-					.findSupplierLevelCode(map);
+			
+//			List<SupplierInfo> supplier_level = supplierSerivce
+//					.findSupplierLevelCode(map);
+			GetNumAndOrderResult result=dataAnalysisFacade.findSupplierLevelCode(map);
+			List<SupplierInfo> supplier_level=result.getSupplierLevel();
+			
 			if (supplier_level != null && supplier_level.size() > 0) {
 				Set<Integer> set = new HashSet<Integer>();
 				for (SupplierInfo item : supplier_level) {
@@ -4142,7 +4184,6 @@ public class QueryController extends BaseController {
 			pm.put("parameter", pm);
 			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
 		}
-
 		return rp;
 	}
 
@@ -4179,9 +4220,12 @@ public class QueryController extends BaseController {
 		map.put("bizId", paramters.get("bizId"));
 		if (paramters.get("provinceId") != null) {
 			StringBuilder supplierIds = new StringBuilder();
-			List<Map<String, Integer>> supplier_province = supplierSerivce
-					.searchSupplierByArea(map); // map需要包含 procinceId, cityId,
-												// supplier三个参数
+//			List<Map<String, Integer>> supplier_province = supplierSerivce
+//					.searchSupplierByArea(map); // map需要包含 procinceId, cityId,
+//												// supplier三个参数
+			GetNumAndOrderResult result=dataAnalysisFacade.searchSupplierByArea(map);
+			List<Map<String, Integer>> supplier_province=result.getSupplierProvince();
+			
 			if (supplier_province != null && supplier_province.size() > 0) {
 				for (Map<String, Integer> item : supplier_province) {
 					supplierIds.append(item.get("id") + ",");
@@ -4196,8 +4240,10 @@ public class QueryController extends BaseController {
 		// 如果选择了【商家类别】作为查询条件
 		if (paramters.get("level") != null) {
 			StringBuilder supplierIds = new StringBuilder();
-			List<SupplierInfo> supplier_level = supplierSerivce
-					.findSupplierLevelCode(map);
+//			List<SupplierInfo> supplier_level = supplierSerivce
+//					.findSupplierLevelCode(map);
+			GetNumAndOrderResult result=dataAnalysisFacade.findSupplierLevelCode(map);
+			List<SupplierInfo> supplier_level=result.getSupplierLevel();
 			if (supplier_level != null && supplier_level.size() > 0) {
 				Set<Integer> set = new HashSet<Integer>();
 				for (SupplierInfo item : supplier_level) {
@@ -4242,9 +4288,12 @@ public class QueryController extends BaseController {
 		map.put("bizId", paramters.get("bizId"));
 		if (paramters.get("provinceId") != null) {
 			StringBuilder supplierIds = new StringBuilder();
-			List<Map<String, Integer>> supplier_province = supplierSerivce
-					.searchSupplierByArea(map); // map需要包含 procinceId, cityId,
-												// supplier三个参数
+//			List<Map<String, Integer>> supplier_province = supplierSerivce
+//					.searchSupplierByArea(map); // map需要包含 procinceId, cityId,
+//												// supplier三个参数
+			GetNumAndOrderResult result=dataAnalysisFacade.searchSupplierByArea(map);
+			List<Map<String, Integer>> supplier_province=result.getSupplierProvince();
+			
 			if (supplier_province != null && supplier_province.size() > 0) {
 				for (Map<String, Integer> item : supplier_province) {
 					supplierIds.append(item.get("id") + ",");
@@ -4259,8 +4308,10 @@ public class QueryController extends BaseController {
 		// 如果选择了【商家类别】作为查询条件
 		if (paramters.get("level") != null) {
 			StringBuilder supplierIds = new StringBuilder();
-			List<SupplierInfo> supplier_level = supplierSerivce
-					.findSupplierLevelCode(map);
+//			List<SupplierInfo> supplier_level = supplierSerivce
+//					.findSupplierLevelCode(map);
+			GetNumAndOrderResult result=dataAnalysisFacade.findSupplierLevelCode(map);
+			List<SupplierInfo> supplier_level=result.getSupplierLevel();
 			if (supplier_level != null && supplier_level.size() > 0) {
 				Set<Integer> set = new HashSet<Integer>();
 				for (SupplierInfo item : supplier_level) {
@@ -4297,21 +4348,30 @@ public class QueryController extends BaseController {
 	public String getAgeListByProduct(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String sl, String ssl,
 			String rp, Integer page, Integer pageSize, String svc, Integer visit) {
-		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
-		// Integer bizId = WebUtils.getCurBizId(request);
-		// getOrgAndUserTreeJsonStr(model, bizId);
-		List<Map<String, Object>> ageMaps = tourGroupService
-				.selectAgeCount(WebUtils.getQueryParamters(request));
-		Map<Object, Object> ageMap = new HashMap<Object, Object>();
-		for (Map<String, Object> map2 : ageMaps) {
-			ageMap.put(map2.get("ageRanges"), map2.get("agecnt"));
-		}
-		model.addAttribute("ageMap", ageMap);
-		// Map parameters = WebUtils.getQueryParamters(request);
-		// parameters.put("set", WebUtils.getDataUserIdSet(request));
-
-		model.addAttribute("personMap", queryService.getPersonCountMap(WebUtils
-				.getQueryParamters(request)));
+		
+//		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
+//		// Integer bizId = WebUtils.getCurBizId(request);
+//		// getOrgAndUserTreeJsonStr(model, bizId);
+//		List<Map<String, Object>> ageMaps = tourGroupService
+//				.selectAgeCount(WebUtils.getQueryParamters(request));
+//		Map<Object, Object> ageMap = new HashMap<Object, Object>();
+//		for (Map<String, Object> map2 : ageMaps) {
+//			ageMap.put(map2.get("ageRanges"), map2.get("agecnt"));
+//		}
+//		model.addAttribute("ageMap", ageMap);
+//		// Map parameters = WebUtils.getQueryParamters(request);
+//		// parameters.put("set", WebUtils.getDataUserIdSet(request));
+//
+//		model.addAttribute("personMap", queryService.getPersonCountMap(WebUtils
+//				.getQueryParamters(request)));
+	
+		GetAgeListByProductDTO getAgeListByProductDTO=new GetAgeListByProductDTO();
+		getAgeListByProductDTO.setQueryParamters(WebUtils.getQueryParamters(request));
+		
+		GetAgeListByProductResult result=dataAnalysisFacade.getAgeListByProduct(getAgeListByProductDTO);
+		model.addAttribute("ageMap", result.getAgeMaps());
+		model.addAttribute("personMap", result.getPersonMap());
+		
 		return rp;
 	}
 
@@ -4320,21 +4380,31 @@ public class QueryController extends BaseController {
 	public String getAgeListByProductAndAgency(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String sl, String ssl,
 			String rp, Integer page, Integer pageSize, String svc, Integer visit) {
-		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
-		// Integer bizId = WebUtils.getCurBizId(request);
-		// getOrgAndUserTreeJsonStr(model, bizId);
-		List<Map<String, Object>> ageMaps = tourGroupService
-				.selectAgeCountWithAgency(WebUtils.getQueryParamters(request));
-		Map<Object, Object> ageMap = new HashMap<Object, Object>();
-		for (Map<String, Object> map2 : ageMaps) {
-			ageMap.put(map2.get("ageRanges"), map2.get("agecnt"));
-		}
-		model.addAttribute("ageMap", ageMap);
-		// Map parameters = WebUtils.getQueryParamters(request);
-		// parameters.put("set", WebUtils.getDataUserIdSet(request));
-
-		model.addAttribute("personMap", queryService.getPersonCountMap(WebUtils
-				.getQueryParamters(request)));
+		
+//		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
+//		
+//		// Integer bizId = WebUtils.getCurBizId(request);
+//		// getOrgAndUserTreeJsonStr(model, bizId);
+//		List<Map<String, Object>> ageMaps = tourGroupService
+//				.selectAgeCountWithAgency(WebUtils.getQueryParamters(request));
+//		Map<Object, Object> ageMap = new HashMap<Object, Object>();
+//		for (Map<String, Object> map2 : ageMaps) {
+//			ageMap.put(map2.get("ageRanges"), map2.get("agecnt"));
+//		}
+//		model.addAttribute("ageMap", ageMap);
+//		// Map parameters = WebUtils.getQueryParamters(request);
+//		// parameters.put("set", WebUtils.getDataUserIdSet(request));
+//
+//		model.addAttribute("personMap", queryService.getPersonCountMap(WebUtils
+//				.getQueryParamters(request)));
+		
+		GetAgeListByProductDTO getAgeListByProductDTO=new GetAgeListByProductDTO();
+		getAgeListByProductDTO.setQueryParamters(WebUtils.getQueryParamters(request));
+		
+		GetAgeListByProductResult result=dataAnalysisFacade.getAgeListByProduct(getAgeListByProductDTO);
+		model.addAttribute("ageMap", result.getAgeMaps());
+		model.addAttribute("personMap", result.getPersonMap());
+		
 		return rp;
 	}
 
@@ -4343,22 +4413,31 @@ public class QueryController extends BaseController {
 	public String getAgeListByAgency(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String sl, String ssl,
 			String rp, Integer page, Integer pageSize, String svc, Integer visit) {
-		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
-		// Integer bizId = WebUtils.getCurBizId(request);
-		// getOrgAndUserTreeJsonStr(model, bizId);
-		List<Map<String, Object>> ageMaps = tourGroupService
-				.selectAgeCountWithAgencyOnly(WebUtils
-						.getQueryParamters(request));
-		// .selectAgeCountWithAgency(WebUtils.getQueryParamters(request));
-		Map<Object, Object> ageMap = new HashMap<Object, Object>();
-		for (Map<String, Object> map2 : ageMaps) {
-			ageMap.put(map2.get("ageRanges"), map2.get("agecnt"));
-		}
-		model.addAttribute("ageMap", ageMap);
-		// Map parameters = WebUtils.getQueryParamters(request);
-		// parameters.put("set", WebUtils.getDataUserIdSet(request));
-		model.addAttribute("personMap", queryService.getPersonCountMap(WebUtils
-				.getQueryParamters(request)));
+		
+//		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
+//		// Integer bizId = WebUtils.getCurBizId(request);
+//		// getOrgAndUserTreeJsonStr(model, bizId);
+//		List<Map<String, Object>> ageMaps = tourGroupService
+//				.selectAgeCountWithAgencyOnly(WebUtils
+//						.getQueryParamters(request));
+//		// .selectAgeCountWithAgency(WebUtils.getQueryParamters(request));
+//		Map<Object, Object> ageMap = new HashMap<Object, Object>();
+//		for (Map<String, Object> map2 : ageMaps) {
+//			ageMap.put(map2.get("ageRanges"), map2.get("agecnt"));
+//		}
+//		model.addAttribute("ageMap", ageMap);
+//		// Map parameters = WebUtils.getQueryParamters(request);
+//		// parameters.put("set", WebUtils.getDataUserIdSet(request));
+//		model.addAttribute("personMap", queryService.getPersonCountMap(WebUtils
+//				.getQueryParamters(request)));
+		
+		GetAgeListByProductDTO getAgeListByProductDTO=new GetAgeListByProductDTO();
+		getAgeListByProductDTO.setQueryParamters(WebUtils.getQueryParamters(request));
+		
+		GetAgeListByProductResult result=dataAnalysisFacade.getAgeListByProduct(getAgeListByProductDTO);
+		model.addAttribute("ageMap", result.getAgeMaps());
+		model.addAttribute("personMap", result.getPersonMap());
+		
 		return rp;
 	}
 
@@ -4392,8 +4471,15 @@ public class QueryController extends BaseController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
+//			set = platformEmployeeService.getUserIdListByOrgIdList(
+//					WebUtils.getCurBizId(request), set);
+			 
+			GetUserIdsDTO getUserIdsDTO=new GetUserIdsDTO();
+			getUserIdsDTO.setBizId(WebUtils.getCurBizId(request));
+			getUserIdsDTO.setUserIdSet(set);
+			
+			set=dataAnalysisFacade.getUserIdListByOrgIdList(getUserIdsDTO);
+			
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -4422,15 +4508,16 @@ public class QueryController extends BaseController {
 		if (result != null && result.size() > 0) {
 			for (int i = 0; i < result.size(); i++) {
 				Map map = (Map) result.get(i);
-				List<BookingSupplierDetail> detailList = detailService
-						.selectByPrimaryBookId((Integer) map.get("id"));
+				
+				//List<BookingSupplierDetail> detailList = detailService.selectByPrimaryBookId((Integer)map.get("id"));
+				BookingSupplierDetailListResult resultList=dataAnalysisFacade.getBookingSupplierDetailList((Integer)map.get("id"));
+				List<BookingSupplierDetail> detailList=resultList.getDetailList();
+				
 				map.put("detailList", detailList);
 				Long createTime = (Long) map.get("createTime");
 				if (createTime != null) {
-					map.put("create_Time", new SimpleDateFormat("yyyy-MM-dd")
-							.format(new Date(createTime)));
+					map.put("create_Time", new SimpleDateFormat("yyyy-MM-dd").format(new Date(createTime)));
 				}
-
 			}
 		}
 
@@ -4440,9 +4527,11 @@ public class QueryController extends BaseController {
 			pm.put("parameter", pm);
 			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
 		}
+		
 		return rp;
 	}
 
+	//FIXME CommonService待实现
 	/**
 	 * 获取查询服务
 	 * 
@@ -4470,10 +4559,14 @@ public class QueryController extends BaseController {
 	public String tranportList(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		// 交通类型
-		List<DicInfo> transportTypeList = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JTFS, bizId);
-		model.addAttribute("transportTypeList", transportTypeList);
+		
+//		// 交通类型
+//		List<DicInfo> transportTypeList = dicService.getListByTypeCode(BasicConstants.GYXX_JTFS, bizId);
+//		model.addAttribute("transportTypeList", transportTypeList);
+
+		TranportListResult result=dataAnalysisFacade.tranportList(bizId);
+		model.addAttribute("transportTypeList", result.getTransportTypeList());
+		
 		model.addAttribute("bizId", bizId);
 		return "queries/transport/transportList";
 	}
@@ -4494,44 +4587,55 @@ public class QueryController extends BaseController {
 	@RequiresPermissions(PermissionConstants.JDGL_YDAP)
 	public String opearteGroupList(ModelMap model, HttpServletRequest request,
 			TourGroupVO tourGroup) {
-		PageBean pageBean = new PageBean();
+	
+//		PageBean pageBean = new PageBean();
+//		model.addAttribute("tourGroup", tourGroup);
+//		model.addAttribute("pageNum", tourGroup.getPage());
+//		if (tourGroup.getPage() == null) {
+//			tourGroup.setPage(1);
+//		} else {
+//			pageBean.setPage(tourGroup.getPage());
+//		}
+//		if (tourGroup.getPageSize() == null) {
+//			// pageBean.setPageSize(Constants.PAGESIZE);
+//			pageBean.setPageSize(Constants.PAGESIZE);
+//		} else {
+//			pageBean.setPageSize(tourGroup.getPageSize());
+//		}
+//		if (StringUtils.isBlank(tourGroup.getSaleOperatorIds())
+//				&& StringUtils.isNotBlank(tourGroup.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = tourGroup.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(
+//					WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				tourGroup.setSaleOperatorIds(salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//			}
+//		}
+//		tourGroup.setBizId(WebUtils.getCurBizId(request));
+//		pageBean.setParameter(tourGroup);
+//		pageBean = tourGroupService.getGroupOperateList(pageBean, tourGroup,WebUtils.getDataUserIdSet(request));
+//		model.addAttribute("pageBean", pageBean);
+
+		OpearteGroupListDTO opearteGroupListDTO=new OpearteGroupListDTO();
+		opearteGroupListDTO.setBizId(WebUtils.getCurBizId(request));
+		opearteGroupListDTO.setTourGroup(tourGroup);
+		opearteGroupListDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		
+		
+		OpearteGroupListResult result=dataAnalysisFacade.opearteGroupList(opearteGroupListDTO);
+		model.addAttribute("pageBean", result.getPageBean());
 		model.addAttribute("tourGroup", tourGroup);
 		model.addAttribute("pageNum", tourGroup.getPage());
-		if (tourGroup.getPage() == null) {
-			tourGroup.setPage(1);
-		} else {
-			pageBean.setPage(tourGroup.getPage());
-		}
-		if (tourGroup.getPageSize() == null) {
-			// pageBean.setPageSize(Constants.PAGESIZE);
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(tourGroup.getPageSize());
-		}
-		if (StringUtils.isBlank(tourGroup.getSaleOperatorIds())
-				&& StringUtils.isNotBlank(tourGroup.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = tourGroup.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				tourGroup.setSaleOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
-		tourGroup.setBizId(WebUtils.getCurBizId(request));
-		pageBean.setParameter(tourGroup);
-		pageBean = tourGroupService.getGroupOperateList(pageBean, tourGroup,
-				WebUtils.getDataUserIdSet(request));
-		model.addAttribute("pageBean", pageBean);
-
+		
 		return "queries/groupInfo-list-table";
 	}
 
