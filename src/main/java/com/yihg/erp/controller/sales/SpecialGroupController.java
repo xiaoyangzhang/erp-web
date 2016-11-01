@@ -13,6 +13,12 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.MergeGroupOrderVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.SpecialGroupOrderVO;
+import com.yimayhd.erpcenter.facade.sales.result.ToAddSpecialGroupResult;
+import com.yimayhd.erpcenter.facade.sales.service.SpecialGroupFacade;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,11 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.common.MergeGroupUtils;
@@ -34,45 +35,16 @@ import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.sales.api.GroupOrderGuestService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.GroupRequirementService;
-import com.yihg.sales.api.SpecialGroupOrderService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupRequirement;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.MergeGroupOrderVO;
-import com.yihg.sales.vo.SpecialGroupOrderVO;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
+
 @Controller
 @RequestMapping("/specialGroup")
 public class SpecialGroupController extends BaseController {
-	@Autowired
-	private GroupOrderService groupOrderService ;
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private GroupOrderGuestService groupOrderGuestService;
-	@Autowired
-	private DicService dicService ;
-	@Autowired
-	private RegionService regionService;
-	@Autowired
-	private  PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private PlatformOrgService orgService;
-	@Autowired
-	private SpecialGroupOrderService specialGroupOrderService ;
 	@Autowired
 	private SysConfig config;
 	@Autowired
 	private BizSettingCommon settingCommon;
 	@Autowired
-	private GroupRequirementService groupRequirementService;
+	private SpecialGroupFacade specialGroupFacade;
 	@Autowired
 	private BizSettingCommon bizSettingCommon;
 	/**
@@ -85,7 +57,7 @@ public class SpecialGroupController extends BaseController {
 	@RequestMapping(value = "toAddSpecialGroup.htm")
 	public String toAddSpecialGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model){
-		model.addAttribute("operType", 1);
+		/*model.addAttribute("operType", 1);
 		GroupOrder groupOrder  = new GroupOrder();
 		groupOrder.setSaleOperatorId(WebUtils.getCurUserId(request));
 		groupOrder.setSaleOperatorName(WebUtils.getCurUser(request).getName());
@@ -112,12 +84,24 @@ public class SpecialGroupController extends BaseController {
 				BasicConstants.GYXX_LYSFXM, bizId);
 		model.addAttribute("lysfxmList", lysfxmList);
 		model.addAttribute("config", config);
+		return "sales/specialGroup/specialGroupInfo";*/
+
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.toAddSpecialGroup(WebUtils.getCurUserId(request), WebUtils.getCurUser(request).getName(), WebUtils.getCurBizId(request));
+		model.addAttribute("operType", 1);
+		model.addAttribute("vo", toAddSpecialGroupResult.getSpecialGroupOrderVO());
+		model.addAttribute("jdxjList", toAddSpecialGroupResult.getJdxjList());
+		model.addAttribute("jtfsList", toAddSpecialGroupResult.getJtfsList());
+		model.addAttribute("zjlxList", toAddSpecialGroupResult.getZjlxList());
+		model.addAttribute("sourceTypeList", toAddSpecialGroupResult.getSourceTypeList());
+		model.addAttribute("allProvince", toAddSpecialGroupResult.getAllProvince());
+		model.addAttribute("lysfxmList", toAddSpecialGroupResult.getLysfxmList());
+		model.addAttribute("config", config);
 		return "sales/specialGroup/specialGroupInfo";
 	}
 	@RequestMapping(value = "toEditSpecialGroup.htm")
 	public String toEditSpecialGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model,Integer id,Integer operType){
-		if(operType==null){
+		/*if(operType==null){
 			operType=1;
 		}
 		model.addAttribute("operType", operType);
@@ -158,6 +142,23 @@ public class SpecialGroupController extends BaseController {
 		
 		
 		
+		return "sales/specialGroup/specialGroupInfo";*/
+
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.toEditSpecialGroup( id,operType, WebUtils.getCurBizId(request));
+		if(operType==null){
+			operType=1;
+		}
+		model.addAttribute("operType", operType);
+		model.addAttribute("vo", toAddSpecialGroupResult.getSpecialGroupOrderVO());
+		model.addAttribute("jdxjList", toAddSpecialGroupResult.getJdxjList());
+		model.addAttribute("zjlxList", toAddSpecialGroupResult.getZjlxList());
+		model.addAttribute("lysfxmList", toAddSpecialGroupResult.getLysfxmList());
+		model.addAttribute("jtfsList", toAddSpecialGroupResult.getJtfsList());
+		model.addAttribute("sourceTypeList", toAddSpecialGroupResult.getSourceTypeList());
+		model.addAttribute("allProvince", toAddSpecialGroupResult.getAllProvince());
+		model.addAttribute("config", config);
+		model.addAttribute("allCity", toAddSpecialGroupResult.getCityList());
+		model.addAttribute("guideStr", toAddSpecialGroupResult.getGuideStr());
 		return "sales/specialGroup/specialGroupInfo";
 	}
 	
@@ -165,18 +166,21 @@ public class SpecialGroupController extends BaseController {
 	@ResponseBody
 	public String saveSpecialGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model,SpecialGroupOrderVO vo) throws ParseException{
-		if(vo.getGroupOrder().getId()==null){
+	/*	if(vo.getGroupOrder().getId()==null){
 			vo.getGroupOrder().setOrderNo(settingCommon.getMyBizCode(request));
 		}
 		Integer orderId = specialGroupOrderService.saveOrUpdateSpecialOrderInfo(vo,WebUtils.getCurUserId(request),WebUtils.getCurUser(request).getName(),WebUtils.getCurBizId(request));
-		return successJson("groupId",orderId+"");
+		return successJson("groupId",orderId+"");*/
+
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.saveSpecialGroup( vo, WebUtils.getCurUser(request).getOrgId(),  WebUtils.getCurBizId(request),  WebUtils.getCurUserId(request),  WebUtils.getCurUser(request).getName());
+		return successJson("groupId",toAddSpecialGroupResult.getOrderId()+"");
 	}
 	
 	
 	@RequestMapping(value = "toSpecialGroupList.htm")
 	public String toSpecialGroupList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model){
-		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
+		/*List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
 				WebUtils.getCurBizId(request));
 		model.addAttribute("pp", pp);
 		List<RegionInfo> allProvince = regionService.getAllProvince();
@@ -192,6 +196,13 @@ public class SpecialGroupController extends BaseController {
 		
 		model.addAttribute("orgUserJsonStr",
 				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		return "sales/specialGroup/specialGroupList";*/
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.toSpecialGroupList(WebUtils.getCurBizId(request));
+		model.addAttribute("pp", toAddSpecialGroupResult.getDicInfoList());
+		model.addAttribute("allProvince", toAddSpecialGroupResult.getAllProvince());
+		model.addAttribute("sourceTypeList", toAddSpecialGroupResult.getSourceTypeList());
+		model.addAttribute("orgJsonStr",toAddSpecialGroupResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",toAddSpecialGroupResult.getOrgUserJsonStr());
 		return "sales/specialGroup/specialGroupList";
 	}
 	
@@ -205,7 +216,7 @@ public class SpecialGroupController extends BaseController {
 	}
 	private void getSpecialGroupsData(HttpServletRequest request,
 			ModelMap model, GroupOrder groupOrder) throws ParseException {
-		if(groupOrder.getDateType()!=null && groupOrder.getDateType()==2){
+		/*if(groupOrder.getDateType()!=null && groupOrder.getDateType()==2){
 			SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd");
 			if(!"".equals(groupOrder.getStartTime())){
 				groupOrder.setStartTime(sdf.parse(groupOrder.getStartTime()).getTime()+"");
@@ -270,7 +281,18 @@ public class SpecialGroupController extends BaseController {
 		model.addAttribute("totalAudit", go.getNumAdult());
 		model.addAttribute("totalChild", go.getNumChild());
 		model.addAttribute("totalGuide", go.getNumGuide());
-		model.addAttribute("total", go.getTotal());
+		model.addAttribute("total", go.getTotal());*/
+
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.getSpecialGroupData( groupOrder,WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+		model.addAttribute("pageTotalAudit", toAddSpecialGroupResult.getPageTotalAudit());
+		model.addAttribute("pageTotalChild",toAddSpecialGroupResult.getPageTotalChild());
+		model.addAttribute("pageTotalGuide",toAddSpecialGroupResult.getPageTotalGuide());
+		model.addAttribute("pageTotal", toAddSpecialGroupResult.getPageTotal());
+		model.addAttribute("page", toAddSpecialGroupResult.getPage());
+		model.addAttribute("totalAudit", toAddSpecialGroupResult.getGroupOrder().getNumAdult());
+		model.addAttribute("totalChild", toAddSpecialGroupResult.getGroupOrder().getNumChild());
+		model.addAttribute("totalGuide", toAddSpecialGroupResult.getGroupOrder().getNumGuide());
+		model.addAttribute("total", toAddSpecialGroupResult.getGroupOrder().getTotal());
 	}
 	/**
 	 * 一地散订单打印预览
@@ -296,7 +318,7 @@ public class SpecialGroupController extends BaseController {
 	public String getSpecialGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, TourGroup tourGroup,
 			Integer tid) throws ParseException{
-		if (tid != null) {
+		/*if (tid != null) {
 			GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(tid);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -313,6 +335,10 @@ public class SpecialGroupController extends BaseController {
 				WebUtils.getDataUserIdSet(request));
 		model.addAttribute("page", pageBean);
 		model.addAttribute("tourGroup", tourGroup);
+		return "sales/specialGroup/toInsertFitGroupList";*/
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.getSpecialGroup(tourGroup,  tid,  WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
+		model.addAttribute("page", toAddSpecialGroupResult.getPage());
+		model.addAttribute("tourGroup", toAddSpecialGroupResult.getTourGroup());
 		return "sales/specialGroup/toInsertFitGroupList";
 	}
 	
@@ -331,7 +357,7 @@ public class SpecialGroupController extends BaseController {
 	@RequestMapping(value = "toMergeGroup.htm")
 	public String toMergeGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String ids) {
-		List<GroupOrder> list = new ArrayList<GroupOrder>();
+	/*	List<GroupOrder> list = new ArrayList<GroupOrder>();
 		String[] split = ids.split(",");
 		for (String str : split) {
 			GroupOrder groupOrder = groupOrderService.findById(Integer
@@ -342,6 +368,11 @@ public class SpecialGroupController extends BaseController {
 		}
 		model.addAttribute("list", list);
 		model.addAttribute("ids", ids);
+		return "sales/specialGroup/mergeGroup";*/
+
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.toMergeGroup(ids);
+		model.addAttribute("list", toAddSpecialGroupResult.getGroupOrderList());
+		model.addAttribute("ids", ids);
 		return "sales/specialGroup/mergeGroup";
 	}
 	
@@ -351,7 +382,7 @@ public class SpecialGroupController extends BaseController {
 	public String mergetGroup(HttpServletRequest request,
 			HttpServletResponse reponse,MergeGroupOrderVO mergeGroupOrderVO) throws ParseException{
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		/*SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		List<GroupOrder> orderList = mergeGroupOrderVO.getOrderList();
 
 		List<MergeGroupOrderVO> result = new ArrayList<MergeGroupOrderVO>();
@@ -381,6 +412,9 @@ public class SpecialGroupController extends BaseController {
 				WebUtils.getCurUserId(request), WebUtils.getCurUser(request)
 						.getName(), settingCommon.getMyBizCode(request));
 		
+		return successJson();*/
+
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.mergetGroup(mergeGroupOrderVO,WebUtils.getCurBizId(request),WebUtils.getCurUser(request).getOrgId(),WebUtils.getCurUserId(request),WebUtils.getCurUser(request).getName());
 		return successJson();
 	}
 	
@@ -398,7 +432,7 @@ public class SpecialGroupController extends BaseController {
 	public String toImpNotGroupList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, GroupOrder groupOrder,
 			String idLists) {
-		if (null == groupOrder.getEndTime()
+		/*if (null == groupOrder.getEndTime()
 				&& null == groupOrder.getDepartureDate()) {
 			Calendar c = Calendar.getInstance();
 			int year = c.get(Calendar.YEAR);
@@ -431,6 +465,13 @@ public class SpecialGroupController extends BaseController {
 		model.addAttribute("pp", pp);
 		model.addAttribute("groupOrder", groupOrder);
 		model.addAttribute("page", pageBean);
+		return "sales/specialGroup/impNotGroupOrder";*/
+
+
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.toImpNotGroupList( groupOrder,  idLists,  WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
+		model.addAttribute("pp", toAddSpecialGroupResult.getDicInfoList());
+		model.addAttribute("groupOrder", groupOrder);
+		model.addAttribute("page", toAddSpecialGroupResult.getPage());
 		return "sales/specialGroup/impNotGroupOrder";
 	}
 	
@@ -440,7 +481,7 @@ public class SpecialGroupController extends BaseController {
 	public String insertGroup(HttpServletRequest request,
 			HttpServletResponse reponse, Integer id, String code) {
 
-		TourGroup tourGroup = tourGroupService.selectByGroupCode(code);
+		/*TourGroup tourGroup = tourGroupService.selectByGroupCode(code);
 		if (tourGroup == null) {
 			return errorJson("未查到该团号对应的散客团信息!");
 		}
@@ -463,7 +504,11 @@ public class SpecialGroupController extends BaseController {
 			}
 		}
 
+		return successJson();*/
+
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.insertGroup( id, code);
 		return successJson();
+
 	}
 	
 	@RequestMapping(value = "insertGroupMany.do", method = RequestMethod.POST)
@@ -471,7 +516,7 @@ public class SpecialGroupController extends BaseController {
 	public String insertGroupMany(HttpServletRequest request,
 			HttpServletResponse reponse, String ids, String code) {
 
-		TourGroup tourGroup = tourGroupService.selectByGroupCode(code);
+		/*TourGroup tourGroup = tourGroupService.selectByGroupCode(code);
 		if (tourGroup == null) {
 			return errorJson("未查到该团号对应的散客团信息!");
 		}
@@ -497,6 +542,8 @@ public class SpecialGroupController extends BaseController {
 				}
 			}
 		}
+		return successJson();*/
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.insertGroupMany( ids,  code);
 		return successJson();
 	}
 	/**
@@ -512,7 +559,7 @@ public class SpecialGroupController extends BaseController {
 	@ResponseBody
 	public String beforeInsertGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String ids) {
-		String[] split = ids.split(",");
+		/*String[] split = ids.split(",");
 		List<String> datelist = new ArrayList<String>();
 		for (String id : split) {
 			GroupOrder groupOrder = groupOrderService.findById(Integer
@@ -530,6 +577,13 @@ public class SpecialGroupController extends BaseController {
 		if (!MergeGroupUtils.hasSame(datelist)) {
 			return errorJson("发团日期一致的订单才允许加入到团中!");
 		}
+		return successJson();*/
+
+
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.beforeInsertGroup(ids);
+		if (!MergeGroupUtils.hasSame(toAddSpecialGroupResult.getDatelist())) {
+			return errorJson("发团日期一致的订单才允许加入到团中!");
+		}
 		return successJson();
 	}
 	/**
@@ -545,7 +599,7 @@ public class SpecialGroupController extends BaseController {
 	@ResponseBody
 	public String judgeMergeGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String ids) {
-		String[] split = ids.split(",");
+	/*	String[] split = ids.split(",");
 		List<String> datelist = new ArrayList<String>();
 		List<Integer> productlist = new ArrayList<Integer>();
 		List<Integer> brandlist = new ArrayList<Integer>();
@@ -570,6 +624,16 @@ public class SpecialGroupController extends BaseController {
 			return errorJson("发团日期一致的订单才允许并团!");
 		}
 		if (!MergeGroupUtils.hasSame(brandlist)) {
+			return errorJson("产品品牌一致的订单才允许并团!");
+		}
+
+		return successJson();*/
+
+		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.judgeMergeGroup(ids);
+		if (!MergeGroupUtils.hasSame(toAddSpecialGroupResult.getDatelist())) {
+			return errorJson("发团日期一致的订单才允许并团!");
+		}
+		if (!MergeGroupUtils.hasSame(toAddSpecialGroupResult.getBrandlist())) {
 			return errorJson("产品品牌一致的订单才允许并团!");
 		}
 

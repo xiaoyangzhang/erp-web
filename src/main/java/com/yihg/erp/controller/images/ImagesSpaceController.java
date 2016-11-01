@@ -35,11 +35,11 @@ import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.TfsUpload;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.common.util.FileConstant;
+import com.yimayhd.erpcenter.common.util.StaConstant;
 import com.yimayhd.erpcenter.dal.basic.dto.TreeDto;
 import com.yimayhd.erpcenter.dal.basic.po.ImgSpace;
 import com.yimayhd.erpcenter.dal.basic.po.ImgWatermark;
-import com.yimayhd.erpcenter.dal.basic.utils.FileConstant;
-import com.yimayhd.erpcenter.dal.basic.utils.StaConstant;
 import com.yimayhd.erpcenter.facade.basic.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.basic.service.ImgFacade;
 

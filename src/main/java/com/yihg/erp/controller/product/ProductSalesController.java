@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,9 +32,9 @@ import com.yihg.erp.controller.images.utils.DateUtil;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yimayhd.erpcenter.dal.basic.constant.BasicConstants;
+import com.yimayhd.erpcenter.common.contants.BasicConstants;
+import com.yimayhd.erpcenter.common.util.DateUtils;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
-import com.yimayhd.erpcenter.dal.basic.utils.DateUtils;
 import com.yimayhd.erpcenter.dal.product.po.PriceView;
 import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
 import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
@@ -45,6 +46,7 @@ import com.yimayhd.erpcenter.facade.result.DetailResult;
 import com.yimayhd.erpcenter.facade.result.ProductInfoResult;
 import com.yimayhd.erpcenter.facade.service.ProductFacade;
 import com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade;
+import com.yimayhd.erpcenter.facade.service.ProductStockFacade;
 import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
 
 /**
@@ -71,6 +73,8 @@ public class ProductSalesController extends BaseController {
 	private ProductUpAndDownFrameFacade productUpAndDownFrameFacade;
 	@Autowired
 	private ProductPricePlusFacade productPricePlusFacade;
+	@Autowired
+	private ProductStockFacade productStockFacade;
 	/****************************************组团版********************************/
 	
 	@RequestMapping(value = "/list.htm")
@@ -155,13 +159,13 @@ public class ProductSalesController extends BaseController {
     	String endDateStr = month==12 ? ((year+1)+"-01-01"):(year+"-"+(month<9 ? ("0"+(month+1)):(""+(month+1)))+"-01");    	
     	Date startDate = DateUtils.parse(beginDateStr, "yyyy-MM-dd");
     	Date endDate = DateUtils.parse(endDateStr,"yyyy-MM-dd");
-        List<PriceView> priceViews = productInfoService.getPriceViewsByDate(groupId, startDate, endDate);        
-        List<ProductStock> stockList = stockService.getStocksByProductIdAndDateSpan(productId, startDate, endDate);
-        
+//        List<PriceView> priceViews = productInfoService.getPriceViewsByDate(groupId, startDate, endDate);        
+//        List<ProductStock> stockList = stockService.getStocksByProductIdAndDateSpan(productId, startDate, endDate);
+        ProductInfoResult result = productStockFacade.priceData(productId, groupId, startDate, endDate);
         List<PriceView> newPriceList = new ArrayList<PriceView>();
-        
+        List<ProductStock> stockList = result.getProductStocks();
         Map<String,PriceView> map = new HashMap<String,PriceView>();
-        if(stockList!=null && stockList.size()>0){
+        if(!CollectionUtils.isEmpty(stockList)){
         	for(ProductStock stock : stockList){
         		PriceView newPrice = new PriceView();
         		newPrice.setProductId(stock.getProductId());
@@ -174,8 +178,8 @@ public class ProductSalesController extends BaseController {
         }
         
         int days = DateUtil.getIntervalDays(endDate, startDate);
-        
-        if(priceViews!=null && priceViews.size()>0){
+        List<PriceView> priceViews = result.getPriceViews();
+        if(!CollectionUtils.isEmpty(priceViews)){
         	for(PriceView price : priceViews){
         		if(price.getGroupDateTo()==null){ //旧的数据过滤掉
 	        		/*if(map.containsKey(DateUtils.format(price.getGroupDate(), "yyyy-MM-dd"))){
@@ -242,10 +246,12 @@ public class ProductSalesController extends BaseController {
     @RequestMapping(value="/priceDate.htm")
     public String productGroupPriceDate(HttpServletRequest request,ModelMap model,Integer productId){
     	//List<ProductGroup> productGroups = productGroupService.selectProductGroups(productId);
-    	List<ProductGroup> productGroups = productGroupService.selectProductGroupsBySellerId(productId,WebUtils.getCurUserId(request));
-    	model.addAttribute("productGroupSuppliers", productGroups);
+//    	List<ProductGroup> productGroups = productGroupService.selectProductGroupsBySellerId(productId,WebUtils.getCurUserId(request));
+    	ProductInfoResult result = productStockFacade.productGroupPriceDate(productId, WebUtils.getCurUserId(request));
+    	model.addAttribute("productGroupSuppliers", result.getProductGroups());
     	model.addAttribute("productId",productId);
-    	com.yihg.product.po.ProductInfo  info = productInfoService.findProductInfoById(productId);
+//    	com.yihg.product.po.ProductInfo  info = productInfoService.findProductInfoById(productId);
+    	ProductInfo info = result.getProductInfo();
     	if(info.getObligate()==null){
     		info.setObligate(0);
     	}    	
@@ -260,9 +266,12 @@ public class ProductSalesController extends BaseController {
     @RequestMapping(value = "/saleList.htm")
     public String saleList(ModelMap model,HttpServletRequest request){
     	//产品名称
-		List<DicInfo> brandList = dicService
-				.getListByTypeCode(BasicConstants.CPXL_PP,WebUtils.getCurBizId(request));
-		model.addAttribute("brandList", brandList);
+//		List<DicInfo> brandList = dicService
+//				.getListByTypeCode(BasicConstants.CPXL_PP,WebUtils.getCurBizId(request));
+    	BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+    	brandQueryDTO.setBizId(WebUtils.getCurBizId(request));
+    	BrandQueryResult queryResult = productCommonFacade.brandQuery(brandQueryDTO);
+		model.addAttribute("brandList",queryResult.getBrandList());
 		return "product/sales/list_plus";
     }
     
@@ -280,7 +289,8 @@ public class ProductSalesController extends BaseController {
 		}
 		pageBean.setParameter(productSales);
 		pageBean.setPage(page);
-		pageBean = productInfoService.findProductSalesPlus(pageBean, bizId,WebUtils.getCurUser(request).getOrgId());
+//		pageBean = productInfoService.findProductSalesPlus(pageBean, bizId,WebUtils.getCurUser(request).getOrgId());
+		pageBean = productStockFacade.findProductSalesPlus(pageBean, bizId,WebUtils.getCurUser(request).getOrgId());
 
 		model.addAttribute("page", pageBean);
 		model.addAttribute("pageNum", page);
@@ -320,7 +330,8 @@ public class ProductSalesController extends BaseController {
     	String endDateStr = month==12 ? ((year+1)+"-01-01"):(year+"-"+(month<9 ? ("0"+(month+1)):(""+(month+1)))+"-01");    	
     	Date startDate = DateUtils.parse(beginDateStr, "yyyy-MM-dd");
     	Date endDate = DateUtils.parse(endDateStr,"yyyy-MM-dd");
-    	List<ProductStock> stockList = stockService.getStocksByProductIdAndDateSpan(productId, startDate, endDate);
+//    	List<ProductStock> stockList = stockService.getStocksByProductIdAndDateSpan(productId, startDate, endDate);
+    	List<ProductStock> stockList = productStockFacade.getStocksByProductIdAndDateSpan(productId, startDate, endDate);
         return JSONArray.toJSONString(stockList);
     }
     

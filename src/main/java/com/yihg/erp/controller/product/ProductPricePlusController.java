@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.erpcenterFacade.common.client.query.BrandQueryDTO;
 import org.erpcenterFacade.common.client.result.BrandQueryResult;
+import org.erpcenterFacade.common.client.result.RegionResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
 import com.yimayhd.erpcenter.facade.query.ProductGroupSupplierDTO;
 import com.yimayhd.erpcenter.facade.query.ProductStockStaticDto;
 import com.yimayhd.erpcenter.facade.query.ProductSupplierConditionDTO;
+import com.yimayhd.erpcenter.facade.result.ProductGroupResult;
 import com.yimayhd.erpcenter.facade.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.result.ToAddPriceGroupResult;
 import com.yimayhd.erpcenter.facade.result.ToSupplierListResult;
@@ -65,7 +67,8 @@ public class ProductPricePlusController extends BaseController {
 	public String toList(HttpServletRequest request,ModelMap model,ProductInfo productInfo){
 		
 		//省市
-        List<RegionInfo> allProvince = regionService.getAllProvince();
+//        List<RegionInfo> allProvince = regionService.getAllProvince();
+		RegionResult regionResult = productCommonFacade.queryProvinces();
         //产品名称
         Integer bizId = WebUtils.getCurBizId(request);
         
@@ -73,7 +76,7 @@ public class ProductPricePlusController extends BaseController {
         brandQueryDTO.setBizId(bizId);
         BrandQueryResult result = productCommonFacade.brandQuery(brandQueryDTO);
         
-        model.addAttribute("allProvince",allProvince);
+        model.addAttribute("allProvince",regionResult.getRegionList());
         model.addAttribute("brandList", result.getBrandList());
         model.addAttribute("state", productInfo.getState());
         return "product/priceplus/product_list_price";
@@ -82,7 +85,8 @@ public class ProductPricePlusController extends BaseController {
 	@RequestMapping(value = "/priceList.do",method=RequestMethod.POST)	
 	public String toSearchlist(HttpServletRequest request, ModelMap model,ProductInfo productInfo,String productName, String name,Integer page,Integer pageSize){
 		//省市
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+		RegionResult regionResult = productCommonFacade.queryProvinces();
 		//产品名称
 		Integer bizId = WebUtils.getCurBizId(request);
 		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
@@ -108,22 +112,23 @@ public class ProductPricePlusController extends BaseController {
 		parameters.put("orgId", WebUtils.getCurUser(request).getOrgId());
 		parameters.put("set", WebUtils.getDataUserIdSet(request));
 	
-		pageBean = productInfoService.findProductInfos(pageBean, parameters);
+//		pageBean = productInfoService.findProductInfos(pageBean, parameters);
 
 		//pageBean = productInfoService.findProductInfos(pageBean, bizId,name, productName,WebUtils.getCurUser(request).getOrgId());
 
-		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
-		for(Object product : pageBean.getResult()){
-			ProductInfo info = (ProductInfo) product;
-			Integer productId = info.getId();
-			String state = productInfoService.getProductPriceState(productId);
-			priceStateMap.put(info.getId(), state);
-		}
-		model.addAttribute("allProvince",allProvince);
+//		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
+//		for(Object product : pageBean.getResult()){
+//			ProductInfo info = (ProductInfo) product;
+//			Integer productId = info.getId();
+//			String state = productInfoService.getProductPriceState(productId);
+//			priceStateMap.put(info.getId(), state);
+//		}
+		ProductGroupResult result = productPricePlusFacade.queryGroupPriceList(pageBean, parameters);
+		model.addAttribute("allProvince",regionResult.getRegionList());
 		model.addAttribute("brandList", brandQueryResult.getBrandList());
-		model.addAttribute("page", pageBean);
+		model.addAttribute("page", result.getPageBean());
 		model.addAttribute("pageNum", page);
-		model.addAttribute("priceStateMap", priceStateMap);
+		model.addAttribute("priceStateMap", result.getMap());
 		return "product/priceplus/product_list_table_price";
 	}
 	
