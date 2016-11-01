@@ -73,10 +73,7 @@ import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePay;
 import com.yimayhd.erpcenter.dal.sales.client.finance.po.InfoBean;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingAirTicket;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
-import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShopDetail;
-import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShopSelect;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplierDetail;
-import com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingGroup;
 import com.yimayhd.erpcenter.dal.sales.client.operation.vo.GroupBookingInfo;
 import com.yimayhd.erpcenter.dal.sales.client.operation.vo.PaymentExportVO;
 //import com.yihg.finance.api.FinanceService;
@@ -145,15 +142,32 @@ import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.dal.sys.po.SysBizBankAccount;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.AirTicketDetailQueriesDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.DeliveryDetailListDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.GetEmployeeIdsDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.GetPaymentDataDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.PaymentStaticPreviewDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.SaleOperatorExcelDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.ShopInfoDetailDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.ShopSelectListDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.ToOperatorGroupStaticTableDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.ToOrdersPreviewDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.ToSaleOperatorOrderStaticTableDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.ToSaleOperatorPreviewDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.AirTicketDetailQueriesResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.AllProvinceResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.DeliveryDetailListResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.GetLevelNameResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.GetOrdersResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.GetOrgAndUserTreeJsonStrResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.GetPaymentDataResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.HotelQueriesResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.PaymentStaticPreviewResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.RestaurantQueriesResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.SaleOperatorExcelResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.ShopDetailListResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.ShopInfoDetailResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.ShopSelectListResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.ToOperatorGroupStaticTableResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.ToOrdersPreviewResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.ToPaymentPreviewResult;
@@ -165,6 +179,7 @@ import com.yimayhd.erpcenter.facade.dataanalysis.client.service.DataAnalysisFaca
 import com.yimayhd.erpcenter.facade.sales.query.BookingShopListDTO;
 import com.yimayhd.erpcenter.facade.sales.result.GuestShopListResult;
 import com.yimayhd.erpcenter.facade.sales.result.GuestShopResult;
+import com.yimayhd.erpcenter.facade.sales.service.BookingShopFacade;
 import com.yimayhd.erpresource.dal.constants.Constants;
 import com.yimayhd.erpresource.dal.constants.SupplierConstant;
 import com.yimayhd.erpresource.dal.po.SupplierInfo;
@@ -233,8 +248,8 @@ public class QueryController extends BaseController {
 //	@Autowired
 //	private BookingGuideService bookingGuideService;
 //	
-//	@Autowired
-//	private BookingShopFacade bookingShopFacade;
+	@Autowired
+	private BookingShopFacade bookingShopFacade;
 	
 	@Autowired
 	private DataAnalysisFacade dataAnalysisFacade;
@@ -1134,11 +1149,21 @@ public class QueryController extends BaseController {
 	public void getOrders(HttpServletRequest request,
 			HttpServletResponse response, PaymentExportVO vo, Integer page,
 			Integer pageSize) {
-		PageBean<PaymentExportVO> pageBean = new PageBean<PaymentExportVO>();
-		pageBean.setParameter(vo);
-		List<GroupOrder> orders = groupOrderService.selectPaymentDetailList(
-				pageBean, WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
+		
+//		PageBean<PaymentExportVO> pageBean = new PageBean<PaymentExportVO>();
+//		pageBean.setParameter(vo);
+//		List<GroupOrder> orders = groupOrderService.selectPaymentDetailList(
+//				pageBean, WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+		
+		ToOrdersPreviewDTO toOrdersPreviewDTO=new ToOrdersPreviewDTO();
+		toOrdersPreviewDTO.setVo(vo);
+		toOrdersPreviewDTO.setBizId(WebUtils.getCurBizId(request));
+		toOrdersPreviewDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		
+		GetOrdersResult result=dataAnalysisFacade.getOrders(toOrdersPreviewDTO);
+		List<GroupOrder> orders=result.getOrders();
+		
 		String path = "";
 
 		try {
@@ -1345,14 +1370,31 @@ public class QueryController extends BaseController {
 	public void getPaymentData(HttpServletRequest request,
 			HttpServletResponse response, PaymentExportVO vo, Integer page,
 			Integer pageSize) {
-		List<SysBizBankAccount> sysBizBankAccountList = bizBankAccountService
-				.getListByBizId(WebUtils.getCurBizId(request));
-
-		PageBean<PaymentExportVO> pageBean = new PageBean<PaymentExportVO>();
-		pageBean.setParameter(vo);
-		List<GroupOrder> orders = groupOrderService.selectPaymentDetailList(
-				pageBean, WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
+		
+//		List<SysBizBankAccount> sysBizBankAccountList = bizBankAccountService
+//				.getListByBizId(WebUtils.getCurBizId(request));
+//
+//		PageBean<PaymentExportVO> pageBean = new PageBean<PaymentExportVO>();
+//		pageBean.setParameter(vo);
+//		List<GroupOrder> orders = groupOrderService.selectPaymentDetailList(
+//				pageBean, WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+		
+		GetPaymentDataDTO getPaymentDataDTO=new GetPaymentDataDTO();
+		getPaymentDataDTO.setBizId(WebUtils.getCurBizId(request));
+		getPaymentDataDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		getPaymentDataDTO.setPage(page);
+		getPaymentDataDTO.setPageSize(pageSize);
+		getPaymentDataDTO.setVo(vo);
+		
+		GetPaymentDataResult result=dataAnalysisFacade.getPaymentData(getPaymentDataDTO);
+		
+		List<SysBizBankAccount> sysBizBankAccountList =result.getSysBizBankAccountList();
+		List<GroupOrder> orders = result.getOrders();
+		List<FinancePay> payDetailList=result.getPayDetailList();
+		GroupOrder orderMiddle = result.getOrderMiddle();
+		GroupOrder orderPre = result.getOrderPre();
+		
 		String path = "";
 
 		try {
@@ -1529,9 +1571,9 @@ public class QueryController extends BaseController {
 			/**
 			 * 增加支付明细
 			 */
-			List<FinancePay> payDetailList = financeService
-					.getFinancePayBySupplierId(vo.getSupplierId(),
-							WebUtils.getCurBizId(request));
+//			List<FinancePay> payDetailList = financeService
+//					.getFinancePayBySupplierId(vo.getSupplierId(),
+//							WebUtils.getCurBizId(request));
 			CellRangeAddress region1 = new CellRangeAddress(orders.size() + 3,
 					orders.size() + 4, 0, 6);
 			sheet.addMergedRegion(region1);
@@ -1665,16 +1707,19 @@ public class QueryController extends BaseController {
 					+ payDetailList.size() + 10, orders.size()
 					+ payDetailList.size() + 10, 0, 1);
 			sheet.addMergedRegion(region22);
-			// 本期发生的应收已收
-			GroupOrder orderMiddle = groupOrderService.selectTotalStatic(
-					pageBean, WebUtils.getCurBizId(request),
-					WebUtils.getDataUserIdSet(request));
-			vo.setEndTime(null);
-			pageBean.setParameter(vo);
-			// 期初余额
-			GroupOrder orderPre = groupOrderService.selectTotalStatic(pageBean,
-					WebUtils.getCurBizId(request),
-					WebUtils.getDataUserIdSet(request));
+			
+//			// 本期发生的应收已收
+//			GroupOrder orderMiddle = groupOrderService.selectTotalStatic(
+//					pageBean, WebUtils.getCurBizId(request),
+//					WebUtils.getDataUserIdSet(request));
+//			vo.setEndTime(null);
+//			pageBean.setParameter(vo);
+//			
+//			// 期初余额
+//			GroupOrder orderPre = groupOrderService.selectTotalStatic(pageBean,
+//					WebUtils.getCurBizId(request),
+//					WebUtils.getDataUserIdSet(request));
+			
 			if (orderPre == null) {
 				orderPre = new GroupOrder();
 				orderPre.setTotal(new BigDecimal(0));
@@ -1867,33 +1912,42 @@ public class QueryController extends BaseController {
 	@RequestMapping(value = "/shopInfoDetailList.do")
 	public String shopInfoDetail(HttpServletRequest request, ModelMap model,
 			QueryShopInfo shop) {
-		PageBean pageBean = new PageBean();
-		if (shop.getPage() == null) {
-			shop.setPage(1);
-		}
-		if (shop.getPageSize() == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(shop.getPageSize());
-		}
-		// shop.setBizId(WebUtils.getCurBizId(request));
-		pageBean.setParameter(WebUtils.getQueryParamters(request));
-		pageBean.setPage(shop.getPage());
-		pageBean = bookingShopService.getshopInfoDetail(pageBean);
-		if (pageBean.getResult() != null && pageBean.getResult().size() > 0) {
-			for (QueryShopInfo qsi : (List<QueryShopInfo>) pageBean.getResult()) {
-
-				List<GroupOrder> gOrders = groupOrderService
-						.selectOrderByGroupId(qsi.getGroupId());
-				qsi.setGroupOrders(gOrders);
-				// List<BookingSupplierPO> supplierPOs =
-				// bookingSupplierService.getBookingSupplierByGroupIdAndSupplierType(bGroup.getGroupId(),
-				// supplierType, null, null, null);
-				// bGroup.setBookingSuppliers(supplierPOs);
-
-			}
-		}
-		model.addAttribute("page", pageBean);
+		
+//		PageBean pageBean = new PageBean();
+//		if (shop.getPage() == null) {
+//			shop.setPage(1);
+//		}
+//		if (shop.getPageSize() == null) {
+//			pageBean.setPageSize(Constants.PAGESIZE);
+//		} else {
+//			pageBean.setPageSize(shop.getPageSize());
+//		}
+//		// shop.setBizId(WebUtils.getCurBizId(request));
+//		pageBean.setParameter(WebUtils.getQueryParamters(request));
+//		pageBean.setPage(shop.getPage());
+//		pageBean = bookingShopService.getshopInfoDetail(pageBean);
+//		if (pageBean.getResult() != null && pageBean.getResult().size() > 0) {
+//			for (QueryShopInfo qsi : (List<QueryShopInfo>) pageBean.getResult()) {
+//
+//				List<GroupOrder> gOrders = groupOrderService
+//						.selectOrderByGroupId(qsi.getGroupId());
+//				qsi.setGroupOrders(gOrders);
+//				// List<BookingSupplierPO> supplierPOs =
+//				// bookingSupplierService.getBookingSupplierByGroupIdAndSupplierType(bGroup.getGroupId(),
+//				// supplierType, null, null, null);
+//				// bGroup.setBookingSuppliers(supplierPOs);
+//
+//			}
+//		}
+//		model.addAttribute("page", pageBean);
+		
+		ShopInfoDetailDTO shopInfoDetailDTO=new ShopInfoDetailDTO();
+		shopInfoDetailDTO.setShop(shop);
+		shopInfoDetailDTO.setQueryParamters(WebUtils.getQueryParamters(request));
+		
+		ShopInfoDetailResult result=dataAnalysisFacade.shopInfoDetail(shopInfoDetailDTO);
+		model.addAttribute("page", result.getPageBean());
+		
 		return "queries/shop/shopInfoDetail-listView";
 	}
 
@@ -1904,9 +1958,13 @@ public class QueryController extends BaseController {
 	 */
 	@RequestMapping(value = "/shopDetailList.htm")
 	public String shopDetailList(ModelMap model, Integer id) {
-		List<BookingShopDetail> bookingShopDetail = bookingShopDetailService
-				.getShopDetailListByBookingId(id);
-		model.addAttribute("shopDetail", bookingShopDetail);
+		
+		//List<BookingShopDetail> bookingShopDetail = bookingShopDetailService.getShopDetailListByBookingId(id);
+		//model.addAttribute("shopDetail", bookingShopDetail);
+		
+		ShopDetailListResult result=dataAnalysisFacade.shopDetailList(id);
+		model.addAttribute("shopDetail", result.getBookingShopDetail());
+		
 		return "queries/shop/shop-listViewDetail";
 	}
 
@@ -1928,12 +1986,14 @@ public class QueryController extends BaseController {
 	@RequestMapping(value = "/guestShopList.do")
 	public String guestShopList(ModelMap model, QueryGuideShop shop,
 			HttpServletRequest request, TourGroupVO groupVo) {
+		
 		BookingShopListDTO bookingShopListDTO = new BookingShopListDTO();
 		bookingShopListDTO.setBizId(WebUtils.getCurBizId(request));
 		bookingShopListDTO.setQueryGuideShop(shop);
 		bookingShopListDTO.setOrgIds(groupVo.getOrgIds());
 		bookingShopListDTO.setSaleOperatorIds(groupVo.getSaleOperatorIds());
 		bookingShopListDTO.setDataUserIds(WebUtils.getDataUserIdSet(request));
+	
 		GuestShopResult result = bookingShopFacade.guestShopList(bookingShopListDTO);
 		
 		model.addAttribute("shoppingDataState", result.getShoppingDataState());
@@ -1958,80 +2018,98 @@ public class QueryController extends BaseController {
 	@RequestMapping(value = "/shopSelectList.do")
 	public String shopSelectList(HttpServletRequest request, ModelMap model,
 			TourGroupVO group) {
-		PageBean pageBean = new PageBean();
-		if (group.getPage() == null) {
-			group.setPage(1);
-		}
-		if (group.getPageSize() == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(group.getPageSize());
-		}
-		group.setSupplierType(Constants.SHOPPING);
-		group.setBizId(WebUtils.getCurBizId(request));
-		pageBean.setParameter(group);
-		pageBean.setPage(group.getPage());
-
-		pageBean = tourGroupService.getGroupInfoList(pageBean, group,
-				WebUtils.getDataUserIdSet(request));
-		fillData(pageBean.getResult());
-		if (pageBean.getResult() != null && pageBean.getResult().size() > 0) {
-			for (BookingGroup bGroup : (List<BookingGroup>) pageBean
-					.getResult()) {
-
-				List<GroupOrder> gOrders = groupOrderService
-						.selectOrderByGroupId(bGroup.getGroupId());
-				bGroup.setGroupOrderList(gOrders);
-			}
-		}
-		model.addAttribute("page", pageBean);
+		
+//		PageBean pageBean = new PageBean();
+//		if (group.getPage() == null) {
+//			group.setPage(1);
+//		}
+//		if (group.getPageSize() == null) {
+//			pageBean.setPageSize(Constants.PAGESIZE);
+//		} else {
+//			pageBean.setPageSize(group.getPageSize());
+//		}
+//		group.setSupplierType(Constants.SHOPPING);
+//		group.setBizId(WebUtils.getCurBizId(request));
+//		pageBean.setParameter(group);
+//		pageBean.setPage(group.getPage());
+//
+//		pageBean = tourGroupService.getGroupInfoList(pageBean, group,
+//				WebUtils.getDataUserIdSet(request));
+//		fillData(pageBean.getResult());
+//		if (pageBean.getResult() != null && pageBean.getResult().size() > 0) {
+//			for (BookingGroup bGroup : (List<BookingGroup>) pageBean
+//					.getResult()) {
+//
+//				List<GroupOrder> gOrders = groupOrderService
+//						.selectOrderByGroupId(bGroup.getGroupId());
+//				bGroup.setGroupOrderList(gOrders);
+//			}
+//		}
+//		model.addAttribute("page", pageBean);
+		
+		ShopSelectListDTO shopSelectListDTO=new ShopSelectListDTO();
+		shopSelectListDTO.setGroup(group);
+		shopSelectListDTO.setBizId(WebUtils.getCurBizId(request));
+		shopSelectListDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		
+		ShopSelectListResult result=dataAnalysisFacade.shopSelectList(shopSelectListDTO);
+		model.addAttribute("page", result.getPageBean());
+		
 		return "queries/shop/shopSelect-listView";
 	}
 
-	private void fillData(List<BookingGroup> bookingGroupList) {
-		if (bookingGroupList != null && bookingGroupList.size() > 0) {
-			for (BookingGroup group : bookingGroupList) {
-				if (group.getProductBrandName() != null) {
-					group.setProductName("【" + group.getProductBrandName()
-							+ "】" + group.getProductName());
-				}
-				// 填充定制团的组团社名称
-				if (group.getSupplierId() != null) {
-					SupplierInfo supplierInfo = supplierSerivce
-							.selectBySupplierId(group.getSupplierId());
-					if (supplierInfo != null) {
-						group.setSupplierName(supplierInfo.getNameFull());
-					}
-				}
-				// 购物查询
-				BookingShopSelect b = bookingShopService.getShopSelect(group
-						.getGroupId());
-				group.setBookingShopSelect(b);
-
-			}
-		}
-	}
+//	private void fillData(List<BookingGroup> bookingGroupList) {
+//		if (bookingGroupList != null && bookingGroupList.size() > 0) {
+//			for (BookingGroup group : bookingGroupList) {
+//				if (group.getProductBrandName() != null) {
+//					group.setProductName("【" + group.getProductBrandName()
+//							+ "】" + group.getProductName());
+//				}
+//				// 填充定制团的组团社名称
+//				if (group.getSupplierId() != null) {
+//					SupplierInfo supplierInfo = supplierSerivce
+//							.selectBySupplierId(group.getSupplierId());
+//					if (supplierInfo != null) {
+//						group.setSupplierName(supplierInfo.getNameFull());
+//					}
+//				}
+//				// 购物查询
+//				BookingShopSelect b = bookingShopService.getShopSelect(group
+//						.getGroupId());
+//				group.setBookingShopSelect(b);
+//
+//			}
+//		}
+//	}
 
 	@RequestMapping(value = "/getEmployeeIds.htm", method = RequestMethod.POST)
 	@ResponseBody
 	public String getEmployeeIds(HttpServletRequest request, String orgIds,
 			Model model) {
-		String employeeIds = "";
-		Set<Integer> set = new HashSet<Integer>();
-		String[] orgIdArr = orgIds.split(",");
-		for (String orgIdStr : orgIdArr) {
-			set.add(Integer.valueOf(orgIdStr));
-		}
-		set = platformEmployeeService.getUserIdListByOrgIdList(
-				WebUtils.getCurBizId(request), set);
-		String salesOperatorIds = "";
-		for (Integer usrId : set) {
-			salesOperatorIds += usrId + ",";
-		}
-		if (!salesOperatorIds.equals("")) {
-			employeeIds = salesOperatorIds.substring(0,
-					salesOperatorIds.length() - 1);
-		}
+		
+//		String employeeIds = "";
+//		Set<Integer> set = new HashSet<Integer>();
+//		String[] orgIdArr = orgIds.split(",");
+//		for (String orgIdStr : orgIdArr) {
+//			set.add(Integer.valueOf(orgIdStr));
+//		}
+//		set = platformEmployeeService.getUserIdListByOrgIdList(
+//				WebUtils.getCurBizId(request), set);
+//		String salesOperatorIds = "";
+//		for (Integer usrId : set) {
+//			salesOperatorIds += usrId + ",";
+//		}
+//		if (!salesOperatorIds.equals("")) {
+//			employeeIds = salesOperatorIds.substring(0,
+//					salesOperatorIds.length() - 1);
+//		}
+		
+		GetEmployeeIdsDTO getEmployeeIdsDTO=new GetEmployeeIdsDTO();
+		getEmployeeIdsDTO.setBizId(WebUtils.getCurBizId(request));
+		getEmployeeIdsDTO.setOrgIds(orgIds);
+		
+		String employeeIds=dataAnalysisFacade.getEmployeeIds(getEmployeeIdsDTO);
+		
 		return successJson("employeeIds", employeeIds);
 	}
 
@@ -2054,43 +2132,53 @@ public class QueryController extends BaseController {
 	@RequestMapping("paymentStaticPreview.htm")
 	public String paymentStaticPreview(HttpServletRequest request,
 			HttpServletResponse response, ModelMap modelMap, GroupOrder order) {
-		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
-
-		Map<String, Object> pms = WebUtils.getQueryParamters(request);
-		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(order.getOperatorIds())
-				&& StringUtils.isNotBlank(order.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = order.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				order.setSaleOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-				pms.put("saleOperatorIds", salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
-
-		pageBean.setPage(1);
-		pageBean.setPageSize(10000);
-		pageBean.setParameter(pms);
-		// pageBean.setParameter(parameters);
-		List<GroupOrder> orders = groupOrderService.selectPaymentStaticData2(
-				pageBean, WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-		modelMap.addAttribute("parameter", pms);
-		modelMap.addAttribute("orders", orders);
-		modelMap.addAttribute("printName", WebUtils.getCurUser(request)
-				.getName());
+		
+//		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+//
+//		Map<String, Object> pms = WebUtils.getQueryParamters(request);
+//		// 如果人员为空并且部门不为空，则取部门下的人id
+//		if (StringUtils.isBlank(order.getOperatorIds())
+//				&& StringUtils.isNotBlank(order.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = order.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(
+//					WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				order.setSaleOperatorIds(salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//				pms.put("saleOperatorIds", salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//			}
+//		}
+//
+//		pageBean.setPage(1);
+//		pageBean.setPageSize(10000);
+//		pageBean.setParameter(pms);
+//		// pageBean.setParameter(parameters);
+//		List<GroupOrder> orders = groupOrderService.selectPaymentStaticData2(
+//				pageBean, WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+		
+		PaymentStaticPreviewDTO paymentStaticPreviewDTO=new PaymentStaticPreviewDTO();
+		paymentStaticPreviewDTO.setOrder(order);
+		paymentStaticPreviewDTO.setBizId(WebUtils.getCurBizId(request));
+		paymentStaticPreviewDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		paymentStaticPreviewDTO.setPms(WebUtils.getQueryParamters(request));
+		
+		PaymentStaticPreviewResult result=dataAnalysisFacade.paymentStaticPreview(paymentStaticPreviewDTO);
+		
+		modelMap.addAttribute("parameter", result.getPms());
+		modelMap.addAttribute("orders", result.getOrders());
+		modelMap.addAttribute("printName", WebUtils.getCurUser(request).getName());
 		modelMap.addAttribute("printTime", DateUtils.format(new Date()));
+		
 		return "queries/paymentStaticPreview";
 	}
 
@@ -2105,15 +2193,29 @@ public class QueryController extends BaseController {
 	@ResponseBody
 	public void paymentStaticExport(HttpServletRequest request,
 			HttpServletResponse response, GroupOrder groupOrder) {
-		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
-		pageBean.setPage(1);
-		pageBean.setPageSize(10000);
-		Map<String, Object> pms = WebUtils.getQueryParamters(request);
-		// pageBean.setParameter(groupOrder);
-		pageBean.setParameter(pms);
-		List<GroupOrder> orders = groupOrderService.selectPaymentStaticData2(
-				pageBean, WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
+		
+//		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+//		pageBean.setPage(1);
+//		pageBean.setPageSize(10000);
+//		
+//		Map<String, Object> pms = WebUtils.getQueryParamters(request);
+//		
+//		// pageBean.setParameter(groupOrder);
+//		pageBean.setParameter(pms);
+//		List<GroupOrder> orders = groupOrderService.selectPaymentStaticData2(
+//				pageBean, WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+		
+		PaymentStaticPreviewDTO paymentStaticPreviewDTO=new PaymentStaticPreviewDTO();
+		paymentStaticPreviewDTO.setOrder(groupOrder);
+		paymentStaticPreviewDTO.setBizId(WebUtils.getCurBizId(request));
+		paymentStaticPreviewDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		paymentStaticPreviewDTO.setPms(WebUtils.getQueryParamters(request));
+		
+		PaymentStaticPreviewResult result=dataAnalysisFacade.paymentStaticExport(paymentStaticPreviewDTO);
+		
+		List<GroupOrder> orders=result.getOrders();
+		
 		String path = "";
 
 		try {
@@ -2326,19 +2428,25 @@ public class QueryController extends BaseController {
 	public String paymentDetailQueries(HttpServletRequest request,
 			ModelMap model, PaymentCondition condition)
 			throws UnsupportedEncodingException {
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		// Integer bizId = WebUtils.getCurBizId(request);
-		// getOrgAndUserTreeJsonStr(model, bizId);
-		model.addAttribute("allProvince", allProvince);
-		// try {
-		// System.out.println(new
-		// String(condition.getSupplierName().getBytes("ISO-8859-1"),"UTF-8")) ;
-		// condition.setSupplierName(new
-		// String(condition.getSupplierName().getBytes("ISO-8859-1"),"UTF-8"));
-		// } catch (UnsupportedEncodingException e) {
-		// e.printStackTrace();
-		// }
+		
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		// Integer bizId = WebUtils.getCurBizId(request);
+//		// getOrgAndUserTreeJsonStr(model, bizId);
+//		model.addAttribute("allProvince", allProvince);
+//		// try {
+//		// System.out.println(new
+//		// String(condition.getSupplierName().getBytes("ISO-8859-1"),"UTF-8")) ;
+//		// condition.setSupplierName(new
+//		// String(condition.getSupplierName().getBytes("ISO-8859-1"),"UTF-8"));
+//		// } catch (UnsupportedEncodingException e) {
+//		// e.printStackTrace();
+//		// }
+//		model.put("condition", condition);
+		
+		AllProvinceResult result = dataAnalysisFacade.getAllProvince();
+		model.addAttribute("allProvince", result.getAllProvince());
 		model.put("condition", condition);
+		
 		return "queries/paymentDetailList";
 	}
 
@@ -2369,27 +2477,32 @@ public class QueryController extends BaseController {
 	public String restaurantQueries(HttpServletRequest request,
 			HttpServletResponse response, ModelMap modelMap,
 			SupplierInfo supplierInfo) {
+		
 		modelMap.addAttribute("supplierType", Constants.RESTAURANT);
 		modelMap.addAttribute("supplierInfo", supplierInfo);
 		Integer bizId = WebUtils.getCurBizId(request);
 
-		// 餐类型
-		List<DicInfo> Type1 = dicService
-				.getListByTypeCode(Constants.RESTAURANT_TYPE_CODE);
-		modelMap.addAttribute("Type1", Type1);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		modelMap.addAttribute("allProvince", allProvince);
-
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		modelMap.addAttribute("cashType", cashTypes);
-
-		// 获取餐厅类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT);
-		modelMap.addAttribute("levelList", levelList);
-
+//		// 餐类型
+//		List<DicInfo> Type1 = dicService.getListByTypeCode(Constants.RESTAURANT_TYPE_CODE);
+//		modelMap.addAttribute("Type1", Type1);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		modelMap.addAttribute("allProvince", allProvince);
+//
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
+//		modelMap.addAttribute("cashType", cashTypes);
+//
+//		// 获取餐厅类别
+//		List<DicInfo> levelList = dicService.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT);
+//		modelMap.addAttribute("levelList", levelList);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.restaurantQueries(bizId);
+	
+		modelMap.addAttribute("Type1", result.getType1());
+		modelMap.addAttribute("allProvince", result.getAllProvince());
+		modelMap.addAttribute("cashType", result.getCashTypes());
+		modelMap.addAttribute("levelList", result.getLevelList());
+		
 		return "queries/restaurant/restaurantList";
 	}
 
@@ -2405,23 +2518,29 @@ public class QueryController extends BaseController {
 	public String restaurantBooking(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
 			PaymentCondition condition) {
+	
 		Integer bizId = WebUtils.getCurBizId(request);
 		condition.setSupplierType(Constants.RESTAURANT);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT);
-		model.addAttribute("levelList", levelList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT);
+//		model.addAttribute("levelList", levelList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.restaurantBooking(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());
+		
 		return "queries/restaurant/restaurantDetailList";
 	}
 
@@ -2441,37 +2560,54 @@ public class QueryController extends BaseController {
 		condition.setSupplierType(Constants.RESTAURANT);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取商家类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT);
-		model.addAttribute("levelList", levelList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取商家类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT);
+//		model.addAttribute("levelList", levelList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.restaurantJSFS(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());
+		
 		return "queries/restaurant/restaurantJSFSList";
 	}
 
 	@RequestMapping("restaurantDetailList.htm")
 	public String restaurantDetailList(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-
+		
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT);
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//
+//		model.addAttribute("supplierType", Constants.RESTAURANT);
+//		model.addAttribute("bizId", bizId);
+//		model.addAttribute("levelList", levelList);
+//		model.addAttribute("cashType", cashTypes);
+//		model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.restaurantDetailList(bizId);
+		
 		model.addAttribute("supplierType", Constants.RESTAURANT);
 		model.addAttribute("bizId", bizId);
-		model.addAttribute("levelList", levelList);
-		model.addAttribute("cashType", cashTypes);
-		model.addAttribute("allProvince", allProvince);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());
 
 		return "queries/restaurant/restaurantDetailList2";
 	}
@@ -2493,25 +2629,34 @@ public class QueryController extends BaseController {
 	public String hotelQueries(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
 			SupplierInfo supplierInfo) {
+		
 		model.addAttribute("supplierType", Constants.HOTEL);
 		model.addAttribute("supplierInfo", supplierInfo);
 		Integer bizId = WebUtils.getCurBizId(request);
 
-		// 酒店类型
-		List<DicInfo> hotelType1 = dicService
-				.getListByTypeCode(Constants.HOTEL_TYPE_CODE_1);
-		model.addAttribute("hotelType1", hotelType1);
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
+//		// 酒店类型
+//		List<DicInfo> hotelType1 = dicService
+//				.getListByTypeCode(Constants.HOTEL_TYPE_CODE_1);
+//		model.addAttribute("hotelType1", hotelType1);
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取酒店类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
+//		model.addAttribute("levelList", levelList);
 
-		// 获取酒店类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
-		model.addAttribute("levelList", levelList);
-
+		
+		HotelQueriesResult result=dataAnalysisFacade.hotelQueries(bizId);
+		
+		model.addAttribute("hotelType1", result.getHotelType1());
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());
+		
 		return "queries/hotel/hotelList";
 	}
 
@@ -2519,22 +2664,29 @@ public class QueryController extends BaseController {
 	public String HotelBookingQueries(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
 			PaymentCondition condition) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
 		condition.setSupplierType(Constants.HOTEL);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取酒店类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
-		model.addAttribute("levelList", levelList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取酒店类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
+//		model.addAttribute("levelList", levelList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.hotelBookingQueries(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());
 
 		return "queries/hotel/hotelDetailList";
 	}
@@ -2543,40 +2695,53 @@ public class QueryController extends BaseController {
 	public String hotelJSFS(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
 			PaymentCondition condition) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
 		condition.setSupplierType(Constants.HOTEL);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取酒店类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
-		model.addAttribute("levelList", levelList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取酒店类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
+//		model.addAttribute("levelList", levelList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.hotelJSFS(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());
+		
 		return "queries/hotel/hotelJSFSList";
 	}
 
 	@RequestMapping("hotelDetailList.htm")
 	public String HoteldetailQueries(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+		
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.hoteldetailQueries(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());	
 
 		model.addAttribute("supplierType", Constants.HOTEL);
 		model.addAttribute("bizId", bizId);
-		model.addAttribute("levelList", levelList);
-		model.addAttribute("cashType", cashTypes);
-		model.addAttribute("allProvince", allProvince);
 
 		return "queries/hotel/hotelDetailList2";
 	}
@@ -2598,26 +2763,34 @@ public class QueryController extends BaseController {
 	public String fleetQueries(HttpServletRequest request,
 			HttpServletResponse response, ModelMap modelMap,
 			SupplierInfo supplierInfo) {
+		
 		modelMap.addAttribute("supplierType", Constants.FLEET);
 		modelMap.addAttribute("supplierInfo", supplierInfo);
 		Integer bizId = WebUtils.getCurBizId(request);
 
-		// 费用项目类型
-		List<DicInfo> Type1 = dicService
-				.getListByTypeCode(Constants.FLEET_TYPE_CODE);
-		modelMap.addAttribute("Type1", Type1);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		modelMap.addAttribute("allProvince", allProvince);
-
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		modelMap.addAttribute("cashType", cashTypes);
-
-		// 获取类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_FLEET);
-		modelMap.addAttribute("levelList", levelList);
+//		// 费用项目类型
+//		List<DicInfo> Type1 = dicService
+//				.getListByTypeCode(Constants.FLEET_TYPE_CODE);
+//		modelMap.addAttribute("Type1", Type1);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		modelMap.addAttribute("allProvince", allProvince);
+//
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		modelMap.addAttribute("cashType", cashTypes);
+//
+//		// 获取类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_FLEET);
+//		modelMap.addAttribute("levelList", levelList);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.fleetQueries(bizId);
+		
+		modelMap.addAttribute("Type1", result.getType1());
+		modelMap.addAttribute("allProvince", result.getAllProvince());
+		modelMap.addAttribute("cashType", result.getCashTypes());
+		modelMap.addAttribute("levelList", result.getLevelList());
 
 		return "queries/fleet/fleetList";
 	}
@@ -2638,18 +2811,24 @@ public class QueryController extends BaseController {
 		condition.setSupplierType(Constants.FLEET);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_FLEET);
-		model.addAttribute("levelList", levelList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_FLEET);
+//		model.addAttribute("levelList", levelList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.fleetDetailList(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());	
 
 		return "queries/fleet/fleetDetailList";
 	}
@@ -2670,19 +2849,25 @@ public class QueryController extends BaseController {
 		condition.setSupplierType(Constants.FLEET);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取商家类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_FLEET);
-		model.addAttribute("levelList", levelList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取商家类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_FLEET);
+//		model.addAttribute("levelList", levelList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.fleetJSFSList(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());	
+		
 		return "queries/fleet/fleetJSFSList";
 	}
 
@@ -2710,9 +2895,14 @@ public class QueryController extends BaseController {
 		model.addAttribute("bizId", bizId);
 		condition.setSupplierType(Constants.ENTERTAINMENT);
 		model.put("condition", condition);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
+		
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.entertainmentDetailQueries(bizId);
+		model.addAttribute("cashType", result.getCashTypes());
+		
 		return "queries/entertainment/entertainmentDetailList";
 	}
 
@@ -2737,22 +2927,29 @@ public class QueryController extends BaseController {
 		modelMap.addAttribute("supplierInfo", supplierInfo);
 		Integer bizId = WebUtils.getCurBizId(request);
 
-		// 类型
-		List<DicInfo> Type1 = dicService
-				.getListByTypeCode(Constants.SCENICSPOT_TYPE_CODE);
-		modelMap.addAttribute("Type1", Type1);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		modelMap.addAttribute("allProvince", allProvince);
-
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		modelMap.addAttribute("cashType", cashTypes);
-
-		// 获取餐厅类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_SCENICSPOT);
-		modelMap.addAttribute("levelList", levelList);
+//		// 类型
+//		List<DicInfo> Type1 = dicService
+//				.getListByTypeCode(Constants.SCENICSPOT_TYPE_CODE);
+//		modelMap.addAttribute("Type1", Type1);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		modelMap.addAttribute("allProvince", allProvince);
+//
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		modelMap.addAttribute("cashType", cashTypes);
+//
+//		// 获取餐厅类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_SCENICSPOT);
+//		modelMap.addAttribute("levelList", levelList);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.sightList(bizId);
+		
+		modelMap.addAttribute("Type1", result.getType1());
+		modelMap.addAttribute("allProvince", result.getAllProvince());
+		modelMap.addAttribute("cashType", result.getCashTypes());
+		modelMap.addAttribute("levelList", result.getLevelList());
 
 		return "queries/sight/sightList";
 	}
@@ -2773,18 +2970,24 @@ public class QueryController extends BaseController {
 		condition.setSupplierType(Constants.SCENICSPOT);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_SCENICSPOT);
-		model.addAttribute("levelList", levelList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_SCENICSPOT);
+//		model.addAttribute("levelList", levelList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.sightBookingList(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());	
 
 		return "queries/sight/sightDetailList";
 	}
@@ -2805,18 +3008,24 @@ public class QueryController extends BaseController {
 		condition.setSupplierType(Constants.SCENICSPOT);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取商家类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_SCENICSPOT);
-		model.addAttribute("levelList", levelList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取商家类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_SCENICSPOT);
+//		model.addAttribute("levelList", levelList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.sightJSFS(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());	
 
 		return "queries/sight/sightJSFSList";
 	}
@@ -2825,17 +3034,21 @@ public class QueryController extends BaseController {
 	public String sightDetailList(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_SCENICSPOT);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+		
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_SCENICSPOT);
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.sightDetailList(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());
 
 		model.addAttribute("supplierType", Constants.SCENICSPOT);
 		model.addAttribute("bizId", bizId);
-		model.addAttribute("levelList", levelList);
-		model.addAttribute("cashType", cashTypes);
-		model.addAttribute("allProvince", allProvince);
 
 		return "queries/sight/sightDetailList2";
 	}
@@ -2861,22 +3074,29 @@ public class QueryController extends BaseController {
 		modelMap.addAttribute("supplierInfo", supplierInfo);
 		Integer bizId = WebUtils.getCurBizId(request);
 
-		// 餐类型
-		List<DicInfo> Type1 = dicService
-				.getListByTypeCode(Constants.AIRTICKET_TYPE_CODE);
-		modelMap.addAttribute("Type1", Type1);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		modelMap.addAttribute("allProvince", allProvince);
-
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		modelMap.addAttribute("cashType", cashTypes);
-
-		// 获取餐厅类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_AIRTICKETAGENT);
-		modelMap.addAttribute("levelList", levelList);
+//		// 餐类型
+//		List<DicInfo> Type1 = dicService
+//				.getListByTypeCode(Constants.AIRTICKET_TYPE_CODE);
+//		modelMap.addAttribute("Type1", Type1);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		modelMap.addAttribute("allProvince", allProvince);
+//
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		modelMap.addAttribute("cashType", cashTypes);
+//
+//		// 获取餐厅类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_AIRTICKETAGENT);
+//		modelMap.addAttribute("levelList", levelList);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.airTicketQueries(bizId);
+		
+		modelMap.addAttribute("allProvince", result.getAllProvince());
+		modelMap.addAttribute("cashType", result.getCashTypes());
+		modelMap.addAttribute("levelList", result.getLevelList());
+		modelMap.addAttribute("Type1", result.getType1());
 
 		return "queries/airTicket/airTicketList";
 	}
@@ -2890,10 +3110,14 @@ public class QueryController extends BaseController {
 		condition.setSupplierType(Constants.AIRTICKETAGENT);
 		// model.addAttribute("bizId", bizId);
 		model.put("condition", condition);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-
-		model.addAttribute("cashType", cashTypes);
+		
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.airTicketBookingQueries(bizId);
+		model.addAttribute("cashType", result.getCashTypes());
+		
 		return "queries/airTicket/airTicketDetailList1";
 	}
 
@@ -2905,18 +3129,24 @@ public class QueryController extends BaseController {
 		condition.setSupplierType(Constants.AIRTICKETAGENT);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取商家类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_AIRTICKETAGENT);
-		model.addAttribute("levelList", levelList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取商家类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_AIRTICKETAGENT);
+//		model.addAttribute("levelList", levelList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.airTicketJSFS(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());
 
 		return "queries/airTicket/airTicketJSFSList";
 	}
@@ -2924,65 +3154,79 @@ public class QueryController extends BaseController {
 	@RequestMapping("airTicketDetailList.htm")
 	public String airTicketDetailQueries(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
-		Integer bizId = WebUtils.getCurBizId(request);
-		// getOrgAndUserTreeJsonStr(model, bizId);
-		// model.addAttribute("bizId", bizId);
-		Map parameters = WebUtils.getQueryParamters(request);
-		if (null == parameters.get("startTime")
-				&& null == parameters.get("endTime")) {
-			Calendar c = Calendar.getInstance();
-			int year = c.get(Calendar.YEAR);
-			int month = c.get(Calendar.MONTH);
-			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			c.set(year, month, 1, 0, 0, 0);
-			// condition.setStartTime(df.format(c.getTime()));
-			parameters.put("startTime", df.format(c.getTime()));
-			// c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
-			parameters.put("endTime", df.format(c.getTime()));
-			// condition.setEndTime(df.format(c.getTime()));
-
-		}
-		// condition.setSupplierType(Constants.AIRTICKETAGENT);
-		if (StringUtils.isNotBlank((String) parameters.get("orgIds"))) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = ((String) parameters.get("orgIds")).split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			List<PlatformOrgPo> orgList = orgService.getOrgListByIdSet(
-					WebUtils.getCurBizId(request), set);
-			StringBuilder sb = new StringBuilder();
-			for (PlatformOrgPo orgPo : orgList) {
-				sb.append(orgPo.getName() + ",");
-			}
-			// condition.setOrgNames(sb.substring(0, sb.length()-1));
-			parameters.put("orgNames", sb.substring(0, sb.length() - 1));
-
-		}
-		// 如果计调不为null，查询计调名字
-		if (StringUtils.isNotBlank((String) parameters.get("saleOperatorIds"))) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] userIdArr = ((String) parameters.get("saleOperatorIds"))
-					.split(",");
-			for (String userIdStr : userIdArr) {
-				set.add(Integer.valueOf(userIdStr));
-			}
-			List<PlatformEmployeePo> empList = platformEmployeeService
-					.getEmpList(WebUtils.getCurBizId(request), set);
-			StringBuilder sb = new StringBuilder();
-			for (PlatformEmployeePo employeePo : empList) {
-				sb.append(employeePo.getName() + "");
-			}
-			// condition.setSaleOperatorName(sb.substring(0, sb.length()-1));
-			parameters
-					.put("saleOperatorName", sb.substring(0, sb.length() - 1));
-		}
-		parameters.put("supplierType", Constants.AIRTICKETAGENT);
-		model.put("condition", parameters);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-
-		model.addAttribute("cashType", cashTypes);
+		
+//		Integer bizId = WebUtils.getCurBizId(request);
+//		// getOrgAndUserTreeJsonStr(model, bizId);
+//		// model.addAttribute("bizId", bizId);
+//		
+//		Map parameters = WebUtils.getQueryParamters(request);
+//		if (null == parameters.get("startTime")
+//				&& null == parameters.get("endTime")) {
+//			Calendar c = Calendar.getInstance();
+//			int year = c.get(Calendar.YEAR);
+//			int month = c.get(Calendar.MONTH);
+//			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+//			c.set(year, month, 1, 0, 0, 0);
+//			// condition.setStartTime(df.format(c.getTime()));
+//			parameters.put("startTime", df.format(c.getTime()));
+//			// c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+//			parameters.put("endTime", df.format(c.getTime()));
+//			// condition.setEndTime(df.format(c.getTime()));
+//
+//		}
+//		
+//		// condition.setSupplierType(Constants.AIRTICKETAGENT);
+//		if (StringUtils.isNotBlank((String) parameters.get("orgIds"))) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = ((String) parameters.get("orgIds")).split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			List<PlatformOrgPo> orgList = orgService.getOrgListByIdSet(
+//					WebUtils.getCurBizId(request), set);
+//			StringBuilder sb = new StringBuilder();
+//			for (PlatformOrgPo orgPo : orgList) {
+//				sb.append(orgPo.getName() + ",");
+//			}
+//			// condition.setOrgNames(sb.substring(0, sb.length()-1));
+//			parameters.put("orgNames", sb.substring(0, sb.length() - 1));
+//
+//		}
+//		
+//		// 如果计调不为null，查询计调名字
+//		if (StringUtils.isNotBlank((String) parameters.get("saleOperatorIds"))) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] userIdArr = ((String) parameters.get("saleOperatorIds"))
+//					.split(",");
+//			for (String userIdStr : userIdArr) {
+//				set.add(Integer.valueOf(userIdStr));
+//			}
+//			List<PlatformEmployeePo> empList = platformEmployeeService
+//					.getEmpList(WebUtils.getCurBizId(request), set);
+//			StringBuilder sb = new StringBuilder();
+//			for (PlatformEmployeePo employeePo : empList) {
+//				sb.append(employeePo.getName() + "");
+//			}
+//			// condition.setSaleOperatorName(sb.substring(0, sb.length()-1));
+//			parameters
+//					.put("saleOperatorName", sb.substring(0, sb.length() - 1));
+//		}
+//		parameters.put("supplierType", Constants.AIRTICKETAGENT);
+//		
+//		model.put("condition", parameters);
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+		
+		AirTicketDetailQueriesDTO airTicketDetailQueriesDTO=new AirTicketDetailQueriesDTO();
+		airTicketDetailQueriesDTO.setBizId(WebUtils.getCurBizId(request));
+		airTicketDetailQueriesDTO.setParameters(WebUtils.getQueryParamters(request));
+		
+		AirTicketDetailQueriesResult result=dataAnalysisFacade.airTicketDetailQueries(airTicketDetailQueriesDTO);
+		
+		model.addAttribute("cashType", result.getCashTypes());
+		model.put("condition", result.getParameters());
+		
 		return "queries/airTicket/airTicketDetailList";
 	}
 
@@ -3003,21 +3247,28 @@ public class QueryController extends BaseController {
 	public String trainTicketQueries(HttpServletRequest request,
 			HttpServletResponse response, ModelMap modelMap,
 			SupplierInfo supplierInfo) {
+		
 		modelMap.addAttribute("supplierType", Constants.TRAINTICKETAGENT);
 		modelMap.addAttribute("supplierInfo", supplierInfo);
 		Integer bizId = WebUtils.getCurBizId(request);
 
-		// 餐类型
-		List<DicInfo> Type1 = dicService
-				.getListByTypeCode(Constants.TRAINTICKET_TYPE_CODE);
-		modelMap.addAttribute("Type1", Type1);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		modelMap.addAttribute("allProvince", allProvince);
-
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		modelMap.addAttribute("cashType", cashTypes);
+//		// 餐类型
+//		List<DicInfo> Type1 = dicService
+//				.getListByTypeCode(Constants.TRAINTICKET_TYPE_CODE);
+//		modelMap.addAttribute("Type1", Type1);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		modelMap.addAttribute("allProvince", allProvince);
+//
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		modelMap.addAttribute("cashType", cashTypes);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.trainTicketQueries(bizId);
+		
+		modelMap.addAttribute("allProvince", result.getAllProvince());
+		modelMap.addAttribute("cashType", result.getCashTypes());
+		modelMap.addAttribute("Type1", result.getType1());
 
 		return "queries/trainTicket/trainTicketList";
 	}
@@ -3031,10 +3282,15 @@ public class QueryController extends BaseController {
 		// model.addAttribute("bizId", bizId);
 		condition.setSupplierType(Constants.TRAINTICKETAGENT);
 		model.put("condition", condition);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-
-		model.addAttribute("cashType", cashTypes);
+		
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//
+//		model.addAttribute("cashType", cashTypes);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.trainTicketBookingQueries(bizId);
+		model.addAttribute("cashType", result.getCashTypes());
+		
 		return "queries/trainTicket/trainTicketDetailList";
 	}
 
@@ -3042,88 +3298,105 @@ public class QueryController extends BaseController {
 	public String trainTicketJSFS(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
 			PaymentCondition condition) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
 		condition.setSupplierType(Constants.TRAINTICKETAGENT);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取商家类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_TRAINTICKETAGENT);
-		model.addAttribute("levelList", levelList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取商家类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_TRAINTICKETAGENT);
+//		model.addAttribute("levelList", levelList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.trainTicketJSFS(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("Type1", result.getType1());
+		
 		return "queries/trainTicket/trainTicketJSFSList";
 	}
 
 	@RequestMapping("trainTicketDetailList.htm")
 	public String trainTicketDetailQueries(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
-		Integer bizId = WebUtils.getCurBizId(request);
-		// getOrgAndUserTreeJsonStr(model, bizId);
-		// model.addAttribute("bizId", bizId);
-		Map parameters = WebUtils.getQueryParamters(request);
-		if (null == parameters.get("startTime")
-				&& null == parameters.get("endTime")) {
-			Calendar c = Calendar.getInstance();
-			int year = c.get(Calendar.YEAR);
-			int month = c.get(Calendar.MONTH);
-			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			c.set(year, month, 1, 0, 0, 0);
-			// condition.setStartTime(df.format(c.getTime()));
-			parameters.put("startTime", df.format(c.getTime()));
-			// c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
-			parameters.put("endTime", df.format(c.getTime()));
-			// condition.setEndTime(df.format(c.getTime()));
-
-		}
-		// condition.setSupplierType(Constants.AIRTICKETAGENT);
-		if (StringUtils.isNotBlank((String) parameters.get("orgIds"))) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = ((String) parameters.get("orgIds")).split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			List<PlatformOrgPo> orgList = orgService.getOrgListByIdSet(
-					WebUtils.getCurBizId(request), set);
-			StringBuilder sb = new StringBuilder();
-			for (PlatformOrgPo orgPo : orgList) {
-				sb.append(orgPo.getName() + ",");
-			}
-			// condition.setOrgNames(sb.substring(0, sb.length()-1));
-			parameters.put("orgNames", sb.substring(0, sb.length() - 1));
-
-		}
-		// 如果计调不为null，查询计调名字
-		if (StringUtils.isNotBlank((String) parameters.get("saleOperatorIds"))) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] userIdArr = ((String) parameters.get("saleOperatorIds"))
-					.split(",");
-			for (String userIdStr : userIdArr) {
-				set.add(Integer.valueOf(userIdStr));
-			}
-			List<PlatformEmployeePo> empList = platformEmployeeService
-					.getEmpList(WebUtils.getCurBizId(request), set);
-			StringBuilder sb = new StringBuilder();
-			for (PlatformEmployeePo employeePo : empList) {
-				sb.append(employeePo.getName() + "");
-			}
-			// condition.setSaleOperatorName(sb.substring(0, sb.length()-1));
-			parameters
-					.put("saleOperatorName", sb.substring(0, sb.length() - 1));
-		}
-		parameters.put("supplierType", Constants.TRAINTICKETAGENT);
-		model.put("condition", parameters);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-
-		model.addAttribute("cashType", cashTypes);
+		
+//		Integer bizId = WebUtils.getCurBizId(request);
+//		// getOrgAndUserTreeJsonStr(model, bizId);
+//		// model.addAttribute("bizId", bizId);
+//		Map parameters = WebUtils.getQueryParamters(request);
+//		if (null == parameters.get("startTime")
+//				&& null == parameters.get("endTime")) {
+//			Calendar c = Calendar.getInstance();
+//			int year = c.get(Calendar.YEAR);
+//			int month = c.get(Calendar.MONTH);
+//			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+//			c.set(year, month, 1, 0, 0, 0);
+//			// condition.setStartTime(df.format(c.getTime()));
+//			parameters.put("startTime", df.format(c.getTime()));
+//			// c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+//			parameters.put("endTime", df.format(c.getTime()));
+//			// condition.setEndTime(df.format(c.getTime()));
+//
+//		}
+//		// condition.setSupplierType(Constants.AIRTICKETAGENT);
+//		if (StringUtils.isNotBlank((String) parameters.get("orgIds"))) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = ((String) parameters.get("orgIds")).split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			List<PlatformOrgPo> orgList = orgService.getOrgListByIdSet(
+//					WebUtils.getCurBizId(request), set);
+//			StringBuilder sb = new StringBuilder();
+//			for (PlatformOrgPo orgPo : orgList) {
+//				sb.append(orgPo.getName() + ",");
+//			}
+//			// condition.setOrgNames(sb.substring(0, sb.length()-1));
+//			parameters.put("orgNames", sb.substring(0, sb.length() - 1));
+//
+//		}
+//		// 如果计调不为null，查询计调名字
+//		if (StringUtils.isNotBlank((String) parameters.get("saleOperatorIds"))) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] userIdArr = ((String) parameters.get("saleOperatorIds"))
+//					.split(",");
+//			for (String userIdStr : userIdArr) {
+//				set.add(Integer.valueOf(userIdStr));
+//			}
+//			List<PlatformEmployeePo> empList = platformEmployeeService
+//					.getEmpList(WebUtils.getCurBizId(request), set);
+//			StringBuilder sb = new StringBuilder();
+//			for (PlatformEmployeePo employeePo : empList) {
+//				sb.append(employeePo.getName() + "");
+//			}
+//			// condition.setSaleOperatorName(sb.substring(0, sb.length()-1));
+//			parameters
+//					.put("saleOperatorName", sb.substring(0, sb.length() - 1));
+//		}
+//		parameters.put("supplierType", Constants.TRAINTICKETAGENT);
+//		model.put("condition", parameters);
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+		
+		AirTicketDetailQueriesDTO airTicketDetailQueriesDTO=new AirTicketDetailQueriesDTO();
+		airTicketDetailQueriesDTO.setBizId(WebUtils.getCurBizId(request));
+		airTicketDetailQueriesDTO.setParameters(WebUtils.getQueryParamters(request));
+		
+		AirTicketDetailQueriesResult result=dataAnalysisFacade.trainTicketDetailQueries(airTicketDetailQueriesDTO);
+		
+		model.addAttribute("cashType", result.getCashTypes());
+		model.put("condition", result.getParameters());
+		
 		return "queries/trainTicket/trainTicketDetailList2";
 	}
 
@@ -3170,26 +3443,35 @@ public class QueryController extends BaseController {
 	public String insuranceQueries(HttpServletRequest request,
 			HttpServletResponse response, ModelMap modelMap,
 			SupplierInfo supplierInfo) {
+		
 		modelMap.addAttribute("supplierType", Constants.INSURANCE);
 		modelMap.addAttribute("supplierInfo", supplierInfo);
 		Integer bizId = WebUtils.getCurBizId(request);
 
-		// 餐类型
-		List<DicInfo> Type1 = dicService
-				.getListByTypeCode(Constants.INSURANCE_TYPE_CODE);
-		modelMap.addAttribute("Type1", Type1);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		modelMap.addAttribute("allProvince", allProvince);
-
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		modelMap.addAttribute("cashType", cashTypes);
-
-		// 获取餐厅类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_INSURANCE);
-		modelMap.addAttribute("levelList", levelList);
+//		// 餐类型
+//		List<DicInfo> Type1 = dicService
+//				.getListByTypeCode(Constants.INSURANCE_TYPE_CODE);
+//		modelMap.addAttribute("Type1", Type1);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		modelMap.addAttribute("allProvince", allProvince);
+//
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		modelMap.addAttribute("cashType", cashTypes);
+//
+//		// 获取餐厅类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_INSURANCE);
+//		modelMap.addAttribute("levelList", levelList);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.insuranceQueries(bizId);
+		
+		modelMap.addAttribute("allProvince", result.getAllProvince());
+		modelMap.addAttribute("cashType", result.getCashTypes());
+		modelMap.addAttribute("levelList", result.getLevelList());
+		modelMap.addAttribute("Type1", result.getType1());
+		
 		return "queries/insurance/insuranceList";
 	}
 
@@ -3197,17 +3479,21 @@ public class QueryController extends BaseController {
 	public String insuranceDetailQueries(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_INSURANCE);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+		
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_INSURANCE);
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.insuranceDetailQueries(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());
 
 		model.addAttribute("supplierType", Constants.INSURANCE);
 		model.addAttribute("bizId", bizId);
-		model.addAttribute("levelList", levelList);
-		model.addAttribute("cashType", cashTypes);
-		model.addAttribute("allProvince", allProvince);
 
 		return "queries/insurance/insuranceDetailList2";
 	}
@@ -3216,22 +3502,29 @@ public class QueryController extends BaseController {
 	public String insuranceBookingQueries(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
 			PaymentCondition condition) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
 		condition.setSupplierType(Constants.INSURANCE);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_INSURANCE);
-		model.addAttribute("levelList", levelList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_INSURANCE);
+//		model.addAttribute("levelList", levelList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.insuranceBookingQueries(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());
 
 		return "queries/insurance/insuranceDetailList";
 	}
@@ -3244,18 +3537,25 @@ public class QueryController extends BaseController {
 		condition.setSupplierType(Constants.INSURANCE);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取商家类别
+//		List<DicInfo> levelList = dicService
+//				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_INSURANCE);
+//		model.addAttribute("levelList", levelList);
+//
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+		
 
-		// 获取商家类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_INSURANCE);
-		model.addAttribute("levelList", levelList);
-
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+		RestaurantQueriesResult result=dataAnalysisFacade.insuranceJSFS(bizId);
+		
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("cashType", result.getCashTypes());
+		model.addAttribute("levelList", result.getLevelList());
 
 		return "queries/insurance/insuranceJSFSList";
 	}
@@ -3295,24 +3595,28 @@ public class QueryController extends BaseController {
 		modelMap.addAttribute("supplierInfo", supplierInfo);
 		Integer bizId = WebUtils.getCurBizId(request);
 
-		// 类型
-		List<DicInfo> Type1 = dicService
-				.getListByTypeCode(Constants.OTHER_TYPE_CODE);
-		modelMap.addAttribute("Type1", Type1);
-
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.QTSR_JSFS, bizId);
-		modelMap.addAttribute("cashType", cashTypes);
-
-		/*
-		 * List<RegionInfo> allProvince = regionService.getAllProvince();
-		 * modelMap.addAttribute("allProvince", allProvince);
-		 * 
-		 * List<DicInfo> levelList =
-		 * dicService.getListByTypeCode(BasicConstants.
-		 * SUPPLIER_LEVEL_RESTAURANT); modelMap.addAttribute("levelList",
-		 * levelList);
-		 */
+//		// 类型
+//		List<DicInfo> Type1 = dicService
+//				.getListByTypeCode(Constants.OTHER_TYPE_CODE);
+//		modelMap.addAttribute("Type1", Type1);
+//
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.QTSR_JSFS, bizId);
+//		modelMap.addAttribute("cashType", cashTypes);
+//
+//		/*
+//		 * List<RegionInfo> allProvince = regionService.getAllProvince();
+//		 * modelMap.addAttribute("allProvince", allProvince);
+//		 * 
+//		 * List<DicInfo> levelList =
+//		 * dicService.getListByTypeCode(BasicConstants.
+//		 * SUPPLIER_LEVEL_RESTAURANT); modelMap.addAttribute("levelList",
+//		 * levelList);
+//		 */
+		RestaurantQueriesResult result=dataAnalysisFacade.incomeQueries(bizId);
+		
+		modelMap.addAttribute("cashType", result.getCashTypes());
+		modelMap.addAttribute("Type1", result.getType1());
 
 		return "queries/income/incomeList";
 	}
@@ -3321,22 +3625,26 @@ public class QueryController extends BaseController {
 	public String incomeDetailQueries(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,
 			PaymentCondition condition) {
+		
 		Integer bizId = WebUtils.getCurBizId(request);
 		condition.setSupplierType(Constants.OTHERINCOME);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.QTSR_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取类别
-		// List<DicInfo> levelList =
-		// dicService.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT);
-		// model.addAttribute("levelList", levelList);
-
-		// List<RegionInfo> allProvince = regionService.getAllProvince();
-		// model.addAttribute("allProvince", allProvince);
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.QTSR_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取类别
+//		// List<DicInfo> levelList =
+//		// dicService.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT);
+//		// model.addAttribute("levelList", levelList);
+//
+//		// List<RegionInfo> allProvince = regionService.getAllProvince();
+//		// model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.incomeDetailQueries(bizId);
+		model.addAttribute("cashType", result.getCashTypes());
 
 		return "queries/income/incomeDetailList";
 	}
@@ -3362,24 +3670,30 @@ public class QueryController extends BaseController {
 		modelMap.addAttribute("supplierInfo", supplierInfo);
 		Integer bizId = WebUtils.getCurBizId(request);
 
-		// 类型
-		List<DicInfo> Type1 = dicService
-				.getListByTypeCode(Constants.OTHER_TYPE_CODE);
-		modelMap.addAttribute("Type1", Type1);
-
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		modelMap.addAttribute("cashType", cashTypes);
-
-		/*
-		 * List<RegionInfo> allProvince = regionService.getAllProvince();
-		 * modelMap.addAttribute("allProvince", allProvince);
-		 * 
-		 * List<DicInfo> levelList =
-		 * dicService.getListByTypeCode(BasicConstants.
-		 * SUPPLIER_LEVEL_RESTAURANT); modelMap.addAttribute("levelList",
-		 * levelList);
-		 */
+//		// 类型
+//		List<DicInfo> Type1 = dicService
+//				.getListByTypeCode(Constants.OTHER_TYPE_CODE);
+//		modelMap.addAttribute("Type1", Type1);
+//
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		modelMap.addAttribute("cashType", cashTypes);
+//
+//		/*
+//		 * List<RegionInfo> allProvince = regionService.getAllProvince();
+//		 * modelMap.addAttribute("allProvince", allProvince);
+//		 * 
+//		 * List<DicInfo> levelList =
+//		 * dicService.getListByTypeCode(BasicConstants.
+//		 * SUPPLIER_LEVEL_RESTAURANT); modelMap.addAttribute("levelList",
+//		 * levelList);
+//		 */
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.outcomeQueries(bizId);
+		
+		modelMap.addAttribute("cashType", result.getCashTypes());
+		modelMap.addAttribute("Type1", result.getType1());
+		
 		return "queries/outcome/outcomeList";
 	}
 
@@ -3391,18 +3705,22 @@ public class QueryController extends BaseController {
 		condition.setSupplierType(Constants.OTHEROUTCOME);
 		model.addAttribute("condition", condition);
 
-		// 从字典中查询结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		model.addAttribute("cashType", cashTypes);
-
-		// 获取类别
-		// List<DicInfo> levelList =
-		// dicService.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT);
-		// model.addAttribute("levelList", levelList);
-
-		// List<RegionInfo> allProvince = regionService.getAllProvince();
-		// model.addAttribute("allProvince", allProvince);
+//		// 从字典中查询结算方式
+//		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_JSFS, bizId);
+//		model.addAttribute("cashType", cashTypes);
+//
+//		// 获取类别
+//		// List<DicInfo> levelList =
+//		// dicService.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT);
+//		// model.addAttribute("levelList", levelList);
+//
+//		// List<RegionInfo> allProvince = regionService.getAllProvince();
+//		// model.addAttribute("allProvince", allProvince);
+		
+		RestaurantQueriesResult result=dataAnalysisFacade.outcomeDetailQueries(bizId);
+		
+		model.addAttribute("cashType", result.getCashTypes());
 
 		return "queries/outcome/outcomeDetailList";
 	}
@@ -3441,60 +3759,71 @@ public class QueryController extends BaseController {
 	@RequestMapping("deliveryDetailList.htm")
 	public String deliveryDetailList(HttpServletRequest request,
 			HttpServletResponse response, ModelMap modelMap) {
-		// Integer bizId = WebUtils.getCurBizId(request);
-		// getOrgAndUserTreeJsonStr(modelMap, bizId);
-		// modelMap.addAttribute("bizId", bizId);
-
-		Map paramters = WebUtils.getQueryParamters(request);
-		if (null == paramters.get("start_min")
-				&& null == paramters.get("start_max")) {
-			Calendar c = Calendar.getInstance();
-			int year = c.get(Calendar.YEAR);
-			int month = c.get(Calendar.MONTH);
-			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			c.set(year, month, 1, 0, 0, 0);
-			// condition.setStartTime(c.getTime()+"");
-			paramters.put("start_min", df.format(c.getTime()));
-			c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
-			paramters.put("start_max", df.format(c.getTime()));
-			// condition.setEndTime(c.getTime()+"");
-
-		}
-		if (StringUtils.isNotBlank((String) paramters.get("orgIds"))) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = ((String) paramters.get("orgIds")).split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			List<PlatformOrgPo> orgList = orgService.getOrgListByIdSet(
-					WebUtils.getCurBizId(request), set);
-			StringBuilder sb = new StringBuilder();
-			for (PlatformOrgPo orgPo : orgList) {
-				sb.append(orgPo.getName() + ",");
-			}
-			// condition.setOrgNames(sb.substring(0, sb.length()-1));
-			paramters.put("orgNames", sb.substring(0, sb.length() - 1));
-
-		}
-		// 如果计调不为null，查询计调名字
-		if (StringUtils.isNotBlank((String) paramters.get("saleOperatorIds"))) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] userIdArr = ((String) paramters.get("saleOperatorIds"))
-					.split(",");
-			for (String userIdStr : userIdArr) {
-				set.add(Integer.valueOf(userIdStr));
-			}
-			List<PlatformEmployeePo> empList = platformEmployeeService
-					.getEmpList(WebUtils.getCurBizId(request), set);
-			StringBuilder sb = new StringBuilder();
-			for (PlatformEmployeePo employeePo : empList) {
-				sb.append(employeePo.getName() + "");
-			}
-			// condition.setSaleOperatorName(sb.substring(0, sb.length()-1));
-			paramters.put("saleOperatorName", sb.substring(0, sb.length() - 1));
-
-		}
-		modelMap.addAttribute("parameters", paramters);
+		
+//		// Integer bizId = WebUtils.getCurBizId(request);
+//		// getOrgAndUserTreeJsonStr(modelMap, bizId);
+//		// modelMap.addAttribute("bizId", bizId);
+//
+//		Map paramters = WebUtils.getQueryParamters(request);
+//		if (null == paramters.get("start_min")
+//				&& null == paramters.get("start_max")) {
+//			Calendar c = Calendar.getInstance();
+//			int year = c.get(Calendar.YEAR);
+//			int month = c.get(Calendar.MONTH);
+//			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+//			c.set(year, month, 1, 0, 0, 0);
+//			// condition.setStartTime(c.getTime()+"");
+//			paramters.put("start_min", df.format(c.getTime()));
+//			c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+//			paramters.put("start_max", df.format(c.getTime()));
+//			// condition.setEndTime(c.getTime()+"");
+//
+//		}
+//		if (StringUtils.isNotBlank((String) paramters.get("orgIds"))) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = ((String) paramters.get("orgIds")).split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			List<PlatformOrgPo> orgList = orgService.getOrgListByIdSet(
+//					WebUtils.getCurBizId(request), set);
+//			StringBuilder sb = new StringBuilder();
+//			for (PlatformOrgPo orgPo : orgList) {
+//				sb.append(orgPo.getName() + ",");
+//			}
+//			// condition.setOrgNames(sb.substring(0, sb.length()-1));
+//			paramters.put("orgNames", sb.substring(0, sb.length() - 1));
+//
+//		}
+//		// 如果计调不为null，查询计调名字
+//		if (StringUtils.isNotBlank((String) paramters.get("saleOperatorIds"))) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] userIdArr = ((String) paramters.get("saleOperatorIds"))
+//					.split(",");
+//			for (String userIdStr : userIdArr) {
+//				set.add(Integer.valueOf(userIdStr));
+//			}
+//			List<PlatformEmployeePo> empList = platformEmployeeService
+//					.getEmpList(WebUtils.getCurBizId(request), set);
+//			StringBuilder sb = new StringBuilder();
+//			for (PlatformEmployeePo employeePo : empList) {
+//				sb.append(employeePo.getName() + "");
+//			}
+//			// condition.setSaleOperatorName(sb.substring(0, sb.length()-1));
+//			paramters.put("saleOperatorName", sb.substring(0, sb.length() - 1));
+//
+//		}
+//		modelMap.addAttribute("parameters", paramters);
+//		
+//		
+		
+		DeliveryDetailListDTO deliveryDetailListDTO=new DeliveryDetailListDTO();
+		deliveryDetailListDTO.setBizId(WebUtils.getCurBizId(request));
+		deliveryDetailListDTO.setParamters(WebUtils.getQueryParamters(request));
+		
+		DeliveryDetailListResult result=dataAnalysisFacade.deliveryDetailList(deliveryDetailListDTO);
+		modelMap.addAttribute("parameters", result.getParamters());
+		
 		return "queries/delivery-detail-list";
 	}
 
