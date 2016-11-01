@@ -530,15 +530,15 @@
 			<artifactId>erpcenterFacade-tj-client</artifactId>
 			<version>0.0.8-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterFacade-ticket-client</artifactId>
+			<version>0.0.8-SNAPSHOT</version>
+		</dependency>
 		<dependency>  
 		    <groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-dataAnalysis-client</artifactId>
 			<name>erpcenterFacade-dataAnalysis-client</name>
-			<version>0.0.8-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.yimayhd.erpcenter</groupId>
-			<artifactId>erpcenterFacade-ticket-client</artifactId>
 			<version>0.0.8-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
