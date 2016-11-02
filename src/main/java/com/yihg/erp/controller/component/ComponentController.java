@@ -17,13 +17,21 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
+import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
+import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.facade.sales.result.ContactManListResult;
 import com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.erpcenterFacade.common.client.query.BrandQueryDTO;
 import org.erpcenterFacade.common.client.result.BrandQueryResult;
+import org.erpcenterFacade.common.client.result.CheckProductStockResult;
 import org.erpcenterFacade.common.client.result.RegionResult;
+import org.erpcenterFacade.common.client.result.ResultSupport;
+import org.erpcenterFacade.common.client.service.ComponentFacade;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,39 +44,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.util.TypeUtils;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.controller.images.utils.DateUtil;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.TfsUpload;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.images.util.DateUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.api.ProductStockService;
-import com.yihg.product.po.ProductGroupSupplier;
-import com.yihg.product.po.ProductInfo;
-import com.yihg.product.po.ProductStock;
-import com.yihg.product.vo.ProductSupplierCondition;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.supplier.api.BizSupplierRelationService;
-import com.yihg.supplier.api.ContractService;
-import com.yihg.supplier.api.SupplierDriverService;
-import com.yihg.supplier.api.SupplierService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.constants.SupplierConstant;
-import com.yihg.supplier.po.SupplierContactMan;
-import com.yihg.supplier.po.SupplierDriver;
-import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.po.PlatformOrgPo;
+import com.yimayhd.erpcenter.facade.basic.service.DicFacade;
 import com.yimayhd.erpcenter.facade.query.ComponentProductListDTO;
 import com.yimayhd.erpcenter.facade.result.ComponentProductListResult;
 import com.yimayhd.erpcenter.facade.service.ProductFacade;
+import com.yimayhd.erpresource.dal.constants.SupplierConstant;
+import com.yimayhd.erpresource.dal.po.SupplierDriver;
+import com.yimayhd.erpresource.dal.po.SupplierInfo;
 
 @Controller
 @RequestMapping("/component")
@@ -78,35 +66,17 @@ public class ComponentController extends BaseController {
 			.getLogger(ComponentController.class);
 	
 	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private PlatformOrgService orgService;
-	@Autowired
-	private SupplierService supplierService;
-	@Autowired
-	private RegionService regionService;
-	//@Autowired
-	//private RegionCardService cardService;
-	@Autowired
-	private SupplierDriverService driverService;
-	@Autowired
 	private SysConfig config;
 	@Autowired
-	private ProductInfoService productInfoService;
-	@Autowired
-	private DicService dicService;
-	@Autowired
-	private ProductGroupSupplierService productSupplierService;
-	@Autowired
-	private GroupOrderService groupOrderService;
-	@Autowired
-	private ProductStockService stockService;
+	private DicFacade dicFacade;
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
 	@Autowired
 	private ProductFacade productFacade;
 	@Autowired
 	private TeamGroupFacade teamGroupFacade;
+	@Autowired
+	private ComponentFacade componentFacade; 
 	
 	@RequestMapping("example.htm")
 	public String example(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,String type){	
@@ -201,7 +171,7 @@ public class ComponentController extends BaseController {
 			type = "single";
 		}
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();		
-		List<PlatformOrgPo> orgList = orgService.getOrgTree(WebUtils.getCurBizId(request), null);
+		List<PlatformOrgPo> orgList = componentFacade.getOrgTree(WebUtils.getCurBizId(request), null);
 		if(orgList!=null && orgList.size()>0){
 			for(PlatformOrgPo org : orgList){
 				Map<String, String> map = new HashMap<String,String>();
@@ -224,8 +194,7 @@ public class ComponentController extends BaseController {
 	}
 	
 	@RequestMapping("supplierList.htm")
-	public String supplierList(HttpServletRequest request,HttpServletResponse reponse, ModelMap model,
-			SupplierInfo supplierInfo,String type){
+	public String supplierList(HttpServletRequest request,HttpServletResponse reponse, ModelMap model,SupplierInfo supplierInfo,String type){
 				
 		RegionResult provinceResult = productCommonFacade.queryProvinces();
 		List<com.yimayhd.erpcenter.dal.basic.po.RegionInfo> allProvince = provinceResult.getRegionList();
@@ -233,11 +202,7 @@ public class ComponentController extends BaseController {
 		model.addAttribute("allProvince", allProvince);
 		// 根据供应商类型查询当前登录商家所属的供应商
 		model.addAttribute("supplierInfo", supplierInfo);
-		PageBean pageBean = new PageBean();
-		pageBean.setPageSize(supplierInfo.getPageSize());
-		pageBean.setParameter(supplierInfo);
-		pageBean.setPage(supplierInfo.getPage());
-		pageBean = supplierService.selectPrivateSupplierList(pageBean,WebUtils.getCurBizId(request));
+		PageBean pageBean = componentFacade.supplierList(WebUtils.getCurBizId(request), supplierInfo);
 		model.addAttribute("page", pageBean);
 		Map<Integer,String> typeMap = null;
 		//过滤显示供应商类型
@@ -274,11 +239,7 @@ public class ComponentController extends BaseController {
 		// 根据供应商类型查询当前登录商家所属的供应商
 		model.addAttribute("supplierInfo", supplierInfo);
 		model.addAttribute("typeMap", SupplierConstant.supplierTypeMap);
-		PageBean pageBean = new PageBean();
-		pageBean.setPageSize(supplierInfo.getPageSize());
-		pageBean.setParameter(supplierInfo);
-		pageBean.setPage(supplierInfo.getPage());
-		pageBean = supplierService.selectPrivateSupplierList(pageBean,WebUtils.getCurBizId(request));
+		PageBean pageBean = componentFacade.supplierList(WebUtils.getCurBizId(request), supplierInfo);
 		model.addAttribute("page", pageBean);
 		if(StringUtils.isBlank(type)){
 			type = "single";
@@ -326,8 +287,8 @@ public class ComponentController extends BaseController {
 	
 	@RequestMapping(value = "driverList.htm", method = RequestMethod.GET)
 	public String bizDriverList(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,SupplierDriver driver, Integer supplierId, Integer page,Integer pageSize){
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+		RegionResult result = productCommonFacade.queryProvinces();
+		model.addAttribute("allProvince", result.getRegionList());
 		
 		//loadMyDriverList(request, model, driver,page, pageSize, supplierId);
 		model.addAttribute("supplierId", supplierId);
@@ -337,8 +298,8 @@ public class ComponentController extends BaseController {
 	
 	@RequestMapping(value = "queryListPage.htm")
 	public String queryListPage(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,SupplierDriver driver, Integer supplierId, Integer page,Integer pageSize){
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+		RegionResult result = productCommonFacade.queryProvinces();
+		model.addAttribute("allProvince", result.getRegionList());
 		
 		loadMyDriverList(request, model, driver,page, pageSize, supplierId);
 		model.addAttribute("supplierId", supplierId);
@@ -364,7 +325,7 @@ public class ComponentController extends BaseController {
 		}
 		
 		Integer bizId = WebUtils.getCurBizId(request);
-		PageBean pageBean = driverService.getMyDriverList(driver, bizId, supplierId, page, pageSize);
+		PageBean pageBean = componentFacade.getMyDriverList(driver, bizId, supplierId, page, pageSize);
 		model.addAttribute("pageBean", pageBean);
 		
 	}
@@ -460,7 +421,7 @@ public class ComponentController extends BaseController {
 	
 	@RequestMapping(value="/productSupplierList.do",method=RequestMethod.POST)
 	public String productSupplierQueryList(HttpServletRequest request,HttpServletResponse response,ModelMap model,ProductSupplierCondition condition){
-		List<ProductGroupSupplier> supplierList = productSupplierService.selectSupplierList(condition);
+		List<ProductGroupSupplier> supplierList = componentFacade.selectSupplierList(condition);
 		model.addAttribute("list", supplierList);
 		model.addAttribute("single", condition.getSingle());
 		return "component/product/product-supplier-list-table";
@@ -485,14 +446,11 @@ public class ComponentController extends BaseController {
 	
 	@ResponseBody
 	public String updateRegion(HttpServletRequest request){
-	  try {
-		regionService.uploadRegion();
-		return successJson();
-	} catch (Exception e) {
-		
-		e.printStackTrace();
-		return errorJson("刷新失败");
-	}
+	  	ResultSupport result = componentFacade.uploadRegion();
+	  	if(result.isSuccess()){
+	  		return successJson();
+	  	}
+	  	return errorJson("刷新失败");
 	}
 
 	@RequestMapping(value="/uploadAllImg.htm",method=RequestMethod.GET)
@@ -525,67 +483,12 @@ public class ComponentController extends BaseController {
 	@RequestMapping(value="/checkProductStock.htm",method=RequestMethod.GET)
 	@ResponseBody
 	public String checkProductStock(HttpServletRequest request,Integer year,Integer month){
-		String beginDateStr = year+"-"+(month<10 ? ("0"+month):(""+month))+"-01";
-    	String endDateStr = month==12 ? ((year+1)+"-01-01"):(year+"-"+(month<9 ? ("0"+(month+1)):(""+(month+1)))+"-01");    	
-    	Date startDate = DateUtils.parse(beginDateStr, "yyyy-MM-dd");
-    	Date endDate = DateUtils.parse(endDateStr,"yyyy-MM-dd");
-    	Integer bizId = WebUtils.getCurBizId(request);
-    	List<Map<String,Object>> list = productInfoService.getAllId(bizId, 2);
-    	StringBuilder sb = new StringBuilder();
-    	StringBuilder sqlSb = new StringBuilder();
-    	if(list!=null && list.size()>0){
-    		int count = DateUtil.getIntervalDays(endDate, startDate);
-    		for(Map<String,Object> map : list){    			
-    			Integer productId = TypeUtils.castToInt(map.get("id"));
-    			sb.append("产品id【"+productId+"】<br>");
-    			for(int i=0;i<count;i++){
-    				Date itemDate = DateUtils.addDay(startDate, i);
-    				Map<String,Object> orderMap = groupOrderService.getCountByProductIdAndDate(bizId, productId, itemDate);
-    				Integer adult = 0;
-    				Integer child = 0;
-    				Integer guide = 0;
-    				if(orderMap!=null && orderMap.size()>0){
-    					adult = TypeUtils.castToInt(orderMap.get("totalAdult"));
-    					child = TypeUtils.castToInt(orderMap.get("totalChild"));
-        				guide = TypeUtils.castToInt(orderMap.get("totalGuide"));
-    				}
-    				
-    				log.info("adult:"+adult+",child:"+child+",guide:"+guide);
-    				int orderTotal = adult+child+guide;
-    				
-    				ProductStock stock = stockService.getStockByProductIdAndDate(productId, itemDate);
-    				Integer receiveCnt = 0;
-    				Integer reserveCnt = 0;
-    				if(stock!=null){
-    					receiveCnt = stock.getReceiveCount();    					
-    					reserveCnt = stock.getReserveCount();
-    				}
-    				
-    				log.info("receiveCnt:"+receiveCnt+",reserveCnt:"+reserveCnt);
-    				int stockTotal = receiveCnt+reserveCnt;
-    				
-    				if(orderTotal == stockTotal){
-    					log.info("日期【"+DateUtils.format(itemDate, "yyyy-MM-dd")+"】对账成功");
-    					//sb.append("产品id【"+productId+"】，日期【"+DateUtils.format(itemDate, "yyyy-MM-dd")+"】对账成功<br>");
-    				}else{
-    					log.info("日期【"+DateUtils.format(itemDate, "yyyy-MM-dd")+"】对账失败"+",订单人数："+orderTotal+"-库存数："+stockTotal);
-    					sb.append("      日期【"+DateUtils.format(itemDate, "yyyy-MM-dd")+"】对账失败："+"订单人数【"+orderTotal+"】库存数【"+stockTotal+"】<br>");
-    					sqlSb.append("      update product_stock set receive_count="+orderTotal+" where state=1 and produdct_id="+productId+" and item_date='"+DateUtils.format(itemDate, "yyyy-MM-dd")+"';<br>");
-    				}    				
-    			}
-    		}
-    	}
-    	return successJson("结果：",sb.toString(),"更新sql:",sqlSb.toString());
+		
+		Integer bizId = WebUtils.getCurBizId(request);
+		CheckProductStockResult result = componentFacade.checkProductStock(bizId, year, month);
+    	return successJson("结果：", result.getSb(), "更新sql:", result.getSqlSb());
     	
 	}
-	
-	@Autowired
-	private ContractService contractService;
-	@Autowired
-	private BizSupplierRelationService relationService;
-	//@Autowired
-   // private SysOptLogService logService;
-	
 	
 	@RequestMapping("initContractLog.htm")	
 	@ResponseBody
