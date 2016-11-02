@@ -20,6 +20,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
@@ -27,6 +28,7 @@ import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TeamGroupVO;
 import com.yimayhd.erpcenter.facade.sales.query.*;
 import com.yimayhd.erpcenter.facade.sales.result.*;
 import com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -34,12 +36,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.json.JSONString;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,7 +61,6 @@ import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-
 import com.yihg.mybatis.utility.PageBean;
 
 
@@ -72,6 +75,8 @@ public class TeamGroupController extends BaseController {
 	private BizSettingCommon settingCommon;
 	@Autowired
 	private TeamGroupFacade teamGroupFacade;
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
 	 @InitBinder  
 	  public void initListBinder(WebDataBinder binder)  
 	  {  
@@ -385,31 +390,31 @@ public class TeamGroupController extends BaseController {
 	public String findTourGroupByConditionLoadModel(HttpServletRequest request,
 			GroupOrder groupOrder, Model model) throws ParseException {
 
-		/*PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
 
 		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
 				: groupOrder.getPageSize());
 		pageBean.setPage(groupOrder.getPage());
 
 		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
-				&& StringUtils.isNotBlank(groupOrder.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = groupOrder.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
+//		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
+//				&& StringUtils.isNotBlank(groupOrder.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = groupOrder.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(
+//					WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//			}
+//		}
 		if (groupOrder.getDateType() != null && groupOrder.getDateType() == 2) {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			if (groupOrder.getStartTime() != null
@@ -425,17 +430,25 @@ public class TeamGroupController extends BaseController {
 				groupOrder.setEndTime(calendar.getTime().getTime() + "");
 			}
 		}
+		groupOrder.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(groupOrder.getSaleOperatorIds(), 
+				groupOrder.getOrgIds(), WebUtils.getCurBizId(request)));
 		pageBean.setParameter(groupOrder);
-		pageBean = groupOrderService.selectByConListPage(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request), 0);
+		FindTourGroupByConditionDTO queryDTO = new FindTourGroupByConditionDTO();
+		queryDTO.setCurBizId(WebUtils.getCurBizId(request));
+		queryDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
+//		queryDTO.setOperatorType(listType);
+		queryDTO.setGroupOrder(groupOrder);
+		FindTourGroupByConditionResult result = teamGroupFacade.findTourGroupByConditionLoadModel(queryDTO, pageBean);
+		//		pageBean = groupOrderService.selectByConListPage(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request), 0);
 		Integer pageTotalAudit = 0;
 		Integer pageTotalChild = 0;
 		Integer pageTotalGuide = 0;
-		List<GroupOrder> result = pageBean.getResult();
-		if (result != null && result.size() > 0) {
+		List<GroupOrder> orderList = pageBean.getResult();
+		if (!CollectionUtils.isEmpty(orderList)) {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			for (GroupOrder groupOrder2 : result) {
+			for (GroupOrder groupOrder2 : orderList) {
 				if (groupOrder2.getCreateTime() != null) {
 					Long createTime = groupOrder2.getTourGroup()
 							.getCreateTime();
@@ -460,10 +473,10 @@ public class TeamGroupController extends BaseController {
 		model.addAttribute("pageTotalAudit", pageTotalAudit);
 		model.addAttribute("pageTotalChild", pageTotalChild);
 		model.addAttribute("pageTotalGuide", pageTotalGuide);
-		GroupOrder order = groupOrderService.selectTotalByCon(groupOrder,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request), 0);
-
+//		GroupOrder order = groupOrderService.selectTotalByCon(groupOrder,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request), 0);
+		GroupOrder order = result.getGroupOrder();
 		model.addAttribute("totalAudit",
 				order == null ? 0 : order.getNumAdult());
 		model.addAttribute("totalChild",
@@ -471,36 +484,31 @@ public class TeamGroupController extends BaseController {
 		model.addAttribute("totalGuide",
 				order == null ? 0 : order.getNumGuide());
 
-		*//**
-		 * 根据组团社id获取组团社名称
-		 *//*
+//		*//**
+//		 * 根据组团社id获取组团社名称
+//		 *//*
 		List<GroupOrder> groupList = pageBean.getResult();
 		model.addAttribute("groupList", groupList);
 		model.addAttribute("groupOrder", groupOrder);
-		model.addAttribute("page", pageBean);*/
+		model.addAttribute("page", pageBean);
 
 
-		FindTourGroupByConditionDTO findTourGroupByConditionDTO = new FindTourGroupByConditionDTO();
-		findTourGroupByConditionDTO.setGroupOrder(groupOrder);
-
-		FindTourGroupByConditionResult findTourGroupByConditionResult = teamGroupFacade.findTourGroupByConditionLoadModel(findTourGroupByConditionDTO);
-		model.addAttribute("pageTotalAudit", findTourGroupByConditionResult.getPageTotalAudit());
-		model.addAttribute("pageTotalChild", findTourGroupByConditionResult.getPageTotalChild());
-		model.addAttribute("pageTotalGuide", findTourGroupByConditionResult.getPageTotalGuide());
-
-		model.addAttribute("totalAudit",
-				findTourGroupByConditionResult.getOrder() == null ? 0 : findTourGroupByConditionResult.getGroupOrder().getNumAdult());
-		model.addAttribute("totalChild",
-				findTourGroupByConditionResult.getOrder() == null ? 0 : findTourGroupByConditionResult.getGroupOrder().getNumChild());
-		model.addAttribute("totalGuide",
-				findTourGroupByConditionResult.getOrder() == null ? 0 : findTourGroupByConditionResult.getGroupOrder().getNumGuide());
+//		model.addAttribute("pageTotalChild", findTourGroupByConditionResult.getPageTotalChild());
+//		model.addAttribute("pageTotalGuide", findTourGroupByConditionResult.getPageTotalGuide());
+//
+//		model.addAttribute("totalAudit",
+//				findTourGroupByConditionResult.getOrder() == null ? 0 : findTourGroupByConditionResult.getGroupOrder().getNumAdult());
+//		model.addAttribute("totalChild",
+//				findTourGroupByConditionResult.getOrder() == null ? 0 : findTourGroupByConditionResult.getGroupOrder().getNumChild());
+//		model.addAttribute("totalGuide",
+//				findTourGroupByConditionResult.getOrder() == null ? 0 : findTourGroupByConditionResult.getGroupOrder().getNumGuide());
 
 		/**
 		 * 根据组团社id获取组团社名称
 		 */
-		model.addAttribute("groupList", findTourGroupByConditionResult.getPageBean().getResult());
-		model.addAttribute("groupOrder", groupOrder);
-		model.addAttribute("page", findTourGroupByConditionResult.getPageBean());
+//		model.addAttribute("groupList", findTourGroupByConditionResult.getPageBean().getResult());
+//		model.addAttribute("groupOrder", groupOrder);
+//		model.addAttribute("page", findTourGroupByConditionResult.getPageBean());
 
 		return "sales/teamGroup/groupTable";
 	}
