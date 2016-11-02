@@ -45,12 +45,12 @@ import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuideListCount;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuideListSelect;
 import com.yimayhd.erpcenter.dal.sys.po.UserSession;
-import com.yimayhd.erpcenter.facade.sales.query.BookingGuideQueryDTO;
-import com.yimayhd.erpcenter.facade.sales.result.BookingGuideResult;
-import com.yimayhd.erpcenter.facade.sales.result.ResultSupport;
-import com.yimayhd.erpcenter.facade.sales.result.WebResult;
-import com.yimayhd.erpcenter.facade.sales.service.BookingGuideFacade;
-import com.yimayhd.erpcenter.facade.sales.service.BookingGuideFinanceFacade;
+import com.yimayhd.erpcenter.facade.operation.query.BookingGuideQueryDTO;
+import com.yimayhd.erpcenter.facade.operation.result.BookingGuideResult;
+import com.yimayhd.erpcenter.facade.operation.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.operation.result.WebResult;
+import com.yimayhd.erpcenter.facade.operation.service.BookingGuideFacade;
+import com.yimayhd.erpcenter.facade.operation.service.BookingGuideFinanceFacade;
 import com.yimayhd.erpresource.dal.constants.Constants;
 import com.yimayhd.erpresource.dal.po.SupplierGuide;
 /**

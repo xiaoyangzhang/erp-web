@@ -89,6 +89,7 @@
 		<facade-product-client.version>0.0.6-SNAPSHOT</facade-product-client.version>
 		<facade-common-client.version>0.0.8-SNAPSHOT</facade-common-client.version>
 		<facade-finance-client.version>0.0.8-SNAPSHOT</facade-finance-client.version>
+		<facade-operation-client.version>0.0.8-SNAPSHOT</facade-operation-client.version>
 	</properties>
 
 	<dependencies>
@@ -373,6 +374,11 @@
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-finance-client</artifactId>
 			<version>${facade-finance-client.version}</version>
+		</dependency>
+ 		<dependency>
+			<groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterFacade-operation-client</artifactId>
+			<version>${facade-operation-client.version}</version>
 		</dependency>
 
 

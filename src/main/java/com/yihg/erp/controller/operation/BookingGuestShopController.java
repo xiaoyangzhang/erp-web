@@ -32,15 +32,15 @@ import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShopDetail;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShopDetailDeploy;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
-import com.yimayhd.erpcenter.facade.sales.query.BookingShopDTO;
-import com.yimayhd.erpcenter.facade.sales.query.BookingShopDetailDeployDTO;
-import com.yimayhd.erpcenter.facade.sales.query.BookingShopListDTO;
-import com.yimayhd.erpcenter.facade.sales.result.BookingShopResult;
-import com.yimayhd.erpcenter.facade.sales.result.ResultSupport;
-import com.yimayhd.erpcenter.facade.sales.result.ToFactShopResult;
+import com.yimayhd.erpcenter.facade.operation.query.BookingShopDTO;
+import com.yimayhd.erpcenter.facade.operation.query.BookingShopDetailDeployDTO;
+import com.yimayhd.erpcenter.facade.operation.query.BookingShopListDTO;
+import com.yimayhd.erpcenter.facade.operation.result.BookingShopResult;
+import com.yimayhd.erpcenter.facade.operation.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.operation.result.ToFactShopResult;
+import com.yimayhd.erpcenter.facade.operation.service.BookingGuestShopFacade;
+import com.yimayhd.erpcenter.facade.operation.service.BookingShopFacade;
 import com.yimayhd.erpcenter.facade.sales.result.operation.BookingFinanceShopFacade;
-import com.yimayhd.erpcenter.facade.sales.service.BookingGuestShopFacade;
-import com.yimayhd.erpcenter.facade.sales.service.BookingShopFacade;
 /**
  * @author : xuzejun
  * @date : 2015年7月25日 下午2:31:01
