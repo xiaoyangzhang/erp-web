@@ -12,17 +12,22 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -43,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.util.TypeUtils;
 //import com.yihg.basic.api.CommonService;
 //import com.yihg.basic.api.DicService;
 //import com.yihg.basic.api.RegionService;
@@ -52,16 +58,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 //import com.yihg.basic.util.NumberUtil;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
+import com.yihg.erp.contant.BizConfigConstant;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.utils.DateUtils;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.common.contants.BasicConstants;
+import com.yimayhd.erpcenter.common.util.DateUtils;
 import com.yimayhd.erpcenter.common.util.NumberUtil;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
 import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePay;
+import com.yimayhd.erpcenter.dal.sales.client.finance.po.InfoBean;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingAirTicket;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
 import com.yimayhd.erpcenter.dal.sales.client.operation.vo.PaymentExportVO;
 //import com.yihg.finance.api.FinanceService;
 //import com.yihg.finance.po.FinancePay;
@@ -112,14 +122,22 @@ import com.yimayhd.erpcenter.dal.sales.client.operation.vo.PaymentExportVO;
 //import com.yihg.sys.po.SysBizBankAccount;
 import com.yimayhd.erpcenter.dal.sales.client.operation.vo.QueryGuideShop;
 import com.yimayhd.erpcenter.dal.sales.client.operation.vo.QueryShopInfo;
+import com.yimayhd.erpcenter.dal.sales.client.query.vo.DeparentmentOrderCondition;
+import com.yimayhd.erpcenter.dal.sales.client.query.vo.DepartmentOrderResult;
+import com.yimayhd.erpcenter.dal.sales.client.query.vo.DepartmentOrderVO;
 import com.yimayhd.erpcenter.dal.sales.client.query.vo.ProductGuestCondition;
+import com.yimayhd.erpcenter.dal.sales.client.query.vo.ProductGuestShoppingCondition;
+import com.yimayhd.erpcenter.dal.sales.client.query.vo.ProductGuestStaticsVo;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.PaymentCondition;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.OperatorGroupStatic;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.SaleOperatorOrderStatic;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.SaleOperatorVo;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.dal.sys.po.SysBizBankAccount;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.AirTicketDetailQueriesDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.DeliveryDetailListDTO;
@@ -177,11 +195,12 @@ import com.yimayhd.erpcenter.facade.dataanalysis.client.result.ToSaleOperatorTab
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.ToSubsidiaryDebtResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.TranportListResult;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.service.DataAnalysisFacade;
+import com.yimayhd.erpcenter.facade.operation.service.BookingShopFacade;
 import com.yimayhd.erpcenter.facade.sales.query.BookingShopListDTO;
 import com.yimayhd.erpcenter.facade.sales.result.GuestShopListResult;
 import com.yimayhd.erpcenter.facade.sales.result.GuestShopResult;
-import com.yimayhd.erpcenter.facade.sales.service.BookingShopFacade;
 import com.yimayhd.erpresource.dal.constants.Constants;
+import com.yimayhd.erpresource.dal.constants.SupplierConstant;
 import com.yimayhd.erpresource.dal.po.SupplierInfo;
 
 @Controller
@@ -5054,8 +5073,8 @@ public class QueryController extends BaseController {
 	 */
 	@RequestMapping("productGuestStatics.htm")
 	public String productGuestStaticsList(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
-		String startDate = DateUtils.getMonthFirstDay();
-		String endDate = DateUtils.getMonthLastDay();
+		String startDate = com.yihg.erp.utils.DateUtils.getMonthFirstDay();
+		String endDate = com.yihg.erp.utils.DateUtils.getMonthLastDay();
 		model.addAttribute("startDate", startDate);
 		model.addAttribute("endDate", endDate);
 		// Integer bizId = WebUtils.getCurBizId(request);
@@ -5296,8 +5315,8 @@ public class QueryController extends BaseController {
 	 */
 	@RequestMapping("guestSourceStatics.htm")
 	public String guestSourceStaticsList(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
-		String startDate = DateUtils.getMonthFirstDay();
-		String endDate = DateUtils.getMonthLastDay();
+		String startDate = com.yihg.erp.utils.DateUtils.getMonthFirstDay();
+		String endDate = com.yihg.erp.utils.DateUtils.getMonthLastDay();
 		model.addAttribute("startDate", startDate);
 		model.addAttribute("endDate", endDate);
 		// Integer bizId = WebUtils.getCurBizId(request);
@@ -5348,7 +5367,7 @@ public class QueryController extends BaseController {
 	// }
 	// if (condition.getEndDate() != null) {
 	// // 添加时间时，结束时间需要加一天
-	// condition.setEndDateNum(com.yihg.images.util.DateUtils.addDay(
+	// condition.setEndDateNum(DateUtils.addDay(
 	// condition.getEndDate(), 1).getTime());
 	// }
 	// String jsonStr = queryService.guestSourceStatics(condition,
@@ -6841,7 +6860,7 @@ public class QueryController extends BaseController {
 		}
 		if (condition.getEndDate() != null) {
 			// 添加时间时，结束时间需要加一天
-			condition.setEndDateNum(com.yihg.images.util.DateUtils.addDay(condition.getEndDate(), 1).getTime());
+			condition.setEndDateNum(DateUtils.addDay(condition.getEndDate(), 1).getTime());
 		}
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
@@ -6889,7 +6908,7 @@ public class QueryController extends BaseController {
 		}
 		if (condition.getEndDate() != null) {
 			// 添加时间时，结束时间需要加一天
-			condition.setEndDateNum(com.yihg.images.util.DateUtils.addDay(condition.getEndDate(), 1).getTime());
+			condition.setEndDateNum(DateUtils.addDay(condition.getEndDate(), 1).getTime());
 		}
 		condition.setBizId(WebUtils.getCurBizId(request));
 		List<Map<String, Object>> guestSourceStatics = queryService.guestSourceStatics2(condition,
