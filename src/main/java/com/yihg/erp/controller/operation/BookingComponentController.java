@@ -23,11 +23,18 @@ import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yimayhd.erpcenter.facade.sales.query.BookingDeliveryQueryDTO;
-import com.yimayhd.erpcenter.facade.sales.query.ContractQueryDTO;
-import com.yimayhd.erpcenter.facade.sales.result.operation.BookingSupplierResult;
-import com.yimayhd.erpcenter.facade.sales.result.operation.TourGroupInfoResult;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupRouteDayVO;
+import com.yimayhd.erpcenter.facade.operation.query.BookingDeliveryQueryDTO;
+import com.yimayhd.erpcenter.facade.operation.query.ContractQueryDTO;
+import com.yimayhd.erpcenter.facade.operation.result.BookingSupplierResult;
+import com.yimayhd.erpcenter.facade.operation.result.TourGroupInfoResult;
+import com.yimayhd.erpcenter.facade.operation.service.BookingComponentFacade;
 import com.yimayhd.erpresource.dal.po.SupplierCar;
+import com.yimayhd.erpresource.dal.po.SupplierContractPrice;
+import com.yimayhd.erpresource.dal.po.SupplierContractPriceDateInfo;
 
 @Controller
 @RequestMapping("/booking")
@@ -45,22 +52,22 @@ public class BookingComponentController extends BaseController {
 			orderId = 0;
 		}
 		// 客人列表
-		List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest> groupOrderGuests = bookingComponentFacade.selectGuestByOrderId(orderId);
+		List<GroupOrderGuest> groupOrderGuests = bookingComponentFacade.selectGuestByOrderId(orderId);
 		model.addAttribute("guestList", groupOrderGuests);
 		return "/operation/component/guest-list";
-	}
+	}  
 	
 	@RequestMapping("transportList.htm")
 	public String transportList(HttpServletRequest request,HttpServletResponse response,ModelMap model, Integer orderId){
 		if(orderId==null){
 			orderId = 0;
 		}
-		List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport> groupOrderTransports = bookingComponentFacade.selectTransportByOrderId(orderId);
+		List<GroupOrderTransport> groupOrderTransports = bookingComponentFacade.selectTransportByOrderId(orderId);
 		model.addAttribute("transportList", groupOrderTransports);
 		int bizId = WebUtils.getCurBizId(request);
 //		List<DicInfo> jtfsList = dicService
 //				.getListByTypeCode(BasicConstants.GYXX_JTFS,bizId);
-		List<com.yimayhd.erpcenter.dal.basic.po.DicInfo> transportList = saleCommonFacade.getTransportListByTypeCode(bizId);
+		List<DicInfo> transportList = saleCommonFacade.getTransportListByTypeCode(bizId);
 		model.addAttribute("transportTypeList", transportList);
 		return "/operation/component/transport-list";
 	}
@@ -108,7 +115,7 @@ public class BookingComponentController extends BaseController {
 		//}
 		model.addAttribute("stype", stype);
 		//GroupRouteVO routeVo = groupRouteService.findGroupRouteByGroupId(gid);	
-		List<com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupRouteDayVO> routeList = result.getGroupRoute().getGroupRouteDayVOList();
+		List<GroupRouteDayVO> routeList = result.getGroupRoute().getGroupRouteDayVOList();
 		model.addAttribute("routeList",routeList);
 		if (null==flag) {
 			return "/operation/component/group-detail";
@@ -150,8 +157,8 @@ public class BookingComponentController extends BaseController {
 		queryDTO.setType1(type1);
 		queryDTO.setType2(type2);
 		queryDTO.setType2Name(type2Name);
-		List<com.yimayhd.erpresource.dal.po.SupplierContractPriceDateInfo> priceList = bookingComponentFacade.getOperateContractPrice(queryDTO);
-		com.yimayhd.erpresource.dal.po.SupplierContractPriceDateInfo price = null;
+		List<SupplierContractPriceDateInfo> priceList = bookingComponentFacade.getOperateContractPrice(queryDTO);
+		SupplierContractPriceDateInfo price = null;
 		if(!CollectionUtils.isEmpty(priceList)){
 			price = priceList.get(0);			
 			return JSON.toJSONString(price);
@@ -171,7 +178,7 @@ public class BookingComponentController extends BaseController {
 		queryDTO.setDateTo(dateTo);
 		queryDTO.setType1(type1);
 		queryDTO.setSeatCnt(seatCnt);
-		List<com.yimayhd.erpresource.dal.po.SupplierContractPriceDateInfo> priceList = bookingComponentFacade.getCarContractPrice(queryDTO);
+		List<SupplierContractPriceDateInfo> priceList = bookingComponentFacade.getCarContractPrice(queryDTO);
 		model.addAttribute("priceList", priceList);
 		return "/operation/component/car-price-list";
 	}
@@ -226,7 +233,7 @@ public class BookingComponentController extends BaseController {
 		queryDTO.setSupplierId(supplierId);
 		queryDTO.setDateList(dateList);
 		queryDTO.setGoodsId(goodsId);
-		List<com.yimayhd.erpresource.dal.po.SupplierContractPriceDateInfo> priceList = bookingComponentFacade.getContractPriceByPramas(queryDTO);
+		List<SupplierContractPriceDateInfo> priceList = bookingComponentFacade.getContractPriceByPramas(queryDTO);
 		if(priceList==null){
 			return "[]";
 		}
@@ -259,7 +266,7 @@ public class BookingComponentController extends BaseController {
 		model.addAttribute("supplierCar", supplierCar);
 //		List<DicInfo> list = dicService
 //				.getListByTypeCode(Constants.FLEET_TYPE_CODE);
-		List<com.yimayhd.erpcenter.dal.basic.po.DicInfo> carTypeList = saleCommonFacade.getCarListByTypeCode();
+		List<DicInfo> carTypeList = saleCommonFacade.getCarListByTypeCode();
 		model.addAttribute("carType", carTypeList);
 		return "/operation/supplier/car/supplierCarList";
 	}
@@ -291,7 +298,7 @@ public class BookingComponentController extends BaseController {
 	public String deliveryContractPrice(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model,Integer contractId){
 		//List<SupplierContractPrice> supplierContractPrices = contractService.getContractPriceListByContractId(contractId);
-		List<com.yimayhd.erpresource.dal.po.SupplierContractPrice> supplierContractPrices = bookingComponentFacade.getContractPriceListByContractId(contractId);
+		List<SupplierContractPrice> supplierContractPrices = bookingComponentFacade.getContractPriceListByContractId(contractId);
 		model.addAttribute("priceList", supplierContractPrices);
 		return "/operation/component/delivery-contract-list-table";
 	}
