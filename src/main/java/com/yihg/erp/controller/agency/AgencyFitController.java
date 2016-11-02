@@ -14,6 +14,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.erpcenterFacade.common.client.query.BrandQueryDTO;
+import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
+import org.erpcenterFacade.common.client.result.BrandQueryResult;
+import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.result.RegionResult;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
+import org.erpcenterFacade.common.client.service.SaleCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +31,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
-import com.yihg.airticket.api.AirTicketRequestService;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.common.MergeGroupUtils;
@@ -37,38 +38,28 @@ import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.finance.api.FinanceService;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.product.api.ProductGroupExtraItemService;
-import com.yihg.product.api.ProductGroupPriceService;
-import com.yihg.product.api.ProductGroupService;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.api.ProductRemarkService;
-import com.yihg.product.api.ProductRouteService;
-import com.yihg.product.api.ProductStockService;
-import com.yihg.product.po.ProductGroup;
-import com.yihg.product.po.ProductInfo;
-import com.yihg.product.po.ProductRemark;
-import com.yihg.product.vo.ProductGroupSupplierVo;
-import com.yihg.product.vo.ProductGroupVo;
-import com.yihg.sales.api.FitOrderService;
-import com.yihg.sales.api.GroupOrderGuestService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.GroupRequirementService;
-import com.yihg.sales.api.GroupRouteService;
-import com.yihg.sales.api.SpecialGroupOrderService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupRequirement;
-import com.yihg.sales.po.GroupRoute;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.FitOrderVO;
-import com.yihg.sales.vo.MergeGroupOrderVO;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
+import com.yimayhd.erpcenter.common.contants.BasicConstants;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
+import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
+import com.yimayhd.erpcenter.dal.product.po.ProductRemark;
+import com.yimayhd.erpcenter.dal.product.vo.ProductGroupSupplierVo;
+import com.yimayhd.erpcenter.dal.product.vo.ProductGroupVo;
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRequirement;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.FitOrderVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.MergeGroupOrderVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.facade.sales.query.AgencyOrderQueryDTO;
+import com.yimayhd.erpcenter.facade.sales.result.AgencyOrderResult;
+import com.yimayhd.erpcenter.facade.sales.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.sales.result.WebResult;
+import com.yimayhd.erpcenter.facade.sales.service.AgencyFitFacade;
 
 @Controller
 @RequestMapping(value = "/agencyFit")
@@ -77,59 +68,23 @@ public class AgencyFitController extends BaseController {
 			.getLogger(AgencyFitController.class);
 
 	@Autowired
-	private GroupOrderService groupOrderService;
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private GroupOrderGuestService groupOrderGuestService;
-	@Autowired
-	private DicService dicService;
-	@Autowired
-	private RegionService regionService;
-	@Autowired
-	private ProductGroupSupplierService productGroupSupplierService;
-	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private PlatformOrgService orgService;
-	@Autowired
-	private ProductGroupService productGroupService;
-	@Autowired
-	private SpecialGroupOrderService specialGroupOrderService;
-	@Autowired
-	private FinanceService financeService;
-	@Autowired
 	private SysConfig config;
 	@Autowired
 	private BizSettingCommon settingCommon;
 	@Autowired
-	private ProductGroupPriceService productGroupPriceService;
+	private AgencyFitFacade agencyFitFacade;
 	@Autowired
-	private GroupRequirementService groupRequirementService;
+	private SaleCommonFacade saleCommonFacade;
 	@Autowired
-	private ProductRemarkService productRemarkService;
-	@Autowired
-	private ProductRouteService productRouteService;
-	@Autowired
-	private ProductInfoService productInfoService;
-	@Autowired
-	private ProductStockService productStockService;
-	@Autowired
-	private ProductGroupExtraItemService productGroupExtraItemService;
-	@Autowired
-	private FitOrderService fitOrderService;
-	@Autowired
-	private GroupRouteService groupRouteService;
-	@Autowired
-	private AirTicketRequestService airTicketRequestService;
-
+	private ProductCommonFacade productCommonFacade;
 	@RequestMapping(value = "getGroupPirceData.do", method = RequestMethod.GET)
 	@ResponseBody
 	public String getGroupPirceData(Integer productId, Integer supplierId,
 			Date date) {
-		List<ProductGroupVo> priceGroup = productGroupService
-				.selectGroupsByProdctIdAndSupplierId(productId, supplierId,
-						date);
+		List<ProductGroupVo> priceGroup = agencyFitFacade.selectGroupsByProdctIdAndSupplierId(productId, supplierId,date);
+//		List<ProductGroupVo> priceGroup = productGroupService
+//				.selectGroupsByProdctIdAndSupplierId(productId, supplierId,
+//						date);
 		Gson gson = new Gson();
 		String string = gson.toJson(priceGroup);
 		return string;
@@ -167,19 +122,27 @@ public class AgencyFitController extends BaseController {
 		model.addAttribute("adultCost", adultCost);
 		model.addAttribute("childCost", childCost);
 
-		List<ProductGroupSupplierVo> groupSuppliersList = productGroupSupplierService
-				.selectProductGroupSupplierVos(groupId, priceId);
-		model.addAttribute("supplierList", groupSuppliersList);
+//		List<ProductGroupSupplierVo> groupSuppliersList = productGroupSupplierService
+//				.selectProductGroupSupplierVos(groupId, priceId);
+		AgencyOrderQueryDTO queryDTO = new AgencyOrderQueryDTO();
+		queryDTO.setDate(date);
+		queryDTO.setGroupId(groupId);
+		queryDTO.setPriceId(priceId);
+		queryDTO.setProductId(productId);
+		AgencyOrderResult result = agencyFitFacade.toAddGroupOrder(queryDTO);
+		model.addAttribute("supplierList", result.getGroupSupplierVos());
 
-		ProductInfo productInfo = productInfoService
-				.findProductInfoById(productId);
-		ProductGroup group = productGroupService.getGroupInfoById(groupId);
-		model.addAttribute("productGroup", group);
+//		ProductInfo productInfo = productInfoService
+//				.findProductInfoById(productId);
+//		ProductGroup group = productGroupService.getGroupInfoById(groupId);
+		model.addAttribute("productGroup", result.getProductGroup());
 
 		PlatformEmployeePo curUser = WebUtils.getCurUser(request);
 		model.addAttribute("curUser", curUser);
-		ProductRemark productRemark = productRemarkService
-				.findProductRemarkByProductId(productId);
+//		ProductRemark productRemark = productRemarkService
+//				.findProductRemarkByProductId(productId);
+		ProductRemark productRemark = result.getProductRemark();
+		ProductInfo productInfo = result.getProductInfo();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		FitOrderVO vo = new FitOrderVO();
 		GroupOrder groupOrder = new GroupOrder();
@@ -199,26 +162,33 @@ public class AgencyFitController extends BaseController {
 		vo.setGroupOrder(groupOrder);
 		model.addAttribute("vo", vo);
 		
-		int count = productStockService.getRestCountByProductIdAndDate(groupOrder.getProductId(),date);
+//		int count = productStockService.getRestCountByProductIdAndDate(groupOrder.getProductId(),date);
+		int count = result.getCount();
 		model.addAttribute("allowNum", count); // 库存
 
 		int bizId = WebUtils.getCurBizId(request);
 		model.addAttribute("productId", productId);
-		List<DicInfo> jdxjList = dicService.getListByTypeCode(BasicConstants.GYXX_JDXJ);
+//		List<DicInfo> jdxjList = dicService.getListByTypeCode(BasicConstants.GYXX_JDXJ);
+		List<DicInfo> jdxjList = saleCommonFacade.getHotelLevelListByTypeCode();
 		model.addAttribute("jdxjList", jdxjList);
-		List<DicInfo> jtfsList = dicService.getListByTypeCode(BasicConstants.GYXX_JTFS,bizId);
+//		List<DicInfo> jtfsList = dicService.getListByTypeCode(BasicConstants.GYXX_JTFS,bizId);
+		List<DicInfo> jtfsList = saleCommonFacade.getTransportListByTypeCode(bizId);
 		model.addAttribute("jtfsList", jtfsList);
-		List<DicInfo> zjlxList = dicService.getListByTypeCode(BasicConstants.GYXX_ZJLX);
+//		List<DicInfo> zjlxList = dicService.getListByTypeCode(BasicConstants.GYXX_ZJLX);
+		List<DicInfo> zjlxList = saleCommonFacade.getCertificateTypesByTypeCode();
 		model.addAttribute("zjlxList", zjlxList);
-		List<DicInfo> guestSourceList = dicService.getListByTypeCode(BasicConstants.GYXX_GUESTSOURCE,bizId);
+//		List<DicInfo> guestSourceList = dicService.getListByTypeCode(BasicConstants.GYXX_GUESTSOURCE,bizId);
+		List<DicInfo> guestSourceList = saleCommonFacade.getGuestSourcesByTypeCode(bizId);
 		model.addAttribute("guestSourceList", guestSourceList);
 
-		DicInfo dicInfoCR = dicService.getDicInfoByTypeCodeAndDicCode(
-				WebUtils.getCurBizId(request), BasicConstants.GYXX_LYSFXM,
-				BasicConstants.CR);
-		DicInfo dicInfoET = dicService.getDicInfoByTypeCodeAndDicCode(
-				WebUtils.getCurBizId(request), BasicConstants.GYXX_LYSFXM,
-				BasicConstants.ERT);
+		DicInfo dicInfoCR = saleCommonFacade.getAdultFeeItems(bizId);
+//		DicInfo dicInfoCR = dicService.getDicInfoByTypeCodeAndDicCode(
+//				WebUtils.getCurBizId(request), BasicConstants.GYXX_LYSFXM,
+//				BasicConstants.CR);
+		DicInfo dicInfoET = saleCommonFacade.getEatFeeItems(bizId);
+//		DicInfo dicInfoET = dicService.getDicInfoByTypeCodeAndDicCode(
+//				WebUtils.getCurBizId(request), BasicConstants.GYXX_LYSFXM,
+//				BasicConstants.ERT);
 
 		List<DicInfo> dicInfoCRList = new ArrayList<DicInfo>();
 		dicInfoCRList.add(dicInfoCR);
@@ -227,13 +197,16 @@ public class AgencyFitController extends BaseController {
 		model.addAttribute("dicInfoCRList", dicInfoCRList);
 		model.addAttribute("dicInfoETList", dicInfoETList);
 
-		List<DicInfo> sourceTypeList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_AGENCY_SOURCE_TYPE,bizId);
+		List<DicInfo> sourceTypeList = saleCommonFacade.getGuestSourceTypes(bizId);
+//		List<DicInfo> sourceTypeList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_AGENCY_SOURCE_TYPE,bizId);
 		model.addAttribute("sourceTypeList", sourceTypeList);
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+		RegionResult regionResult = productCommonFacade.queryProvinces();
+		model.addAttribute("allProvince", regionResult.getRegionList());
 		
-		List<DicInfo> lysfxmList = dicService.getListByTypeCode(BasicConstants.GYXX_LYSFXM, bizId);
+//		List<DicInfo> lysfxmList = dicService.getListByTypeCode(BasicConstants.GYXX_LYSFXM, bizId);
+		List<DicInfo> lysfxmList = saleCommonFacade.getFeeItems2(bizId);
 		model.addAttribute("lysfxmList", lysfxmList);
 
 		return "agency/fitOrder/fitOrderInfo";
@@ -242,127 +215,142 @@ public class AgencyFitController extends BaseController {
 	@RequestMapping(value = "toEditFirOrder.htm", method = RequestMethod.GET)
 	public String toEditFirOrder(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer orderId,
-			Integer operType, boolean isSales) throws ParseException {
-		FitOrderVO vo = fitOrderService.selectFitOrderVOById(orderId);
+			Integer operType, boolean isSales) throws Exception {
+		AgencyOrderResult result = agencyFitFacade.toEditFirOrder(orderId);
+//		FitOrderVO vo = fitOrderService.selectFitOrderVOById(orderId);
+		FitOrderVO vo = result.getFitOrderVO();
 		model.addAttribute("vo", vo);
 		model.addAttribute("operType", operType);
 		model.addAttribute("config", config);
 		model.addAttribute("editType", false);
 		model.addAttribute("isSales", isSales);
 
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		GroupOrder groupOrder = groupOrderService.findById(orderId);
-		int count = productStockService.getRestCountByProductIdAndDate(groupOrder.getProductId(),sdf.parse(groupOrder.getDepartureDate()));
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		GroupOrder groupOrder = groupOrderService.findById(orderId);
+//		int count = productStockService.getRestCountByProductIdAndDate(groupOrder.getProductId(),sdf.parse(groupOrder.getDepartureDate()));
+		int count = result.getCount();
 		model.addAttribute("allowNum", count); // 库存
 
 		int bizId = WebUtils.getCurBizId(request);
 		
-		List<DicInfo> jdxjList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
+		List<DicInfo> jdxjList = saleCommonFacade.getHotelLevelListByTypeCode();
+//		List<DicInfo> jdxjList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
 		model.addAttribute("jdxjList", jdxjList);
-		List<DicInfo> jtfsList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_JTFS,bizId);
+		List<DicInfo> jtfsList = saleCommonFacade.getTransportListByTypeCode(bizId);
+//		List<DicInfo> jtfsList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_JTFS,bizId);
 		model.addAttribute("jtfsList", jtfsList);
-		List<DicInfo> zjlxList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_ZJLX);
+		List<DicInfo> zjlxList = saleCommonFacade.getCertificateTypesByTypeCode();
+//		List<DicInfo> zjlxList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_ZJLX);
 		model.addAttribute("zjlxList", zjlxList);
-		List<DicInfo> sourceTypeList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_AGENCY_SOURCE_TYPE,bizId);
-		List<DicInfo> guestSourceList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_GUESTSOURCE,bizId);
+//		List<DicInfo> sourceTypeList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_AGENCY_SOURCE_TYPE,bizId);
+		List<DicInfo> sourceTypeList = saleCommonFacade.getGuestSourceTypes(bizId);
+//		List<DicInfo> guestSourceList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_GUESTSOURCE,bizId);
+		List<DicInfo> guestSourceList = saleCommonFacade.getGuestSourcesByTypeCode(bizId);
 		model.addAttribute("guestSourceList", guestSourceList);
 		model.addAttribute("sourceTypeList", sourceTypeList);
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+		RegionResult regionResult = productCommonFacade.queryProvinces();
+		model.addAttribute("allProvince", regionResult.getRegionList());
 
-		List<RegionInfo> cityList = null;
-		if (groupOrder.getProvinceId() != null
-				&& groupOrder.getProvinceId() != -1) {
-			cityList = regionService.getRegionById(groupOrder.getProvinceId()
-					+ "");
-		}
+		List<RegionInfo> cityList = result.getRegionList();
+//		if (groupOrder.getProvinceId() != null && groupOrder.getProvinceId() != -1) {
+//			cityList = regionService.getRegionById(groupOrder.getProvinceId()
+//					+ "");
+//		}
 		model.addAttribute("allCity", cityList);
 		
-		List<DicInfo> lysfxmList = dicService.getListByTypeCode(
-				BasicConstants.GYXX_LYSFXM, bizId);
+		List<DicInfo> lysfxmList = saleCommonFacade.getFeeItems2(bizId);
+//		List<DicInfo> lysfxmList = dicService.getListByTypeCode(
+//				BasicConstants.GYXX_LYSFXM, bizId);
 		model.addAttribute("lysfxmList", lysfxmList);
-		List<Map<String, Object>> payDetails = financeService
-				.selectDetailByLocOrderId(orderId);
-		model.addAttribute("payDetails", payDetails);
+//		List<Map<String, Object>> payDetails = financeService
+//				.selectDetailByLocOrderId(orderId);
+		model.addAttribute("payDetails", result.getMapList());
 		return "agency/fitOrder/fitOrderInfo";
 	}
 
 	@RequestMapping(value = "saveFitOrderInfo.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String saveFitOrderInfo(HttpServletRequest request,
-			FitOrderVO fitOrderVO) throws ParseException {
-		ProductInfo productInfo ;
-		Integer orderId;
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Integer newNum = fitOrderVO.getGroupOrder().getNumAdult()
-				+ fitOrderVO.getGroupOrder().getNumChild();   //修改后人数
-		
-		Integer oldNum = 0;  //修改前人数
-		try {
-			if (fitOrderVO.getGroupOrder().getId() != null) {
-				FitOrderVO vo = fitOrderService.selectFitOrderVOById(fitOrderVO
-						.getGroupOrder().getId());
-
-				oldNum = vo.getGroupOrder().getNumAdult()
-						+ vo.getGroupOrder().getNumChild();
-			}
-			
-			//查出库存(剩余人数)
-			int freeCount = productStockService.getRestCountByProductIdAndDate(fitOrderVO
-					.getGroupOrder().getProductId(),sdf.parse(fitOrderVO
-							.getGroupOrder().getDepartureDate()));
-			//实际库存应该是修改前人数+库存
-			freeCount = oldNum + freeCount;
-			if(newNum > freeCount){
-				//如果新增人数大于库存,则不能保存
-				return errorJson("由于库存剩余数有变化，目前剩余库存不足【" + newNum + "】！实际库存还有【" + freeCount + "】");
-			}
-			
+			FitOrderVO fitOrderVO) throws Exception {
+//		ProductInfo productInfo ;
+//		Integer orderId;
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		Integer newNum = fitOrderVO.getGroupOrder().getNumAdult()
+//				+ fitOrderVO.getGroupOrder().getNumChild();   //修改后人数
+//		
+//		Integer oldNum = 0;  //修改前人数
+//		try {
+//			if (fitOrderVO.getGroupOrder().getId() != null) {
+//				FitOrderVO vo = fitOrderService.selectFitOrderVOById(fitOrderVO
+//						.getGroupOrder().getId());
+//
+//				oldNum = vo.getGroupOrder().getNumAdult()
+//						+ vo.getGroupOrder().getNumChild();
+//			}
+//			
+//			//查出库存(剩余人数)
+//			int freeCount = productStockService.getRestCountByProductIdAndDate(fitOrderVO
+//					.getGroupOrder().getProductId(),sdf.parse(fitOrderVO
+//							.getGroupOrder().getDepartureDate()));
+//			//实际库存应该是修改前人数+库存
+//			freeCount = oldNum + freeCount;
+//			if(newNum > freeCount){
+//				//如果新增人数大于库存,则不能保存
+//				return errorJson("由于库存剩余数有变化，目前剩余库存不足【" + newNum + "】！实际库存还有【" + freeCount + "】");
+//			}
+//			
 			fitOrderVO.getGroupOrder().setOrderNo(
 					settingCommon.getMyBizCode(request));
 			fitOrderVO.setAgency(true);
-			if(fitOrderVO.getGroupOrder().getId()==null){
-				fitOrderVO.setProductCode(productInfoService.findProductInfoById(fitOrderVO.getGroupOrder().getProductId()).getCode());
-			}
-//			String bizConfigValue = WebUtils.getBizConfigValue(request,
-//					BizConfigConstant.AUTO_MERGE_ORDER);
-			 productInfo = productInfoService.findProductInfoById(fitOrderVO.getGroupOrder().getProductId());
-			orderId = fitOrderService.saveOrUpdateFitOrderInfo(fitOrderVO,
-					WebUtils.getCurUserId(request), WebUtils
-							.getCurUser(request).getName(),productInfo==null?null:productInfo.getOperatorId(),productInfo==null?"":productInfo.getOperatorName(), WebUtils
-							.getCurBizId(request), settingCommon
-							.getMyBizCode(request), true);
-		} catch (ParseException e) {
-			return errorJson("操作失败,请检查后重试！");
-		}
-		try {
-			if(productInfo!=null){
-				if(fitOrderVO.getGroupOrder().getType()==0){ //预留
-					productStockService.updateReserveCount(fitOrderVO.getGroupOrder().getProductId(), sdf.parse(fitOrderVO.getGroupOrder().getDepartureDate()), newNum - oldNum);
-					
-				}else{
-				
-
-				productStockService.updateStockCount(fitOrderVO.getGroupOrder()
-						.getProductId(), sdf.parse(fitOrderVO.getGroupOrder()
-						.getDepartureDate()), newNum - oldNum);
-				
-				}
-			}
-			
-			
-			
-			
-		} catch (Exception e) {
-			return errorJson("更新库存失败！");
-		}
-
-		return successJson("orderId", orderId + "");
+//			if(fitOrderVO.getGroupOrder().getId()==null){
+//				fitOrderVO.setProductCode(productInfoService.findProductInfoById(fitOrderVO.getGroupOrder().getProductId()).getCode());
+//			}
+////			String bizConfigValue = WebUtils.getBizConfigValue(request,
+////					BizConfigConstant.AUTO_MERGE_ORDER);
+//			 productInfo = productInfoService.findProductInfoById(fitOrderVO.getGroupOrder().getProductId());
+//			orderId = fitOrderService.saveOrUpdateFitOrderInfo(fitOrderVO,
+//					WebUtils.getCurUserId(request), WebUtils
+//							.getCurUser(request).getName(),productInfo==null?null:productInfo.getOperatorId(),productInfo==null?"":productInfo.getOperatorName(), WebUtils
+//							.getCurBizId(request), settingCommon
+//							.getMyBizCode(request), true);
+//		} catch (ParseException e) {
+//			return errorJson("操作失败,请检查后重试！");
+//		}
+//		try {
+//			if(productInfo!=null){
+//				if(fitOrderVO.getGroupOrder().getType()==0){ //预留
+//					productStockService.updateReserveCount(fitOrderVO.getGroupOrder().getProductId(), sdf.parse(fitOrderVO.getGroupOrder().getDepartureDate()), newNum - oldNum);
+//					
+//				}else{
+//				
+//
+//				productStockService.updateStockCount(fitOrderVO.getGroupOrder()
+//						.getProductId(), sdf.parse(fitOrderVO.getGroupOrder()
+//						.getDepartureDate()), newNum - oldNum);
+//				
+//				}
+//			}
+//			
+//			
+//			
+//			
+//		} catch (Exception e) {
+//			return errorJson("更新库存失败！");
+//		}
+		AgencyOrderQueryDTO queryDTO = new AgencyOrderQueryDTO();
+		queryDTO.setBizCode(settingCommon.getMyBizCode(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setUserId(WebUtils.getCurUserId(request));
+		queryDTO.setUserName(WebUtils.getCurUser(request).getName());
+		WebResult<Map<String,Object>> result = agencyFitFacade.saveFitOrderInfo(fitOrderVO, queryDTO);
+		
+		return result.isSuccess() ? successJson("orderId", result.getValue().get("orderId")+"") : errorJson(result.getResultMsg());
 	}
 
 	/**
@@ -378,21 +366,31 @@ public class AgencyFitController extends BaseController {
 	public String toFitOrderListForMsgl(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model) {
 		model.addAttribute("isSales", true);
-		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
-				WebUtils.getCurBizId(request));
-		model.addAttribute("pp", pp);
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		BrandQueryResult pp = productCommonFacade.brandQuery(brandQueryDTO);
+//		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
+//				WebUtils.getCurBizId(request));
+		model.addAttribute("pp", pp.getBrandList());
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+		RegionResult regionResult = productCommonFacade.queryProvinces();
+		model.addAttribute("allProvince", regionResult.getRegionList());
 		
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> sourceTypeList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_AGENCY_SOURCE_TYPE,bizId);
+		List<DicInfo> sourceTypeList = saleCommonFacade.getGuestSourceTypes(bizId);
+//		List<DicInfo> sourceTypeList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_AGENCY_SOURCE_TYPE,bizId);
 		model.addAttribute("sourceTypeList", sourceTypeList);
 		
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+//		model.addAttribute("orgJsonStr",
+//				orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr",
+//				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO	departmentTuneQueryDTO = new  DepartmentTuneQueryDTO();
+	    departmentTuneQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		DepartmentTuneQueryResult queryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", queryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", queryResult.getOrgUserJsonStr());
 		return "agency/fitOrder/fitOrderList";
 	}
 	@RequestMapping(value = "getFitOrderListForMsglData.do")
@@ -415,56 +413,66 @@ public class AgencyFitController extends BaseController {
 		}
 
 		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
-				&& StringUtils.isNotBlank(groupOrder.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = groupOrder.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
+//		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
+//				&& StringUtils.isNotBlank(groupOrder.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = groupOrder.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(
+//					WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//			}
+//		}
+		groupOrder.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(groupOrder.getSaleOperatorIds(),
+				groupOrder.getOrgIds(), WebUtils.getCurBizId(request)));
+		
 		PageBean pageBean = new PageBean();
 		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
 				: groupOrder.getPageSize());
 		pageBean.setPage(groupOrder.getPage() == null ? 1 : groupOrder
 				.getPage());
 		pageBean.setParameter(groupOrder);
-		pageBean = groupOrderService.selectFitOrderListPage(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request),0);
-		List<GroupOrder> list = pageBean.getResult();
-		if (list != null && list.size() > 0) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			for (GroupOrder groupOrder2 : list) {
-				if (groupOrder2.getCreateTime() != null) {
-					Long createTime = groupOrder2.getCreateTime();
-					String dateStr = sdf.format(createTime);
-					groupOrder2.setCreateTimeStr(dateStr);
-					
-					if (groupOrder2.getProductId()!=null){ 
-						ProductInfo productInfo = productInfoService.findProductInfoById(groupOrder2.getProductId());
-						groupOrder2.setQuartzTime(productInfo.getObligateHour());
-					}
-				}
-
-			}
-		}
-
-		GroupOrder order = groupOrderService.selectFitOrderTotalCount(
-				groupOrder, WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request),0);
-		model.addAttribute("page", pageBean);
-		model.addAttribute("totalOrder", order);
+//		pageBean = groupOrderService.selectFitOrderListPage(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request),0);
+//		List<GroupOrder> list = pageBean.getResult();
+//		if (list != null && list.size() > 0) {
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//			for (GroupOrder groupOrder2 : list) {
+//				if (groupOrder2.getCreateTime() != null) {
+//					Long createTime = groupOrder2.getCreateTime();
+//					String dateStr = sdf.format(createTime);
+//					groupOrder2.setCreateTimeStr(dateStr);
+//					
+//					if (groupOrder2.getProductId()!=null){ 
+//						ProductInfo productInfo = productInfoService.findProductInfoById(groupOrder2.getProductId());
+//						groupOrder2.setQuartzTime(productInfo.getObligateHour());
+//					}
+//				}
+//
+//			}
+//		}
+//
+//		GroupOrder order = groupOrderService.selectFitOrderTotalCount(
+//				groupOrder, WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request),0);
+		AgencyOrderQueryDTO queryDTO = new AgencyOrderQueryDTO();
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setGroupOrder(groupOrder);
+		queryDTO.setSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setPageBean(pageBean);
+		queryDTO.setOperatorType(0);
+		AgencyOrderResult result = agencyFitFacade.getFitOrderListForMsglData(queryDTO);
+		model.addAttribute("page", result.getPageBean());
+		model.addAttribute("totalOrder", result.getGroupOrder());
 		return "agency/fitOrder/fitOrderList_table";
 	}
 
@@ -473,19 +481,31 @@ public class AgencyFitController extends BaseController {
 	public String toFitOrderListForSales(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model) {
 		model.addAttribute("isSales", false);
-		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
-				WebUtils.getCurBizId(request));
-		model.addAttribute("pp", pp);
-		List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-		List<DicInfo> sourceTypeList = dicService
-				.getListByTypeCode(BasicConstants.GYXX_AGENCY_SOURCE_TYPE);
-		model.addAttribute("sourceTypeList", sourceTypeList);
+//		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
+//				WebUtils.getCurBizId(request));
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		BrandQueryResult pp = productCommonFacade.brandQuery(brandQueryDTO);
+		model.addAttribute("pp", pp.getBrandList());
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("allProvince", allProvince);
+//		List<DicInfo> sourceTypeList = dicService
+//				.getListByTypeCode(BasicConstants.GYXX_AGENCY_SOURCE_TYPE);
+		RegionResult regionResult = productCommonFacade.queryProvinces();
+		model.addAttribute("allProvince", regionResult.getRegionList());
+		
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		List<DicInfo> sourceTypeList = saleCommonFacade.getGuestSourceTypes(bizId);
+		model.addAttribute("sourceTypeList", sourceTypeList);
+//		model.addAttribute("orgJsonStr",
+//				orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr",
+//				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO	departmentTuneQueryDTO = new  DepartmentTuneQueryDTO();
+	    departmentTuneQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		DepartmentTuneQueryResult queryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", queryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", queryResult.getOrgUserJsonStr());
 		return "agency/fitOrder/fitOrderList";
 	}
 	
@@ -509,55 +529,65 @@ public class AgencyFitController extends BaseController {
 		}
 
 		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
-				&& StringUtils.isNotBlank(groupOrder.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = groupOrder.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
+//		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
+//				&& StringUtils.isNotBlank(groupOrder.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = groupOrder.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(
+//					WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0,
+//						salesOperatorIds.length() - 1));
+//			}
+//		}
+		groupOrder.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(groupOrder.getSaleOperatorIds(),
+				groupOrder.getOrgIds(), WebUtils.getCurBizId(request)));
+		
 		PageBean pageBean = new PageBean();
 		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
 				: groupOrder.getPageSize());
 		pageBean.setPage(groupOrder.getPage() == null ? 1 : groupOrder
 				.getPage());
 		pageBean.setParameter(groupOrder);
-		pageBean = groupOrderService.selectFitOrderListPage(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request),1);
-		List<GroupOrder> list = pageBean.getResult();
-		if (list != null && list.size() > 0) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			for (GroupOrder groupOrder2 : list) {
-				if (groupOrder2.getCreateTime() != null) {
-					Long createTime = groupOrder2.getCreateTime();
-					String dateStr = sdf.format(createTime);
-					groupOrder2.setCreateTimeStr(dateStr);
-					if (groupOrder2.getProductId()!=null){
-						ProductInfo productInfo = productInfoService.findProductInfoById(groupOrder2.getProductId());
-						groupOrder2.setQuartzTime(productInfo.getObligateHour());
-					}
-				}
-
-			}
-		}
-
-		GroupOrder order = groupOrderService.selectFitOrderTotalCount(
-				groupOrder, WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request),1);
-		model.addAttribute("page", pageBean);
-		model.addAttribute("totalOrder", order);
+//		pageBean = groupOrderService.selectFitOrderListPage(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request),1);
+//		List<GroupOrder> list = pageBean.getResult();
+//		if (list != null && list.size() > 0) {
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//			for (GroupOrder groupOrder2 : list) {
+//				if (groupOrder2.getCreateTime() != null) {
+//					Long createTime = groupOrder2.getCreateTime();
+//					String dateStr = sdf.format(createTime);
+//					groupOrder2.setCreateTimeStr(dateStr);
+//					if (groupOrder2.getProductId()!=null){
+//						ProductInfo productInfo = productInfoService.findProductInfoById(groupOrder2.getProductId());
+//						groupOrder2.setQuartzTime(productInfo.getObligateHour());
+//					}
+//				}
+//
+//			}
+//		}
+//
+//		GroupOrder order = groupOrderService.selectFitOrderTotalCount(
+//				groupOrder, WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request),1);
+		AgencyOrderQueryDTO queryDTO = new AgencyOrderQueryDTO();
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setGroupOrder(groupOrder);
+		queryDTO.setSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setPageBean(pageBean);
+		queryDTO.setOperatorType(1);
+		AgencyOrderResult result = agencyFitFacade.getFitOrderListForMsglData(queryDTO);
+		model.addAttribute("page", result.getPageBean());
+		model.addAttribute("totalOrder", result.getGroupOrder());
 		return "agency/fitOrder/fitOrderList_table";
 	}
 
@@ -575,23 +605,28 @@ public class AgencyFitController extends BaseController {
 	public String getInsertFitGroupList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, TourGroup tourGroup,
 			Integer tid) throws ParseException {
-		if (tid != null) {
-			GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(tid);
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-			tourGroup.setEndTime(sdf.parse(groupOrder.getDepartureDate()));
-		}
+//		if (tid != null) {
+//			GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(tid);
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//
+//			tourGroup.setEndTime(sdf.parse(groupOrder.getDepartureDate()));
+//		}
 		tourGroup.setGroupMode(0);
 		PageBean pageBean = new PageBean();
 		pageBean.setPageSize(tourGroup.getPageSize() == null ? Constants.PAGESIZE
 				: tourGroup.getPageSize());
 		pageBean.setPage(tourGroup.getPage());
 		pageBean.setParameter(tourGroup);
-		pageBean = tourGroupService.selectSKGroupListPage(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
+//		pageBean = tourGroupService.selectSKGroupListPage(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+		AgencyOrderQueryDTO queryDTO = new AgencyOrderQueryDTO();
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setPageBean(pageBean);
+		pageBean = agencyFitFacade.getInsertFitGroupList(queryDTO);
 		model.addAttribute("page", pageBean);
-		model.addAttribute("tourGroup", tourGroup);
+		model.addAttribute("tourGroup", (TourGroup)pageBean.getParameter());
 		return "agency/fitOrder/insertFitGroupList";
 
 	}
@@ -608,7 +643,8 @@ public class AgencyFitController extends BaseController {
 	@ResponseBody
 	public String changeType(HttpServletRequest request,
 			HttpServletResponse reponse, GroupOrder groupOrder) {
-		groupOrderService.updateGroupOrder(groupOrder);
+//		groupOrderService.updateGroupOrder(groupOrder);
+		ResultSupport resultSupport = agencyFitFacade.updateGroupOrder(groupOrder);
 		return successJson();
 	}
 
@@ -624,37 +660,37 @@ public class AgencyFitController extends BaseController {
 	@ResponseBody
 	public String delGroupOrder(HttpServletRequest request,
 			HttpServletResponse reponse, Integer id) {
-		if (airTicketRequestService.doesOrderhaveRequested(
-				WebUtils.getCurBizId(request), id)) {
-			return errorJson("删除订单前请先取消机票申请。");
-		}
-		GroupOrder groupOrder = groupOrderService.findById(id);
-		groupOrder.setState(-1);
-		groupOrderService.updateGroupOrder(groupOrder);
-
-		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			
-			if(groupOrder.getType()==0){ //预留
-				productStockService.updateReserveCount(groupOrder.getProductId(), sdf.parse(groupOrder.getDepartureDate()),-(groupOrder.getNumAdult() + groupOrder.getNumChild()));
-				
-			}else{
-			
-
-				productStockService.updateStockCount(groupOrder.getProductId(),
-						sdf.parse(groupOrder.getDepartureDate()),
-						-(groupOrder.getNumAdult() + groupOrder.getNumChild()));
-			
-			}
-			
-			
-			
-			
-		} catch (Exception e) {
-			return errorJson("更新库存失败！");
-		}
-
-		return successJson();
+//		if (airTicketRequestService.doesOrderhaveRequested(
+//				WebUtils.getCurBizId(request), id)) {
+//			return errorJson("删除订单前请先取消机票申请。");
+//		}
+//		GroupOrder groupOrder = groupOrderService.findById(id);
+//		groupOrder.setState(-1);
+//		groupOrderService.updateGroupOrder(groupOrder);
+//
+//		try {
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//			
+//			if(groupOrder.getType()==0){ //预留
+//				productStockService.updateReserveCount(groupOrder.getProductId(), sdf.parse(groupOrder.getDepartureDate()),-(groupOrder.getNumAdult() + groupOrder.getNumChild()));
+//				
+//			}else{
+//			
+//
+//				productStockService.updateStockCount(groupOrder.getProductId(),
+//						sdf.parse(groupOrder.getDepartureDate()),
+//						-(groupOrder.getNumAdult() + groupOrder.getNumChild()));
+//			
+//			}
+//			
+//			
+//			
+//			
+//		} catch (Exception e) {
+//			return errorJson("更新库存失败！");
+//		}
+		ResultSupport resultSupport = agencyFitFacade.delGroupOrder(id, WebUtils.getCurBizId(request));
+		return resultSupport.isSuccess() ? successJson() : errorJson(resultSupport.getResultMsg());
 	}
 
 	/**
@@ -671,21 +707,21 @@ public class AgencyFitController extends BaseController {
 	public String beforeInsertGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String ids) {
 		String[] split = ids.split(",");
-		List<String> datelist = new ArrayList<String>();
-		for (String id : split) {
-			GroupOrder groupOrder = groupOrderService.findById(Integer
-					.parseInt(id));
-			datelist.add(groupOrder.getDepartureDate());
-//			List<GroupOrderGuest> guestList = groupOrderGuestService
-//					.selectByOrderId(Integer.parseInt(id));
-//			if (guestList == null || guestList.size() == 0) {
-//				return errorJson("订单号:" + groupOrder.getOrderNo()
-//						+ "无客人信息,无法并团!");
-//			}
-
-		}
-
-		if (!MergeGroupUtils.hasSame(datelist)) {
+//		List<String> datelist = new ArrayList<String>();
+//		for (String id : split) {
+//			GroupOrder groupOrder = groupOrderService.findById(Integer
+//					.parseInt(id));
+//			datelist.add(groupOrder.getDepartureDate());
+////			List<GroupOrderGuest> guestList = groupOrderGuestService
+////					.selectByOrderId(Integer.parseInt(id));
+////			if (guestList == null || guestList.size() == 0) {
+////				return errorJson("订单号:" + groupOrder.getOrderNo()
+////						+ "无客人信息,无法并团!");
+////			}
+//
+//		}
+		AgencyOrderResult result = agencyFitFacade.modifyGroup(split);
+		if (!MergeGroupUtils.hasSame(result.getStrList())) {
 			return errorJson("发团日期一致的订单才允许加入到团中!");
 		}
 		return successJson();
@@ -705,33 +741,33 @@ public class AgencyFitController extends BaseController {
 	public String judgeMergeGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String ids) {
 		String[] split = ids.split(",");
-		List<String> datelist = new ArrayList<String>();
-		List<Integer> productlist = new ArrayList<Integer>();
-		List<Integer> brandlist = new ArrayList<Integer>();
-		List<Integer> statelist = new ArrayList<Integer>();
-		for (String id : split) {
-			GroupOrder groupOrder = groupOrderService.findById(Integer
-					.parseInt(id));
-			datelist.add(groupOrder.getDepartureDate());
-			productlist.add(groupOrder.getProductId());
-			statelist.add(groupOrder.getStateFinance());
-			brandlist.add(groupOrder.getProductBrandId());
-//			List<GroupOrderGuest> guestList = groupOrderGuestService
-//					.selectByOrderId(Integer.parseInt(id));
-//			if (guestList == null || guestList.size() == 0) {
-//				return errorJson("订单号:" + groupOrder.getOrderNo()
-//						+ "无客人信息,无法并团!");
-//			}
-
-		}
-
-		if (!MergeGroupUtils.hasSame(datelist)) {
+//		List<String> datelist = new ArrayList<String>();
+//		List<Integer> productlist = new ArrayList<Integer>();
+//		List<Integer> brandlist = new ArrayList<Integer>();
+//		List<Integer> statelist = new ArrayList<Integer>();
+//		for (String id : split) {
+//			GroupOrder groupOrder = groupOrderService.findById(Integer
+//					.parseInt(id));
+//			datelist.add(groupOrder.getDepartureDate());
+//			productlist.add(groupOrder.getProductId());
+//			statelist.add(groupOrder.getStateFinance());
+//			brandlist.add(groupOrder.getProductBrandId());
+////			List<GroupOrderGuest> guestList = groupOrderGuestService
+////					.selectByOrderId(Integer.parseInt(id));
+////			if (guestList == null || guestList.size() == 0) {
+////				return errorJson("订单号:" + groupOrder.getOrderNo()
+////						+ "无客人信息,无法并团!");
+////			}
+//
+//		}
+		AgencyOrderResult result = agencyFitFacade.modifyGroup(split);
+		if (!MergeGroupUtils.hasSame(result.getStrList())) {
 			return errorJson("发团日期一致的订单才允许并团!");
 		}
 		// if (!MergeGroupUtils.hasSame(productlist)) {
 		// return errorJson("产品一致的订单才允许并团!");
 		// }
-		if (!MergeGroupUtils.hasSame(brandlist)) {
+		if (!MergeGroupUtils.hasSame(result.getIntList())) {
 			return errorJson("产品品牌一致的订单才允许并团!");
 		}
 
@@ -743,35 +779,40 @@ public class AgencyFitController extends BaseController {
 	public String insertGroupMany(HttpServletRequest request,
 			HttpServletResponse reponse, String ids, String code) {
 
-		TourGroup tourGroup = tourGroupService.selectByGroupCode(code);
-		if (tourGroup == null) {
-			return errorJson("未查到该团号对应的散客团信息!");
-		}
+//		TourGroup tourGroup = tourGroupService.selectByGroupCode(code);
+//		if (tourGroup == null) {
+//			return errorJson("未查到该团号对应的散客团信息!");
+//		}
 		String[] split = ids.split(",");
-		for (String str : split) {
-			GroupOrder groupOrder = groupOrderService
-					.selectByPrimaryKey(Integer.parseInt(str));
-			groupOrder.setGroupId(tourGroup.getId());
-			groupOrder.setOperatorId(WebUtils.getCurUserId(request));
-			groupOrder.setOperatorName(WebUtils.getCurUser(request).getName());
-			groupOrderService.updateGroupOrder(groupOrder);
-			tourGroup.setOrderNum(tourGroup.getOrderNum() == null ? 1
-					: tourGroup.getOrderNum() + 1);
-			tourGroupService.updateByPrimaryKey(tourGroup);
-			groupOrderService.updateGroupPersonNum(tourGroup.getId());
-			groupOrderService.updateGroupPrice(tourGroup.getId());
-
-			List<GroupRequirement> list = groupRequirementService
-					.selectByOrderId(Integer.parseInt(str));
-			if (list != null && list.size() > 0) {
-				for (GroupRequirement groupRequirement : list) {
-					groupRequirement.setGroupId(tourGroup.getId());
-					groupRequirementService
-							.updateByPrimaryKeySelective(groupRequirement);
-				}
-			}
-		}
-		return successJson();
+//		for (String str : split) {
+//			GroupOrder groupOrder = groupOrderService
+//					.selectByPrimaryKey(Integer.parseInt(str));
+//			groupOrder.setGroupId(tourGroup.getId());
+//			groupOrder.setOperatorId(WebUtils.getCurUserId(request));
+//			groupOrder.setOperatorName(WebUtils.getCurUser(request).getName());
+//			groupOrderService.updateGroupOrder(groupOrder);
+//			tourGroup.setOrderNum(tourGroup.getOrderNum() == null ? 1
+//					: tourGroup.getOrderNum() + 1);
+//			tourGroupService.updateByPrimaryKey(tourGroup);
+//			groupOrderService.updateGroupPersonNum(tourGroup.getId());
+//			groupOrderService.updateGroupPrice(tourGroup.getId());
+//
+//			List<GroupRequirement> list = groupRequirementService
+//					.selectByOrderId(Integer.parseInt(str));
+//			if (list != null && list.size() > 0) {
+//				for (GroupRequirement groupRequirement : list) {
+//					groupRequirement.setGroupId(tourGroup.getId());
+//					groupRequirementService
+//							.updateByPrimaryKeySelective(groupRequirement);
+//				}
+//			}
+//		}
+		AgencyOrderQueryDTO queryDTO = new AgencyOrderQueryDTO();
+		queryDTO.setUserId(WebUtils.getCurUserId(request));
+		queryDTO.setUserName(WebUtils.getCurUser(request).getName());
+		queryDTO.setIdArr(split);
+		ResultSupport resultSupport = agencyFitFacade.insertGroupMany(queryDTO);
+		return resultSupport.isSuccess() ? successJson():errorJson(resultSupport.getResultMsg());
 	}
 
 	@RequestMapping(value = "insertGroup.do", method = RequestMethod.POST)
@@ -779,32 +820,39 @@ public class AgencyFitController extends BaseController {
 	public String insertGroup(HttpServletRequest request,
 			HttpServletResponse reponse, Integer id, String code) {
 
-		TourGroup tourGroup = tourGroupService.selectByGroupCode(code);
-		if (tourGroup == null) {
-			return errorJson("未查到该团号对应的散客团信息!");
-		}
-		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(id);
-		groupOrder.setGroupId(tourGroup.getId());
-		groupOrder.setOperatorId(tourGroup.getOperatorId());
-		groupOrder.setOperatorName(tourGroup.getOperatorName());
-		groupOrderService.updateGroupOrder(groupOrder);
-		tourGroup.setOrderNum(tourGroup.getOrderNum() == null ? 1 : tourGroup
-				.getOrderNum() + 1);
-		tourGroupService.updateByPrimaryKey(tourGroup);
-		groupOrderService.updateGroupPersonNum(tourGroup.getId());
-		groupOrderService.updateGroupPrice(tourGroup.getId());
+//		TourGroup tourGroup = tourGroupService.selectByGroupCode(code);
+//		if (tourGroup == null) {
+//			return errorJson("未查到该团号对应的散客团信息!");
+//		}
+//		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(id);
+//		groupOrder.setGroupId(tourGroup.getId());
+//		groupOrder.setOperatorId(tourGroup.getOperatorId());
+//		groupOrder.setOperatorName(tourGroup.getOperatorName());
+//		groupOrderService.updateGroupOrder(groupOrder);
+//		tourGroup.setOrderNum(tourGroup.getOrderNum() == null ? 1 : tourGroup
+//				.getOrderNum() + 1);
+//		tourGroupService.updateByPrimaryKey(tourGroup);
+//		groupOrderService.updateGroupPersonNum(tourGroup.getId());
+//		groupOrderService.updateGroupPrice(tourGroup.getId());
+//
+//		List<GroupRequirement> list = groupRequirementService
+//				.selectByOrderId(id);
+//		if (list != null && list.size() > 0) {
+//			for (GroupRequirement groupRequirement : list) {
+//				groupRequirement.setGroupId(tourGroup.getId());
+//				groupRequirementService
+//						.updateByPrimaryKeySelective(groupRequirement);
+//			}
+//		}
 
-		List<GroupRequirement> list = groupRequirementService
-				.selectByOrderId(id);
-		if (list != null && list.size() > 0) {
-			for (GroupRequirement groupRequirement : list) {
-				groupRequirement.setGroupId(tourGroup.getId());
-				groupRequirementService
-						.updateByPrimaryKeySelective(groupRequirement);
-			}
-		}
-
-		return successJson();
+//		return successJson();
+		AgencyOrderQueryDTO queryDTO = new AgencyOrderQueryDTO();
+		queryDTO.setUserId(WebUtils.getCurUserId(request));
+		queryDTO.setUserName(WebUtils.getCurUser(request).getName());
+		String[] idArr = {id+""};
+		queryDTO.setIdArr(idArr);
+		ResultSupport resultSupport = agencyFitFacade.insertGroupMany(queryDTO);
+		return resultSupport.isSuccess() ? successJson():errorJson(resultSupport.getResultMsg());
 	}
 
 	/**
@@ -819,15 +867,16 @@ public class AgencyFitController extends BaseController {
 	@RequestMapping(value = "toMergeGroup.htm")
 	public String toMergeGroup(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, String ids) {
-		List<GroupOrder> list = new ArrayList<GroupOrder>();
+//		List<GroupOrder> list = new ArrayList<GroupOrder>();
 		String[] split = ids.split(",");
-		for (String str : split) {
-			GroupOrder groupOrder = groupOrderService.findById(Integer
-					.parseInt(str));
-			groupOrder.setGroupOrderGuestList((groupOrderGuestService
-					.selectByOrderId(groupOrder.getId())));
-			list.add(groupOrder);
-		}
+//		for (String str : split) {
+//			GroupOrder groupOrder = groupOrderService.findById(Integer
+//					.parseInt(str));
+//			groupOrder.setGroupOrderGuestList((groupOrderGuestService
+//					.selectByOrderId(groupOrder.getId())));
+//			list.add(groupOrder);
+//		}
+		List<GroupOrder> list = agencyFitFacade.toMergeGroup(split);
 		model.addAttribute("list", list);
 		model.addAttribute("ids", ids);
 		return "agency/fitOrder/mergeGroup";
@@ -842,6 +891,7 @@ public class AgencyFitController extends BaseController {
 	 * @return
 	 * @throws ParseException
 	 */
+	//TODO 逻辑有问题
 	@RequestMapping(value = "mergeGroup.do")
 	@ResponseBody
 	public String mergeGroup(HttpServletRequest request,
@@ -951,13 +1001,17 @@ public class AgencyFitController extends BaseController {
 		pageBean.setPage(groupOrder.getPage() == null ? 1 : groupOrder
 				.getPage());
 		pageBean.setParameter(groupOrder);
-		pageBean = groupOrderService.selectNotGroupListPage(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request));
-		List<GroupOrder> result = pageBean.getResult();
-		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
-				WebUtils.getCurBizId(request));
-		model.addAttribute("pp", pp);
+//		pageBean = groupOrderService.selectNotGroupListPage(pageBean,
+//				WebUtils.getCurBizId(request),
+//				WebUtils.getDataUserIdSet(request));
+		pageBean = agencyFitFacade.toImpNotGroupList(pageBean, WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
+//		List<GroupOrder> result = pageBean.getResult();
+//		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
+//				WebUtils.getCurBizId(request));
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		BrandQueryResult pp = productCommonFacade.brandQuery(brandQueryDTO);
+		model.addAttribute("pp", pp.getBrandList());
 		model.addAttribute("groupOrder", groupOrder);
 		model.addAttribute("page", pageBean);
 		return "agency/fitOrder/impNotGroupOrder";

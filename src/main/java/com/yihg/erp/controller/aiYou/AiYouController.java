@@ -71,12 +71,6 @@ public class AiYouController extends BaseController {
     private BizSettingCommon settingCommon;
 
     @Autowired
-    private DicService dicService;
-    @Autowired
-    private RegionService regionService;
-    @Autowired
-    private ProductStockService productStockService;
-    @Autowired
     private GroupOrderBiz groupOrderBiz;
     @Autowired
     private GroupOrderFacade groupOrderFacade;
@@ -84,16 +78,6 @@ public class AiYouController extends BaseController {
     private SysConfig config;
     @Autowired
     private FitOrderDal fitOrderDal;
-    @Autowired
-    private SupplierService supplierService;
-    @Autowired
-    private ProductGroupSupplierService productGroupSupplierService;
-    @Autowired
-    private ProductRemarkService productRemarkService;
-    @Autowired
-    private ProductInfoService productInfoService;
-    @Autowired
-    private ProductRouteService productRouteService;
 
     /**
      * 获取爱游订单
