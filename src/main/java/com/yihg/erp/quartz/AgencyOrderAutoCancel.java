@@ -5,39 +5,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.yihg.erp.utils.WebUtils;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.api.ProductStockService;
-import com.yihg.product.api.TrafficResService;
-import com.yihg.product.constants.Constants.TRAFFICRES_STOCK_ACTION;
-import com.yihg.product.po.ProductInfo;
-import com.yihg.product.po.TrafficResStocklog;
-import com.yihg.sales.api.FitOrderService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.product.constans.Constants.TRAFFICRES_STOCK_ACTION;
+import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
+import com.yimayhd.erpcenter.dal.product.po.TrafficResStocklog;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 
 public class AgencyOrderAutoCancel {
 	private static final Logger log = LoggerFactory.getLogger(AgencyOrderAutoCancel.class);
-	@Autowired
-	private FitOrderService fitOrderService;
-	@Autowired
-	private GroupOrderService groupOrderService;
-
-	@Autowired
-	private ProductStockService productStockService;
-
-	@Autowired
-	private ProductInfoService productInfoService;
-
-	@Autowired
-	private TrafficResService trafficResService;
 
 	public void execute() throws ParseException {
 		long startTime = System.currentTimeMillis();

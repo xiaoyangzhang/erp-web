@@ -27,7 +27,6 @@ import com.yimayhd.erpcenter.facade.sales.query.BookingDeliveryQueryDTO;
 import com.yimayhd.erpcenter.facade.sales.query.ContractQueryDTO;
 import com.yimayhd.erpcenter.facade.sales.result.operation.BookingSupplierResult;
 import com.yimayhd.erpcenter.facade.sales.result.operation.TourGroupInfoResult;
-import com.yimayhd.erpcenter.facade.sales.service.BookingComponentFacade;
 import com.yimayhd.erpresource.dal.po.SupplierCar;
 
 @Controller

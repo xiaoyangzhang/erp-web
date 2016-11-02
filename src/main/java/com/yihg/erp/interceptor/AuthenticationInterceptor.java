@@ -20,7 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.contant.SysConfigConstant;
-import com.yihg.sys.po.PlatformMenuPo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformMenuPo;
 import com.yimayhd.erpcenter.dal.sys.po.UserSession;
 import com.yimayhd.erpcenter.facade.sys.query.UserSessionDTO;
 import com.yimayhd.erpcenter.facade.sys.result.UserSessionResult;
