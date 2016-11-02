@@ -38,9 +38,10 @@ import com.yimayhd.erpcenter.facade.operation.query.BookingShopListDTO;
 import com.yimayhd.erpcenter.facade.operation.result.BookingShopResult;
 import com.yimayhd.erpcenter.facade.operation.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.operation.result.ToFactShopResult;
+import com.yimayhd.erpcenter.facade.operation.service.BookingFinanceShopFacade;
 import com.yimayhd.erpcenter.facade.operation.service.BookingGuestShopFacade;
 import com.yimayhd.erpcenter.facade.operation.service.BookingShopFacade;
-import com.yimayhd.erpcenter.facade.sales.result.operation.BookingFinanceShopFacade;
+
 /**
  * @author : xuzejun
  * @date : 2015年7月25日 下午2:31:01
