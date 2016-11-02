@@ -891,7 +891,7 @@ public class AgencyFitController extends BaseController {
 			HttpServletResponse reponse, MergeGroupOrderVO mergeGroupOrderVO)
 			throws ParseException {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		List<GroupOrder> orderList = mergeGroupOrderVO.getOrderList();
+//		List<GroupOrder> orderList = mergeGroupOrderVO.getOrderList();
 
 		List<MergeGroupOrderVO> result = new ArrayList<MergeGroupOrderVO>();
 //		for (int i = 0; i < orderList.size();) {
@@ -917,38 +917,44 @@ public class AgencyFitController extends BaseController {
 //			result.add(mov);
 //		}
 		
-		for (MergeGroupOrderVO mgo : result) {
-			List<GroupOrder> oList = mergeGroupOrderVO.getOrderList();
-			Integer orderId = null;
-			Integer dayNum = null;
-			// 设置订单
-			for (GroupOrder go2 : orderList) {
-				List<GroupRoute> rouList = groupRouteService.selectByOrderId(go2.getId());
-				if (rouList != null && rouList.size() > 0) {
-
-					if (orderId == null) {
-						orderId = go2.getId();
-					}
-					if (dayNum == null) {
-						dayNum = rouList.size();
-					}
-					if (rouList.size() > dayNum) {
-						dayNum = rouList.size();
-						orderId = go2.getId();
-					}
-				}
-			}
-			
-			GroupOrder key = groupOrderService.selectByPrimaryKey(orderId);
-			ProductInfo productInfo = productInfoService.findProductInfoById(key.getProductId());
-			mgo.setProductCode(productInfo.getCode());
-		}
-		// -------------------------------------------------------------------------------
-
-		fitOrderService.mergetGroup(result, WebUtils.getCurBizId(request),
-				WebUtils.getCurUserId(request), WebUtils.getCurUser(request)
-						.getName(), settingCommon.getMyBizCode(request),true);
-
+//		for (MergeGroupOrderVO mgo : result) {
+//			List<GroupOrder> oList = mergeGroupOrderVO.getOrderList();
+//			Integer orderId = null;
+//			Integer dayNum = null;
+//			// 设置订单
+//			for (GroupOrder go2 : orderList) {
+//				List<GroupRoute> rouList = groupRouteService.selectByOrderId(go2.getId());
+//				if (rouList != null && rouList.size() > 0) {
+//
+//					if (orderId == null) {
+//						orderId = go2.getId();
+//					}
+//					if (dayNum == null) {
+//						dayNum = rouList.size();
+//					}
+//					if (rouList.size() > dayNum) {
+//						dayNum = rouList.size();
+//						orderId = go2.getId();
+//					}
+//				}
+//			}
+//			
+//			GroupOrder key = groupOrderService.selectByPrimaryKey(orderId);
+//			ProductInfo productInfo = productInfoService.findProductInfoById(key.getProductId());
+//			mgo.setProductCode(productInfo.getCode());
+//		}
+//		// -------------------------------------------------------------------------------
+//
+//		fitOrderService.mergetGroup(result, WebUtils.getCurBizId(request),
+//				WebUtils.getCurUserId(request), WebUtils.getCurUser(request)
+//						.getName(), settingCommon.getMyBizCode(request),true);
+		AgencyOrderQueryDTO queryDTO = new AgencyOrderQueryDTO();
+		queryDTO.setBizCode(settingCommon.getMyBizCode(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setUserId(WebUtils.getCurUserId(request));
+		queryDTO.setUserName(WebUtils.getCurUser(request).getName());
+		queryDTO.setMergeGroupOrderVOs(result);
+		ResultSupport resultSupport = agencyFitFacade.mergeGroup(queryDTO, mergeGroupOrderVO);
 		return successJson();
 	}
 

@@ -166,8 +166,8 @@ public class BookingGuestShopController extends BaseController {
 		BookingShopResult result = bookingFinanceShopFacade.toEditBookingShop(groupId, type);
 		model.addAttribute("shoplist", result.getBookingShops());
 		model.addAttribute("groupId", groupId);
-		
-		if(type==1){
+		  
+		if(type==1){  
 			return "operation/financeShop/alltoShop-list";
 		}else{
 			model.addAttribute("view", 1);
