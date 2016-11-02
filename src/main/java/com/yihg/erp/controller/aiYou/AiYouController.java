@@ -40,18 +40,17 @@ import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.DateUtils;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yimayhd.erpcenter.biz.sales.client.service.sales.GroupOrderBiz;
 import com.yimayhd.erpcenter.common.contants.BasicConstants;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
 import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
 import com.yimayhd.erpcenter.dal.product.po.ProductRemark;
 import com.yimayhd.erpcenter.dal.product.po.ProductRoute;
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.AiYouBean;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrice;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute;
-import com.yimayhd.erpcenter.dal.sales.client.sales.service.FitOrderDal;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.FitOrderVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.facade.basic.service.DicFacade;
@@ -62,7 +61,6 @@ import com.yimayhd.erpcenter.facade.sales.result.ToImpAiYouOrderResult;
 import com.yimayhd.erpcenter.facade.sales.service.AiYouFacade;
 import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
 import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade_aiyou;
-import com.yimayhd.erpresource.dal.constants.Constants;
 
 @Controller
 @RequestMapping(value = "/aiyou")

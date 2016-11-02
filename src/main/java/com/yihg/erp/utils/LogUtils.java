@@ -9,7 +9,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.yimayhd.erpcenter.dal.basic.constant.BasicConstants.LOG_ACTION;
+import com.yimayhd.erpcenter.common.contants.BasicConstants.LOG_ACTION;
 import com.yimayhd.erpcenter.dal.basic.po.LogOperator;
 import com.yimayhd.erpcenter.dal.basic.utils.LogFieldUtil;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;

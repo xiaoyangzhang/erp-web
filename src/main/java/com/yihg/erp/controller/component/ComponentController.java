@@ -17,13 +17,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
-import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
-import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
-import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
-import com.yimayhd.erpcenter.facade.sales.result.ContactManListResult;
-import com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.erpcenterFacade.common.client.query.BrandQueryDTO;
@@ -43,16 +36,20 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.util.TypeUtils;
 import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.controller.images.utils.DateUtil;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.TfsUpload;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
+import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
+import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.facade.basic.service.DicFacade;
 import com.yimayhd.erpcenter.facade.query.ComponentProductListDTO;
 import com.yimayhd.erpcenter.facade.result.ComponentProductListResult;
+import com.yimayhd.erpcenter.facade.sales.result.ContactManListResult;
+import com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade;
 import com.yimayhd.erpcenter.facade.service.ProductFacade;
 import com.yimayhd.erpresource.dal.constants.SupplierConstant;
 import com.yimayhd.erpresource.dal.po.SupplierDriver;
