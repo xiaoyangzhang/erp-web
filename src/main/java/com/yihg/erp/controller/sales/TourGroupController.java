@@ -1520,7 +1520,7 @@ public class TourGroupController extends BaseController {
 		findTourGroupByConditionDTO.setGroupOrder(groupOrder);
 		findTourGroupByConditionDTO.setCurBizId(WebUtils.getCurBizId(request));
 		findTourGroupByConditionDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
-		FindTourGroupByConditionResult findTourGroupByConditionResult = teamGroupFacade.findTourGroupByConditionLoadModel(findTourGroupByConditionDTO);
+		FindTourGroupByConditionResult findTourGroupByConditionResult = teamGroupFacade.findTourGroupByConditionLoadModel(findTourGroupByConditionDTO,pageBean);
 
 		model.addAttribute("pageTotalAudit", findTourGroupByConditionResult.getPageTotalAudit());
 		model.addAttribute("pageTotalChild", findTourGroupByConditionResult.getPageTotalChild());
