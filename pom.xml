@@ -86,10 +86,10 @@
 		<skip_maven_deploy>false</skip_maven_deploy>
 		<updateReleaseInfo>true</updateReleaseInfo>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<facade-product-client.version>0.0.8-SNAPSHOT</facade-product-client.version>
-		<facade-common-client.version>0.0.8-SNAPSHOT</facade-common-client.version>
-		<facade-finance-client.version>0.0.8-SNAPSHOT</facade-finance-client.version>
-		<facade-operation-client.version>0.0.8-SNAPSHOT</facade-operation-client.version>
+		<facade-product-client.version>0.0.9-SNAPSHOT</facade-product-client.version>
+		<facade-common-client.version>0.0.9-SNAPSHOT</facade-common-client.version>
+		<facade-finance-client.version>0.0.9-SNAPSHOT</facade-finance-client.version>
+		<facade-operation-client.version>0.0.9-SNAPSHOT</facade-operation-client.version>
 	</properties>
 
 	<dependencies>
@@ -368,7 +368,7 @@
 		<dependency>
 			<groupId>com.yimayhd.erpresource</groupId>
 			  <artifactId>erpresourceDAL-client</artifactId>
-			  <version>0.0.8-SNAPSHOT</version>
+			  <version>0.0.9-SNAPSHOT</version>
 		</dependency>
  		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
@@ -498,53 +498,53 @@
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterDAL-product-client</artifactId>
-			<version>0.0.8-SNAPSHOT</version>
+			<version>0.0.9-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-sys-client</artifactId>
-			<version>0.0.8-SNAPSHOT</version>
+			<version>0.0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterDAL-sys-client</artifactId>
-			<version>0.0.8-SNAPSHOT</version>
+			<version>0.0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpresource</groupId>
 			<artifactId>erpresourceDAL-client</artifactId>
-			<version>0.0.8-SNAPSHOT</version>
+			<version>0.0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-supplier-client</artifactId>
-			<version>0.0.8-SNAPSHOT</version>
+			<version>0.0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-sales-client</artifactId>
-			<version>0.0.8-SNAPSHOT</version>
+			<version>0.0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-basic-client</artifactId>
-			<version>0.0.8-SNAPSHOT</version>
+			<version>0.0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-tj-client</artifactId>
-			<version>0.0.8-SNAPSHOT</version>
+			<version>0.0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-ticket-client</artifactId>
-			<version>0.0.8-SNAPSHOT</version>
+			<version>0.0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>  
 		    <groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-dataAnalysis-client</artifactId>
-			<version>0.0.8-SNAPSHOT</version>
+			<version>0.0.9-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
