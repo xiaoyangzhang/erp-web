@@ -43,28 +43,12 @@ import com.yimayhd.erpcenter.dal.sys.po.UserSession;
 
 @Controller
 @RequestMapping("/resOrder")
-public class resTrafficOrderController extends BaseController{
+public class ResTrafficOrderController extends BaseController{
 	
-	@Autowired
-	private GroupOrderService groupOrderService;
-	
-	@Autowired
-	private TourGroupService tourGroupService;
-	
-	@Autowired
-	private TrafficResService trafficResService;
-	
-	@Autowired
-	private LogOperatorService logService;
-	
-	@Autowired
-	private DicService dicService;
 	
 	@Autowired
 	private BizSettingCommon settingCommon;
 	
-	@Autowired
-	private SpecialGroupOrderService specialGroupOrderService ;
 	
 	@RequestMapping("resGroupOrderList.htm")
 	public String loadGroupOrderInfo(HttpServletRequest request, ModelMap model){

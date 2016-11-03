@@ -23,15 +23,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.LogOperatorService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.contants.BasicConstants.LOG_ACTION;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.LogOperator;
-import com.yihg.basic.po.RegionInfo;
-import com.yihg.basic.util.LogFieldUtil;
 import com.yihg.erp.aop.PostHandler;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.contant.BizConfigConstant;
@@ -40,32 +31,27 @@ import com.yihg.erp.controller.sales.RouteController;
 import com.yihg.erp.utils.LogUtils;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.finance.api.FinanceService;
-import com.yihg.finance.po.FinancePay;
-import com.yihg.finance.po.FinancePayDetail;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.api.TrafficResProductService;
-import com.yihg.product.api.TrafficResService;
-import com.yihg.product.po.ProductInfo;
-import com.yihg.product.po.TrafficRes;
-import com.yihg.product.po.TrafficResLine;
-import com.yihg.product.po.TrafficResProduct;
-import com.yihg.product.po.TrafficResStocklog;
-import com.yihg.product.vo.TrafficResVo;
-import com.yihg.sales.api.GroupOrderGuestService;
-import com.yihg.sales.api.GroupOrderPriceService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.GroupOrderTransportService;
-import com.yihg.sales.api.GroupRouteService;
-import com.yihg.sales.api.SpecialGroupOrderService;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupOrderPrice;
-import com.yihg.sales.po.GroupOrderTransport;
-import com.yihg.sales.vo.SpecialGroupOrderVO;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.sys.api.PlatformEmployeeService;
+import com.yimayhd.erpcenter.common.contants.BasicConstants;
+import com.yimayhd.erpcenter.common.contants.BasicConstants.LOG_ACTION;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.basic.po.LogOperator;
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
+import com.yimayhd.erpcenter.dal.basic.utils.LogFieldUtil;
+import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
+import com.yimayhd.erpcenter.dal.product.po.TrafficRes;
+import com.yimayhd.erpcenter.dal.product.po.TrafficResLine;
+import com.yimayhd.erpcenter.dal.product.po.TrafficResProduct;
+import com.yimayhd.erpcenter.dal.product.po.TrafficResStocklog;
+import com.yimayhd.erpcenter.dal.product.vo.TrafficResVo;
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
+import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePay;
+import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePayDetail;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrice;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.SpecialGroupOrderVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 
 @Controller
@@ -74,17 +60,6 @@ import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 public class ResTrafficController extends BaseController{
 	private static final Logger log = LoggerFactory
 			.getLogger(RouteController.class);
-	@Autowired
-	private TrafficResService trafficResService;
-	
-	@Autowired 
-	private TrafficResProductService trafficResProductService;
-	
-	@Autowired
-	private DicService dicService ;
-	
-	@Autowired
-	private RegionService regionService;
 	
 	@Autowired
 	private SysConfig config;
@@ -92,32 +67,7 @@ public class ResTrafficController extends BaseController{
 	@Autowired
 	private BizSettingCommon settingCommon;
 
-	@Autowired
-	private GroupOrderService groupOrderService ;
 	
-	@Autowired
-	private GroupOrderPriceService groupOrderPriceService;
-	@Autowired
-	private SpecialGroupOrderService specialGroupOrderService ;
-	
-	@Autowired
-	private ProductInfoService productInfoService ;
-	
-	@Autowired
-	private GroupOrderGuestService groupOrderGuestService;
-	@Autowired
-	private GroupOrderTransportService groupOrderTransportService;
-	@Autowired
-	private GroupRouteService groupRouteService;
-	
-	@Autowired
-	private LogOperatorService logService;
-	
-	@Autowired
-	private FinanceService financeService;
-	
-	@Autowired
-	private  PlatformEmployeeService platformEmployeeService;
 	/**
 	 * 交通资源
 	 * @param request
@@ -142,8 +92,8 @@ public class ResTrafficController extends BaseController{
 	 */
 	@RequestMapping("resourceList_table.do")
 	public String resourceList_table(HttpServletRequest request,ModelMap model, Integer pageSize, Integer page) {
-		SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd");
-	PageBean<TrafficRes> pageBean = new PageBean<TrafficRes>();
+//		SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd");
+		PageBean<TrafficRes> pageBean = new PageBean<TrafficRes>();
 		if(page==null){
 			pageBean.setPage(1);
 		}else{
