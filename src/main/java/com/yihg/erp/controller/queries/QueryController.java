@@ -6170,7 +6170,7 @@ public class QueryController extends BaseController {
 	public String productProfitList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String sl,
 			String ssl, String rp, Integer page, Integer pageSize, String svc) {
 		// 如果为散客团，查询库存
-		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
+	/*	PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
 		List result = pb.getResult();
 		Map paramters = WebUtils.getQueryParamters(request);
 		Map conditionMap = new HashMap();
@@ -6188,6 +6188,20 @@ public class QueryController extends BaseController {
 				}
 			}
 		}
+		return rp;*/
+
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSsl(ssl);
+		queryDTO.setRp(rp);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.productProfitList(queryDTO);
+
 		return rp;
 
 	}
