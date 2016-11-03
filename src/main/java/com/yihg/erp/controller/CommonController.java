@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.erpcenterFacade.common.client.service.CommonFacade;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -111,7 +112,7 @@ public class CommonController {
 		}
 		pms.put("set", WebUtils.getDataUserIdSet(request));
 		pb.setParameter(pms);
-		pb=getCommonService(svc).queryListPage(sl, pb);
+		pb=getCommonFacade(svc).queryListPage(sl, pb);
 		model.addAttribute("pageBean", pb);
 		model.addAttribute("reqpm", pms);
 		
@@ -122,7 +123,7 @@ public class CommonController {
 		if (StringUtils.isNotBlank(ssl)) {
 			Map pm = (Map)pb.getParameter();
 			pm.put("parameter", pm);
-			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
+			model.addAttribute("sum", getCommonFacade(svc).queryOne(ssl, pm));
 		}
 		return rp;
 	}
@@ -139,7 +140,7 @@ public class CommonController {
 	 */
 	@RequestMapping(value = "queryList.htm")
 	public String queryList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String sl, String rp, String svc) {
-		model.addAttribute("list", getCommonService(svc).queryList(sl, WebUtils.getQueryParamters(request)));
+		model.addAttribute("list", getCommonFacade(svc).queryList(sl, WebUtils.getQueryParamters(request)));
 		return rp;
 	}
 
@@ -155,7 +156,7 @@ public class CommonController {
 	 */
 	@RequestMapping(value = "queryOne.htm")
 	public String queryOne(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String sl, String rp, String svc) {
-		model.addAttribute("one", getCommonService(svc).queryOne(sl, WebUtils.getQueryParamters(request)));
+		model.addAttribute("one", getCommonFacade(svc).queryOne(sl, WebUtils.getQueryParamters(request)));
 		return rp;
 	}
 
@@ -170,7 +171,7 @@ public class CommonController {
 	 */
 	@RequestMapping(value = "queryJson.htm")
 	public String queryJson(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String sl, String svc) {
-		Object obj = getCommonService(svc).queryOne(sl, WebUtils.getQueryParamters(request));
+		Object obj = getCommonFacade(svc).queryOne(sl, WebUtils.getQueryParamters(request));
 		return JSON.toJSONString(obj);
 	}
 
@@ -182,10 +183,10 @@ public class CommonController {
 	 * @param svc
 	 * @return
 	 */
-	private CommonService getCommonService(String svc) {
+	private CommonFacade getCommonFacade(String svc) {
 		if (StringUtils.isBlank(svc)) {
 			svc = "commonsaleService";
 		}
-		return appContext.getBean(svc, CommonService.class);
+		return appContext.getBean(svc, CommonFacade.class);
 	}
 }
