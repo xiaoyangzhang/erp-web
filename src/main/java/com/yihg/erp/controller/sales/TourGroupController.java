@@ -10,18 +10,14 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.dal.product.constans.Constants;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
@@ -1477,6 +1473,48 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("groupList", groupList);
 		model.addAttribute("groupOrder", groupOrder);
 		model.addAttribute("page", pageBean);*/
+
+		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+
+		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
+				: groupOrder.getPageSize());
+		pageBean.setPage(groupOrder.getPage());
+
+		// 如果人员为空并且部门不为空，则取部门下的人id
+		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
+				&& StringUtils.isNotBlank(groupOrder.getOrgIds())) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = groupOrder.getOrgIds().split(",");
+			for (String orgIdStr : orgIdArr) {
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
+					WebUtils.getCurBizId(request), set);
+			String salesOperatorIds = "";
+			for (Integer usrId : set) {
+				salesOperatorIds += usrId + ",";
+			}
+			if (!salesOperatorIds.equals("")) {
+				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0,
+						salesOperatorIds.length() - 1));
+			}
+		}
+		if (groupOrder.getDateType() != null && groupOrder.getDateType() == 2) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			if (groupOrder.getStartTime() != null
+					&& groupOrder.getStartTime() != "") {
+				groupOrder.setStartTime(sdf.parse(groupOrder.getStartTime())
+						.getTime() + "");
+			}
+			if (groupOrder.getEndTime() != null
+					&& groupOrder.getEndTime() != "") {
+				Calendar calendar = new GregorianCalendar();
+				calendar.setTime(sdf.parse(groupOrder.getEndTime()));
+				calendar.add(calendar.DATE, 1);// 把日期往后增加一天.整数往后推,负数往前移动
+				groupOrder.setEndTime(calendar.getTime().getTime() + "");
+			}
+		}
+		pageBean.setParameter(groupOrder);
 
 		FindTourGroupByConditionDTO findTourGroupByConditionDTO = new FindTourGroupByConditionDTO();
 		findTourGroupByConditionDTO.setGroupOrder(groupOrder);
