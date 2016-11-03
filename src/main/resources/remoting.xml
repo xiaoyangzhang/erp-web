@@ -25,264 +25,74 @@
 		<context:include-filter type="annotation" expression="com.alibaba.dubbo.config.annotation.Service" 
 		/> </context:component-scan> -->
 	<!-- 采用注册中心方式配置 -->
-	<dubbo:reference id="SupplierService"
-		interface="com.yihg.supplier.api.SupplierService" version="1.0.0" />
-	<dubbo:reference id="SupplierCarService"
-		interface="com.yihg.supplier.api.SupplierCarService" version="1.0.0" />
+	<dubbo:reference id="dicFacade"
+		interface="com.yimayhd.erpcenter.facade.basic.service.DicFacade" version="1.0.0" />
+	<dubbo:reference id="logFacade"
+		interface="com.yimayhd.erpcenter.facade.basic.service.LogFacade" version="1.0.0" />
 
 
-	<dubbo:reference id="contractService"
-		interface="com.yihg.supplier.api.ContractService" version="1.0.0" />
-	<dubbo:reference id="bizSupplierRelationService"
-		interface="com.yihg.supplier.api.BizSupplierRelationService" version="1.0.0" />
-	<dubbo:reference id="dicTypeService" interface="com.yihg.basic.api.DicTypeService"
+	<dubbo:reference id="regionFacade"
+		interface="com.yimayhd.erpcenter.facade.basic.service.RegionFacade" version="1.0.0" />
+	<dubbo:reference id="imgFacade"
+		interface="com.yimayhd.erpcenter.facade.basic.service.ImgFacade" version="1.0.0" />
+	<dubbo:reference id="saleCommonFacade" interface="org.erpcenterFacade.common.client.service.SaleCommonFacade"
 		version="1.0.0" />
-	<dubbo:reference id="dicService" interface="com.yihg.basic.api.DicService"
+	<dubbo:reference id="CommonFacade" interface="org.erpcenterFacade.common.client.service.CommonFacade"
 		version="1.0.0" />
-	<dubbo:reference id="regionService" interface="com.yihg.basic.api.RegionService"
+	<dubbo:reference id="componentFacade" interface="org.erpcenterFacade.common.client.service.ComponentFacade"
 		version="1.0.0" timeout="10000"/>
-	<dubbo:reference id="regionCardService"
-		interface="com.yihg.basic.api.RegionCardService" version="1.0.0" />
-	<dubbo:reference id="supplierGuideService"
-		interface="com.yihg.supplier.api.SupplierGuideService" version="1.0.0" />
-	<dubbo:reference id="supplierImgService"
-		interface="com.yihg.supplier.api.SupplierImgService" version="1.0.0" />
+	<dubbo:reference id="guestFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.GuestFacade" version="1.0.0" />
+	<dubbo:reference id="initGroupFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.InitGroupFacade" version="1.0.0" />
+	<dubbo:reference id="routeFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.RouteFacade" version="1.0.0" />
 	<!--用户管理 -->
-	<dubbo:reference id="platformSysService"
-		interface="com.yihg.sys.api.PlatformSysService" version="1.0.0" />
-	<dubbo:reference id="platformRoleService"
-		interface="com.yihg.sys.api.PlatformRoleService" version="1.0.0" />
-	<dubbo:reference id="platformMenuService"
-		interface="com.yihg.sys.api.PlatformMenuService" version="1.0.0" />
-	<dubbo:reference id="platformOrgService"
-		interface="com.yihg.sys.api.PlatformOrgService" version="1.0.0" />
-	<dubbo:reference id="platformEmployeeService"
-		interface="com.yihg.sys.api.PlatformEmployeeService" version="1.0.0" />
-	<dubbo:reference id="platformSessionService"
-		interface="com.yihg.sys.api.PlatformSessionService" version="1.0.0" />
-	<dubbo:reference id="sysBizInfoService"
-		interface="com.yihg.sys.api.SysBizInfoService" version="1.0.0" />
-	<dubbo:reference id="sysBizBankAccountService"
-		interface="com.yihg.sys.api.SysBizBankAccountService" version="1.0.0" />
-	<dubbo:reference id="sysBizConfigService"
-		interface="com.yihg.sys.api.SysBizConfigService" version="1.0.0" />
+	<dubbo:reference id="seatInCoachFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.SeatInCoachFacade" version="1.0.0" />
+	<dubbo:reference id="specialGroupFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.SpecialGroupFacade" version="1.0.0" />
+	<dubbo:reference id="teamGroupFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade" version="1.0.0" />
+	<dubbo:reference id="tourGroupFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade" version="1.0.0" />
+	<dubbo:reference id="agencyFitFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.AgencyFitFacade" version="1.0.0" />
+	<dubbo:reference id="agencyFitGroupFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.AgencyFitGroupFacade" version="1.0.0" />
+	<dubbo:reference id="agencyTeamFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.AgencyTeamFacade" version="1.0.0" />
+	<dubbo:reference id="aiYouFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.AiYouFacade" version="1.0.0" />
+	<dubbo:reference id="b2BFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.B2BFacade" version="1.0.0" />
 	<!-- <dubbo:reference id="sysOptLogService"
 		interface="com.yihg.sys.api.SysOptLogService" version="1.0.0" /> -->
 
 	<!-- 图片空间 -->
-	<dubbo:reference id="imgSpaceServie"
-		interface="com.yihg.images.service.ImgSpaceServie" version="1.0.0" />
-	<dubbo:reference id="imgWatermarkService"
-		interface="com.yihg.images.service.ImgWatermarkService" version="1.0.0" />
-	<dubbo:reference id="imgReferenceService"
-		interface="com.yihg.images.service.ImgReferenceService" version="1.0.0" />
+	<dubbo:reference id="budgetItemFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.BudgetItemFacade" version="1.0.0" />
+	<dubbo:reference id="costItemFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.CostItemFacade" version="1.0.0" />
+	<dubbo:reference id="fitGroupFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.FitGroupFacade" version="1.0.0" />
 
 	<!-- 销售管理 -->
-	<dubbo:reference id="tourGroupService"
-		interface="com.yihg.sales.api.TourGroupService" version="1.0.0" timeout="8000" />
-	<dubbo:reference id="groupOrderService"
-		interface="com.yihg.sales.api.GroupOrderService" version="1.0.0" timeout="8000"/>
+	<dubbo:reference id="fitOrderFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.FitOrderFacade" version="1.0.0" timeout="8000" />
+	<dubbo:reference id="groupOrderAiYouFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade_aiyou" version="1.0.0" timeout="8000"/>
 
-	<dubbo:reference id="groupOrderGuestService"
-		interface="com.yihg.sales.api.GroupOrderGuestService" version="1.0.0" />
+	<dubbo:reference id="groupRequirementFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.GroupRequirementFacade" version="1.0.0" />
 
-	<dubbo:reference id="groupOrderPriceService"
-		interface="com.yihg.sales.api.GroupOrderPriceService" version="1.0.0" timeout="8000" />
-	<dubbo:reference id="groupRequirementService"
-		interface="com.yihg.sales.api.GroupRequirementService" version="1.0.0" />
-	<dubbo:reference id="groupOrderTransportService"
-		interface="com.yihg.sales.api.GroupOrderTransportService" version="1.0.0" />
-
-	<dubbo:reference id="fitGroupService"
-		interface="com.yihg.sales.api.FitGroupService" version="1.0.0" timeout="8000"/>
-		
-	<dubbo:reference id="fitOrderService"
-		interface="com.yihg.sales.api.FitOrderService" version="1.0.0" timeout="8000"/>
-
-	<dubbo:reference id="groupRouteService"
-		interface="com.yihg.sales.api.GroupRouteService" version="1.0.0" timeout="8000"/>
-	<dubbo:reference id="specialGroupOrderService"
-		interface="com.yihg.sales.api.SpecialGroupOrderService" version="1.0.0" timeout="8000"/>
-		
-		<dubbo:reference id="teamGroupService"
-		interface="com.yihg.sales.api.TeamGroupService" version="1.0.0" timeout="8000"/>
-
-	<!-- 产品管理 -->
-	<dubbo:reference id="productRemarkService"
-		interface="com.yihg.product.api.ProductRemarkService" version="1.0.0"  timeout="10000"/>
-	<dubbo:reference id="productTagService"
-		interface="com.yihg.product.api.ProductTagService" version="1.0.0"  timeout="10000"/>
-	<dubbo:reference id="productInfoService"
-		interface="com.yihg.product.api.ProductInfoService" version="1.0.0"
-		owner="xzj"  timeout="10000"/>
-	<dubbo:reference id="productRouteService"
-		interface="com.yihg.product.api.ProductRouteService" owner="zzy"
-		version="1.0.0"  timeout="10000"/>
-	<dubbo:reference id="productRouteSupplierService"
-		interface="com.yihg.product.api.ProductRouteSupplierService" owner="zzy"
-		version="1.0.0"  timeout="10000"/>
-	<dubbo:reference id="productRouteTrafficService"
-		interface="com.yihg.product.api.ProductRouteTrafficService" owner="zzy"
-		version="1.0.0"  timeout="10000"/>
-	<dubbo:reference id="productGroupService"
-		interface="com.yihg.product.api.ProductGroupService" owner="xzj"
-		version="1.0.0" timeout="60000" />
-	<dubbo:reference id="productGroupSupplierService"
-		interface="com.yihg.product.api.ProductGroupSupplierService" owner="xzj"
-		version="1.0.0" timeout="2000" />
-	<dubbo:reference id="productGroupPriceService"
-		interface="com.yihg.product.api.ProductGroupPriceService" owner="xzj"
-		version="1.0.0"  timeout="10000"/>
-	<dubbo:reference id="productGroupExtraItemService"
-		interface="com.yihg.product.api.ProductGroupExtraItemService" owner="xzj"
-		version="1.0.0" timeout="10000" />
-	<dubbo:reference id="productStockService"
-		interface="com.yihg.product.api.ProductStockService"
-		version="1.0.0" timeout="10000" />
-
-	<!-- 供应商管理 -->
-	<dubbo:reference id="supplierDriverService"
-		interface="com.yihg.supplier.api.SupplierDriverService" version="1.0.0"
-		owner="jz" />
-	<dubbo:reference id="supplierItemService"
-		interface="com.yihg.supplier.api.SupplierItemService" version="1.0.0" />
-
-	<!-- 基调管理 -->
-	<dubbo:reference id="bookingGuideService"
-		interface="com.yihg.operation.api.BookingGuideService" owner="xzj"  timeout="10000"
-		version="1.0.0" />
-
-	<dubbo:reference id="bookingSupplierService"
-		interface="com.yihg.operation.api.BookingSupplierService" owner="wsj"
-		version="1.0.0" timeout="10000"/>
-
-	<dubbo:reference id="bookingSupplierDetailService"
-		interface="com.yihg.operation.api.BookingSupplierDetailService" owner="wsj"
-		version="1.0.0"  timeout="10000" />
-	<dubbo:reference id="bookingDeliveryService"
-		interface="com.yihg.operation.api.BookingDeliveryService" owner="ge"
-		version="1.0.0"  timeout="8000"/>
-	<dubbo:reference id="bookingDeliveryPriceService"
-		interface="com.yihg.operation.api.BookingDeliveryPriceService" owner="ge"
-		version="1.0.0"  timeout="10000" />
-	<dubbo:reference id="bookingShopService"
-		interface="com.yihg.operation.api.BookingShopService" owner="xzj"
-		version="1.0.0"  timeout="8000"/>
-	<dubbo:reference id="bookingShopDetailService"
-		interface="com.yihg.operation.api.BookingShopDetailService" owner="xzj"
-		version="1.0.0"  timeout="10000" />
-	<dubbo:reference id="bookingShopDetailDeployService"
-		interface="com.yihg.operation.api.BookingShopDetailDeployService"
-		owner="xzj" version="1.0.0"  timeout="10000" />
-
-
-	<!-- 通用查询 -->
-	<dubbo:reference id="commonsaleService"
-		interface="com.yihg.sales.api.CommonSaleService" version="1.0.0" timeout="10000"
-		owner="jz" />
-	<dubbo:reference id="commonSupplierService"
-		interface="com.yihg.supplier.api.CommonSupplierService" version="1.0.0" timeout="10000"
-		owner="jz" />
-	<dubbo:reference id="deliveryService"
-		interface="com.yihg.operation.api.BookingDeliveryService" owner="wsj"  timeout="10000"
-		version="1.0.0" />
-	<!-- 财务管理 -->
-	<dubbo:reference id="financeService"
-		interface="com.yihg.finance.api.FinanceService" version="1.0.0" owner="jz"  timeout="60000"/>
-	<dubbo:reference id="financeGuideService"
-		interface="com.yihg.finance.api.FinanceGuideService" version="1.0.0"
-		owner="jz" timeout="8000" />
-	<dubbo:reference id="financeBillService"
-		interface="com.yihg.finance.api.FinanceBillService" version="1.0.0"
-		owner="liuyun" timeout="8000"/>
-	<dubbo:reference id="financeVerifyService"
-		interface="com.yihg.finance.api.FinanceVerifyService" version="1.0.0"
-		owner="ghf" />
-
-	<!-- 手机app接口 -->
-	<dubbo:reference id="customerService"
-		interface="com.yihg.customer.api.CustomerService" version="1.0.0"
-		owner="jzt" />
-
-	<dubbo:reference id="travelHistoryRouteService"
-		interface="com.yihg.travel.api.TravelHistoryRouteService" version="1.0.0"
-		owner="jzt" />
-
-	<!-- 机票接口 -->
-	<dubbo:reference id="airTicketResourceService"
-		interface="com.yihg.airticket.api.AirTicketResourceService" version="1.0.0"
-		owner="liuyun" />
-	<dubbo:reference id="airTicketRequestService"
-		interface="com.yihg.airticket.api.AirTicketRequestService" version="1.0.0"
-		owner="liuyun" />
-	<dubbo:reference id="airTicketOrderService"
-		interface="com.yihg.airticket.api.AirTicketOrderService" version="1.0.0"
-		owner="liuyun" />
-
-	<!-- 机场接口 -->
-	<dubbo:reference id="airPortService" interface="com.yihg.air.api.AirPortService"
-		version="1.0.0" owner="fyb" />
-	<dubbo:reference id="airLineService" interface="com.yihg.air.api.AirLineService"
-		version="1.0.0" owner="fyb" />
-
-	<!-- 质量 -->
-	<dubbo:reference id="qualityService"
-		interface="com.yihg.quality.api.QualityService" version="1.0.0" owner="ge" />
-	<dubbo:reference id="groupFeedbackService"
-		interface="com.yihg.sales.api.GroupFeedbackService" version="1.0.0"
-		owner="zzn" />
-	<dubbo:reference id="supplierCommentService"
-		interface="com.yihg.supplier.api.SupplierCommentService" version="1.0.0"
-		owner="wj" />
-
-	<!-- 查询 -->
-	<dubbo:reference id="queryService" interface="com.yihg.query.api.QueryService"
-		version="1.0.0" owner="ge" timeout="2000" />
-
-	<!-- 统计 -->
-	<dubbo:reference id="tjService" interface="com.yihg.tj.api.TJService"
-		version="1.0.0" owner="ge" timeout="30000" />
-		
-	<dubbo:reference id="productGroupSellerService" interface="com.yihg.product.api.ProductGroupSellerService"
-		version="1.0.0" owner="wj" timeout="8000" />
-		
-	<dubbo:reference id="supplierGuestService" interface="com.yihg.supplier.api.SupplierGuestService"
-	version="1.0.0" owner="wj" timeout="8000" />
-<dubbo:reference id="consultService"
-		interface="com.yihg.supplier.api.ConsultService" version="1.0.0" timeout="8000"/>
-	<!-- B2B调用订单明细信息 -->
-	<dubbo:reference id="b2bGroupOrderService" interface="com.yihg.b2b.api.B2BGroupOrderService" owner="zm" version="1.0.0" timeout="8000" />
-	<!-- B2B调用结束 -->
+	<dubbo:reference id="groupRouteFacade"
+		interface="com.yimayhd.erpcenter.facade.sales.service.GroupRouteFacade" version="1.0.0" timeout="8000" />
+	<dubbo:reference id="commonSupplierFacade"
+		interface="com.yimayhd.erpcenter.facade.supplier.service.CommonSupplierFacade" version="1.0.0" />
 	
 	
-	<!-- 淘宝原始单信息 -->
-	<dubbo:reference id="taobaoOrderService"
-		interface="com.yihg.taobao.api.TaobaoOrderService" owner="zm" version="1.0.0"
-		timeout="8000" />
-	<!-- 淘宝调用结束 -->
-	
-	<!-- 交通资源产品信息 -->
-	<dubbo:reference id="TrafficResService"
-		interface="com.yihg.product.api.TrafficResService" owner="zm" version="1.0.0"
-		timeout="8000" />
-	<!-- 交通资源产品调用结束 -->
-	
-	<!-- 交通资源产品信息  start-->
-	<dubbo:reference id="trafficResProductService"
-		interface="com.yihg.product.api.TrafficResProductService" owner="zm" version="1.0.0"
-		timeout="8000" />
-	<!-- 交通资源产品调用结束 end -->
-	
-	<!-- 业务更改日志信息 -->
-	<dubbo:reference id="logOperatorService"
-		interface="com.yihg.basic.api.LogOperatorService" owner="ouzy" version="1.0.0"
-		timeout="8000" />
-	<!-- 业务更改日志信息 -->
-	
-	<!-- 队列 -->
-	<!-- <dubbo:reference id="msgSender" interface="com.yihg.queue.api.IMsgSender" 
-		version="1.0.0" owner="ge"/> -->
-		
+			
 	<dubbo:reference id="productFacade"
 		interface="com.yimayhd.erpcenter.facade.service.ProductFacade" owner="wj" version="1.0.0.test"
 		timeout="8000" />
@@ -351,9 +161,6 @@
 		timeout="8000" />
 	<dubbo:reference id="supplierGuestFacade"
 		interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierGuestFacade" owner="ly" version="1.0.0.test"
-		timeout="8000" />
-	<dubbo:reference id="commonSupplierFacade"
-		interface="com.yimayhd.erpcenter.facade.supplier.service.CommonSupplierFacade" owner="ly" version="1.0.0.test"
 		timeout="8000" />
 		
 		
