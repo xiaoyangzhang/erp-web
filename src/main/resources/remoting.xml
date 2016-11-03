@@ -334,6 +334,24 @@
 	<dubbo:reference id="bookingShopFacade"
 		interface="com.yimayhd.erpcenter.facade.sales.service.BookingShopFacade" owner="wj" version="1.0.0.test"
 		timeout="8000" />
+	<dubbo:reference id="consultFacade"
+		interface="com.yimayhd.erpcenter.facade.supplier.service.ConsultFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="contractFacade"
+		interface="com.yimayhd.erpcenter.facade.supplier.service.ContractFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="supplierCarFacade"
+		interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierCarFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="supplierDriverFacade"
+		interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierDriverFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="supplierFacade"
+		interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="supplierGuestFacade"
+		interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierGuestFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
 		
 		
 </beans>
