@@ -121,18 +121,17 @@ public class TourGroupController extends BaseController {
 	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
 	private SysPlatformOrgFacade sysPlatformOrgFacade;
 
-
-	@Autowired
-	private GroupProfitFacade  tourGroupProfitFacade;//利润
-	
-	@Autowired
-	private GroupOrderLockFacade groupOrderLockFacade;//锁单
+//	@Autowired
+//	private GroupProfitFacade  tourGroupProfitFacade;//利润
+//	
+//	@Autowired
+//	private GroupOrderLockFacade groupOrderLockFacade;//锁单
 	
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
 	
-	@Autowired
-	private GroupQueryPrintFacade groupQueryPrintFacade;//查询打印
+//	@Autowired
+//	private GroupQueryPrintFacade groupQueryPrintFacade;//查询打印
 
 	@Autowired
 	private TourGroupFacade tourGroupFacade;//
@@ -3565,7 +3564,7 @@ public class TourGroupController extends BaseController {
 		//FIXME 这里和GroupOrder公共 可以考虑抽取
 		Integer bizId = WebUtils.getCurBizId(request);
 		
-		ToOrderLockListResult result = groupOrderLockFacade.toOrderLockList(bizId);
+		ToOrderLockListResult result = tourGroupFacade.toOrderLockList(bizId);
 
 		model.addAttribute("allProvince", result.getAllProvince());
 		model.addAttribute("orgJsonStr",result.getOrgJsonStr());
@@ -3632,7 +3631,7 @@ public class TourGroupController extends BaseController {
 		orderLockTableDTO.setOrder(order);
 		orderLockTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 		
-		ToProfitQueryTableResult result = tourGroupProfitFacade.toProfitQueryTable(orderLockTableDTO);
+		ToProfitQueryTableResult result = tourGroupFacade.toProfitQueryTable(orderLockTableDTO);
 		model.addAttribute("groupOrder", result.getGroupOrder());
 		model.addAttribute("staticInfo", result.getStaticInfo());
 		model.addAttribute("page", result.getPageBean());
@@ -3797,7 +3796,7 @@ public class TourGroupController extends BaseController {
 		profitQueryByTourDTO.setPage(page);
 		profitQueryByTourDTO.setPageSize(pageSize);
 		
-		ProfitQueryByTourResult profitQueryByTourResult=tourGroupProfitFacade.toProfitQueryTableByTour(profitQueryByTourDTO);
+		ProfitQueryByTourResult profitQueryByTourResult=tourGroupFacade.toProfitQueryTableByTour(profitQueryByTourDTO);
 		
 		model.addAttribute("page", profitQueryByTourResult.getPageBean());
 		model.addAttribute("groupList", profitQueryByTourResult.getPageBean().getResult());
@@ -4633,7 +4632,7 @@ public class TourGroupController extends BaseController {
 		toSKConfirmPreviewDTO.setGroupId(groupId);
 		toSKConfirmPreviewDTO.setSupplierId(supplierId);
 		
-		ToSKConfirmPreviewResult result = groupQueryPrintFacade.toSKConfirmPreview(toSKConfirmPreviewDTO);
+		ToSKConfirmPreviewResult result = tourGroupFacade.toSKConfirmPreview(toSKConfirmPreviewDTO);
 		
 		model.addAttribute("supplier", result.getSupplier());
 		model.addAttribute("groupId", groupId);
@@ -5070,7 +5069,7 @@ public class TourGroupController extends BaseController {
 		toSKConfirmPreviewDTO.setGroupId(groupId);
 		toSKConfirmPreviewDTO.setSupplierId(supplierId);
 		
-		ToSKConfirmPreviewResult result = groupQueryPrintFacade.toSKConfirmPreview(toSKConfirmPreviewDTO);
+		ToSKConfirmPreviewResult result = tourGroupFacade.toSKConfirmPreview(toSKConfirmPreviewDTO);
 		
 		String url = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis() + ".doc";
 		
