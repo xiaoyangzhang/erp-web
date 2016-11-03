@@ -5651,7 +5651,17 @@ public class QueryController extends BaseController {
 	@RequestMapping(value = "detailPreview.htm")
 	public String detailPreview(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String sl,
 			String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+		//PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 
@@ -5675,7 +5685,18 @@ public class QueryController extends BaseController {
 	@RequestMapping("exportExcel2.htm")
 	public void exportExcel2(HttpServletRequest request, HttpServletResponse response, ModelMap model, String sl,
 			String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+	//	PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
 
 		String path = "";
 		BigDecimal total = new BigDecimal(0);
@@ -5841,7 +5862,19 @@ public class QueryController extends BaseController {
 	@RequestMapping(value = "ticketDetailPreview.htm")
 	public String ticketDetailPreview(HttpServletRequest request, HttpServletResponse reponse, ModelMap model,
 			String sl, String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+		//PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+
+		PageBean pb  = queryResult.getPageBean();
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 
@@ -5865,7 +5898,18 @@ public class QueryController extends BaseController {
 	@RequestMapping("exportExcel3.htm")
 	public void exportExcel3(HttpServletRequest request, HttpServletResponse response, ModelMap model, String sl,
 			String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+		//PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
 
 		String path = "";
 		BigDecimal total = new BigDecimal(0);
@@ -6079,7 +6123,18 @@ public class QueryController extends BaseController {
 	@RequestMapping("productWithCustomerList.do")
 	public String productWithCustomerList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model,
 			String sl, String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
+	//	PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
+
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
 		/*
 		 * List result = pb.getResult(); Map paramters =
 		 * WebUtils.getQueryParamters(request); if (result != null &&
@@ -6154,7 +6209,18 @@ public class QueryController extends BaseController {
 	@RequestMapping(value = "otherDetailPreview.htm")
 	public String otherDetailPreview(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String sl,
 			String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+	//	PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
+
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 
@@ -6179,7 +6245,18 @@ public class QueryController extends BaseController {
 	@RequestMapping("exportExcel4.htm")
 	public void exportExcel4(HttpServletRequest request, HttpServletResponse response, ModelMap model, String sl,
 			String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+	//	PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
 
 		String path = "";
 		BigDecimal total2 = new BigDecimal(0);
@@ -6357,7 +6434,18 @@ public class QueryController extends BaseController {
 	@RequestMapping(value = "fleetDetailPreview.htm")
 	public String fleetDetailPreview(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String sl,
 			String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+		//PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
+
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 
@@ -6381,7 +6469,18 @@ public class QueryController extends BaseController {
 	@RequestMapping("exportExcel5.htm")
 	public void exportExcel5(HttpServletRequest request, HttpServletResponse response, ModelMap model, String sl,
 			String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+		//PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
 
 		String path = "";
 		BigDecimal total2 = new BigDecimal(0);
@@ -6622,7 +6721,7 @@ public class QueryController extends BaseController {
 	@RequestMapping(value = "productGuestDetailPreview.htm")
 	public String productGuestDetailPreview(HttpServletRequest request, HttpServletResponse reponse, ModelMap model,
 			ProductGuestCondition condition) {
-		if (StringUtils.isBlank(condition.getOperatorIds()) && StringUtils.isNotBlank(condition.getOrgIds())) {
+		/*if (StringUtils.isBlank(condition.getOperatorIds()) && StringUtils.isNotBlank(condition.getOrgIds())) {
 			Set<Integer> set = new HashSet<Integer>();
 			String[] orgIdArr = condition.getOrgIds().split(",");
 			for (String orgIdStr : orgIdArr) {
@@ -6662,6 +6761,19 @@ public class QueryController extends BaseController {
 				WebUtils.getDataUserIdSet(request));
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
 		model.addAttribute("productGuest", productGuestStatics);
+		return "/queries/order/productGuestPreview";*/
+
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setProductGuestCondition(condition);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.productGuestDetailPreview(queryDTO);
+
+		String imgPath = bizSettingCommon.getMyBizLogo(request);
+		model.addAttribute("imgPath", imgPath);
+		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
+		model.addAttribute("productGuest", queryResult.getProductGuestStatics());
 		return "/queries/order/productGuestPreview";
 	}
 
@@ -7025,8 +7137,18 @@ public class QueryController extends BaseController {
 	@RequestMapping("productShopList.do")
 	public String productShopList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String sl,
 			String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
+		//PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
 
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
 		return rp;
 
 	}
@@ -7449,7 +7571,7 @@ public class QueryController extends BaseController {
 
 		QueryDTO queryDTO = new QueryDTO();
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
-		QueryResult queryResult = queryFacade.settleList(queryDTO);
+		QueryResult queryResult = queryFacade.settleList();
 		model.addAttribute("auditorList", queryResult.getTourGroupList());
 		// Integer bizId = WebUtils.getCurBizId(request);
 		// getOrgAndUserTreeJsonStr(model, bizId);
@@ -8552,12 +8674,26 @@ public class QueryController extends BaseController {
 	@RequestMapping("getAccountDetail.do")
 	public String getAccountDetail(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String sl,
 			String ssl, String rp, Integer page, Integer pageSize, String svc, Integer visit) {
-		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
+	/*	PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
 		if (StringUtils.isNotBlank(ssl)) {
 			Map pm = (Map) pb.getParameter();
 			pm.put("parameter", pm);
 			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
 		}
+		return rp;*/
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSsl(ssl);
+		queryDTO.setRp(rp);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.getAccountDetail(queryDTO);
+			model.addAttribute("sum", queryResult.getSum());
+
 		return rp;
 	}
 
