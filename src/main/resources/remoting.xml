@@ -355,6 +355,23 @@
 	<dubbo:reference id="commonSupplierFacade"
 		interface="com.yimayhd.erpcenter.facade.supplier.service.CommonSupplierFacade" owner="ly" version="1.0.0.test"
 		timeout="8000" />
-		
-		
+
+
+	<dubbo:reference id="tourGroupFacade"
+					 interface="com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade" owner="ly" version="1.0.0.test"
+					 timeout="8000" />
+	<dubbo:reference id="teamGroupFacade" interface="com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade" owner="ly" version="1.0.0.test"
+					 timeout="8000" />
+	<dubbo:reference id="specialGroupFacade" interface="com.yimayhd.erpcenter.facade.sales.service.SpecialGroupFacade" owner="ly" version="1.0.0.test"
+					 timeout="8000" />
+	<dubbo:reference id="seatInCoachFacade" interface="com.yimayhd.erpcenter.facade.sales.service.SeatInCoachFacade" owner="ly" version="1.0.0.test"
+					 timeout="8000" />
+	<dubbo:reference id="routeFacade"
+					 interface="com.yimayhd.erpcenter.facade.sales.service.RouteFacade" owner="ly" version="1.0.0.test"
+					 timeout="8000" />
+	<dubbo:reference id="initGroupFacade" interface="com.yimayhd.erpcenter.facade.sales.service.InitGroupFacade" owner="ly" version="1.0.0.test"
+					 timeout="8000" />
+	<dubbo:reference id="guestFacade" interface="com.yimayhd.erpcenter.facade.sales.service.GuestFacade" owner="ly" version="1.0.0.test"
+					 timeout="8000" />
+
 </beans>
