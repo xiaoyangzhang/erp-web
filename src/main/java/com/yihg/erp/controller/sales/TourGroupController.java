@@ -8,43 +8,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.yimayhd.erpcenter.common.util.NumberUtil;
-import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
-import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
-import com.yimayhd.erpcenter.dal.product.vo.ProductGroupSupplierVo;
-import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
-import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
-import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.*;
-import com.yimayhd.erpcenter.dal.sales.client.sales.vo.OtherInfoVO;
-import com.yimayhd.erpcenter.dal.sys.po.SysBizBankAccount;
-import com.yimayhd.erpcenter.facade.sales.query.*;
-import com.yimayhd.erpcenter.facade.sales.result.*;
-import com.yimayhd.erpcenter.facade.sales.service.*;
-import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
-import com.yimayhd.erpresource.dal.po.SupplierContactMan;
-import com.yimayhd.erpresource.dal.po.SupplierInfo;
-import org.apache.commons.lang.StringUtils;
+import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.dal.product.constans.Constants;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
@@ -71,11 +44,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
-import com.yihg.customer.api.CustomerService;
-import com.yihg.customer.po.Customer;
 import com.yihg.erp.aop.RequiresPermissions;
-import com.yihg.erp.common.BizSettingCommon;
-import com.yihg.erp.common.GroupCodeUtil;
 import com.yihg.erp.contant.BizConfigConstant;
 import com.yihg.erp.contant.OpenPlatformConstannt;
 import com.yihg.erp.contant.PermissionConstants;
@@ -83,20 +52,56 @@ import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.controller.supplier.SupplierController;
 import com.yihg.erp.utils.DateUtils;
 import com.yihg.erp.utils.MD5Util;
-import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
 import com.yihg.erp.utils.WordReporter.NumberToCN;
-import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.common.util.NumberUtil;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
+import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.AutocompleteInfo;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrice;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRequirement;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupPriceVo;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupRouteDayVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.OtherInfoVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.SysBizBankAccount;
+import com.yimayhd.erpcenter.facade.sales.query.ChangeGroupDTO;
+import com.yimayhd.erpcenter.facade.sales.query.CopyTourGroupDTO;
+import com.yimayhd.erpcenter.facade.sales.query.FindTourGroupByConditionDTO;
 import com.yimayhd.erpcenter.facade.sales.query.ProfitQueryByTourDTO;
 import com.yimayhd.erpcenter.facade.sales.query.ToSKConfirmPreviewDTO;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToOrderLockTableDTO;
+import com.yimayhd.erpcenter.facade.sales.result.BookingProfitTableResult;
+import com.yimayhd.erpcenter.facade.sales.result.FindTourGroupByConditionResult;
+import com.yimayhd.erpcenter.facade.sales.result.GetPushInfoResult;
 import com.yimayhd.erpcenter.facade.sales.result.ProfitQueryByTourResult;
+import com.yimayhd.erpcenter.facade.sales.result.PushWapResult;
+import com.yimayhd.erpcenter.facade.sales.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.sales.result.ToAddTourGroupOrderResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToChangeGroupResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToGroupListResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToOtherInfoResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToPreviewResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToProfitQueryTableResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToSKChargePreviewResult;
 import com.yimayhd.erpcenter.facade.sales.result.ToSKConfirmPreviewResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToSaleChargeResult;
+import com.yimayhd.erpcenter.facade.sales.result.TogroupRequirementResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToOrderLockListResult;
+import com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade;
+import com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
+import com.yimayhd.erpresource.dal.po.SupplierContactMan;
+import com.yimayhd.erpresource.dal.po.SupplierInfo;
 
 @Controller
 @RequestMapping(value = "/tourGroup")
@@ -112,18 +117,17 @@ public class TourGroupController extends BaseController {
 	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
 	private SysPlatformOrgFacade sysPlatformOrgFacade;
 
-
-	@Autowired
-	private GroupProfitFacade  tourGroupProfitFacade;//利润
-	
-	@Autowired
-	private GroupOrderLockFacade groupOrderLockFacade;//锁单
+//	@Autowired
+//	private GroupProfitFacade  tourGroupProfitFacade;//利润
+//	
+//	@Autowired
+//	private GroupOrderLockFacade groupOrderLockFacade;//锁单
 	
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
 	
-	@Autowired
-	private GroupQueryPrintFacade groupQueryPrintFacade;//查询打印
+//	@Autowired
+//	private GroupQueryPrintFacade groupQueryPrintFacade;//查询打印
 
 	@Autowired
 	private TourGroupFacade tourGroupFacade;//
@@ -1470,11 +1474,53 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("groupOrder", groupOrder);
 		model.addAttribute("page", pageBean);*/
 
+		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+
+		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
+				: groupOrder.getPageSize());
+		pageBean.setPage(groupOrder.getPage());
+
+		// 如果人员为空并且部门不为空，则取部门下的人id
+		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
+				&& StringUtils.isNotBlank(groupOrder.getOrgIds())) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = groupOrder.getOrgIds().split(",");
+			for (String orgIdStr : orgIdArr) {
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(
+					WebUtils.getCurBizId(request), set);
+			String salesOperatorIds = "";
+			for (Integer usrId : set) {
+				salesOperatorIds += usrId + ",";
+			}
+			if (!salesOperatorIds.equals("")) {
+				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0,
+						salesOperatorIds.length() - 1));
+			}
+		}
+		if (groupOrder.getDateType() != null && groupOrder.getDateType() == 2) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			if (groupOrder.getStartTime() != null
+					&& groupOrder.getStartTime() != "") {
+				groupOrder.setStartTime(sdf.parse(groupOrder.getStartTime())
+						.getTime() + "");
+			}
+			if (groupOrder.getEndTime() != null
+					&& groupOrder.getEndTime() != "") {
+				Calendar calendar = new GregorianCalendar();
+				calendar.setTime(sdf.parse(groupOrder.getEndTime()));
+				calendar.add(calendar.DATE, 1);// 把日期往后增加一天.整数往后推,负数往前移动
+				groupOrder.setEndTime(calendar.getTime().getTime() + "");
+			}
+		}
+		pageBean.setParameter(groupOrder);
+
 		FindTourGroupByConditionDTO findTourGroupByConditionDTO = new FindTourGroupByConditionDTO();
 		findTourGroupByConditionDTO.setGroupOrder(groupOrder);
 		findTourGroupByConditionDTO.setCurBizId(WebUtils.getCurBizId(request));
 		findTourGroupByConditionDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
-		FindTourGroupByConditionResult findTourGroupByConditionResult = teamGroupFacade.findTourGroupByConditionLoadModel(findTourGroupByConditionDTO);
+		FindTourGroupByConditionResult findTourGroupByConditionResult = teamGroupFacade.findTourGroupByConditionLoadModel(findTourGroupByConditionDTO,pageBean);
 
 		model.addAttribute("pageTotalAudit", findTourGroupByConditionResult.getPageTotalAudit());
 		model.addAttribute("pageTotalChild", findTourGroupByConditionResult.getPageTotalChild());
@@ -3556,7 +3602,7 @@ public class TourGroupController extends BaseController {
 		//FIXME 这里和GroupOrder公共 可以考虑抽取
 		Integer bizId = WebUtils.getCurBizId(request);
 		
-		ToOrderLockListResult result = groupOrderLockFacade.toOrderLockList(bizId);
+		ToOrderLockListResult result = tourGroupFacade.toOrderLockList(bizId);
 
 		model.addAttribute("allProvince", result.getAllProvince());
 		model.addAttribute("orgJsonStr",result.getOrgJsonStr());
@@ -3623,7 +3669,7 @@ public class TourGroupController extends BaseController {
 		orderLockTableDTO.setOrder(order);
 		orderLockTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 		
-		ToProfitQueryTableResult result = tourGroupProfitFacade.toProfitQueryTable(orderLockTableDTO);
+		ToProfitQueryTableResult result = tourGroupFacade.toProfitQueryTable(orderLockTableDTO);
 		model.addAttribute("groupOrder", result.getGroupOrder());
 		model.addAttribute("staticInfo", result.getStaticInfo());
 		model.addAttribute("page", result.getPageBean());
@@ -3788,7 +3834,7 @@ public class TourGroupController extends BaseController {
 		profitQueryByTourDTO.setPage(page);
 		profitQueryByTourDTO.setPageSize(pageSize);
 		
-		ProfitQueryByTourResult profitQueryByTourResult=tourGroupProfitFacade.toProfitQueryTableByTour(profitQueryByTourDTO);
+		ProfitQueryByTourResult profitQueryByTourResult=tourGroupFacade.toProfitQueryTableByTour(profitQueryByTourDTO);
 		
 		model.addAttribute("page", profitQueryByTourResult.getPageBean());
 		model.addAttribute("groupList", profitQueryByTourResult.getPageBean().getResult());
@@ -4624,7 +4670,7 @@ public class TourGroupController extends BaseController {
 		toSKConfirmPreviewDTO.setGroupId(groupId);
 		toSKConfirmPreviewDTO.setSupplierId(supplierId);
 		
-		ToSKConfirmPreviewResult result = groupQueryPrintFacade.toSKConfirmPreview(toSKConfirmPreviewDTO);
+		ToSKConfirmPreviewResult result = tourGroupFacade.toSKConfirmPreview(toSKConfirmPreviewDTO);
 		
 		model.addAttribute("supplier", result.getSupplier());
 		model.addAttribute("groupId", groupId);
@@ -5061,7 +5107,7 @@ public class TourGroupController extends BaseController {
 		toSKConfirmPreviewDTO.setGroupId(groupId);
 		toSKConfirmPreviewDTO.setSupplierId(supplierId);
 		
-		ToSKConfirmPreviewResult result = groupQueryPrintFacade.toSKConfirmPreview(toSKConfirmPreviewDTO);
+		ToSKConfirmPreviewResult result = tourGroupFacade.toSKConfirmPreview(toSKConfirmPreviewDTO);
 		
 		String url = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis() + ".doc";
 		

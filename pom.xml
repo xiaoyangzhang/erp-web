@@ -19,7 +19,7 @@
 		</resource> </resources> </build> </profile> <profile> <id>test</id> <build> 
 		<resources> <resource> <directory>${project.basedir}/conf_test/</directory> 
 		</resource> </resources> </build> </profile> </profiles> -->
-  
+   
 	<build>
 		<plugins>
 			<plugin>
@@ -74,21 +74,22 @@
 		<!-- Test libs -->
 		<junit.version>4.10</junit.version>
 		<!-- other -->
-		<yihg-erp-supplier-api.version>1.0.0-SNAPSHOT</yihg-erp-supplier-api.version>
+		<!-- <yihg-erp-supplier-api.version>1.0.0-SNAPSHOT</yihg-erp-supplier-api.version>
 		<yihg-erp-product-api.version>1.0.0-SNAPSHOT</yihg-erp-product-api.version>
 		<yihg-erp-basic-api.version>1.0.0-SNAPSHOT</yihg-erp-basic-api.version>
 		<yihg-erp-sales-api.version>1.0.0-SNAPSHOT</yihg-erp-sales-api.version>
 		<yihg-erp-sys-api.version>1.0.0-SNAPSHOT</yihg-erp-sys-api.version>
-		<yihg-travel-base-api.version>1.0.0-SNAPSHOT</yihg-travel-base-api.version>
+		 --><yihg-travel-base-api.version>1.0.0-SNAPSHOT</yihg-travel-base-api.version>
 		<yihg-travel-customer-api.version>1.0.0-SNAPSHOT</yihg-travel-customer-api.version>
 
 		<!-- Build args -->
 		<skip_maven_deploy>false</skip_maven_deploy>
 		<updateReleaseInfo>true</updateReleaseInfo>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<facade-product-client.version>0.0.6-SNAPSHOT</facade-product-client.version>
+		<facade-product-client.version>0.0.8-SNAPSHOT</facade-product-client.version>
 		<facade-common-client.version>0.0.8-SNAPSHOT</facade-common-client.version>
 		<facade-finance-client.version>0.0.8-SNAPSHOT</facade-finance-client.version>
+		<facade-operation-client.version>0.0.8-SNAPSHOT</facade-operation-client.version>
 	</properties>
 
 	<dependencies>
@@ -374,6 +375,11 @@
 			<artifactId>erpcenterFacade-finance-client</artifactId>
 			<version>${facade-finance-client.version}</version>
 		</dependency>
+ 		<dependency>
+			<groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterFacade-operation-client</artifactId>
+			<version>${facade-operation-client.version}</version>
+		</dependency>
 
 
 
@@ -530,11 +536,15 @@
 			<artifactId>erpcenterFacade-tj-client</artifactId>
 			<version>0.0.8-SNAPSHOT</version>
 		</dependency>
-		
-
+		<dependency>
+			<groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterFacade-ticket-client</artifactId>
+			<version>0.0.8-SNAPSHOT</version>
+		</dependency>
+		<dependency>  
+		    <groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterFacade-dataAnalysis-client</artifactId>
+			<version>0.0.8-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
-
 </project>
-
-
-

@@ -57,12 +57,15 @@ import com.yimayhd.erpcenter.facade.tj.client.service.ResTrafficFacade;
 public class ResTrafficController extends BaseController{
 	private static final Logger log = LoggerFactory
 			.getLogger(RouteController.class);
+	
 	@Autowired
 	private SysConfig config;
 	@Autowired
 	private BizSettingCommon settingCommon;
+	
 	@Autowired
 	private ResTrafficFacade resTrafficFacade;
+	
 	/**
 	 * 交通资源
 	 * @param request

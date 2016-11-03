@@ -10,20 +10,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -33,6 +28,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
+import org.erpcenterFacade.common.client.service.SaleCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -60,13 +56,13 @@ import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroupPriceAndPersons;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
-import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
-import com.yimayhd.erpcenter.facade.sales.query.BookingShopDTO;
-import com.yimayhd.erpcenter.facade.sales.result.BookingShopResult;
-import com.yimayhd.erpcenter.facade.sales.result.LoadBookingShopInfoResult;
-import com.yimayhd.erpcenter.facade.sales.result.LoadShopInfoResult;
-import com.yimayhd.erpcenter.facade.sales.result.ResultSupport;
-import com.yimayhd.erpcenter.facade.sales.service.BookingShopFacade;
+import com.yimayhd.erpcenter.facade.operation.query.BookingShopDTO;
+import com.yimayhd.erpcenter.facade.operation.result.BookingShopResult;
+import com.yimayhd.erpcenter.facade.operation.result.LoadBookingShopInfoResult;
+import com.yimayhd.erpcenter.facade.operation.result.LoadShopInfoResult;
+import com.yimayhd.erpcenter.facade.operation.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.operation.result.WebResult;
+import com.yimayhd.erpcenter.facade.operation.service.BookingShopFacade;
 import com.yimayhd.erpresource.dal.constants.Constants;
 /**
  * @author : xuzejun
@@ -84,6 +80,8 @@ public class BookingShopController extends BaseController {
 	private BookingShopFacade bookingShopFacade;
 	@Autowired
 	private ProductCommonFacade productCommonFacade;
+	@Autowired
+	private SaleCommonFacade saleCommonFacade;
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
 //		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
@@ -359,16 +357,25 @@ public class BookingShopController extends BaseController {
 	@RequestMapping(value = "/deleteShop.do",method = RequestMethod.POST)
 	@ResponseBody
 	public String deldetailGuide(Integer id) {
-		int count = shopDetailDeployService.getCountByShopId(id);
-		BigDecimal total = shopDetailDeployService.getSumBuyTotalByBookingId(id);
-		List<BookingShopDetail> lists = shopDetailService.getShopDetailListByBookingId(id);
-		if((count>0 && (total.compareTo(BigDecimal.ZERO))!=0) || lists.size()>0){
-			JSONObject json = new JSONObject();
-			json.put("fail", true);
-			return json.toString();
-		}else{
-			return bookingShopService.deleteByPrimaryKey(id)==1?successJson():errorJson("操作失败！");
+//		int count = shopDetailDeployService.getCountByShopId(id);
+//		BigDecimal total = shopDetailDeployService.getSumBuyTotalByBookingId(id);
+//		List<BookingShopDetail> lists = shopDetailService.getShopDetailListByBookingId(id);
+//		if((count>0 && (total.compareTo(BigDecimal.ZERO))!=0) || lists.size()>0){
+		WebResult<Map<String,Boolean>> webResult = bookingShopFacade.deldetailGuide(id);
+		if (!webResult.isSuccess()  ) {
+			if (webResult.getValue() != null) {
+				
+				JSONObject json = new JSONObject();
+				json.put("fail", true);
+				return json.toString();
+			}
+			return errorJson("操作失败！");
+		}else {
+			return successJson();
 		}
+//		}else{
+//			return bookingShopService.deleteByPrimaryKey(id)==1?successJson():errorJson("操作失败！");
+//		}
 	}
 	
 	
@@ -381,13 +388,13 @@ public class BookingShopController extends BaseController {
 	//@RequiresPermissions(PermissionConstants.JDGL_SHOPPING)
 	public String toFactShop(Integer id,Integer groupId,ModelMap model) {
 	
-		BookingShop shop =bookingShopService.selectByPrimaryKey(id);
+//		BookingShop shop =bookingShopService.selectByPrimaryKey(id);
 		//查询实际消费返款列表
-		List<BookingShopDetail> shopDetails =shopDetailService.getShopDetailListByBookingId(id);
-		
+//		List<BookingShopDetail> shopDetails =shopDetailService.getShopDetailListByBookingId(id);
+		BookingShopResult result = bookingShopFacade.toFactShop(id);
 		model.addAttribute("id", id);
-		model.addAttribute("shopDetails", shopDetails);
-		model.addAttribute("shop", shop);
+		model.addAttribute("shopDetails", result.getShopDetails());
+		model.addAttribute("shop", result.getBookingShop());
 		return "operation/shop/factShopView";
 	}
 	
@@ -396,13 +403,13 @@ public class BookingShopController extends BaseController {
 	//@RequiresPermissions(PermissionConstants.JDGL_SHOPPING)
 	public String factShop(Integer id,Integer groupId,ModelMap model) {
 	
-		BookingShop shop =bookingShopService.selectByPrimaryKey(id);
+//		BookingShop shop =bookingShopService.selectByPrimaryKey(id);
 		//查询实际消费返款列表
-		List<BookingShopDetail> shopDetails =shopDetailService.getShopDetailListByBookingId(id);
-		
+//		List<BookingShopDetail> shopDetails =shopDetailService.getShopDetailListByBookingId(id);
+		BookingShopResult result = bookingShopFacade.toFactShop(id);
 		model.addAttribute("id", id);
-		model.addAttribute("shopDetails", shopDetails);
-		model.addAttribute("shop", shop);
+		model.addAttribute("shopDetails", result.getShopDetails());
+		model.addAttribute("shop", result.getBookingShop());
 		model.addAttribute("view", 1);
 		return "operation/shop/factShopView";
 	}
@@ -413,10 +420,11 @@ public class BookingShopController extends BaseController {
 	@ResponseBody
 	public String editFactShop(BookingShopDetailDeploy b ,ModelMap model) {
 			//查询分摊
-			List<BookingShopDetailDeploy> deploys = shopDetailDeployService.selectByDetailId(b.getBookingDetailId());
-			List<GroupOrder> groupOrders = tourGroupService.selectOrderAndGuestInfoByGroupId(b.getOrderId());
-			List<BookingShopDetailDeploy> detailDeploys = new ArrayList<BookingShopDetailDeploy>();
-			
+//			List<BookingShopDetailDeploy> deploys = shopDetailDeployService.selectByDetailId(b.getBookingDetailId());
+//			List<GroupOrder> groupOrders = tourGroupService.selectOrderAndGuestInfoByGroupId(b.getOrderId());
+		BookingShopResult result = bookingShopFacade.editFactShop(b.getOrderId(), b.getBookingDetailId());	
+		List<BookingShopDetailDeploy> detailDeploys = new ArrayList<BookingShopDetailDeploy>();
+			List<GroupOrder> groupOrders = result.getGroupOrders();
 			for (GroupOrder g : groupOrders) {
 				boolean exist = false;
 				BookingShopDetailDeploy deploy = new BookingShopDetailDeploy();
@@ -437,6 +445,7 @@ public class BookingShopController extends BaseController {
 					}
 				}
 				deploy.setGuestNames(sb.toString());
+				List<BookingShopDetailDeploy> deploys = result.getShopDetailDeploys();
 				for (int i = 0; i < deploys.size()&& !exist; i++) {
 					if(deploys.get(i).getOrderId().equals(g.getId())){
 						deploy.setBookingDetailId(b.getBookingDetailId());
@@ -470,10 +479,11 @@ public class BookingShopController extends BaseController {
 	 */
 	@RequestMapping(value = "/toEditShopDetail.htm")
 	public String toEditShopDetail(BookingShopDetail shopDetail,String shopDate,Integer supplierId,Integer groupId,ModelMap model) {
-		
-		List<DicInfo> dic = dicService.getListByTypeCode(Constants.SHOPPING_TYPE_CODE);
+		List<DicInfo> dic = saleCommonFacade.getShopListByTypeCode();
+//		List<DicInfo> dic = dicService.getListByTypeCode(Constants.SHOPPING_TYPE_CODE);
 		if(shopDetail.getId()!=null){
-			shopDetail = shopDetailService.getShopDetailById(shopDetail.getId());
+//			shopDetail = shopDetailService.getShopDetailById(shopDetail.getId());
+			shopDetail = bookingShopFacade.getShopDetailById(shopDetail.getId());
 		}
 		model.addAttribute("shopDate", shopDate.substring(0, 10));
 		model.addAttribute("supplierId", supplierId);
@@ -493,12 +503,13 @@ public class BookingShopController extends BaseController {
 	@ResponseBody
 	public String saveShopDetail(BookingShopDetail shopDetail) {
 		
-		String suc = shopDetailService.save(shopDetail)>0?successJson():errorJson("操作失败！");
-		
-		if(shopDetail.getId()!=null){
-			financeService.calcTourGroupAmount(shopDetail.getBookingId());
-		}
-		return suc;
+//		String suc = shopDetailService.save(shopDetail)>0?successJson():errorJson("操作失败！");
+//		
+//		if(shopDetail.getId()!=null){
+//			financeService.calcTourGroupAmount(shopDetail.getBookingId());
+//		}
+		ResultSupport resultSupport = bookingShopFacade.saveShopDetail(shopDetail);
+		return resultSupport.isSuccess() ? successJson() : errorJson(resultSupport.getResultMsg());
 	}
 	
 	
@@ -510,9 +521,10 @@ public class BookingShopController extends BaseController {
 	@RequestMapping(value = "/delShopDetail.do",method = RequestMethod.POST)
 	@ResponseBody
 	public String delShopDetail(Integer id,Integer groupId) {
-		String suc = shopDetailService.deleteByPrimaryKey(id)==1?successJson():errorJson("操作失败！");
-		financeService.calcTourGroupAmount(groupId);
-		return suc;
+//		String suc = shopDetailService.deleteByPrimaryKey(id)==1?successJson():errorJson("操作失败！");
+//		financeService.calcTourGroupAmount(groupId);
+		ResultSupport resultSupport = bookingShopFacade.delShopDetail(id, groupId);
+		return resultSupport.isSuccess() ? successJson() : errorJson(resultSupport.getResultMsg());
 
 	}
 	/**
@@ -523,7 +535,9 @@ public class BookingShopController extends BaseController {
 	@RequestMapping(value = "/saveDeploy.do")
 	@ResponseBody
 	public String saveShopDetail(BookingShopDetailDeployVO deployVO) {
-		return shopDetailDeployService.insertSelective(deployVO)>0?successJson():errorJson("操作失败！");
+//		return shopDetailDeployService.insertSelective(deployVO)>0?successJson():errorJson("操作失败！");
+		ResultSupport resultSupport = bookingShopFacade.saveShopDetail(deployVO);
+		return resultSupport.isSuccess() ? successJson() : errorJson(resultSupport.getResultMsg());
 	}
 	
 	/**
@@ -566,35 +580,37 @@ public class BookingShopController extends BaseController {
 			pageBean.setPageSize(pageSize);
 		}
 		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
+//		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = group.getOrgIds().split(",");
+//			for(String orgIdStr : orgIdArr){
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds="";
+//			for(Integer usrId : set){
+//				salesOperatorIds+=usrId+",";
+//			}
+//			if(!salesOperatorIds.equals("")){
+//				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+//			}
+//		}
+		group.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(group.getSaleOperatorIds(), group.getOrgIds(),WebUtils.getCurBizId(request)));
 		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
 		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
 			pm.put("operator_id", group.getSaleOperatorIds());
 		}
 		pm.put("set", WebUtils.getDataUserIdSet(request));
 		pageBean.setParameter(pm);
-		pageBean = bookingShopService.selectShopTJListPage(pageBean);
-		List<Map<String,Object>> lists = pageBean.getResult();
-		for (Map<String, Object> map : lists) {
-			PlatformOrgPo platformOrgPo = orgService.getCompanyByEmployeeId(WebUtils.getCurBizId(request), (Integer)map.get("operator_id"));
-			if(null!=platformOrgPo){
-				map.put("company", platformOrgPo.getName());
-			}
-		}
+//		pageBean = bookingShopService.selectShopTJListPage(pageBean);
+//		List<Map<String,Object>> lists = pageBean.getResult();
+//		for (Map<String, Object> map : lists) {
+//			PlatformOrgPo platformOrgPo = orgService.getCompanyByEmployeeId(WebUtils.getCurBizId(request), (Integer)map.get("operator_id"));
+//			if(null!=platformOrgPo){
+//				map.put("company", platformOrgPo.getName());
+//			}
+//		}
+		pageBean = bookingShopFacade.shopTJList(pageBean, WebUtils.getCurBizId(request));
 		model.addAttribute("pageBean", pageBean);
 
 		return "operation/shopTj/tjShopList-table";
@@ -623,35 +639,38 @@ public class BookingShopController extends BaseController {
 			pageBean.setPageSize(pageSize);
 		}
 		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
+//		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = group.getOrgIds().split(",");
+//			for(String orgIdStr : orgIdArr){
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds="";
+//			for(Integer usrId : set){
+//				salesOperatorIds+=usrId+",";
+//			}
+//			if(!salesOperatorIds.equals("")){
+//				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+//			}
+//		}
+		group.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(group.getSaleOperatorIds(), group.getOrgIds(),WebUtils.getCurBizId(request)));
 		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
 		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
 			pm.put("operator_id", group.getSaleOperatorIds());
 		}
 		pm.put("set", WebUtils.getDataUserIdSet(request));
 		pageBean.setParameter(pm);
-		pageBean = bookingShopService.selectShopTJListPage(pageBean);
-		List<Map<String,Object>> lists = pageBean.getResult();
-		for (Map<String, Object> map : lists) {
-			PlatformOrgPo platformOrgPo = orgService.getCompanyByEmployeeId(WebUtils.getCurBizId(request), (Integer)map.get("operator_id"));
-			if(null!=platformOrgPo){
-				map.put("company", platformOrgPo.getName());
-			}
-		}
+//		pageBean = bookingShopService.selectShopTJListPage(pageBean);
+//		List<Map<String,Object>> lists = pageBean.getResult();
+//		for (Map<String, Object> map : lists) {
+//			PlatformOrgPo platformOrgPo = orgService.getCompanyByEmployeeId(WebUtils.getCurBizId(request), (Integer)map.get("operator_id"));
+//			if(null!=platformOrgPo){
+//				map.put("company", platformOrgPo.getName());
+//			}
+//		}
+		pageBean = bookingShopFacade.shopTJList(pageBean, WebUtils.getCurBizId(request));
+
 		model.addAttribute("pageBean", pageBean);
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
@@ -676,35 +695,39 @@ public class BookingShopController extends BaseController {
 			pageBean.setPageSize(pageSize);
 		}
 		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
+//		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = group.getOrgIds().split(",");
+//			for(String orgIdStr : orgIdArr){
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds="";
+//			for(Integer usrId : set){
+//				salesOperatorIds+=usrId+",";
+//			}
+//			if(!salesOperatorIds.equals("")){
+//				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+//			}
+//		}
+		group.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(group.getSaleOperatorIds(), group.getOrgIds(),WebUtils.getCurBizId(request)));
+
 		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
 		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
 			pm.put("operator_id", group.getSaleOperatorIds());
 		}
 		pm.put("set", WebUtils.getDataUserIdSet(request));
 		pageBean.setParameter(pm);
-		pageBean = bookingShopService.selectShopTJListPage(pageBean);
-		List<Map<String,Object>> lists = pageBean.getResult();
-		for (Map<String, Object> map : lists) {
-			PlatformOrgPo platformOrgPo = orgService.getCompanyByEmployeeId(WebUtils.getCurBizId(request), (Integer)map.get("operator_id"));
-			if(null!=platformOrgPo){
-				map.put("company", platformOrgPo.getName());
-			}
-		}
+//		pageBean = bookingShopService.selectShopTJListPage(pageBean);
+//		List<Map<String,Object>> lists = pageBean.getResult();
+//		for (Map<String, Object> map : lists) {
+//			PlatformOrgPo platformOrgPo = orgService.getCompanyByEmployeeId(WebUtils.getCurBizId(request), (Integer)map.get("operator_id"));
+//			if(null!=platformOrgPo){
+//				map.put("company", platformOrgPo.getName());
+//			}
+//		}
+		pageBean = bookingShopFacade.shopTJList(pageBean, WebUtils.getCurBizId(request));
+
 		model.addAttribute("pageBean", pageBean);
 		List list = pageBean.getResult();
 		String path ="";

@@ -17,21 +17,21 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.controller.BaseController;
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
+import com.yimayhd.erpcenter.facade.basic.service.RegionFacade;
 
 @Controller
 @RequestMapping(value = "/basic")
 public class RegionController extends BaseController {
 	@Autowired
-	private RegionService regionService;
+	private RegionFacade regionFacade;
 	
 	@RequestMapping(value = "getRegion.htm", method = RequestMethod.GET,produces="text/html;charset=UTF-8")
 	@ResponseBody
-	public String getRegion(HttpServletRequest request,
-			HttpServletResponse response, String pid, ModelMap model){
-		List<RegionInfo> list = regionService.getRegionById(pid);
+	public String getRegion(HttpServletRequest request, HttpServletResponse response, String pid, ModelMap model){
+		
+		List<RegionInfo> list = regionFacade.getRegionById(pid);
 		Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
 				.create();
 		String json = gson.toJson(list);
@@ -54,7 +54,7 @@ public class RegionController extends BaseController {
 		if(StringUtils.isBlank(id)){
 			return jsonArray.toJSONString();
 		}
-		List<RegionInfo> dicRegions = regionService.getRegionById(id);
+		List<RegionInfo> dicRegions = regionFacade.getRegionById(id);
 		if(dicRegions==null || dicRegions.size()==0){
 			return jsonArray.toJSONString();
 		}
@@ -75,7 +75,7 @@ public class RegionController extends BaseController {
 	
 	@RequestMapping(value="regionEdit.htm",method=RequestMethod.GET)
 	public String digUpdate(ModelMap model,String id){
-		RegionInfo dicRegion = regionService.getById(id);
+		RegionInfo dicRegion = regionFacade.getById(id);
 		model.addAttribute("region", dicRegion);
 		return "/basic/region/region_edit";
 	}
@@ -84,13 +84,11 @@ public class RegionController extends BaseController {
 	@ResponseBody
 	public String regionSubmit(RegionInfo dicRegion){
 		if(dicRegion.getId()!=null){
-			return  regionService.update(dicRegion)> 0 ?successJson() :errorJson("修改失败");
+			return  regionFacade.update(dicRegion)> 0 ?successJson() :errorJson("修改失败");
 		}else{
-			return  regionService.add(dicRegion)> 0 ?successJson() :errorJson("修改失败");
+			return  regionFacade.add(dicRegion)> 0 ?successJson() :errorJson("修改失败");
 
 		}
-		
-	
 	}
 	
 	@RequestMapping(value="regionAdd.htm",method=RequestMethod.GET)
@@ -103,17 +101,14 @@ public class RegionController extends BaseController {
 	@RequestMapping(value="isNode.do",method=RequestMethod.GET,produces="text/html;charset=UTF-8")
 	@ResponseBody
 	public String isNode(String id){
-		int i =  regionService.isNode(id);
+		int i =  regionFacade.isNode(id);
 		if(i==0){
 			RegionInfo dicRegion = new RegionInfo();
 			dicRegion.setId(Integer.valueOf(id));
 			dicRegion.setStatus(0);
-			regionService.update(dicRegion);
+			regionFacade.update(dicRegion);
 		}
 		 return i== 0 ?successJson() :errorJson("不允许删除,存在子节点");
 	}
-	
-	
-
 	
 }

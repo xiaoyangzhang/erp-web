@@ -5,9 +5,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
-import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
-import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -45,8 +42,11 @@ public class FitGroupController extends BaseController {
 ////	private PlatformOrgService orgService;
 //	@Autowired
 //	private DicService dicService;
+	
+	//FIXME 好像是应用web中的东西，暂放
 	@Autowired
-	private SysConfig config;//FIXME 这个东西有疑问
+	private SysConfig config;
+	
 //	@Autowired
 //	private FitGroupService fitGroupService;
 //	@Autowired
@@ -61,9 +61,6 @@ public class FitGroupController extends BaseController {
 ////	private BookingGuideService bookingGuideService;
 //	@Autowired
 //	private BookingSupplierService bookingSupplierService ;
-
-	@Autowired
-	private ProductCommonFacade productCommonFacade;
 	
 	@Autowired
 	private FitGroupFacade fitGroupFacade;
@@ -450,15 +447,9 @@ public class FitGroupController extends BaseController {
 		
 		model.addAttribute("group", result.getGroup());
 		model.addAttribute("page", result.getPageBean());
-		model.addAttribute("tourGroup", result.getTourGroup());
-		
-		
-		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
-		departmentTuneQueryDTO.setBizId(bizId);
-		DepartmentTuneQueryResult departmentResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
-		
-		model.addAttribute("orgJsonStr",departmentResult.getOrgJsonStr());
-		model.addAttribute("orgUserJsonStr",departmentResult.getOrgUserJsonStr());
+		model.addAttribute("tourGroup", result.getTourGroup());		
+		model.addAttribute("orgJsonStr",result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
 		
 		return "sales/fitGroup/fitGroupList";
 	}

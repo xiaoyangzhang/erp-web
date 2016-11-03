@@ -8,6 +8,14 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.common.exception.ClientException;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.SalesVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
+import com.yimayhd.erpcenter.facade.sales.result.InitGroupResult;
+import com.yimayhd.erpcenter.facade.sales.service.InitGroupFacade;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,50 +24,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.exception.ClientException;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.api.BookingDeliveryService;
-import com.yihg.operation.api.BookingSupplierService;
-import com.yihg.operation.po.BookingDelivery;
-import com.yihg.operation.po.BookingSupplier;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.SalesVO;
-import com.yihg.sales.vo.TourGroupVO;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierGuide;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
+
 
 @Controller
 @RequestMapping(value = "/initGroup")
 public class InitGroupController extends BaseController {
+
 	@Autowired
-	private GroupOrderService groupOrderService;
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private PlatformOrgService orgService;
-	@Autowired
-	private BookingDeliveryService bookingDeliveryService;
-	@Autowired
-	private BookingSupplierService bookingSupplierService;
-	
-	
+	private InitGroupFacade initGroupFacade;
+
 	
 	@RequestMapping("initGroupList.htm")
 	public String initGroupList(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
-		Integer bizId = WebUtils.getCurBizId(request);
+		/*Integer bizId = WebUtils.getCurBizId(request);
 		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
+		return "sales/initGroup/initGroupList";*/
+		Integer bizId = WebUtils.getCurBizId(request);
+		InitGroupResult initGroupResult = initGroupFacade.qualityList(bizId);
+		model.addAttribute("orgJsonStr", initGroupResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", initGroupResult.getOrgUserJsonStr());
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
 		return "sales/initGroup/initGroupList";
 	}
@@ -68,7 +57,7 @@ public class InitGroupController extends BaseController {
 	@RequestMapping(value = "/initGroupList.do")
 	public String initGroupList(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group,String guideName) {
-		PageBean pageBean = new PageBean();
+		/*PageBean pageBean = new PageBean();
 		if (page == null) {
 			pageBean.setPage(1);
 		} else {
@@ -104,6 +93,11 @@ public class InitGroupController extends BaseController {
 		pageBean = tourGroupService.selectInitGroupList(pageBean);
 		model.addAttribute("pageBean", pageBean);
 		
+		return "sales/initGroup/initGroupList-table";*/
+
+		InitGroupResult initGroupResult = initGroupFacade.initGroupList(pageSize,page,group, guideName, WebUtils.getQueryParamters(request), WebUtils.getDataUserIdSet(request), WebUtils.getCurBizId(request));
+		model.addAttribute("pageBean", initGroupResult.getPageBean());
+
 		return "sales/initGroup/initGroupList-table";
 	}
 	
@@ -112,7 +106,7 @@ public class InitGroupController extends BaseController {
 	@RequestMapping(value = "getInitGroupList.htm")
 	public String getInitGroupList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model,Integer groupId) {
-		List<GroupOrder> orderList =null;
+		/*List<GroupOrder> orderList =null;
 		List<BookingDelivery> bookingDeliveryList =null;
 		List<BookingSupplier> hotelList = null;
 		List<BookingSupplier> restaurantList = null;
@@ -147,17 +141,37 @@ public class InitGroupController extends BaseController {
 		model.addAttribute("insuranceList", insuranceList);
 		model.addAttribute("airticketList", airticketList);
 		model.addAttribute("trainList", trainList);
+		return "sales/initGroup/initGroupInfo";*/
+		InitGroupResult initGroupResult = initGroupFacade.getInitGroupList(groupId, WebUtils.getCurBizId(request));
+		model.addAttribute("tourGroup", initGroupResult.getTourGroup());
+		model.addAttribute("orderList", initGroupResult.getOrderList());
+		model.addAttribute("bookingDeliveryList", initGroupResult.getBookingDeliveryList());
+		model.addAttribute("hotelList", initGroupResult.getHotelList());
+		model.addAttribute("restaurantList", initGroupResult.getRestaurantList());
+
+		model.addAttribute("fleetList", initGroupResult.getFleetList());
+		model.addAttribute("scenicsportList", initGroupResult.getScenicsportList());
+		model.addAttribute("insuranceList", initGroupResult.getInsuranceList());
+		model.addAttribute("airticketList", initGroupResult.getAirticketList());
+		model.addAttribute("trainList", initGroupResult.getTrainList());
 		return "sales/initGroup/initGroupInfo";
 	}
 	
 	@RequestMapping(value = "saveInitGroupInfo.do")
 	@ResponseBody
 	public String saveInitGroupInfo(HttpServletRequest request,HttpServletResponse reponse,SalesVO salesVO){
-		String result = chargeOption(salesVO);
+	/*	String result = chargeOption(salesVO);
 		if(result!=null){
 			return errorJson(result);
 		}
 		groupOrderService.saveInitGroupInfo(WebUtils.getCurBizId(request), salesVO,WebUtils.getCurUserId(request),WebUtils.getCurUser(request).getName());
+		return successJson();*/
+
+		String result = chargeOption(salesVO);
+		if(result!=null){
+			return errorJson(result);
+		}
+		InitGroupResult initGroupResult = initGroupFacade.saveInitGroupInfo(salesVO,WebUtils.getCurBizId(request), WebUtils.getCurUserId(request), WebUtils.getCurUser(request).getName());
 		return successJson();
 	}
 
@@ -313,9 +327,18 @@ public class InitGroupController extends BaseController {
 	@RequestMapping(value = "/deleteInitGroupInfo.do",method = RequestMethod.POST)
 	@ResponseBody
 	public String deleteInitGroupInfo(Integer groupId) {
-		
+	/*
 		try{
 			tourGroupService.deleteInitGroupInfo(groupId);
+		}catch(ClientException ex){
+			return errorJson(ex.getMessage());
+		}catch(Exception ex){
+			return errorJson("操作失败！");
+		}
+		return successJson();*/
+
+		try{
+			InitGroupResult initGroupResult = initGroupFacade.deleteInitGroupInfo(groupId);
 		}catch(ClientException ex){
 			return errorJson(ex.getMessage());
 		}catch(Exception ex){
