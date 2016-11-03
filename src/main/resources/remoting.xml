@@ -162,6 +162,6 @@
 	<dubbo:reference id="supplierGuestFacade"
 		interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierGuestFacade" owner="ly" version="1.0.0.test"
 		timeout="8000" />
-		
-		
+
+
 </beans>
