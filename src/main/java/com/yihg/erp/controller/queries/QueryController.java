@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.*;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.*;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.service.QueryFacade;
+import com.yimayhd.erpcenter.facade.operation.query.BookingShopListDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -52,13 +53,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.util.TypeUtils;
-//import com.yihg.basic.api.CommonService;
-//import com.yihg.basic.api.DicService;
-//import com.yihg.basic.api.RegionService;
-//import com.yihg.basic.contants.BasicConstants;
-//import com.yihg.basic.po.DicInfo;
-//import com.yihg.basic.po.RegionInfo;
-//import com.yihg.basic.util.NumberUtil;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.contant.BizConfigConstant;
@@ -76,53 +70,6 @@ import com.yimayhd.erpcenter.dal.sales.client.finance.po.InfoBean;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingAirTicket;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
 import com.yimayhd.erpcenter.dal.sales.client.operation.vo.PaymentExportVO;
-//import com.yihg.finance.api.FinanceService;
-//import com.yihg.finance.po.FinancePay;
-//import com.yihg.finance.po.InfoBean;
-//import com.yihg.mybatis.utility.PageBean;
-//import com.yihg.operation.api.BookingGuideService;
-//import com.yihg.operation.api.BookingShopDetailDeployService;
-//import com.yihg.operation.api.BookingShopDetailService;
-//import com.yihg.operation.api.BookingShopService;
-//import com.yihg.operation.api.BookingSupplierDetailService;
-//import com.yihg.operation.api.BookingSupplierService;
-//import com.yihg.operation.po.BookingAirTicket;
-//import com.yihg.operation.po.BookingGuide;
-//import com.yihg.operation.po.BookingShopDetail;
-//import com.yihg.operation.po.BookingShopSelect;
-//import com.yihg.operation.po.BookingSupplierDetail;
-//import com.yihg.operation.vo.BookingGroup;
-//import com.yihg.operation.vo.GroupBookingInfo;
-//import com.yihg.operation.vo.PaymentExportVO;
-//import com.yihg.operation.vo.QueryShopInfo;
-//import com.yihg.product.api.ProductGroupPriceService;
-//import com.yihg.query.api.QueryService;
-//import com.yihg.query.vo.DeparentmentOrderCondition;
-//import com.yihg.query.vo.DepartmentOrderResult;
-//import com.yihg.query.vo.DepartmentOrderVO;
-//import com.yihg.query.vo.ProductGuestCondition;
-//import com.yihg.query.vo.ProductGuestShoppingCondition;
-//import com.yihg.query.vo.ProductGuestStaticsVo;
-//import com.yihg.sales.api.GroupOrderService;
-//import com.yihg.sales.api.TourGroupService;
-//import com.yihg.sales.po.GroupOrder;
-//import com.yihg.sales.po.GroupOrderGuest;
-//import com.yihg.sales.po.PaymentCondition;
-//import com.yihg.sales.po.TourGroup;
-//import com.yihg.sales.vo.OperatorGroupStatic;
-//import com.yihg.sales.vo.SaleOperatorOrderStatic;
-//import com.yihg.sales.vo.SaleOperatorVo;
-//import com.yihg.sales.vo.TourGroupVO;
-//import com.yihg.supplier.api.SupplierService;
-//import com.yihg.supplier.constants.Constants;
-//import com.yihg.supplier.constants.SupplierConstant;
-//import com.yihg.supplier.po.SupplierInfo;
-//import com.yihg.sys.api.PlatformEmployeeService;
-//import com.yihg.sys.api.PlatformOrgService;
-//import com.yihg.sys.api.SysBizBankAccountService;
-//import com.yihg.sys.po.PlatformEmployeePo;
-//import com.yihg.sys.po.PlatformOrgPo;
-//import com.yihg.sys.po.SysBizBankAccount;
 import com.yimayhd.erpcenter.dal.sales.client.operation.vo.QueryGuideShop;
 import com.yimayhd.erpcenter.dal.sales.client.operation.vo.QueryShopInfo;
 import com.yimayhd.erpcenter.dal.sales.client.query.vo.DeparentmentOrderCondition;
@@ -144,7 +91,6 @@ import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.dal.sys.po.SysBizBankAccount;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.service.DataAnalysisFacade;
 import com.yimayhd.erpcenter.facade.operation.service.BookingShopFacade;
-import com.yimayhd.erpcenter.facade.sales.query.BookingShopListDTO;
 import com.yimayhd.erpcenter.facade.sales.result.GuestShopListResult;
 import com.yimayhd.erpcenter.facade.sales.result.GuestShopResult;
 import com.yimayhd.erpresource.dal.constants.Constants;
@@ -1870,7 +1816,7 @@ public class QueryController extends BaseController {
 	 */
 	@RequestMapping(value = "/guestShopList.htm")
 	public String toGuestShopList(HttpServletRequest request, ModelMap model) {
-		GuestShopListResult result = bookingShopFacade.toGuestShopList(WebUtils.getCurBizId(request));
+		com.yimayhd.erpcenter.facade.operation.result.GuestShopListResult result = bookingShopFacade.toGuestShopList(WebUtils.getCurBizId(request));
 		model.addAttribute("allProvince", result.getAllProvince());
 		model.addAttribute("sourceTypeList", result.getSourceTypeList());
 		// getOrgAndUserTreeJsonStr(model, bizId);
@@ -1897,9 +1843,9 @@ public class QueryController extends BaseController {
 	/**
 	 * 购物查询
 	 * 
-	 * @param request
-	 * @param response
-	 * @param modelMap
+	 * @param
+	 * @param
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("/shopSelectList.htm")
@@ -2298,8 +2244,8 @@ public class QueryController extends BaseController {
 
 	/**
 	 * @param request
-	 * @param response
-	 * @param modelMap
+	 * @param
+	 * @param
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
@@ -2392,7 +2338,7 @@ public class QueryController extends BaseController {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param modelMap
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("restaurantBooking.htm")
@@ -2430,7 +2376,7 @@ public class QueryController extends BaseController {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param modelMap
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("restaurantJSFS.htm")
@@ -2501,7 +2447,7 @@ public class QueryController extends BaseController {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param modelMap
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("hotelList.htm")
@@ -2673,7 +2619,7 @@ public class QueryController extends BaseController {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param modelMap
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("fleetDetailList.htm")
@@ -2710,7 +2656,7 @@ public class QueryController extends BaseController {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param modelMap
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("fleetJSFSList.htm")
@@ -2747,7 +2693,7 @@ public class QueryController extends BaseController {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param modelMap
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("entertainmentList.htm")
@@ -2827,7 +2773,7 @@ public class QueryController extends BaseController {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param modelMap
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("sightBooking.htm")
@@ -2864,7 +2810,7 @@ public class QueryController extends BaseController {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param modelMap
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("sightJSFS.htm")
@@ -3264,7 +3210,7 @@ public class QueryController extends BaseController {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param modelMap
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("golfList.htm")
@@ -3293,7 +3239,7 @@ public class QueryController extends BaseController {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param model
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("insuranceList.htm")
@@ -4445,7 +4391,7 @@ public class QueryController extends BaseController {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param modelMap
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("transportList.htm")
@@ -5019,7 +4965,7 @@ public class QueryController extends BaseController {
 	 * @param request
 	 * @param response
 	 * @param model
-	 * @param condition
+	 * @param
 	 * @return
 	 */
 	@RequestMapping("productGuestStatics.htm")
@@ -5338,7 +5284,7 @@ public class QueryController extends BaseController {
 	 * 
 	 * @param request
 	 * @param model
-	 * @param guide
+	 * @param
 	 * @param pageSize
 	 * @param page
 	 * @return
@@ -6724,12 +6670,12 @@ public class QueryController extends BaseController {
 	 * @param request
 	 * @param reponse
 	 * @param model
-	 * @param sl
-	 * @param ssl
-	 * @param rp
-	 * @param page
-	 * @param pageSize
-	 * @param svc
+	 * @param
+	 * @param
+	 * @param
+	 * @param
+	 * @param
+	 * @param
 	 * @return
 	 */
 	@RequestMapping(value = "productGuestDetailPreview.htm")
@@ -6797,12 +6743,12 @@ public class QueryController extends BaseController {
 	 * @param request
 	 * @param response
 	 * @param model
-	 * @param sl
-	 * @param ssl
-	 * @param rp
-	 * @param page
-	 * @param pageSize
-	 * @param svc
+	 * @param
+	 * @param
+	 * @param
+	 * @param
+	 * @param
+	 * @param
 	 */
 	@RequestMapping("exportExcel6.htm")
 	public void exportExcel6(HttpServletRequest request, HttpServletResponse response, ModelMap model,
@@ -6936,12 +6882,12 @@ public class QueryController extends BaseController {
 	 * @param request
 	 * @param reponse
 	 * @param model
-	 * @param sl
-	 * @param ssl
-	 * @param rp
-	 * @param page
-	 * @param pageSize
-	 * @param svc
+	 * @param
+	 * @param
+	 * @param
+	 * @param
+	 * @param
+	 * @param
 	 * @return
 	 */
 	@RequestMapping(value = "productSourcePreview.htm")
@@ -6994,12 +6940,12 @@ public class QueryController extends BaseController {
 	 * @param request
 	 * @param response
 	 * @param model
-	 * @param sl
-	 * @param ssl
-	 * @param rp
-	 * @param page
-	 * @param pageSize
-	 * @param svc
+	 * @param
+	 * @param
+	 * @param
+	 * @param
+	 * @param
+	 * @param
 	 */
 	@RequestMapping("exportExcel7.htm")
 	public void exportExcel7(HttpServletRequest request, HttpServletResponse response, ModelMap model,
@@ -8470,7 +8416,17 @@ public class QueryController extends BaseController {
 	@RequestMapping(value = "deliveryDetailPreview.htm")
 	public String deliveryDetailPreview(HttpServletRequest request, HttpServletResponse reponse, ModelMap model,
 			String sl, String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+	//	PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(10000);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 
@@ -8495,8 +8451,17 @@ public class QueryController extends BaseController {
 	@RequestMapping("deliveryExportExcel.do")
 	public void deliveryExportExcel(HttpServletRequest request, HttpServletResponse response, ModelMap model, String sl,
 			String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
-
+		//PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(10000);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult rueryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb = rueryResult.getPageBean();
 		String path = "";
 		BigDecimal total = new BigDecimal(0);
 		BigDecimal totalCash = new BigDecimal(0);
@@ -8739,12 +8704,12 @@ public class QueryController extends BaseController {
 	 * @param request
 	 * @param reponse
 	 * @param model
-	 * @param sl
-	 * @param ssl
-	 * @param rp
+	 * @param
+	 * @param
+	 * @param
 	 * @param page
 	 * @param pageSize
-	 * @param svc
+	 * @param
 	 * @return
 	 */
 	@RequestMapping(value = "productTrendList.htm")
