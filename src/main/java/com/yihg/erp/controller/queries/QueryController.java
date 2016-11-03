@@ -8387,6 +8387,7 @@ public class QueryController extends BaseController {
 
 		QueryDTO queryDTO = new QueryDTO();
 		queryDTO.setCondition(condition);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
 		QueryResult queryResult = queryFacade.departmentOrderList(queryDTO);
@@ -8446,7 +8447,7 @@ public class QueryController extends BaseController {
 		QueryDTO queryDTO = new QueryDTO();
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
-		QueryResult queryResult = queryFacade.productTrendList(queryDTO);
+		QueryResult queryResult = queryFacade.receivePersonCountTable(queryDTO);
 		model.addAttribute("personMap", queryResult.getPersonMap());
 		return "queries/receivePersonCount/receivePersonCountTable";
 
@@ -8766,6 +8767,8 @@ public class QueryController extends BaseController {
 		queryDTO.setOrgIds(orgIds);
 		queryDTO.setPage(page);
 		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
 		QueryResult queryResult = queryFacade.productTrendTableList(queryDTO);
 		model.addAttribute("page", queryResult.getPageBean());
