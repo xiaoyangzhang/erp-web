@@ -90,6 +90,9 @@
 		<facade-common-client.version>0.0.8-SNAPSHOT</facade-common-client.version>
 		<facade-finance-client.version>0.0.8-SNAPSHOT</facade-finance-client.version>
 		<facade-operation-client.version>0.0.8-SNAPSHOT</facade-operation-client.version>
+		<facade-finance-client.version>0.0.8-SNAPSHOT</facade-finance-client.version>
+		<facade-supplier-client.version>0.0.8-SNAPSHOT</facade-supplier-client.version>
+		<facade-dataAnalysis-client.version>0.0.8-SNAPSHOT</facade-dataAnalysis-client.version>
 	</properties>
 
 	<dependencies>
