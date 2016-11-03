@@ -162,6 +162,51 @@
 	<dubbo:reference id="supplierGuestFacade"
 		interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierGuestFacade" owner="ly" version="1.0.0.test"
 		timeout="8000" />
-
+	
+	<dubbo:reference id="dataAnalysisFacade"
+		interface="com.yimayhd.erpcenter.facade.dataanalysis.client.service.DataAnalysisFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="queryFacade"
+		interface="com.yimayhd.erpcenter.facade.dataanalysis.client.service.QueryFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="billStatisticsFacade"
+		interface="org.yimayhd.erpcenter.facade.finance.service.BillStatisticsFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="financeFacade"
+		interface="org.yimayhd.erpcenter.facade.finance.service.FinanceFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="financeGuideFacade"
+		interface="org.yimayhd.erpcenter.facade.finance.service.FinanceGuideFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	
+	<dubbo:reference id="verifyFacade"
+		interface="org.yimayhd.erpcenter.facade.finance.service.VerifyFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="bookingComponentFacade"
+		interface="com.yimayhd.erpcenter.facade.operation.service.BookingComponentFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="bookingDeliveryFacade"
+		interface="com.yimayhd.erpcenter.facade.operation.service.BookingDeliveryFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="bookingFinanceShopFacade"
+		interface="com.yimayhd.erpcenter.facade.operation.service.BookingFinanceShopFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="bookingGuestShopFacade"
+		interface="com.yimayhd.erpcenter.facade.operation.service.BookingGuestShopFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="bookingGuideFacade"
+		interface="com.yimayhd.erpcenter.facade.operation.service.BookingGuideFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="bookingGuideFinanceFacade"
+		interface="com.yimayhd.erpcenter.facade.operation.service.BookingGuideFinanceFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	
+	<dubbo:reference id="bookingShopFacade"
+		interface="com.yimayhd.erpcenter.facade.operation.service.BookingShopFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	<dubbo:reference id="bookingSupplierFacade"
+		interface="com.yimayhd.erpcenter.facade.operation.service.BookingSupplierFacade" owner="ly" version="1.0.0.test"
+		timeout="8000" />
+	
 
 </beans>
