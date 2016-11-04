@@ -74,7 +74,7 @@ public class AiYouController extends BaseController {
     private GroupOrderFacade groupOrderFacade;
     
     @Autowired
-    private GroupOrderFacade_aiyou groupOrderFacadeAiYou;
+    private GroupOrderFacade_aiyou groupOrderAiYouFacade;
     @Autowired
     private SysConfig config;
     
@@ -125,7 +125,7 @@ public class AiYouController extends BaseController {
         Integer bizId = WebUtils.getCurBizId(request);
 
         List<AiYouBean> aiyouOrderList = Collections.emptyList();
-        ListResultSupport<AiYouBean> resultSupport = groupOrderFacadeAiYou.getAiYourOrders(code, port, startDate, endDate, groupNum, bizId);
+        ListResultSupport<AiYouBean> resultSupport = groupOrderAiYouFacade.getAiYourOrders(code, port, startDate, endDate, groupNum, bizId);
         if(resultSupport!=null && resultSupport.isSuccess()){
             aiyouOrderList = resultSupport.getValues();
         }
@@ -345,7 +345,7 @@ public class AiYouController extends BaseController {
         }
         httpPost.abort();
 
-        Integer groupOrderId = groupOrderFacadeAiYou.saveAiYouDataToGroupOrder(groupOrderList);
+        Integer groupOrderId = groupOrderAiYouFacade.saveAiYouDataToGroupOrder(groupOrderList);
         if (groupOrderId > 0) {
             return successJson("msg", "数据导入成功！");
         } else {
