@@ -95,7 +95,7 @@ public class FinanceGuideController extends BaseController {
 		dto.setRp(rp);
 		dto.setSaleOperatorIds(group.getSaleOperatorIds());
 		dto.setSet(WebUtils.getDataUserIdSet(request));
-		dto.setSl(ssl);
+		dto.setSl(sl);
 		dto.setSsl(ssl);
 		dto.setSvc(svc);
 		PageBean pb = financeGuideFacade.auditList(dto);
@@ -138,17 +138,17 @@ public class FinanceGuideController extends BaseController {
 			ModelMap model, Integer page, Integer pageSize) {
 		
 		PayRecordDetailsDTO dto = new PayRecordDetailsDTO();
-		dto.setBizId(dto.getBizId());
-		dto.setOrgIds(dto.getOrgIds());
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setOrgIds(request.getParameter("orgIds"));
 		if(page != null){
 			dto.setPage(page);
 		}
 		if(pageSize != null){
 			dto.setPageSize(pageSize);
 		}
-		dto.setParamters(dto.getParamters());
-		dto.setSaleOperatorIds(dto.getSaleOperatorIds());
-		dto.setSet(dto.getSet());
+		dto.setParamters(WebUtils.getQueryParamters(request));
+		dto.setSaleOperatorIds(request.getParameter("saleOperatorIds"));
+		dto.setSet(WebUtils.getDataUserIdSet(request));
 		PageBean pb = financeGuideFacade.payRecordListPage(dto);
 		model.addAttribute("pageBean", pb);
 		return "finance/guide/pay-list-table";

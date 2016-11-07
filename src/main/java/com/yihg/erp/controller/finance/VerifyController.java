@@ -111,7 +111,7 @@ public class VerifyController extends BaseController {
 		dto.setRp(rp);
 		dto.setSaleOperatorIds(group.getSaleOperatorIds());
 		dto.setSet(WebUtils.getDataUserIdSet(request));
-		dto.setSl(ssl);
+		dto.setSl(sl);
 		dto.setSsl(ssl);
 		dto.setSvc(svc);
 		PageBean pb = verifyFacade.searchList(dto);
