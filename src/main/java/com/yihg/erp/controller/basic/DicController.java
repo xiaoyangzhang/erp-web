@@ -72,7 +72,7 @@ public class DicController extends BaseController{
 	
 	@RequestMapping(value = "/delDicType.do", method = RequestMethod.POST)
 	@ResponseBody
-	public String dicTypeDel(HttpServletRequest request,HttpServletResponse response,ModelMap model,String id) {
+	public String dicTypeDel(HttpServletRequest request,HttpServletResponse response,ModelMap model,Integer id) {
 		dicFacade.dicTypeDelete(id);
 		return successJson();			
 	}
@@ -138,7 +138,7 @@ public class DicController extends BaseController{
 	}
 	
 	@RequestMapping(value="/editDic.htm",method=RequestMethod.GET)
-	public String dicEdit(HttpServletRequest request,HttpServletResponse response,ModelMap model,String id){
+	public String dicEdit(HttpServletRequest request,HttpServletResponse response,ModelMap model,Integer id){
 		DicInfo dicInfo = dicFacade.getDicById(id);
 		DicTypeInfo dicTypeInfo = dicFacade.getDicTypeById(dicInfo.getTypeId());
 		int share = 1;
@@ -170,7 +170,7 @@ public class DicController extends BaseController{
 	
 	@RequestMapping(value = "/delDic.do", method = RequestMethod.POST)
 	@ResponseBody
-	public String dicDel(HttpServletRequest request,HttpServletResponse response,ModelMap model,String id) {
+	public String dicDel(HttpServletRequest request,HttpServletResponse response,ModelMap model,Integer id) {
 		//Long dicId = Long.valueOf(id);
 		dicFacade.dicDel(id);		
 		return successJson();
