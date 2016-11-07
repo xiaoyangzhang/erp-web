@@ -104,7 +104,7 @@ public class BookingComponentController extends BaseController {
 		//团队才有组团社
 		//if(groupInfo!=null && groupInfo.getGroupMode()>0){
 			//List<GroupOrder> list = groupOrderService.selectOrderByGroupId(gid);
-		if(CollectionUtils.isEmpty(result.getOrders())){
+		if(!CollectionUtils.isEmpty(result.getOrders())){
 				supplierName=result.getOrders().get(0).getSupplierName();
 			}
 		//}

@@ -2217,14 +2217,15 @@ public class BookingSupplierController extends BaseController {
 		List<DicInfo> cashTypes = null;
 		Integer bizId = WebUtils.getCurBizId(request);
 		BookingSupplierResult result = null;
-		if (bookingId != null) {
+//		if (bookingId != null) {
 			result = bookingSupplierFacade.loadInAndOutcomeData(bookingId, groupId);
 			supplier = result.getBookingSupplier();
 			details = result.getDetailList();
 			
 //			supplier = bookingSupplierService.selectByPrimaryKey(bookingId);
 //			details = detailService.selectByPrimaryBookId(bookingId);
-		} else {
+//		} else {
+		if(bookingId == null){
 			supplier = new BookingSupplier();
 			supplier.setGroupId(groupId);
 			supplier.setFinanceTotal(new BigDecimal(0));
@@ -2238,9 +2239,10 @@ public class BookingSupplierController extends BaseController {
 		}
 		if (subType.intValue() == 1) {
 //			cashTypes = dicService.getListByTypeCode(BasicConstants.QTSR_JSFS, bizId);
-			
+			cashTypes = saleCommonFacade.getIncomeTypeListByTypeCode(bizId);
 		} else {
 //			cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
+			cashTypes = saleCommonFacade.getSettleWayListByTypeCode(bizId);
 		}
 		
 		model.addAttribute("supplier", supplier);

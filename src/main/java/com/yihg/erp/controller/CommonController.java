@@ -183,7 +183,7 @@ public class CommonController {
 	 */
 	private CommonFacade getCommonFacade(String svc) {
 		if (StringUtils.isBlank(svc)) {
-			svc = "commonsaleService";
+			svc = "commonFacade";
 		}
 		return appContext.getBean(svc, CommonFacade.class);
 	}

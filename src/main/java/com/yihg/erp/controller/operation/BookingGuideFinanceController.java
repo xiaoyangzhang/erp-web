@@ -42,8 +42,21 @@ import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
 import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuideListCount;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuideListSelect;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier;
+import com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingGuidesVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
 import com.yimayhd.erpcenter.dal.sys.po.UserSession;
 import com.yimayhd.erpcenter.facade.operation.query.BookingGuideQueryDTO;
 import com.yimayhd.erpcenter.facade.operation.result.BookingGuideResult;
@@ -93,7 +106,7 @@ public class BookingGuideFinanceController extends BaseController {
 	//TourGroup group,
 	@RequestMapping(value = "/bookingGuideList.do")
 	//@RequiresPermissions(PermissionConstants.JDGL_GUIDE)
-	public String bookingGuideList(HttpServletRequest request, ModelMap model,com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO group) {
+	public String bookingGuideList(HttpServletRequest request, ModelMap model,TourGroupVO group) {
 		PageBean pageBean = new PageBean();
 		if(group.getPage()==null){
 			group.setPage(1);
@@ -153,7 +166,7 @@ public class BookingGuideFinanceController extends BaseController {
 	
 
 	@RequestMapping(value = "/lockListTable.do")
-	public String lockListTable(HttpServletRequest request, ModelMap model,com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO group) {
+	public String lockListTable(HttpServletRequest request, ModelMap model,TourGroupVO group) {
 		UserSession user = WebUtils.getCurrentUserSession(request);
 		Map<String,Boolean> optMap = user.getOptMap();
 		model.addAttribute("optMap_LOCK", optMap.containsKey(PermissionConstants.JDGL_DYJDSH.concat("_").concat(PermissionConstants.JDGL_GUIDE_LOCK)));
@@ -272,7 +285,7 @@ public class BookingGuideFinanceController extends BaseController {
 	public String guideDetailListView( ModelMap model,Integer groupId) {
 		model.addAttribute("groupId", groupId);
 //		List<BookingGuidesVO> vo = bookingGuideService.selectBookingGuideVoByGroupId(groupId);
-		List<com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingGuidesVO> guidesVOs = bookingGuideFinanceFacade.guideDetailListView(groupId);
+		List<BookingGuidesVO> guidesVOs = bookingGuideFinanceFacade.guideDetailListView(groupId);
 		model.addAttribute("vo", guidesVOs);
 		return "operation/guideFinance/guide-detaillistView";
 	}
@@ -283,7 +296,7 @@ public class BookingGuideFinanceController extends BaseController {
 	public String toGuideDetailListView( ModelMap model,Integer groupId) {
 		model.addAttribute("groupId", groupId);
 //		List<BookingGuidesVO> vo = bookingGuideService.selectBookingGuideVoByGroupId(groupId);
-		List<com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingGuidesVO> guidesVOs = bookingGuideFinanceFacade.guideDetailListView(groupId);
+		List<BookingGuidesVO> guidesVOs = bookingGuideFinanceFacade.guideDetailListView(groupId);
 
 		model.addAttribute("vo", guidesVOs);
 		model.addAttribute("view",1);
@@ -296,8 +309,8 @@ public class BookingGuideFinanceController extends BaseController {
 	 */
 	@RequestMapping(value = "/saveGuide.do")
 	@ResponseBody
-	public String saveGuide(HttpServletRequest request, ModelMap model,com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingGuidesVO guideVO) {
-		com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide guide = guideVO.getGuide();
+	public String saveGuide(HttpServletRequest request, ModelMap model,BookingGuidesVO guideVO) {
+		BookingGuide guide = guideVO.getGuide();
 		if(guide.getId()==null){
 //			int No = bookingGuideService.getBookingCountByTime();
 //			guide.setBookingNo(bizSettingCommon.getMyBizCode(request)+Constants.GUIDE+new SimpleDateFormat("yyMMdd").format(new Date())+(No+100));
@@ -355,14 +368,14 @@ public class BookingGuideFinanceController extends BaseController {
 	 * @Description: 导游查询结果
 	 */
 	@RequestMapping(value = "impGuideList.do",method=RequestMethod.POST)
-	public String queryImpGuideList(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,com.yimayhd.erpresource.dal.po.SupplierGuide guide,Integer page,Integer pageSize){
+	public String queryImpGuideList(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,SupplierGuide guide,Integer page,Integer pageSize){
 		Integer bizId = WebUtils.getCurBizId(request);
 		loadGuideList(model,guide,page,pageSize,bizId);
 		model.addAttribute("images_source", config.getImages200Url());
 		return "operation/guideFinance/imp-guideListView";
 	}	
 	
-	private void loadGuideList(ModelMap model,com.yimayhd.erpresource.dal.po.SupplierGuide guide,Integer page,Integer pageSize,Integer bizId){
+	private void loadGuideList(ModelMap model,SupplierGuide guide,Integer page,Integer pageSize,Integer bizId){
 		if(page==null){
 			page = 1;
 		}
@@ -393,7 +406,7 @@ public class BookingGuideFinanceController extends BaseController {
 //		g.setId(id);
 //		g.setIsDefault((byte)1);
 //		return bookingGuideService.updateByPrimaryKeySelective(g)>0?successJson():errorJson("操作失败！");
-		com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide g = new com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide();
+		BookingGuide g = new BookingGuide();
 		g.setId(id);
 		g.setIsDefault((byte)1);
 		ResultSupport resultSupport = bookingGuideFacade.defTetailGuide(g, groupId);
@@ -592,8 +605,8 @@ public class BookingGuideFinanceController extends BaseController {
 			model.addAttribute("guidesVo", result.getGuidesVO());
 			model.addAttribute("group", result.getTourGroup());
 			BigDecimal count=new BigDecimal(0);
-			List<com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide> list = result.getFinanceGuides();
-			for (com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide l : list) {
+			List<FinanceGuide> list = result.getFinanceGuides();
+			for (FinanceGuide l : list) {
 					if(l.getSupplierType().equals(Constants.OTHERINCOME)){
 						count=count.subtract(l.getTotal());
 					}else{
@@ -616,24 +629,27 @@ public class BookingGuideFinanceController extends BaseController {
 	 * @Description: 报账单
 	 */
 	@RequestMapping(value = "/financeSupplierView.htm")
-	public String financeSupplierView(com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide financeGuide,ModelMap model){
+	public String financeSupplierView(FinanceGuide financeGuide,ModelMap model){
 //		List<BookingSupplier> list = financeGuideService.getFinanceSupplierByFinanceGuide(financeGuide);
 //		BookingGuide guide= bookingGuideService.selectByPrimaryKey(financeGuide.getBookingId());
 		BookingGuideResult result = bookingGuideFacade.financeSupplierView(financeGuide);
-		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier> bookingSuppliers = result.getBookingSuppliers();
+		List<BookingSupplier> bookingSuppliers = result.getBookingSuppliers();
 		
 		BigDecimal count=new BigDecimal(0);
-		for (com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier l : bookingSuppliers) {
-			if(l.getSupplierType().equals(Constants.OTHERINCOME)){
-				count=count.subtract(l.getFtotal());
-			}else{
-				count=count.add(l.getFtotal());
+		if (!CollectionUtils.isEmpty(bookingSuppliers)) {
+			
+			for (BookingSupplier l : bookingSuppliers) {
+				if(l.getSupplierType().equals(Constants.OTHERINCOME)){
+					count=count.subtract(l.getFtotal());
+				}else{
+					count=count.add(l.getFtotal());
+				}
 			}
 		}
 //		getSupplierDetail(list);
 		model.addAttribute("count", count);
 		model.addAttribute("list", bookingSuppliers);
-		com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide guide = result.getBookingGuide();
+		BookingGuide guide = result.getBookingGuide();
 		model.addAttribute("stateFinance", guide.getStateFinance());
 		model.addAttribute("financeGuide", financeGuide);
 		return "operation/guideFinance/guide-financeSupplier";
@@ -645,11 +661,11 @@ public class BookingGuideFinanceController extends BaseController {
 	 * @Description: 关联   id为1排除已经有的
 	 */
 	@RequestMapping(value = "/getFinanceSupplierView.htm")
-	public String financeRelevanceSupplierView(com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide financeGuide,ModelMap model){
+	public String financeRelevanceSupplierView(FinanceGuide financeGuide,ModelMap model){
 //		List<BookingSupplier> list = financeGuideService.getFinanceSupplierByFinanceGuide(financeGuide);
 		//StringBuffer sb = new StringBuffer();
 //		getSupplierDetail(list);
-		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier> list = bookingGuideFacade.getFinanceSupplierByFinanceGuide(financeGuide);
+		List<BookingSupplier> list = bookingGuideFacade.getFinanceSupplierByFinanceGuide(financeGuide);
 
 		model.addAttribute("list", list);
 		model.addAttribute("financeGuide", financeGuide);
@@ -702,7 +718,7 @@ public class BookingGuideFinanceController extends BaseController {
 	@RequestMapping(value = "/financeSave.do",method = RequestMethod.POST)
 	@ResponseBody
 	public String financeSave(String data) {
-		List<com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide> financeGuides = JSONArray.parseArray(data, com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide.class);
+		List<FinanceGuide> financeGuides = JSONArray.parseArray(data, FinanceGuide.class);
 //		BookingGuide guide = bookingGuideService.selectByPrimaryKey(list.get(0).getBookingId());
 //		if(guide.getStateFinance()!=null && guide.getStateFinance().equals(1)){
 //			return errorJson("已审核！");
@@ -878,8 +894,8 @@ public class BookingGuideFinanceController extends BaseController {
 		String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
 		BookingGuideResult result = bookingGuideFinanceFacade.createGroupOrder(guideId, num);
-		com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup tourGroup = result.getTourGroup();
-		com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide bookingGuide = result.getBookingGuide();
+		TourGroup tourGroup = result.getTourGroup();
+		BookingGuide bookingGuide = result.getBookingGuide();
 		//查询导游信息
 //		BookingGuide bookingGuide = bookingGuideService.selectByPrimaryKey(guideId);			
 		//团信息
@@ -888,11 +904,11 @@ public class BookingGuideFinanceController extends BaseController {
 		 * 获取全陪，定制团一个团对应一个订单
 		 */
 		String accompanys = "" ;
-		List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest> guests = result.getGuestGuides();
+		List<GroupOrderGuest> guests = result.getGuestGuides();
 //		List<GroupOrder> orders = groupOrderService.selectOrderByGroupId(tourGroup.getId()) ;
 //		GroupOrder order = orders.get(0) ;
 //		List<GroupOrderGuest> guests = groupOrderGuestService.selectByOrderId(order.getId()) ;
-		for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest guest : guests) { 
+		for (GroupOrderGuest guest : guests) { 
 			if(guest.getType()==3){
 				accompanys = guest.getName()+"-"+guest.getMobile() ;
 				break ;
@@ -942,11 +958,11 @@ public class BookingGuideFinanceController extends BaseController {
 		/**
 		 * 行程列表
 		 */
-		List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute> routeList = result.getGroupRoutes();
+		List<GroupRoute> routeList = result.getGroupRoutes();
 //		List<GroupRoute> routeList = routeService.selectByGroupId(bookingGuide.getGroupId());
 		List<Map<String,String>> routeMapList = new ArrayList<Map<String,String>>();
 		if(!CollectionUtils.isEmpty(routeList)){
-			for(com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute route:routeList){
+			for(GroupRoute route:routeList){
 				Map<String,String> routeMap = new HashMap<String,String>();
 				Date date = DateUtils.addDays(tourGroup.getDateStart(), route.getDayNum()==null?0:(route.getDayNum()-1));
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -971,13 +987,13 @@ public class BookingGuideFinanceController extends BaseController {
 		/**
 		 * 计调信息
 		 */
-		List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo> pos = result.getGroupGuides(); ;
-		com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo po = null ;
+		List<GroupGuidePrintPo> pos = result.getGroupGuides(); ;
+		GroupGuidePrintPo po = null ;
 		//预定下接社信息
 		List<Map<String,String>> mapList = new ArrayList<Map<String,String>>();
 //		List<BookingDelivery> deliveries = deliveryService.getDeliveryListByGroupId(tourGroup.getId()) ;
-		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery> deliveries = result.getBookingDeliveries();
-		for (com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery bd : deliveries) {
+		List<BookingDelivery> deliveries = result.getBookingDeliveries();
+		for (BookingDelivery bd : deliveries) {
 			po = new  com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo();
 			po.setSupplierType("下接社");
 			po.setSupplierName(bd.getSupplierName());
@@ -992,9 +1008,9 @@ public class BookingGuideFinanceController extends BaseController {
 		}
 		//预定购物
 //		List<BookingShop> shops = shopService.getShopListByGroupId(tourGroup.getId()) ;
-		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop> shops = result.getBookingShops();
-		for (com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop bs : shops) {
-			po = new  com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo();
+		List<BookingShop> shops = result.getBookingShops();
+		for (BookingShop bs : shops) {
+			po = new  GroupGuidePrintPo();
 			po.setSupplierType("购物店");
 			po.setSupplierName(bs.getSupplierName());
 			po.setContacktWay("");
@@ -1086,7 +1102,7 @@ public class BookingGuideFinanceController extends BaseController {
 		/**
 		 * 组织打印数据
 		 */
-		for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo ggp : pos) {
+		for (GroupGuidePrintPo ggp : pos) {
 			Map<String,String> map = new HashMap<String,String>();
 			map.put("supplierType",ggp.getSupplierType()) ;
 			map.put("supplierName",ggp.getSupplierName()) ;
@@ -1097,12 +1113,12 @@ public class BookingGuideFinanceController extends BaseController {
 		}
 		List<Map<String, String>> orderList = new ArrayList<Map<String, String>>();
 		if(num==2){
-			List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo> gopps = result.getGroupOrderPrints();
+			List<GroupOrderPrintPo> gopps = result.getGroupOrderPrints();
 //			List<GroupOrder> orders1 = groupOrderService.selectOrderByGroupId(tourGroup.getId()) ;
 //			List<GroupOrderPrintPo> gopps = new ArrayList<GroupOrderPrintPo>() ;
 //			GroupOrderPrintPo gopp = null ;
 //			for (GroupOrder order1 : orders1) {
-			for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo gopp : gopps) {
+			for (GroupOrderPrintPo gopp : gopps) {
 				
 				//拿到单条订单信息
 //				gopp = new GroupOrderPrintPo() ;
@@ -1116,7 +1132,7 @@ public class BookingGuideFinanceController extends BaseController {
 //				gopp.setPersonNum(numAdult+"大"+numChild+"小");
 				//根据散客订单统计客人信息
 //				List<GroupOrderGuest> guests1 = groupOrderGuestService.selectByOrderId(order1.getId()) ;
-				List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest> guests1 = gopp.getGuests();
+				List<GroupOrderGuest> guests1 = gopp.getGuests();
 				gopp.setGuestInfo(getGuestInfo(guests1)) ;
 				//根据散客订单统计酒店信息
 //				List<GroupRequirement> grogShopList = groupRequirementService
@@ -1125,7 +1141,7 @@ public class BookingGuideFinanceController extends BaseController {
 				//根据散客订单统计接机信息
 //				List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
 //						.selectByOrderId(order1.getId());
-				List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport> groupOrderTransports = gopp.getOrderTransports();
+				List<GroupOrderTransport> groupOrderTransports = gopp.getOrderTransports();
 				gopp.setAirPickup(getAirInfo(groupOrderTransports, 0)) ;
 				//根据散客订单统计送机信息
 				gopp.setAirOff(getAirInfo(groupOrderTransports,1));
@@ -1135,7 +1151,7 @@ public class BookingGuideFinanceController extends BaseController {
 			
 //			orderList = new ArrayList<Map<String, String>>();
 			int i = 0 ;
-			for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo po1: gopps) {
+			for (GroupOrderPrintPo po1: gopps) {
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("num",""+i++) ;
 				/*map.put("supplierName",po1.getSupplierName()) ;
@@ -1172,9 +1188,9 @@ public class BookingGuideFinanceController extends BaseController {
 	 * @param guests
 	 * @return
 	 */
-	public String getGuestInfo(List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest> guests) {
+	public String getGuestInfo(List<GroupOrderGuest> guests) {
 		StringBuilder sb = new StringBuilder();
-		for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest guest : guests) {
+		for (GroupOrderGuest guest : guests) {
 			sb.append(guest.getName() + " " + guest.getMobile() + " "
 					+ guest.getCertificateNum() + ";");
 		}
@@ -1207,17 +1223,17 @@ public class BookingGuideFinanceController extends BaseController {
 	 * 0表示接信息 1表示送信息
 	 * @return
 	 */
-	public String getAirInfo(List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport> groupOrderTransports,
+	public String getAirInfo(List<GroupOrderTransport> groupOrderTransports,
 			Integer flag) {
 		StringBuilder sb = new StringBuilder();
 		if (flag == 0) {
-			for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport transport : groupOrderTransports) {
+			for (GroupOrderTransport transport : groupOrderTransports) {
 				sb.append(transport.getArrivalTime() + " "
 						+ transport.getClassNo() + ";");
 			}
 		}
 		if (flag == 1) {
-			for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport transport : groupOrderTransports) {
+			for (GroupOrderTransport transport : groupOrderTransports) {
 				sb.append(transport.getDepartureTime() + " "
 						+ transport.getClassNo() + ";");
 			}
