@@ -1007,7 +1007,7 @@ public class BookingDeliveryController extends BaseController {
                 
                 // 省内交通
                 gopp.setTrans(getSourceType(groupOrderTransports));
-                gopps.add(gopp);
+//                gopps.add(gopp);
 //            }
         }
         

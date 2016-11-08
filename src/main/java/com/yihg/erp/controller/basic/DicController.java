@@ -75,7 +75,7 @@ public class DicController extends BaseController{
 	public String dicTypeDel(HttpServletRequest request,HttpServletResponse response,ModelMap model,Integer id) {
 		dicFacade.dicTypeDelete(id);
 		return successJson();			
-	}
+	} 
 	
 	@RequestMapping(value="/dicIndex.htm",method=RequestMethod.GET)
 	public String dicIndex(HttpServletRequest request,HttpServletResponse response,ModelMap model){

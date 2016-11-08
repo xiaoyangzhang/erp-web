@@ -1976,7 +1976,7 @@ public class BookingSupplierController extends BaseController {
 		
 		//车队				
 //		pageBean = tourGroupService.getFleetGroupList(pageBean, tourGroup, WebUtils.getDataUserIdSet(request));
-		bookingSupplierFacade.getFleetGroupList(pageBean, tourGroup, WebUtils.getDataUserIdSet(request));
+		pageBean = bookingSupplierFacade.getFleetGroupList(pageBean, tourGroup, WebUtils.getDataUserIdSet(request));
 		List result = pageBean.getResult();
 		if (result != null && result.size() > 0) {
 			for (Object object : result) {
