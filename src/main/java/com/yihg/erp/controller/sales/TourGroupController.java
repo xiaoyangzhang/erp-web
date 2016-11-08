@@ -1902,7 +1902,7 @@ public class TourGroupController extends BaseController {
 		String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
 
-		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesConfirm(orderId, agency, WebUtils.getCurBizId(request));
+		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesConfirm(orderId, agency, WebUtils.getCurBizId(request), WebUtils.getCurUser(request).getOrgId());
 		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
 		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
 		List<GroupOrderPrice> prices = toPreviewResult.getPriceList();
@@ -2281,7 +2281,7 @@ public class TourGroupController extends BaseController {
 
 		String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
-		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesChargeNoRoute(orderId,  WebUtils.getCurBizId(request));
+		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesChargeNoRoute(orderId,  WebUtils.getCurBizId(request),WebUtils.getCurUser(request).getOrgId());
 		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
 		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
 		List<GroupOrderPrice> prices = toPreviewResult.getPriceList();
@@ -2659,7 +2659,7 @@ public class TourGroupController extends BaseController {
 
 		String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
-		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesConfirmNoRoute(orderId, WebUtils.getCurBizId(request));
+		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesConfirmNoRoute(orderId, WebUtils.getCurBizId(request),WebUtils.getCurUser(request).getOrgId());
 		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
 		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
 		List<GroupOrderPrice> prices = toPreviewResult.getPriceList();
@@ -3009,7 +3009,7 @@ public class TourGroupController extends BaseController {
 
 		String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
-		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesCharge(orderId, WebUtils.getCurBizId(request));
+		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesCharge(orderId, WebUtils.getCurBizId(request),WebUtils.getCurUser(request).getOrgId());
 
 		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
 		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
@@ -3222,7 +3222,7 @@ public class TourGroupController extends BaseController {
 
 		String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
-		ToPreviewResult toPreviewResult = tourGroupFacade.createGuestNames(orderId, WebUtils.getCurBizId(request));
+		ToPreviewResult toPreviewResult = tourGroupFacade.createGuestNames(orderId, WebUtils.getCurBizId(request),WebUtils.getCurUser(request).getOrgId());
 		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
 		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
 		String realPath = request.getSession().getServletContext()
@@ -4426,7 +4426,7 @@ public class TourGroupController extends BaseController {
 		}
 		return url;*/
 
-		ToPreviewResult toPreviewResult = tourGroupFacade.toPreview( orderId,  num,  agency,  WebUtils.getCurBizId(request));
+		ToPreviewResult toPreviewResult = tourGroupFacade.toPreview( orderId,  num,  agency,  WebUtils.getCurBizId(request),WebUtils.getCurUser(request).getOrgId());
 		model.addAttribute("agency", agency);
 		model.addAttribute("guideString", toPreviewResult.getGuideString());
 		model.addAttribute("guestGuideString", toPreviewResult.getGuestGuideString());
@@ -4518,7 +4518,7 @@ public class TourGroupController extends BaseController {
 		}
 		return url;*/
 
-		ToSaleChargeResult toPreviewResult = tourGroupFacade.toSaleCharge( orderId,  num, WebUtils.getCurUserId(request), WebUtils.getCurBizId(request));
+		ToSaleChargeResult toPreviewResult = tourGroupFacade.toSaleCharge( orderId,  num, WebUtils.getCurUserId(request), WebUtils.getCurBizId(request),WebUtils.getCurUser(request).getOrgId());
 		model.addAttribute("person", toPreviewResult.getGroupOrder().getNumAdult() + "+" + toPreviewResult.getGroupOrder().getNumChild() + "+" + toPreviewResult.getGroupOrder().getNumGuide());
 		model.addAttribute("guest_guide", toGetGuideString(toPreviewResult.getGuests())); // 姓名和电话
 		model.addAttribute("guest_leader", toGetLeaderString(toPreviewResult.getGuests())); // 姓名和电话
@@ -4802,7 +4802,7 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
 		return "sales/preview/skcharge";*/
 
-		ToSKChargePreviewResult toSKChargePreviewResult = tourGroupFacade.toSKChargePreview( groupId,  WebUtils.getCurUserId(request),  WebUtils.getCurUserId(request),  supplierId);
+		ToSKChargePreviewResult toSKChargePreviewResult = tourGroupFacade.toSKChargePreview( groupId,  WebUtils.getCurUserId(request),  WebUtils.getCurUserId(request),supplierId,WebUtils.getCurUser(request).getOrgId());
 
 		model.addAttribute("supplier", toSKChargePreviewResult.getSupplier());
 		model.addAttribute("groupId", groupId);
