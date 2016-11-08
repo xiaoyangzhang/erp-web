@@ -247,7 +247,7 @@
 					if($(this).attr("checked")){
 						stock.rules("add",{required:true,isNum:true,reasonable:true,messages: { required: "必填",isNum:"必须输入数字"}});	
 					}		
-				})
+				});
 			}
 		}
 		
