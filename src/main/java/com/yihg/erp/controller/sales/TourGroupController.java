@@ -1901,7 +1901,9 @@ public class TourGroupController extends BaseController {
 
 		String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
-
+		if(agency == null){
+			agency = 0;
+		}
 		ToPreviewResult toPreviewResult = tourGroupFacade.createSalesConfirm(orderId, agency, WebUtils.getCurBizId(request), WebUtils.getCurUser(request).getOrgId());
 		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
 		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
