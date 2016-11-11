@@ -1007,7 +1007,7 @@ public class TjGroupController {
 		tjSearchDTO.setPm(WebUtils.getQueryParamters(request));
 		tjSearchDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
 		SelectLineProfitListResult result = tjGroupFacade.selectLineProfits(tjSearchDTO);
-		
+		model.addAttribute("pageBean",result.getPageBean());
 		model.addAttribute("all_income_order", result.getAllIncomeOrder());
 		model.addAttribute("all_income_other", result.getAllIncomeOther());
 		model.addAttribute("all_shop_repay", result.getAllShopRepay());

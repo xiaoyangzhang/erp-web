@@ -179,11 +179,11 @@ public class CommonController {
 	 * @author Jing.Zhuo
 	 * @create 2015年8月18日 上午9:34:25
 	 * @param svc
-	 * @return
+	 * @return+
 	 */
 	private CommonFacade getCommonFacade(String svc) {
 		if (StringUtils.isBlank(svc)) {
-			svc = "commonsaleService";
+			svc = "commonFacade";
 		}
 		return appContext.getBean(svc, CommonFacade.class);
 	}

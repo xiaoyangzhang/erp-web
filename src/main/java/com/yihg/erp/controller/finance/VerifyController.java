@@ -40,6 +40,7 @@ import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.common.util.DateUtils;
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
 import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceVerify;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
@@ -105,13 +106,23 @@ public class VerifyController extends BaseController {
 		SearchListDTO dto = new SearchListDTO();
 		dto.setBizId(WebUtils.getCurBizId(request));
 		dto.setOrgIds(group.getOrgIds());
-		dto.setPage(page);
-		dto.setPageSize(pageSize);
+		if (page == null) {
+			dto.setPage(1);
+		}else {
+			
+			dto.setPage(page);
+		}
+		if (pageSize == null) {
+			dto.setPageSize(Constants.PAGESIZE);
+		}else {
+			
+			dto.setPageSize(pageSize);
+		}
 		dto.setParamters(WebUtils.getQueryParamters(request));
 		dto.setRp(rp);
 		dto.setSaleOperatorIds(group.getSaleOperatorIds());
 		dto.setSet(WebUtils.getDataUserIdSet(request));
-		dto.setSl(ssl);
+		dto.setSl(sl);
 		dto.setSsl(ssl);
 		dto.setSvc(svc);
 		PageBean pb = verifyFacade.searchList(dto);

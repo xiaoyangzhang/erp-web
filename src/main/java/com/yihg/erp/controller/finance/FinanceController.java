@@ -730,7 +730,7 @@ public class FinanceController extends BaseController {
 		queryDTO.setRp(rp);
 		queryDTO.setSaleOperatorIds(group.getSaleOperatorIds());
 		queryDTO.setSet(WebUtils.getDataUserIdSet(request));
-		queryDTO.setSl(ssl);
+		queryDTO.setSl(sl);
 		queryDTO.setSsl(ssl);
 		queryDTO.setSvc(svc);
 		SettleSealListResult result = financeFacade.settleSealList(queryDTO);
@@ -993,7 +993,7 @@ public class FinanceController extends BaseController {
 		dto.setRp(rp);
 		dto.setSaleOperatorIds(group.getSaleOperatorIds());
 		dto.setSet(WebUtils.getDataUserIdSet(request));
-		dto.setSl(ssl);
+		dto.setSl(sl);
 		dto.setSsl(ssl);
 		dto.setSvc(svc);
 		PageBean pb = financeFacade.aduditStatisticsList(dto);
@@ -1990,7 +1990,7 @@ public class FinanceController extends BaseController {
 		dto.setRp(rp);
 		dto.setSaleOperatorIds(group.getSaleOperatorIds());
 		dto.setSet(WebUtils.getDataUserIdSet(request));
-		dto.setSl(ssl);
+		dto.setSl(sl);
 		dto.setSsl(ssl);
 		dto.setSvc(svc);
 		
