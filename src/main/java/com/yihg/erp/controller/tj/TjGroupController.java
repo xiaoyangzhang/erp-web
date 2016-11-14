@@ -13,11 +13,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -41,38 +37,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.controller.airticket.ResourceController;
+import com.yihg.erp.utils.DateUtils;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.finance.api.FinanceGuideService;
-import com.yihg.finance.api.FinanceService;
-import com.yihg.finance.po.FinanceCommission;
-import com.yihg.finance.po.InfoBean;
-import com.yihg.images.util.DateUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.api.BookingDeliveryService;
-import com.yihg.operation.api.BookingShopService;
-import com.yihg.operation.po.BookingDelivery;
-import com.yihg.operation.po.BookingShopSelect;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.TourGroupVO;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.tj.api.TJService;
-import com.yihg.tj.po.TJGroupProfit;
-import com.yihg.tj.po.TJGroupQueryId;
-import com.yihg.tj.po.TJRecord;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
+import com.yimayhd.erpcenter.dal.sales.client.tj.po.TJGroupProfit;
+import com.yimayhd.erpcenter.facade.tj.client.query.TjSearchDTO;
+import com.yimayhd.erpcenter.facade.tj.client.result.SelectLineProfitListResult;
+import com.yimayhd.erpcenter.facade.tj.client.result.SelectShopProjectListResult;
+import com.yimayhd.erpcenter.facade.tj.client.result.TJGroupProfitResult;
+import com.yimayhd.erpcenter.facade.tj.client.result.TjSearchResult;
+import com.yimayhd.erpcenter.facade.tj.client.result.ToGroupListResult;
+import com.yimayhd.erpcenter.facade.tj.client.service.TJFacade;
+import com.yimayhd.erpcenter.facade.tj.client.service.TjGroupFacade;
 /**
  * 财务统计
  * @author wj
@@ -81,26 +63,12 @@ import com.yihg.tj.po.TJRecord;
 @Controller
 @RequestMapping(value = "/tjGroup")
 public class TjGroupController {
-	@Autowired
-	private TJService tjService;
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private BookingDeliveryService bookingDeliveryService;
-	@Autowired
-	private FinanceService financeService;
-	@Autowired
-	private BookingShopService bookingShopService;
-	@Autowired
-	private FinanceGuideService financeGuideService;
 	@Resource
 	private BizSettingCommon bizSettingCommon;
 	@Autowired
-	private PlatformOrgService orgService;
+	private TjGroupFacade tjGroupFacade;
 	@Autowired
-	private DicService dicService;
+	private TJFacade tjFacade;
 	
 	private static final Logger log = LoggerFactory.getLogger(ResourceController.class);
 	
@@ -109,255 +77,98 @@ public class TjGroupController {
 	
 	@RequestMapping("list.htm")
 	public String list(HttpServletRequest request, HttpServletResponse reponse, ModelMap model,TourGroupVO group){
+		TjSearchDTO tjSearchDTO = new TjSearchDTO();
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		tjSearchDTO.setBizId(bizId);
+		tjSearchDTO.setGroup(group);
+		
+		String page = request.getParameter("p");
+		String pageSize = request.getParameter("ps");
+		tjSearchDTO.setPage(page==null?0:Integer.parseInt(page));
+		tjSearchDTO.setPageSize(pageSize==null?0:Integer.parseInt(pageSize));
+		tjSearchDTO.setPm( WebUtils.getQueryParamters(request));
+		tjSearchDTO.setDataUserIdString(WebUtils.getDataUserIdString(request));
+		tjSearchDTO.setDateFrom(request.getParameter("dateFrom"));
+		tjSearchDTO.setDateTo(request.getParameter("dateTo"));
+		ToGroupListResult result = tjGroupFacade.list(tjSearchDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", result.getOrgUserJsonStr());
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
 		
-		String page = (String)request.getParameter("p");
-		String pageSize = (String)request.getParameter("ps");
-		PageBean<TJGroupProfit> pageBean = new PageBean<TJGroupProfit>();
-		if (pageSize != null){
-			pageBean.setPageSize(new Integer(pageSize));
-		}else{
-			pageBean.setPageSize(Constants.PAGESIZE);
-		}
-		if (page != null){
-			pageBean.setPage(new Integer(page));
-		}
+//		setArchiveTime(request, model, BasicConstants.TJ_GROUP_PROFIT);
 		
-		setArchiveTime(request, model, BasicConstants.TJ_GROUP_PROFIT);
-		
-		String dateFrom="",  dateTo="";
-		if (request.getParameter("dateFrom")==null && request.getParameter("dateTo")==null){
-			Calendar cal = Calendar.getInstance();
-			SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd");
-			cal.set( Calendar.DATE, 1 );
-			cal.roll(Calendar.DATE, - 1 );
-			dateTo=sdf.format(cal.getTime());
-			cal.set(GregorianCalendar.DAY_OF_MONTH, 1);
-			dateFrom=sdf.format(cal.getTime());
-		}else {
-			dateFrom = request.getParameter("dateFrom");
-			dateTo = request.getParameter("dateTo");
-		}
-		
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		pm.put("dateFrom", dateFrom.equals("-1") ? null : dateFrom);
-		pm.put("dateTo", dateTo.equals("-1") ? null : dateTo);
-		pm.put("dataUser", WebUtils.getDataUserIdString(request));
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operatorId", group.getSaleOperatorIds());
-		}
-		pageBean.setParameter(pm);
-		
-		TJGroupProfit totalTj = tjService.selectTotalGroupProfit(pageBean);
-		pageBean = tjService.selectGroupProfitListPage(pageBean);
-		this.addOrderDetail(pageBean);
-		
-		model.addAttribute("page", pageBean);
-		model.addAttribute("pageTotalTj", this.getPageTotal(pageBean.getResult()));
-		model.addAttribute("totalTj", totalTj);
+		model.addAttribute("page", result.getPageBean());
+		model.addAttribute("pageTotalTj", this.getPageTotal(result.getPageBean().getResult()));
+		model.addAttribute("totalTj", result.getTotalTj());
 		return "tj/tjGroupProfitList";
 	}
 	
 	@RequestMapping("GroupProfitList.htm")
 	public String GroupProfitList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model){
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		TjSearchResult result = tjGroupFacade.GroupProfitList(bizId);
+		
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", result.getOrgUserJsonStr());
 		model.addAttribute("bizId", bizId); // 过滤B商家
-		
-		/*if (group.getStartTime()==null && group.getEndTime()==null){
-			SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd");
-			Calendar cal = Calendar.getInstance();
-			cal.set( Calendar.DATE, 1 );
-			cal.roll(Calendar.DATE, - 1 );
-			group.setStartTime(cal.getTime());
-
-			cal.set(GregorianCalendar.DAY_OF_MONTH, 1);
-			group.setEndTime(cal.getTime());
-		}*/
-		
 		return "tj/GroupProfitList";
 	}
 	
 
 	@RequestMapping(value = "/GroupProfitList_Post.do")
 	public String GroupProfitList_get(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, TourGroupVO group){
-
-		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
-			}
-		}
+		TjSearchDTO tjSearchDTO = new TjSearchDTO();
+		tjSearchDTO.setBizId(WebUtils.getCurBizId(request));
+		tjSearchDTO.setGroup(group);
+		tjSearchDTO.setDataUserIdString(WebUtils.getDataUserIdString(request));
+		ToGroupListResult result = tjGroupFacade.GroupProfitList_get(tjSearchDTO);
 		
-		int pageSize = group.getPageSize() == null ? Constants.PAGESIZE : group.getPageSize();
-		int page = group.getPage() == null ? 1 : group.getPage();
-		PageBean<TJGroupProfit> pageBean = new PageBean<TJGroupProfit>();
-		pageBean.setPageSize(pageSize);
-		pageBean.setPage(page);
-		
-		Integer bizId = WebUtils.getCurBizId(request);
-		String dataUser = WebUtils.getDataUserIdString(request); //数据权限
-		pageBean.setParameter(group);
-		
-		TJGroupProfit totalTj = tjService.selectTotalGroupProfitOu(pageBean, bizId, dataUser);
-		pageBean = tjService.selectGroupProfitListPageOu(pageBean, bizId, dataUser);
-		//this.addOrderDetail(pageBean);
-		
-		model.addAttribute("page", pageBean);
-		model.addAttribute("pageTotalTj", this.getPageTotal(pageBean.getResult()));
-		model.addAttribute("totalTj", totalTj);
+		model.addAttribute("page", result.getPageBean());
+		model.addAttribute("pageTotalTj", this.getPageTotal(result.getPageBean().getResult()));
+		model.addAttribute("totalTj", result.getTotalTj());
 		return "tj/GroupProfitList_table";
 	}
 	
 	@RequestMapping(value = "/GroupProfitList_GetData.do")
 	@ResponseBody
 	public String GroupProfitList_GetData(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, TourGroupVO group){
-
-		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
-			}
-		}
+		TjSearchDTO tjSearchDTO = new TjSearchDTO();
+		tjSearchDTO.setBizId(WebUtils.getCurBizId(request));
+		tjSearchDTO.setGroup(group);
+		tjSearchDTO.setDataUserIdString(WebUtils.getDataUserIdString(request));
+		PageBean result = tjGroupFacade.GroupProfitList_GetData(tjSearchDTO);
 		
-		int pageSize = group.getPageSize() == null ? Constants.PAGESIZE : group.getPageSize();
-		int page = group.getPage() == null ? 1 : group.getPage();
-		PageBean<TJGroupProfit> pageBean = new PageBean<TJGroupProfit>();
-		pageBean.setPageSize(pageSize);
-		pageBean.setPage(page);
-		
-		Integer bizId = WebUtils.getCurBizId(request);
-		String dataUser = WebUtils.getDataUserIdString(request); //数据权限
-		pageBean.setParameter(group);
-		
-		//TJGroupProfit totalTj = tjService.selectTotalGroupProfitOu(pageBean, bizId, dataUser);
-		pageBean = tjService.selectGroupProfitListPageOu(pageBean, bizId, dataUser);
-		//this.addOrderDetail(pageBean);
-		
-		model.addAttribute("page", pageBean);
+		model.addAttribute("page", result);
 		//model.addAttribute("pageTotalTj", this.getPageTotal(pageBean.getResult()));
 		//model.addAttribute("totalTj", totalTj);
-		return JSON.toJSONString(pageBean);
+		return JSON.toJSONString(result);
 	}
 	
 	@RequestMapping(value = "/GroupProfitList_PostFooter.do")
 	@ResponseBody
 	public String GroupProfitList_PostFooter(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, TourGroupVO group){
+		TjSearchDTO tjSearchDTO = new TjSearchDTO();
+		tjSearchDTO.setBizId(WebUtils.getCurBizId(request));
+		tjSearchDTO.setGroup(group);
+		tjSearchDTO.setDataUserIdString(WebUtils.getDataUserIdString(request));
+		TJGroupProfitResult result = tjGroupFacade.GroupProfitList_PostFooter(tjSearchDTO);
 
-		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
-			}
-		}
-		
-		int pageSize = group.getPageSize() == null ? Constants.PAGESIZE : group.getPageSize();
-		int page = group.getPage() == null ? 1 : group.getPage();
-		PageBean<TJGroupProfit> pageBean = new PageBean<TJGroupProfit>();
-		pageBean.setPageSize(pageSize);
-		pageBean.setPage(page);
-		
-		Integer bizId = WebUtils.getCurBizId(request);
-		String dataUser = WebUtils.getDataUserIdString(request); //数据权限
-		pageBean.setParameter(group);
-		
-		//TJGroupProfit totalPage = this.getPageTotal(pageBean.getResult());
-		TJGroupProfit totalAll = tjService.selectTotalGroupProfitOu(pageBean, bizId, dataUser);
-		//Map<String, Object> totalMap = new HashMap<String, Object>();
-		//totalMap.put("tPage", totalPage);
-		//totalMap.put("tAll", totalAll);
-
-		return JSON.toJSONString(totalAll);
+		return JSON.toJSONString(result.getTjGroupProfit());
 	}
 	
 	@RequestMapping("toGroupProfitPrint.htm")
 	public String toGroupProfitPrint(HttpServletRequest request, HttpServletResponse reponse, ModelMap model,TourGroupVO group){
-		if (StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
-			pm.put("operatorId", group.getSaleOperatorIds());
-		}
-		Integer bizId = WebUtils.getCurBizId(request);
-		String dataUser = WebUtils.getDataUserIdString(request); //数据权限
-		pm.put("dataUser", dataUser);
-		
-		PageBean<TJGroupProfit> pageBean = new PageBean<TJGroupProfit>();
-		pageBean.setPageSize(100000);
-		pageBean.setPage(1);		
-		pageBean.setParameter(pm);
-		
-		pageBean = tjService.selectGroupProfitListPageOu(pageBean, bizId, dataUser);
-		//pageBean = tjService.selectGroupProfitListPage(pageBean);
-		this.addOrderDetail2(pageBean);
+		TjSearchDTO tjSearchDTO = new TjSearchDTO();
+		tjSearchDTO.setBizId(WebUtils.getCurBizId(request));
+		tjSearchDTO.setGroup(group);
+		tjSearchDTO.setPm(WebUtils.getQueryParamters(request));
+		tjSearchDTO.setDataUserIdString(WebUtils.getDataUserIdString(request));
+		SelectShopProjectListResult result = tjGroupFacade.toGroupProfitPrint(tjSearchDTO);
 		
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
-		model.addAttribute("page", pageBean);
-		model.addAttribute("pageTotalTj", this.getPageTotal(pageBean.getResult()));
+		model.addAttribute("page", result.getPageBean());
+		model.addAttribute("pageTotalTj", this.getPageTotal(result.getPageBean().getResult()));
 		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" <br/>打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		return "tj/tjGroupProfitList-print";
 	}
@@ -377,7 +188,7 @@ public class TjGroupController {
 			for (String orgIdStr : orgIdArr) {
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = tjFacade.getUserIdListByOrgIdList(set, WebUtils.getCurBizId(request));
 			String salesOperatorIds = "";
 			for (Integer usrId : set) {
 				salesOperatorIds += usrId + ",";
@@ -399,7 +210,7 @@ public class TjGroupController {
 		pageBean.setPage(1);		
 		pageBean.setParameter(pm);
 		
-		pageBean = tjService.selectGroupProfitListPageOu(pageBean, bizId, dataUser);
+		pageBean = tjGroupFacade.selectGroupProfitListPageOu(pageBean, bizId, dataUser);
 		//pageBean = tjService.selectGroupProfitListPage(pageBean);
 		this.addOrderDetailExcl(pageBean);
 		
@@ -732,71 +543,71 @@ public class TjGroupController {
 		download(path, response,"tjGroupProfit.xlsx");
 	}
 	
+//	
+//	private void addOrderDetail(PageBean pageBean){
+//		List<TJGroupProfit> list = pageBean.getResult();
+//		if(list != null && list.size() > 0){
+//			StringBuilder detailStr = null;
+//			TJGroupProfit groupProfit = null;
+//			for(int i = 0; i < list.size(); i++){
+//				groupProfit = list.get(i);
+//				List<GroupOrder> orderList = tourGroupService.selectOrderAndGuestInfoByGroupId(groupProfit.getGroupId());
+//				if(orderList == null || orderList.size() == 0){
+//					continue;
+//				}
+//				
+//				detailStr = new StringBuilder();
+//				for(int j = 0; j < orderList.size(); j++){
+//					if(j > 0){
+//						detailStr.append("<br/>");
+//					}
+//					GroupOrder order = orderList.get(j);
+//					String total = order.getTotal()!=null?df.format(order.getTotal()):df.format(new BigDecimal(0));
+//					detailStr.append("<label class='order-lb1'>"+ order.getSupplierName()+"</label>");
+//					detailStr.append("<label class='order-lb2'>"+ order.getNumAdult() +"+"+ order.getNumChild() +"</label>");
+//					detailStr.append("<label class='order-lb3'>"+ total +"</label>");
+//					detailStr.append("<label class='order-lb4'>"+ order.getSaleOperatorName()+"</label>");
+//					detailStr.append("<label class='order-lb5'>"+ order.getSourceTypeName()+"</label>");
+//				}
+//				groupProfit.setOrderDetails(detailStr.toString());
+//			}
+//		}
+//	}
 	
-	private void addOrderDetail(PageBean pageBean){
-		List<TJGroupProfit> list = pageBean.getResult();
-		if(list != null && list.size() > 0){
-			StringBuilder detailStr = null;
-			TJGroupProfit groupProfit = null;
-			for(int i = 0; i < list.size(); i++){
-				groupProfit = list.get(i);
-				List<GroupOrder> orderList = tourGroupService.selectOrderAndGuestInfoByGroupId(groupProfit.getGroupId());
-				if(orderList == null || orderList.size() == 0){
-					continue;
-				}
-				
-				detailStr = new StringBuilder();
-				for(int j = 0; j < orderList.size(); j++){
-					if(j > 0){
-						detailStr.append("<br/>");
-					}
-					GroupOrder order = orderList.get(j);
-					String total = order.getTotal()!=null?df.format(order.getTotal()):df.format(new BigDecimal(0));
-					detailStr.append("<label class='order-lb1'>"+ order.getSupplierName()+"</label>");
-					detailStr.append("<label class='order-lb2'>"+ order.getNumAdult() +"+"+ order.getNumChild() +"</label>");
-					detailStr.append("<label class='order-lb3'>"+ total +"</label>");
-					detailStr.append("<label class='order-lb4'>"+ order.getSaleOperatorName()+"</label>");
-					detailStr.append("<label class='order-lb5'>"+ order.getSourceTypeName()+"</label>");
-				}
-				groupProfit.setOrderDetails(detailStr.toString());
-			}
-		}
-	}
-	
-	/**
-	 * 处理销售订单的明细显示
-	 * @param pageBean
-	 */
-	private void addOrderDetail2(PageBean pageBean) {
-		List<TJGroupProfit> list = pageBean.getResult();
-		if (list != null && list.size() > 0) {
-			StringBuilder detailStr = new StringBuilder();
-			TJGroupProfit groupProfit = null;
-			for (int i = 0; i < list.size(); i++) {
-				groupProfit = list.get(i);
-				if (!StringUtils.isBlank(groupProfit.getOrderSupplierNames())){
-					for (String row : groupProfit.getOrderSupplierNames().split(",")) {
-						if (!StringUtils.isBlank(row)){
-							String[] rowAry = row.split("@");
-							if (rowAry.length > 1) {
-								detailStr.append("<p>");
-								detailStr.append("<label class='order-lb1'>" + rowAry[0] + "</label>");
-								detailStr.append("<label class='order-lb2'>" + rowAry[1] + "+" + rowAry[2] + "</label>");
-								detailStr.append("<label class='order-lb3'>" + df.format(new BigDecimal(rowAry[4])) + "</label>");
-								detailStr.append("<label class='order-lb4'>" + rowAry[5] + "</label>");
-								if (rowAry.length == 7)
-									detailStr.append("<label class='order-lb5'>" + rowAry[6] + "</label>");
-								detailStr.append("</p>");
-							}
-						}
-					}
-				}
-
-				groupProfit.setOrderDetails(detailStr.toString());
-				detailStr.setLength(0);
-			}
-		}
-	}	
+//	/**
+//	 * 处理销售订单的明细显示
+//	 * @param pageBean
+//	 */
+//	private void addOrderDetail2(PageBean pageBean) {
+//		List<TJGroupProfit> list = pageBean.getResult();
+//		if (list != null && list.size() > 0) {
+//			StringBuilder detailStr = new StringBuilder();
+//			TJGroupProfit groupProfit = null;
+//			for (int i = 0; i < list.size(); i++) {
+//				groupProfit = list.get(i);
+//				if (!StringUtils.isBlank(groupProfit.getOrderSupplierNames())){
+//					for (String row : groupProfit.getOrderSupplierNames().split(",")) {
+//						if (!StringUtils.isBlank(row)){
+//							String[] rowAry = row.split("@");
+//							if (rowAry.length > 1) {
+//								detailStr.append("<p>");
+//								detailStr.append("<label class='order-lb1'>" + rowAry[0] + "</label>");
+//								detailStr.append("<label class='order-lb2'>" + rowAry[1] + "+" + rowAry[2] + "</label>");
+//								detailStr.append("<label class='order-lb3'>" + df.format(new BigDecimal(rowAry[4])) + "</label>");
+//								detailStr.append("<label class='order-lb4'>" + rowAry[5] + "</label>");
+//								if (rowAry.length == 7)
+//									detailStr.append("<label class='order-lb5'>" + rowAry[6] + "</label>");
+//								detailStr.append("</p>");
+//							}
+//						}
+//					}
+//				}
+//
+//				groupProfit.setOrderDetails(detailStr.toString());
+//				detailStr.setLength(0);
+//			}
+//		}
+//	}	
 	private void addOrderDetailExcl(PageBean pageBean){
 		List<TJGroupProfit> list = pageBean.getResult();
 		if (list != null && list.size() > 0) {
@@ -858,196 +669,196 @@ public class TjGroupController {
 		return pageTotal;
 	}
 	
-	@RequestMapping("archiveAllGroupProfit.do")
-	public void archiveAllGroupProfit(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws IOException, InterruptedException{
-		model.addAttribute("archiveType", "All");
-		this.initGroupProfitTable(request, response, model);
-	}
-	@RequestMapping("archiveIncrementalGroupProfit.do")
-	public void archiveIncrementalGroupProfit(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws IOException, InterruptedException{
-		model.addAttribute("archiveType", "Incremental");
-		this.initGroupProfitTable(request, response, model);
-	}
+//	@RequestMapping("archiveAllGroupProfit.do")
+//	public void archiveAllGroupProfit(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws IOException, InterruptedException{
+//		model.addAttribute("archiveType", "All");
+//		this.initGroupProfitTable(request, response, model);
+//	}
+//	@RequestMapping("archiveIncrementalGroupProfit.do")
+//	public void archiveIncrementalGroupProfit(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws IOException, InterruptedException{
+//		model.addAttribute("archiveType", "Incremental");
+//		this.initGroupProfitTable(request, response, model);
+//	}
 	
-	private void initGroupProfitTable(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws IOException, InterruptedException{
-		response.setContentType("text/html;charset=utf-8");
-		response.getWriter().write("开始归档");
-		response.flushBuffer();
-		
-		List<TJGroupQueryId> groupIdList = new ArrayList<TJGroupQueryId>();
-		if (model.get("archiveType").equals("Incremental")){
-			groupIdList = tjService.findUpdatedGroupIdList("tj_group_profit");
-		}else if (model.get("archiveType").equals("All")){
-			groupIdList = tjService.findAllGroupIdList();
-		}else {
-
-		}
-
-		Long startTime = System.currentTimeMillis();
-		if (model.get("archiveType").equals("All")){
-			tjService.clearAllGroup();
-		}else if (groupIdList.size()>0){
-			tjService.clearUpdatedGroup(groupIdList);
-		}
-		for(int i=0; i<groupIdList.size(); i++){
-			Integer groupId = groupIdList.get(i).getGroupId();
-			Integer bizId = groupIdList.get(i).getBizId();
-			TJGroupProfit tj = new TJGroupProfit();
-			TourGroup g = tourGroupService.selectByPrimaryKey(groupId);
-			if (g==null){
-				continue;
-			}
-			if (g.getGroupState()!=null && g.getGroupState()!=1 && g.getGroupState()!=3 && g.getGroupState()!=4){
-				continue;
-			}
-			tj.setBizId(bizId);
-			tj.setGroupId(groupId);
-			tj.setGroupCode(g.getGroupCode());
-			tj.setGroupMode(g.getGroupMode());
-			tj.setGroupState(g.getGroupState());
-			tj.setDateStart(g.getDateStart());
-			tj.setDateEnd(g.getDateEnd());
-			tj.setProductBrandName(g.getProductBrandName());
-			tj.setProductName(g.getProductName());
-			tj.setTotalAdult(g.getTotalAdult()==null?0:g.getTotalAdult());
-			tj.setTotalChild(g.getTotalChild()==null?0:g.getTotalChild());
-			tj.setTotalGuide(g.getTotalGuide()==null?0:g.getTotalGuide());
-			tj.setOperatorId(g.getOperatorId());
-			tj.setOperatorName(g.getOperatorName());
-			tj.setOperatorCompanyId(this.getCompanyIdByOperatorId(g.getOperatorId()));
-			// 取得组团社信息
-			Set<String> orderSupplierNameList = new HashSet<String>();
-			Set<String> orderSupplierIdList = new HashSet<String>();
-			Set<String> orderIdList = new HashSet<String>();
-			//销售ID
-			Integer saleId = null;
-			for(GroupOrder order: tourGroupService.selectOrderAndGuestInfoByGroupId(groupId)){
-				orderSupplierNameList.add(order.getSupplierName());
-				orderSupplierIdList.add(order.getSupplierId().toString());
-				orderIdList.add(order.getId().toString());
-				if(null == saleId){
-					saleId = order.getSaleOperatorId();
-				}
-			}
-			tj.setSaleOperatorId(saleId);
-			tj.setOrderSupplierIds(StringUtils.join(orderSupplierIdList, ","));
-			tj.setOrderSupplierNames(StringUtils.join(orderSupplierNameList, ","));
-			tj.setOrderIds(StringUtils.join(orderIdList, ","));
-			// 取得地接社信息
-			ArrayList<String> deliveryNameList = new ArrayList<String>();
-			ArrayList<String> deliveryIdList = new ArrayList<String>();
-			for (BookingDelivery delivery : bookingDeliveryService.getDeliveryListByGroupId(groupId)){
-				if (delivery.getSupplierId()==null){
-					log.error("wrong delivery at " + groupId);
-				}
-				deliveryNameList.add(delivery.getSupplierName());
-				deliveryIdList.add(delivery.getSupplierId().toString());
-			}
-			tj.setDeliveryNames(StringUtils.join(deliveryNameList, "<br/>"));
-			tj.setDeliveryIds(StringUtils.join(deliveryIdList, ","));
-			
-			Map fMap = financeService.queryAuditViewInfo(groupId, bizId);
-			// 组团社收入
-			InfoBean incomeOrder = (InfoBean)fMap.get("order");
-			tj.setIncomeOrder(incomeOrder.getNum());
-			tj.setIncomeOrderState(incomeOrder.getIsAudited()?1:0);
-			// 其他收入
-			InfoBean incomeOther = (InfoBean)fMap.get("otherin");
-			tj.setIncomeOther(incomeOther.getNum());
-			tj.setIncomeOtherState(incomeOther.getIsAudited()?1:0);
-			// 购物收入
-			//InfoBean incomeShop = (InfoBean)fMap.get("shop");
-			tj.setIncomeShop(g.getTotalIncomeShop()==null?new BigDecimal(0):g.getTotalIncomeShop());
-			tj.setIncomeShopState(0); // TODO 此处没有取是否审核过
-			// 地接社费用
-			InfoBean expenseDel = (InfoBean)fMap.get("del");
-			tj.setExpenseTravelagency(expenseDel.getNum());
-			tj.setExpenseTravelagencyState(expenseDel.getIsAudited()?1:0);
-			// 其他供应商支出
-			Collection<InfoBean> sups = (Collection<InfoBean>)fMap.get("sup");
-			for(InfoBean info: sups){
-				if (Constants.RESTAURANT.equals(Integer.parseInt(info.getId()))){
-					tj.setExpenseRestaurant(info.getNum());
-					tj.setExpenseRestaurantState(info.getIsAudited()?1:0);
-				}else if (Constants.HOTEL.equals(Integer.parseInt(info.getId()))){
-					tj.setExpenseHotel(info.getNum());
-					tj.setExpenseHotelState(info.getIsAudited()?1:0);
-				}else if (Constants.FLEET.equals(Integer.parseInt(info.getId()))){
-					tj.setExpenseFleet(info.getNum());
-					tj.setExpenseFleetState(info.getIsAudited()?1:0);
-				}else if (Constants.SCENICSPOT.equals(Integer.parseInt(info.getId()))){
-					tj.setExpenseScenicspot(info.getNum());
-					tj.setExpenseScenicspotState(info.getIsAudited()?1:0);
-				}else if (Constants.AIRTICKETAGENT.equals(Integer.parseInt(info.getId()))){
-					tj.setExpenseAirticket(info.getNum());
-					tj.setExpenseAirticketState(info.getIsAudited()?1:0);
-				}else if (Constants.TRAINTICKETAGENT.equals(Integer.parseInt(info.getId()))){
-					tj.setExpenseTrainticket(info.getNum());
-					tj.setExpenseTrainticketState(info.getIsAudited()?1:0);
-				}else if (Constants.INSURANCE.equals(Integer.parseInt(info.getId()))){
-					tj.setExpenseInsurance(info.getNum());
-					tj.setExpenseInsuranceState(info.getIsAudited()?1:0);
-				}else if (Constants.OTHEROUTCOME.equals(Integer.parseInt(info.getId()))){
-					tj.setExpenseOther(info.getNum());
-					tj.setExpenseOtherState(info.getIsAudited()?1:0);
-				}else {
-					log.error("Wrong supplier type, groupId:" + groupId + " and supplierType:"+info.getId());
-				}
-			}
-			// 计算总收入、支出、毛利润
-			tj.setTotalIncome(tj.getIncomeOrder().add(tj.getIncomeOther()).add(tj.getIncomeShop()));
-			tj.setTotalExpense(tj.getExpenseTravelagency().add(tj.getExpenseRestaurant()).add(tj.getExpenseFleet())
-					.add(tj.getExpenseHotel()).add(tj.getExpenseScenicspot()).add(tj.getExpenseAirticket())
-					.add(tj.getExpenseTrainticket()).add(tj.getExpenseInsurance()).add(tj.getExpenseOther()));
-			tj.setTotalProfit(tj.getTotalIncome().subtract(tj.getTotalExpense()));
-			if (tj.getTotalAdult()+tj.getTotalChild()!=0){
-				tj.setProfitPerGuest(tj.getTotalProfit().divide(new BigDecimal(tj.getTotalAdult()+tj.getTotalChild()), 2, BigDecimal.ROUND_HALF_DOWN));
-			}
-
-			BookingShopSelect groupShop = bookingShopService.getShopSelect(groupId);
-			if (groupShop!=null){
-				tj.setShopSales(groupShop.getFactSales());
-				tj.setShopSalesState(groupShop.isAudited()?1:0);
-				tj.setShopRepay(groupShop.getTotalRepay());
-				tj.setShopRepayState(groupShop.isAudited()?1:0);
-			}
-			List<FinanceCommission> commissions = financeGuideService.selectCommissionByGroupId(groupId);
-			BigDecimal tmpComm=new BigDecimal(0);
-			Integer tmpCommState=(commissions.size()>0)?1:0;
-			for (FinanceCommission comm: commissions){
-				tmpComm=tmpComm.add(comm.getTotal());
-				if (comm.getStateFinance()==0){
-					tmpCommState=0;
-				}
-			}
-			tj.setShopCommission(tmpComm);
-			tj.setShopCommissionState(tmpCommState);
-			tjService.insertGroupProfit(tj);
-			if (i%10==0){
-				response.getWriter().write(".");
-				response.flushBuffer();
-			}
-		}
-		insertArchiveRecord(request, startTime, BasicConstants.TJ_GROUP_PROFIT);
-		response.getWriter().write("归档完成。");
-		response.flushBuffer();
-	}
+//	private void initGroupProfitTable(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws IOException, InterruptedException{
+//		response.setContentType("text/html;charset=utf-8");
+//		response.getWriter().write("开始归档");
+//		response.flushBuffer();
+//		
+//		List<TJGroupQueryId> groupIdList = new ArrayList<TJGroupQueryId>();
+//		if (model.get("archiveType").equals("Incremental")){
+//			groupIdList = tjService.findUpdatedGroupIdList("tj_group_profit");
+//		}else if (model.get("archiveType").equals("All")){
+//			groupIdList = tjService.findAllGroupIdList();
+//		}else {
+//
+//		}
+//
+//		Long startTime = System.currentTimeMillis();
+//		if (model.get("archiveType").equals("All")){
+//			tjService.clearAllGroup();
+//		}else if (groupIdList.size()>0){
+//			tjService.clearUpdatedGroup(groupIdList);
+//		}
+//		for(int i=0; i<groupIdList.size(); i++){
+//			Integer groupId = groupIdList.get(i).getGroupId();
+//			Integer bizId = groupIdList.get(i).getBizId();
+//			TJGroupProfit tj = new TJGroupProfit();
+//			TourGroup g = tourGroupService.selectByPrimaryKey(groupId);
+//			if (g==null){
+//				continue;
+//			}
+//			if (g.getGroupState()!=null && g.getGroupState()!=1 && g.getGroupState()!=3 && g.getGroupState()!=4){
+//				continue;
+//			}
+//			tj.setBizId(bizId);
+//			tj.setGroupId(groupId);
+//			tj.setGroupCode(g.getGroupCode());
+//			tj.setGroupMode(g.getGroupMode());
+//			tj.setGroupState(g.getGroupState());
+//			tj.setDateStart(g.getDateStart());
+//			tj.setDateEnd(g.getDateEnd());
+//			tj.setProductBrandName(g.getProductBrandName());
+//			tj.setProductName(g.getProductName());
+//			tj.setTotalAdult(g.getTotalAdult()==null?0:g.getTotalAdult());
+//			tj.setTotalChild(g.getTotalChild()==null?0:g.getTotalChild());
+//			tj.setTotalGuide(g.getTotalGuide()==null?0:g.getTotalGuide());
+//			tj.setOperatorId(g.getOperatorId());
+//			tj.setOperatorName(g.getOperatorName());
+//			tj.setOperatorCompanyId(this.getCompanyIdByOperatorId(g.getOperatorId()));
+//			// 取得组团社信息
+//			Set<String> orderSupplierNameList = new HashSet<String>();
+//			Set<String> orderSupplierIdList = new HashSet<String>();
+//			Set<String> orderIdList = new HashSet<String>();
+//			//销售ID
+//			Integer saleId = null;
+//			for(GroupOrder order: tourGroupService.selectOrderAndGuestInfoByGroupId(groupId)){
+//				orderSupplierNameList.add(order.getSupplierName());
+//				orderSupplierIdList.add(order.getSupplierId().toString());
+//				orderIdList.add(order.getId().toString());
+//				if(null == saleId){
+//					saleId = order.getSaleOperatorId();
+//				}
+//			}
+//			tj.setSaleOperatorId(saleId);
+//			tj.setOrderSupplierIds(StringUtils.join(orderSupplierIdList, ","));
+//			tj.setOrderSupplierNames(StringUtils.join(orderSupplierNameList, ","));
+//			tj.setOrderIds(StringUtils.join(orderIdList, ","));
+//			// 取得地接社信息
+//			ArrayList<String> deliveryNameList = new ArrayList<String>();
+//			ArrayList<String> deliveryIdList = new ArrayList<String>();
+//			for (BookingDelivery delivery : bookingDeliveryService.getDeliveryListByGroupId(groupId)){
+//				if (delivery.getSupplierId()==null){
+//					log.error("wrong delivery at " + groupId);
+//				}
+//				deliveryNameList.add(delivery.getSupplierName());
+//				deliveryIdList.add(delivery.getSupplierId().toString());
+//			}
+//			tj.setDeliveryNames(StringUtils.join(deliveryNameList, "<br/>"));
+//			tj.setDeliveryIds(StringUtils.join(deliveryIdList, ","));
+//			
+//			Map fMap = financeService.queryAuditViewInfo(groupId, bizId);
+//			// 组团社收入
+//			InfoBean incomeOrder = (InfoBean)fMap.get("order");
+//			tj.setIncomeOrder(incomeOrder.getNum());
+//			tj.setIncomeOrderState(incomeOrder.getIsAudited()?1:0);
+//			// 其他收入
+//			InfoBean incomeOther = (InfoBean)fMap.get("otherin");
+//			tj.setIncomeOther(incomeOther.getNum());
+//			tj.setIncomeOtherState(incomeOther.getIsAudited()?1:0);
+//			// 购物收入
+//			//InfoBean incomeShop = (InfoBean)fMap.get("shop");
+//			tj.setIncomeShop(g.getTotalIncomeShop()==null?new BigDecimal(0):g.getTotalIncomeShop());
+//			tj.setIncomeShopState(0); // TODO 此处没有取是否审核过
+//			// 地接社费用
+//			InfoBean expenseDel = (InfoBean)fMap.get("del");
+//			tj.setExpenseTravelagency(expenseDel.getNum());
+//			tj.setExpenseTravelagencyState(expenseDel.getIsAudited()?1:0);
+//			// 其他供应商支出
+//			Collection<InfoBean> sups = (Collection<InfoBean>)fMap.get("sup");
+//			for(InfoBean info: sups){
+//				if (Constants.RESTAURANT.equals(Integer.parseInt(info.getId()))){
+//					tj.setExpenseRestaurant(info.getNum());
+//					tj.setExpenseRestaurantState(info.getIsAudited()?1:0);
+//				}else if (Constants.HOTEL.equals(Integer.parseInt(info.getId()))){
+//					tj.setExpenseHotel(info.getNum());
+//					tj.setExpenseHotelState(info.getIsAudited()?1:0);
+//				}else if (Constants.FLEET.equals(Integer.parseInt(info.getId()))){
+//					tj.setExpenseFleet(info.getNum());
+//					tj.setExpenseFleetState(info.getIsAudited()?1:0);
+//				}else if (Constants.SCENICSPOT.equals(Integer.parseInt(info.getId()))){
+//					tj.setExpenseScenicspot(info.getNum());
+//					tj.setExpenseScenicspotState(info.getIsAudited()?1:0);
+//				}else if (Constants.AIRTICKETAGENT.equals(Integer.parseInt(info.getId()))){
+//					tj.setExpenseAirticket(info.getNum());
+//					tj.setExpenseAirticketState(info.getIsAudited()?1:0);
+//				}else if (Constants.TRAINTICKETAGENT.equals(Integer.parseInt(info.getId()))){
+//					tj.setExpenseTrainticket(info.getNum());
+//					tj.setExpenseTrainticketState(info.getIsAudited()?1:0);
+//				}else if (Constants.INSURANCE.equals(Integer.parseInt(info.getId()))){
+//					tj.setExpenseInsurance(info.getNum());
+//					tj.setExpenseInsuranceState(info.getIsAudited()?1:0);
+//				}else if (Constants.OTHEROUTCOME.equals(Integer.parseInt(info.getId()))){
+//					tj.setExpenseOther(info.getNum());
+//					tj.setExpenseOtherState(info.getIsAudited()?1:0);
+//				}else {
+//					log.error("Wrong supplier type, groupId:" + groupId + " and supplierType:"+info.getId());
+//				}
+//			}
+//			// 计算总收入、支出、毛利润
+//			tj.setTotalIncome(tj.getIncomeOrder().add(tj.getIncomeOther()).add(tj.getIncomeShop()));
+//			tj.setTotalExpense(tj.getExpenseTravelagency().add(tj.getExpenseRestaurant()).add(tj.getExpenseFleet())
+//					.add(tj.getExpenseHotel()).add(tj.getExpenseScenicspot()).add(tj.getExpenseAirticket())
+//					.add(tj.getExpenseTrainticket()).add(tj.getExpenseInsurance()).add(tj.getExpenseOther()));
+//			tj.setTotalProfit(tj.getTotalIncome().subtract(tj.getTotalExpense()));
+//			if (tj.getTotalAdult()+tj.getTotalChild()!=0){
+//				tj.setProfitPerGuest(tj.getTotalProfit().divide(new BigDecimal(tj.getTotalAdult()+tj.getTotalChild()), 2, BigDecimal.ROUND_HALF_DOWN));
+//			}
+//
+//			BookingShopSelect groupShop = bookingShopService.getShopSelect(groupId);
+//			if (groupShop!=null){
+//				tj.setShopSales(groupShop.getFactSales());
+//				tj.setShopSalesState(groupShop.isAudited()?1:0);
+//				tj.setShopRepay(groupShop.getTotalRepay());
+//				tj.setShopRepayState(groupShop.isAudited()?1:0);
+//			}
+//			List<FinanceCommission> commissions = financeGuideService.selectCommissionByGroupId(groupId);
+//			BigDecimal tmpComm=new BigDecimal(0);
+//			Integer tmpCommState=(commissions.size()>0)?1:0;
+//			for (FinanceCommission comm: commissions){
+//				tmpComm=tmpComm.add(comm.getTotal());
+//				if (comm.getStateFinance()==0){
+//					tmpCommState=0;
+//				}
+//			}
+//			tj.setShopCommission(tmpComm);
+//			tj.setShopCommissionState(tmpCommState);
+//			tjService.insertGroupProfit(tj);
+//			if (i%10==0){
+//				response.getWriter().write(".");
+//				response.flushBuffer();
+//			}
+//		}
+//		insertArchiveRecord(request, startTime, BasicConstants.TJ_GROUP_PROFIT);
+//		response.getWriter().write("归档完成。");
+//		response.flushBuffer();
+//	}
 	
-	@RequestMapping("test")
-	@ResponseBody
-	public String test(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws IOException, InterruptedException{
-		HashMap<String, String> json = new HashMap<String, String>();
-		response.setContentType("text/html;charset=utf-8");
-		response.getWriter().write("开始归档");
-		response.flushBuffer();
-		
-		for (int i=0; i<100; i++){
-			
-			
-		}
-		
-		return JSON.toJSONString(json);
-	}
+//	@RequestMapping("test")
+//	@ResponseBody
+//	public String test(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws IOException, InterruptedException{
+//		HashMap<String, String> json = new HashMap<String, String>();
+//		response.setContentType("text/html;charset=utf-8");
+//		response.getWriter().write("开始归档");
+//		response.flushBuffer();
+//		
+//		for (int i=0; i<100; i++){
+//			
+//			
+//		}
+//		
+//		return JSON.toJSONString(json);
+//	}
 	
 	private ArrayList<Integer> qyList;
 	private ArrayList<Integer> zyList;
@@ -1061,10 +872,10 @@ public class TjGroupController {
 			 * 昆明逸游旅行社有限公司   1-5- id=5
 			 * 昆明顺行旅行社有限公司   1-6- id=6
 			 */
-			String qy = platformEmployeeService.findByOrgPath("1-3-") ;
-			String zy = platformEmployeeService.findByOrgPath("1-4-") ;
-			String yy = platformEmployeeService.findByOrgPath("1-5-") ;
-			String sx = platformEmployeeService.findByOrgPath("1-6-") ;
+			String qy = tjFacade.findByOrgPath("1-3-");
+			String zy = tjFacade.findByOrgPath("1-4-") ;
+			String yy = tjFacade.findByOrgPath("1-5-") ;
+			String sx = tjFacade.findByOrgPath("1-6-") ;
 			
 			this.qyList = new ArrayList<Integer>();
 			this.zyList = new ArrayList<Integer>();
@@ -1107,10 +918,11 @@ public class TjGroupController {
 	@RequestMapping("toLineProfitList.htm")
 	public String toLineProfitList(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
-		setArchiveTime(request, model, BasicConstants.TJ_GROUP_PROFIT);
+//		setArchiveTime(request, model, BasicConstants.TJ_GROUP_PROFIT);
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		TjSearchResult result = tjGroupFacade.toLineProfitList(bizId);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", result.getOrgUserJsonStr());
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
 		return "tj/tjLineProfitList";
 	}
@@ -1126,15 +938,13 @@ public class TjGroupController {
 	@RequestMapping("toLineProfits.htm")
 	public String toLineProfits(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
-		setArchiveTime(request, model, BasicConstants.TJ_GROUP_PROFIT);
+//		setArchiveTime(request, model, BasicConstants.TJ_GROUP_PROFIT);
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		TjSearchResult result = tjGroupFacade.toLineProfits(bizId);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", result.getOrgUserJsonStr());
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
-		//客源类别
-		List<DicInfo> sourceTypeList = dicService
-				.getListByTypeCode(Constants.GUEST_SOURCE_TYPE,bizId);
-		model.addAttribute("sourceTypeList", sourceTypeList);
+		model.addAttribute("sourceTypeList", result.getSourceTypeList());
 		
 		return "tj/tjLineProfits";
 	}
@@ -1150,56 +960,28 @@ public class TjGroupController {
 	@RequestMapping(value = "/selectLineProfitList.do")
 	public String selectLineProfitList(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,String saleOperatorIds,String orgIds,String sourceTypeId) {
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
-		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
-		}
+		TjSearchDTO tjSearchDTO = new TjSearchDTO();
+		tjSearchDTO.setBizId(WebUtils.getCurBizId(request));
+		tjSearchDTO.setPage(page);
+		tjSearchDTO.setPageSize(pageSize);
+		tjSearchDTO.setOrgIds(orgIds);
+		tjSearchDTO.setSaleOperatorIds(saleOperatorIds);
+		tjSearchDTO.setPm(WebUtils.getQueryParamters(request));
+		tjSearchDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
+		SelectLineProfitListResult result = tjGroupFacade.selectLineProfitList(tjSearchDTO);
 		
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(saleOperatorIds) && StringUtils.isNotBlank(orgIds)){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = orgIds.split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				saleOperatorIds=salesOperatorIds.substring(0, salesOperatorIds.length()-1);
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=saleOperatorIds && !"".equals(saleOperatorIds)){
-			pm.put("operator_id", saleOperatorIds);
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = tjService.selectLineProfitListPage(pageBean);
-		model.addAttribute("pageBean", pageBean);
-		Map<String,Object> map = tjService.selectLineProfitCount(pageBean);
-		if(null!=map){
-			model.addAttribute("all_income_order", map.get("all_income_order"));
-			model.addAttribute("all_income_other", map.get("all_income_other"));
-			model.addAttribute("all_shop_repay", map.get("all_shop_repay"));
-			model.addAttribute("all_total_cost", map.get("all_total_cost"));
-			model.addAttribute("all_shop_commission", map.get("all_shop_commission"));
-			model.addAttribute("all_total_profit", map.get("all_total_profit"));
-			model.addAttribute("all_shop_sales", map.get("all_shop_sales"));
-			model.addAttribute("all_sum_person", map.get("all_sum_person"));
-			model.addAttribute("all_total_adult", map.get("total_adult"));
-			model.addAttribute("all_total_child", map.get("total_child"));
-			model.addAttribute("all_total_guide", map.get("total_guide"));
-		}
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("all_income_order", result.getAllIncomeOrder());
+		model.addAttribute("all_income_other", result.getAllIncomeOther());
+		model.addAttribute("all_shop_repay", result.getAllShopRepay());
+		model.addAttribute("all_total_cost", result.getAllTotalCost());
+		model.addAttribute("all_shop_commission", result.getAllShopCommission());
+		model.addAttribute("all_total_profit", result.getAllTotalProfit());
+		model.addAttribute("all_shop_sales", result.getAllShopSales());
+		model.addAttribute("all_sum_person", result.getAllSumPerson());
+		model.addAttribute("all_total_adult", result.getAllTotalAdult());
+		model.addAttribute("all_total_child", result.getAllTotalChild());
+		model.addAttribute("all_total_guide", result.getAllTotalGuide());
 		return "tj/tjLineProfitList-table";
 	}
 	
@@ -1216,92 +998,63 @@ public class TjGroupController {
 	@RequestMapping(value = "/selectLineProfits.do")
 	public String selectLineProfits(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,String saleOperatorIds,String orgIds,String sourceTypeId) {
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
-		}
-		if (pageSize == null) {
-			pageBean.setPageSize(Constants.PAGESIZE);
-		} else {
-			pageBean.setPageSize(pageSize);
-		}
-		
-		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(saleOperatorIds) && StringUtils.isNotBlank(orgIds)){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = orgIds.split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				saleOperatorIds=salesOperatorIds.substring(0, salesOperatorIds.length()-1);
-			}
-		}
-		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=saleOperatorIds && !"".equals(saleOperatorIds)){
-			pm.put("operator_id", saleOperatorIds);
-		}
-		pm.put("set", WebUtils.getDataUserIdSet(request));
-		pageBean.setParameter(pm);
-		pageBean = tjService.selectLineProfitListPage(pageBean);
-		model.addAttribute("pageBean", pageBean);
-		Map<String,Object> map = tjService.selectLineProfitCount(pageBean);
-		if(null!=map){
-			model.addAttribute("all_income_order", map.get("all_income_order"));
-			model.addAttribute("all_income_other", map.get("all_income_other"));
-			model.addAttribute("all_shop_repay", map.get("all_shop_repay"));
-			model.addAttribute("all_total_cost", map.get("all_total_cost"));
-			model.addAttribute("all_shop_commission", map.get("all_shop_commission"));
-			model.addAttribute("all_total_profit", map.get("all_total_profit"));
-			model.addAttribute("all_shop_sales", map.get("all_shop_sales"));
-			model.addAttribute("all_sum_person", map.get("all_sum_person"));
-			model.addAttribute("all_total_adult", map.get("total_adult"));
-			model.addAttribute("all_total_child", map.get("total_child"));
-			model.addAttribute("all_total_guide", map.get("total_guide"));
-		}
+		TjSearchDTO tjSearchDTO = new TjSearchDTO();
+		tjSearchDTO.setBizId(WebUtils.getCurBizId(request));
+		tjSearchDTO.setPage(page);
+		tjSearchDTO.setPageSize(pageSize);
+		tjSearchDTO.setOrgIds(orgIds);
+		tjSearchDTO.setSaleOperatorIds(saleOperatorIds);
+		tjSearchDTO.setPm(WebUtils.getQueryParamters(request));
+		tjSearchDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
+		SelectLineProfitListResult result = tjGroupFacade.selectLineProfits(tjSearchDTO);
+		model.addAttribute("pageBean",result.getPageBean());
+		model.addAttribute("all_income_order", result.getAllIncomeOrder());
+		model.addAttribute("all_income_other", result.getAllIncomeOther());
+		model.addAttribute("all_shop_repay", result.getAllShopRepay());
+		model.addAttribute("all_total_cost", result.getAllTotalCost());
+		model.addAttribute("all_shop_commission", result.getAllShopCommission());
+		model.addAttribute("all_total_profit", result.getAllTotalProfit());
+		model.addAttribute("all_shop_sales", result.getAllShopSales());
+		model.addAttribute("all_sum_person", result.getAllSumPerson());
+		model.addAttribute("all_total_adult", result.getAllTotalAdult());
+		model.addAttribute("all_total_child", result.getAllTotalChild());
+		model.addAttribute("all_total_guide", result.getAllTotalGuide());
 		return "tj/tjLineProfitListsTable";
 	}
 	
 	
 
 	
-	/**
-	 * 取得最新归档时间，放到Model里
-	 * @param request
-	 * @param model
-	 */
-	private void setArchiveTime(HttpServletRequest request, ModelMap model, String type){
-		Date recordEndTime = tjService.selectRecordEndTime(type, WebUtils.getCurBizId(request));
-		model.addAttribute("recordEndTime", DateUtils.format(recordEndTime, DateUtils.FORMAT_LONG));
-	}
+//	/**
+//	 * 取得最新归档时间，放到Model里
+//	 * @param request
+//	 * @param model
+//	 */
+//	private void setArchiveTime(HttpServletRequest request, ModelMap model, String type){
+//		Date recordEndTime = tjService.selectRecordEndTime(type, WebUtils.getCurBizId(request));
+//		model.addAttribute("recordEndTime", DateUtils.format(recordEndTime, DateUtils.FORMAT_LONG));
+//	}
 	
-	/**
-	 * 添加归档记录
-	 * @param request
-	 * @param startTime
-	 */
-	private void insertArchiveRecord(HttpServletRequest request, Long startTime, String type){
-		Long endTime = System.currentTimeMillis();
-		//根据类型查询此表上一次统计的结束时间作为本次统计的开始时间
-		Date startDate = tjService.selectRecordEndTime(type, WebUtils.getCurBizId(request));
-		TJRecord tjRecord = new TJRecord();
-		tjRecord.setBizId(WebUtils.getCurBizId(request));
-		tjRecord.setType(type);
-		tjRecord.setStartTime(startDate);
-		tjRecord.setEndTime(new Date());
-		//耗时  秒
-		Long taketime = (endTime-startTime)/1000;
-		tjRecord.setTakeTime(taketime.intValue());
-		//插入记录
-		tjService.insetTJRecord(tjRecord);
-	}
+//	/**
+//	 * 添加归档记录
+//	 * @param request
+//	 * @param startTime
+//	 */
+//	private void insertArchiveRecord(HttpServletRequest request, Long startTime, String type){
+//		Long endTime = System.currentTimeMillis();
+//		//根据类型查询此表上一次统计的结束时间作为本次统计的开始时间
+//		Date startDate = tjService.selectRecordEndTime(type, WebUtils.getCurBizId(request));
+//		TJRecord tjRecord = new TJRecord();
+//		tjRecord.setBizId(WebUtils.getCurBizId(request));
+//		tjRecord.setType(type);
+//		tjRecord.setStartTime(startDate);
+//		tjRecord.setEndTime(new Date());
+//		//耗时  秒
+//		Long taketime = (endTime-startTime)/1000;
+//		tjRecord.setTakeTime(taketime.intValue());
+//		//插入记录
+//		tjService.insetTJRecord(tjRecord);
+//	}
 	
 	/**
 	 * 线路利润统计打印页面
@@ -1324,7 +1077,7 @@ public class TjGroupController {
 			for(String orgIdStr : orgIdArr){
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = tjFacade.getUserIdListByOrgIdList(set, WebUtils.getCurBizId(request));
 			String salesOperatorIds="";
 			for(Integer usrId : set){
 				salesOperatorIds+=usrId+",";
@@ -1340,8 +1093,8 @@ public class TjGroupController {
 		pm.put("set", WebUtils.getDataUserIdSet(request));
 		pageBean.setParameter(pm);
 		
-		pageBean = tjService.selectLineProfitListPage(pageBean);
-		Map<String,Object> map = tjService.selectLineProfitCount(pageBean);
+		pageBean = tjGroupFacade.selectLineProfitListPage(pageBean);
+		Map<String,Object> map = tjGroupFacade.selectLineProfitCount(pageBean);
 		if(null!=map){
 			model.addAttribute("all_sum_person", map.get("all_sum_person"));
 		}
@@ -1376,7 +1129,7 @@ public class TjGroupController {
 			for(String orgIdStr : orgIdArr){
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			set = tjFacade.getUserIdListByOrgIdList(set, WebUtils.getCurBizId(request));
 			String salesOperatorIds="";
 			for(Integer usrId : set){
 				salesOperatorIds+=usrId+",";
@@ -1392,10 +1145,9 @@ public class TjGroupController {
 		pm.put("set", WebUtils.getDataUserIdSet(request));
 		pageBean.setParameter(pm);
 		
-		pageBean = tjService.selectLineProfitListPage(pageBean);
-		
+		pageBean = tjGroupFacade.selectLineProfitListPage(pageBean);
 		List list = pageBean.getResult();
-		Map<String,Object> map = tjService.selectLineProfitCount(pageBean);
+		Map<String,Object> map = tjGroupFacade.selectLineProfitCount(pageBean);
 		String path ="";
 		
 		try {

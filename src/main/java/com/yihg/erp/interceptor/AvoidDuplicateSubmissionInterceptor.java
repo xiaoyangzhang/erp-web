@@ -13,14 +13,11 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.yihg.erp.aop.AvoidDuplicateSubmission;
 import com.yihg.erp.contant.TokenConstant.tokenActionEnum;
-import com.yihg.sys.api.PlatformSessionService;
 
 public class AvoidDuplicateSubmissionInterceptor extends
 		HandlerInterceptorAdapter {
 	private static final Logger LOG = Logger
 			.getLogger(AvoidDuplicateSubmissionInterceptor.class);
-	@Autowired
-	private PlatformSessionService platformSessionService;
 
 	@Override
 	public boolean preHandle(HttpServletRequest request,

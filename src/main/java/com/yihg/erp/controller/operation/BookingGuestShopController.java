@@ -1,20 +1,18 @@
 package com.yihg.erp.controller.operation;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
+import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
+import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
+import org.erpcenterFacade.common.client.service.SaleCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -22,44 +20,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson.util.TypeUtils;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.po.DicInfo;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.finance.api.FinanceService;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.api.BookingGuideService;
-import com.yihg.operation.api.BookingShopDetailDeployService;
-import com.yihg.operation.api.BookingShopDetailService;
-import com.yihg.operation.api.BookingShopService;
-import com.yihg.operation.api.BookingSupplierDetailService;
-import com.yihg.operation.po.BookingGuide;
-import com.yihg.operation.po.BookingShop;
-import com.yihg.operation.po.BookingShopDetail;
-import com.yihg.operation.po.BookingShopDetailDeploy;
-import com.yihg.operation.po.BookingSupplierDetail;
-import com.yihg.operation.vo.BookingGroup;
-import com.yihg.operation.vo.BookingShopDetailDeployVO;
-import com.yihg.operation.vo.BookingShopDetailVO;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.po.TourGroupPriceAndPersons;
-import com.yihg.sales.vo.TourGroupVO;
-import com.yihg.supplier.api.SupplierService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShopDetail;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShopDetailDeploy;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
+import com.yimayhd.erpcenter.facade.operation.query.BookingShopDTO;
+import com.yimayhd.erpcenter.facade.operation.query.BookingShopDetailDeployDTO;
+import com.yimayhd.erpcenter.facade.operation.query.BookingShopListDTO;
+import com.yimayhd.erpcenter.facade.operation.result.BookingShopResult;
+import com.yimayhd.erpcenter.facade.operation.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.operation.result.ToFactShopResult;
+import com.yimayhd.erpcenter.facade.operation.service.BookingFinanceShopFacade;
+import com.yimayhd.erpcenter.facade.operation.service.BookingGuestShopFacade;
+import com.yimayhd.erpcenter.facade.operation.service.BookingShopFacade;
+
 /**
  * @author : xuzejun
  * @date : 2015年7月25日 下午2:31:01
@@ -70,32 +52,19 @@ import com.yihg.sys.api.PlatformOrgService;
 public class BookingGuestShopController extends BaseController {
 
 	
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private SupplierService supplierSerivce;
-	@Autowired
-	private BookingShopService bookingShopService;
-	@Autowired
-	private BookingGuideService bookingGuideService;
-	@Autowired
-	private DicService dicService;
-	@Autowired
-	private BookingShopDetailService shopDetailService;
-	@Autowired
-	private BookingShopDetailDeployService shopDetailDeployService;
-	@Autowired
-	private FinanceService financeService;
-	@Autowired
-	private GroupOrderService groupOrderService;
 	@Resource
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
+	@Autowired
+	private BookingShopFacade bookingShopFacade;
+	@Autowired
+	private BookingGuestShopFacade bookingGuestShopFacade;
+	@Autowired
+	private BookingFinanceShopFacade bookingFinanceShopFacade;
+	@Autowired
+	private SaleCommonFacade saleCommonFacade;
+	@Autowired
 	private BizSettingCommon bizSettingCommon;
-	@Autowired
-	private BookingSupplierDetailService detailService;
-	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private PlatformOrgService orgService;
 	/**
 	 * @author : xuzejun
 	 * @date : 2015年7月25日 下午2:31:01
@@ -105,8 +74,11 @@ public class BookingGuestShopController extends BaseController {
 	@RequiresPermissions(PermissionConstants.JDGL_GUESTSHOPPING)
 	public String toList(ModelMap model,HttpServletRequest request) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult departmentTuneQueryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", departmentTuneQueryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", departmentTuneQueryResult.getOrgUserJsonStr());
 		
 		return "operation/guestShop/shop-list";
 	}
@@ -114,69 +86,37 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/bookingShopList.do")
 	@RequiresPermissions(PermissionConstants.JDGL_GUESTSHOPPING)
 	public String bookingShopList(HttpServletRequest request, ModelMap model,TourGroup group,TourGroupVO groupVo) {
-		PageBean pageBean = new PageBean();
-		if(group.getPage()==null){
-			group.setPage(1);
-		}
-		if(group.getPageSize()==null){
-			pageBean.setPageSize(Constants.PAGESIZE);
-		}else{
-			pageBean.setPageSize(group.getPageSize());
-		}
-		Map paramters = WebUtils.getQueryParamters(request);
-		if(StringUtils.isBlank(groupVo.getSaleOperatorIds()) && StringUtils.isNotBlank(groupVo.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = groupVo.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-				//paramters.put("saleOperatorIds", salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
-		pageBean.setParameter(group);
-		pageBean.setPage(group.getPage());
-		
-		pageBean = tourGroupService.selectBookingShopListPage(pageBean, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
-		/*fillData(pageBean.getResult());
-		if (pageBean.getResult()!=null&&pageBean.getResult().size()>0) {
-			for (BookingGroup bGroup : (List<BookingGroup>) pageBean.getResult()) {
-				
-				List<GroupOrder> gOrders = groupOrderService
-						.selectOrderByGroupId(bGroup.getGroupId());
-				bGroup.setGroupOrderList(gOrders);
-			}
-		}*/
+		BookingShopListDTO bookingShopListDTO = new BookingShopListDTO();
+		bookingShopListDTO.setGroup(group);
+		bookingShopListDTO.setBizId(WebUtils.getCurBizId(request));
+		bookingShopListDTO.setOrgIds(groupVo.getOrgIds());
+		bookingShopListDTO.setSaleOperatorIds(groupVo.getSaleOperatorIds());
+		bookingShopListDTO.setDataUserIds(WebUtils.getDataUserIdSet(request));
+		PageBean pageBean = bookingShopFacade.bookingShopList(bookingShopListDTO);
 		model.addAttribute("page", pageBean);
 		return "operation/guestShop/shop-listView";
 	}
 	
 	
-	private void fillData(List<BookingGroup> bookingGroupList){
-		if(bookingGroupList!=null&&bookingGroupList.size()>0){
-			for(BookingGroup group : bookingGroupList){
-				if(group.getProductBrandName()!=null){
-					group.setProductName("【"+group.getProductBrandName()+"】"+group.getProductName());
-				}
-				//填充定制团的组团社名称
-				if(group.getSupplierId()!=null){
-					SupplierInfo supplierInfo = supplierSerivce.selectBySupplierId(group.getSupplierId());
-					if(supplierInfo!=null){
-						group.setSupplierName(supplierInfo.getNameFull());
-					}
-				}
-
-				//group.setCount(bookingShopService.getSelectCountByGruopId(group.getGroupId()));
-				
-			}
-		}
-	}
+//	private void fillData(List<BookingGroup> bookingGroupList){
+//		if(bookingGroupList!=null&&bookingGroupList.size()>0){
+//			for(BookingGroup group : bookingGroupList){
+//				if(group.getProductBrandName()!=null){
+//					group.setProductName("【"+group.getProductBrandName()+"】"+group.getProductName());
+//				}
+//				//填充定制团的组团社名称
+//				if(group.getSupplierId()!=null){
+//					SupplierInfo supplierInfo = supplierSerivce.selectBySupplierId(group.getSupplierId());
+//					if(supplierInfo!=null){
+//						group.setSupplierName(supplierInfo.getNameFull());
+//					}
+//				}
+//
+//				//group.setCount(bookingShopService.getSelectCountByGruopId(group.getGroupId()));
+//				
+//			}
+//		}
+//	}
 	
 	/**
 	 * @author : xuzejun
@@ -186,9 +126,9 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/shopDetailList.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_GUESTSHOPPING)
 	public String shopDetailList( ModelMap model,Integer groupId) {
-		List<BookingShop> bookingShops=bookingShopService.getShopListByGroupId(groupId);
+		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop> bookingShops = bookingShopFacade.shopDetailList(groupId);
 		BigDecimal count=new BigDecimal(0);
-		for (BookingShop bookingShop : bookingShops) {
+		for (com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop bookingShop : bookingShops) {
 			if(bookingShop.getTotalMoney()!=null){
 				count=count.add(bookingShop.getTotalMoney());
 			}
@@ -210,19 +150,30 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/toBookingShopView.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_GUESTSHOPPING)
 	public String toEditBookingShop( ModelMap model,Integer groupId,Integer type) {
-		List<BookingShop> shoplist = bookingShopService.getShopListByGroupId(groupId);
-		model.addAttribute("shoplist", shoplist);
+//		List<BookingShop> shoplist = bookingShopService.getShopListByGroupId(groupId);
+//		model.addAttribute("shoplist", shoplist);
+//		model.addAttribute("groupId", groupId);
+//		
+//		if(type==1){
+//			return "operation/guestShop/alltoShop-list";
+//		}else{
+//			model.addAttribute("view", 1);
+//			TourGroupPriceAndPersons tourGroupInfo = tourGroupService.selectTourGroupInfo(groupId);
+//			tourGroupInfo.setProfit(tourGroupInfo.getIncomeIncome()-tourGroupInfo.getCostTotalPrice());
+//			tourGroupInfo.setTotalProfit(tourGroupInfo.getProfit()/tourGroupInfo.getTotalAdult());
+//			model.addAttribute("tourGroupInfo", tourGroupInfo);
+//			return "operation/guestShop/alltoIndex-list";
+//		}
+		BookingShopResult result = bookingFinanceShopFacade.toEditBookingShop(groupId, type);
+		model.addAttribute("shoplist", result.getBookingShops());
 		model.addAttribute("groupId", groupId);
-		
-		if(type==1){
-			return "operation/guestShop/alltoShop-list";
+		  
+		if(type==1){  
+			return "operation/financeShop/alltoShop-list";
 		}else{
 			model.addAttribute("view", 1);
-			TourGroupPriceAndPersons tourGroupInfo = tourGroupService.selectTourGroupInfo(groupId);
-			tourGroupInfo.setProfit(tourGroupInfo.getIncomeIncome()-tourGroupInfo.getCostTotalPrice());
-			tourGroupInfo.setTotalProfit(tourGroupInfo.getProfit()/tourGroupInfo.getTotalAdult());
-			model.addAttribute("tourGroupInfo", tourGroupInfo);
-			return "operation/guestShop/alltoIndex-list";
+			model.addAttribute("tourGroupInfo",result.getTourGroupInfo());
+			return "operation/financeShop/alltoIndex-list";
 		}
 	
 		
@@ -231,14 +182,19 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/bookingShopView.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_GUESTSHOPPING)
 	public String bookingShopView( ModelMap model,Integer groupId,Integer type) {
-		List<BookingShop> shoplist = bookingShopService.getShopListByGroupId(groupId);
-		model.addAttribute("shoplist", shoplist);
+//		List<BookingShop> shoplist = bookingShopService.getShopListByGroupId(groupId);
+//		model.addAttribute("shoplist", shoplist);
+//		model.addAttribute("groupId", groupId);
+//			TourGroupPriceAndPersons tourGroupInfo = tourGroupService.selectTourGroupInfo(groupId);
+//			tourGroupInfo.setProfit(tourGroupInfo.getIncomeIncome()-tourGroupInfo.getCostTotalPrice());
+//			tourGroupInfo.setTotalProfit(tourGroupInfo.getProfit()/tourGroupInfo.getTotalAdult());
+//			model.addAttribute("tourGroupInfo", tourGroupInfo);
+//			model.addAttribute("view", 0);
+		BookingShopResult result = bookingFinanceShopFacade.toEditBookingShop(groupId, type);
+		model.addAttribute("shoplist",  result.getBookingShops());
 		model.addAttribute("groupId", groupId);
-			TourGroupPriceAndPersons tourGroupInfo = tourGroupService.selectTourGroupInfo(groupId);
-			tourGroupInfo.setProfit(tourGroupInfo.getIncomeIncome()-tourGroupInfo.getCostTotalPrice());
-			tourGroupInfo.setTotalProfit(tourGroupInfo.getProfit()/tourGroupInfo.getTotalAdult());
-			model.addAttribute("tourGroupInfo", tourGroupInfo);
-			model.addAttribute("view", 0);
+		model.addAttribute("tourGroupInfo", result.getTourGroupInfo());
+		model.addAttribute("view", 0);
 			return "operation/guestShop/alltoIndex-list";
 	}
 	
@@ -250,14 +206,20 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/editShop.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_GUESTSHOPPING)
 	public String editShop( ModelMap model,Integer groupId,Integer id) {
+//		model.addAttribute("groupId", groupId);
+//		if(id!=null){
+//			BookingShop shop = bookingShopService.selectByPrimaryKey(id);
+//			model.addAttribute("shop", shop);
+//		}
+//		//查询导游列表
+//		List<BookingGuide> guides = bookingGuideService.selectGuidesByGroupId(groupId);
+//		model.addAttribute("guides", guides);
 		model.addAttribute("groupId", groupId);
-		if(id!=null){
-			BookingShop shop = bookingShopService.selectByPrimaryKey(id);
-			model.addAttribute("shop", shop);
-		}
-		//查询导游列表
-		List<BookingGuide> guides = bookingGuideService.selectGuidesByGroupId(groupId);
-		model.addAttribute("guides", guides);
+		BookingShopResult result = bookingFinanceShopFacade.editShop(groupId, id);
+			model.addAttribute("shop", result.getBookingShop());
+//		}
+//		//查询导游列表
+		model.addAttribute("guides", result.getBookingGuides());
 		return "operation/guestShop/edit-shop";
 		
 	}
@@ -270,19 +232,23 @@ public class BookingGuestShopController extends BaseController {
 	 */
 	@RequestMapping(value = "/saveShop.do")
 	@ResponseBody
-	public String saveShop(HttpServletRequest request, ModelMap model,BookingShop shop) {
+	public String saveShop(HttpServletRequest request, ModelMap model,com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop shop) {
+//		if(null==shop.getId()){
+//			int No = bookingShopService.getBookingCountByTime();
+//			shop.setBookingNo(bizSettingCommon.getMyBizCode(request)+Constants.SHOPPING+new SimpleDateFormat("yyMMdd").format(new Date())+(No+100));
+//			shop.setUserId(WebUtils.getCurUserId(request));
+//			shop.setUserName(WebUtils.getCurUser(request).getName());
+//		}
+//		String suc = bookingShopService.save(shop)>0?successJson():errorJson("操作失败！");
+//		if(shop.getId()!=null){
+//			financeService.calcTourGroupAmount(shop.getGroupId());
+//		}
 		if(null==shop.getId()){
-			int No = bookingShopService.getBookingCountByTime();
-			shop.setBookingNo(bizSettingCommon.getMyBizCode(request)+Constants.SHOPPING+new SimpleDateFormat("yyMMdd").format(new Date())+(No+100));
 			shop.setUserId(WebUtils.getCurUserId(request));
 			shop.setUserName(WebUtils.getCurUser(request).getName());
 		}
-		String suc = bookingShopService.save(shop)>0?successJson():errorJson("操作失败！");
-		if(shop.getId()!=null){
-			financeService.calcTourGroupAmount(shop.getGroupId());
-		}
-	
-		return suc;
+		int result = bookingFinanceShopFacade.saveShopAndUpdateFinance(shop, bizSettingCommon.getMyBizCode(request));
+		return result >0 ? successJson():errorJson("操作失败！");
 	}
 
 
@@ -294,7 +260,9 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/deleteShop.do",method = RequestMethod.POST)
 	@ResponseBody
 	public String deldetailGuide(Integer id) {
-		return bookingShopService.deleteByPrimaryKey(id)==1?successJson():errorJson("操作失败！");
+		//return bookingShopService.deleteByPrimaryKey(id)==1?successJson():errorJson("操作失败！");
+		ResultSupport resultSupport = bookingGuestShopFacade.deldetailGuide(id);
+		return resultSupport.isSuccess() ? successJson() : errorJson("操作失败！") ;
 
 	}
 	
@@ -307,83 +275,81 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/toFactShop.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_GUESTSHOPPING)
 	public String toFactShop(Integer id,Integer groupId,ModelMap model) {
-	
-		BookingShop shop =bookingShopService.selectByPrimaryKey(id);
-		//查询实际消费返款列表
-		//List<BookingShopDetail> shopDetails =shopDetailService.getShopDetailListByBookingId(id);
-		//查询分摊
-		List<BookingShopDetailDeploy> detailDeploys = selectShopDetail(id,
-				groupId);
+		BookingShopDTO bookingShopDTO = new BookingShopDTO();
+		bookingShopDTO.setShopId(id);
+		bookingShopDTO.setGroupId(groupId);
+		ToFactShopResult result = bookingShopFacade.toFactShop(bookingShopDTO);
 		model.addAttribute("id", id);
-		model.addAttribute("detailDeploys", detailDeploys);
-		model.addAttribute("shop", shop);
+		model.addAttribute("detailDeploys", result.getDetailDeploys());
+		model.addAttribute("shop", result.getShop());
 		return "operation/guestShop/factShopView";
 	}
 
-	private List<BookingShopDetailDeploy> selectShopDetail(Integer id,
-			Integer groupId) {
-		List<BookingShopDetailDeploy> deploys = shopDetailDeployService.selectByBookingId(id);
-		List<GroupOrder> groupOrders = tourGroupService.selectOrderAndGuestInfoByGroupId(groupId);
-		List<BookingShopDetailDeploy> detailDeploys = new ArrayList<BookingShopDetailDeploy>();
-		
-		for (GroupOrder g : groupOrders) {
-			boolean exist = false;
-			BookingShopDetailDeploy deploy = new BookingShopDetailDeploy();
-			deploy.setOrderId(g.getId());//订单id
-			deploy.setOrderNo(g.getOrderNo());//订单号
-			deploy.setSupplierName(g.getSupplierName());//组团社
-			//deploy.setGuestSize(g.getGroupOrderGuestList().size());//人数
-			deploy.setAdultNum(g.getNumAdult());
-			deploy.setChildNum(g.getNumChild());
-			/*StringBuffer sb = new StringBuffer();
-			if(null!=g.getGroupOrderGuestList()){
-				List<GroupOrderGuest> groupOrderGuestList = g.getGroupOrderGuestList();
-				for (int i = 0; i < groupOrderGuestList.size(); i++) {
-						if(i!=groupOrderGuestList.size()-1){
-							sb.append(groupOrderGuestList.get(i).getName()+",");
-						}else{
-							sb.append(groupOrderGuestList.get(i).getName());
-						}
-						
-				}
-			}*/
-			deploy.setGuestNames(g.getReceiveMode());
-			for (int i = 0; i < deploys.size()&& !exist; i++) {
-				if(deploys.get(i).getOrderId().equals(g.getId())){
-					deploy.setBookingId(id);
-					deploy.setBuyTotal(deploys.get(i).getBuyTotal());
-					deploy.setRemark(deploys.get(i).getRemark());
-					detailDeploys.add(deploy);
-					exist = true;
-					break;
-				}
-			}
-			if(!exist){
-				
-				deploy.setBookingId(id);
-				deploy.setRemark(null);
-				deploy.setBuyTotal(null);
-				
-				detailDeploys.add(deploy);
-			}
-			
-		}
-		return detailDeploys;
-	}
+//	private List<BookingShopDetailDeploy> selectShopDetail(Integer id,
+//			Integer groupId) {
+//		List<BookingShopDetailDeploy> deploys = shopDetailDeployService.selectByBookingId(id);
+//		List<GroupOrder> groupOrders = tourGroupService.selectOrderAndGuestInfoByGroupId(groupId);
+//		List<BookingShopDetailDeploy> detailDeploys = new ArrayList<BookingShopDetailDeploy>();
+//		
+//		for (GroupOrder g : groupOrders) {
+//			boolean exist = false;
+//			BookingShopDetailDeploy deploy = new BookingShopDetailDeploy();
+//			deploy.setOrderId(g.getId());//订单id
+//			deploy.setOrderNo(g.getOrderNo());//订单号
+//			deploy.setSupplierName(g.getSupplierName());//组团社
+//			//deploy.setGuestSize(g.getGroupOrderGuestList().size());//人数
+//			deploy.setAdultNum(g.getNumAdult());
+//			deploy.setChildNum(g.getNumChild());
+//			/*StringBuffer sb = new StringBuffer();
+//			if(null!=g.getGroupOrderGuestList()){
+//				List<GroupOrderGuest> groupOrderGuestList = g.getGroupOrderGuestList();
+//				for (int i = 0; i < groupOrderGuestList.size(); i++) {
+//						if(i!=groupOrderGuestList.size()-1){
+//							sb.append(groupOrderGuestList.get(i).getName()+",");
+//						}else{
+//							sb.append(groupOrderGuestList.get(i).getName());
+//						}
+//						
+//				}
+//			}*/
+//			deploy.setGuestNames(g.getReceiveMode());
+//			for (int i = 0; i < deploys.size()&& !exist; i++) {
+//				if(deploys.get(i).getOrderId().equals(g.getId())){
+//					deploy.setBookingId(id);
+//					deploy.setBuyTotal(deploys.get(i).getBuyTotal());
+//					deploy.setRemark(deploys.get(i).getRemark());
+//					detailDeploys.add(deploy);
+//					exist = true;
+//					break;
+//				}
+//			}
+//			if(!exist){
+//				
+//				deploy.setBookingId(id);
+//				deploy.setRemark(null);
+//				deploy.setBuyTotal(null);
+//				
+//				detailDeploys.add(deploy);
+//			}
+//			
+//		}
+//		return detailDeploys;
+//	}
 	
 	
 	@RequestMapping(value = "/factShop.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_GUESTSHOPPING)
 	public String factShop(Integer id,Integer groupId,ModelMap model) {
 	
-	BookingShop shop =bookingShopService.selectByPrimaryKey(id);
+		//BookingShop shop =bookingShopService.selectByPrimaryKey(id);
 	/*		List<BookingShopDetail> shopDetails =shopDetailService.getShopDetailListByBookingId(id);*/
-		List<BookingShopDetailDeploy> detailDeploys = selectShopDetail(id,
-				groupId);
-		model.addAttribute("detailDeploys", detailDeploys);
+//		List<BookingShopDetailDeploy> detailDeploys = selectShopDetail(id,
+//				groupId);
+		BookingShopResult result = bookingGuestShopFacade.factShop(id, groupId);
+		model.addAttribute("detailDeploys", result.getShopDetailDeploys());
 		model.addAttribute("id", id);
 		/*model.addAttribute("shopDetails", shopDetails);*/
-		model.addAttribute("shop", shop);
+		model.addAttribute("shop", result.getBookingShop());
 		model.addAttribute("view", 1);
 		return "operation/guestShop/factShopView";
 	}
@@ -392,13 +358,14 @@ public class BookingGuestShopController extends BaseController {
 	//分摊
 	@RequestMapping(value = "/editDetailDeploy.htm")
 	@ResponseBody
-	public String editFactShop(BookingShopDetailDeploy b ,ModelMap model) {
+	public String editFactShop(com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShopDetailDeploy b ,ModelMap model) {
 			//查询分摊
-			List<BookingShopDetailDeploy> deploys = shopDetailDeployService.selectByDetailId(b.getBookingDetailId());
-			List<GroupOrder> groupOrders = tourGroupService.selectOrderAndGuestInfoByGroupId(b.getOrderId());
+//			List<BookingShopDetailDeploy> deploys = shopDetailDeployService.selectByDetailId(b.getBookingDetailId());
+//			List<GroupOrder> groupOrders = tourGroupService.selectOrderAndGuestInfoByGroupId(b.getOrderId());
+			BookingShopResult result = bookingFinanceShopFacade.editFactShop(b);
 			List<BookingShopDetailDeploy> detailDeploys = new ArrayList<BookingShopDetailDeploy>();
-			
-			for (GroupOrder g : groupOrders) {
+			List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder> groupOrders = result.getGroupOrders();
+			for (com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder g : groupOrders) {
 				boolean exist = false;
 				BookingShopDetailDeploy deploy = new BookingShopDetailDeploy();
 				deploy.setOrderId(g.getId());//订单id
@@ -407,7 +374,7 @@ public class BookingGuestShopController extends BaseController {
 				deploy.setGuestSize(g.getGroupOrderGuestList().size());//人数
 				StringBuffer sb = new StringBuffer();
 				if(null!=g.getGroupOrderGuestList()){
-					List<GroupOrderGuest> groupOrderGuestList = g.getGroupOrderGuestList();
+					List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest> groupOrderGuestList = g.getGroupOrderGuestList();
 					for (int i = 0; i < groupOrderGuestList.size(); i++) {
 							if(i!=groupOrderGuestList.size()-1){
 								sb.append(groupOrderGuestList.get(i).getName()+",");
@@ -418,6 +385,8 @@ public class BookingGuestShopController extends BaseController {
 					}
 				}
 				deploy.setGuestNames(sb.toString());
+				List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShopDetailDeploy> deploys = result.getShopDetailDeploys();
+
 				for (int i = 0; i < deploys.size()&& !exist; i++) {
 					if(deploys.get(i).getOrderId().equals(g.getId())){
 						deploy.setBookingDetailId(b.getBookingDetailId());
@@ -452,15 +421,28 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/toEditShopDetail.htm")
 	public String toEditShopDetail(BookingShopDetail shopDetail,String shopDate,Integer supplierId,Integer groupId,ModelMap model) {
 		
-		List<DicInfo> dic = dicService.getListByTypeCode(Constants.SHOPPING_TYPE_CODE);
-		if(shopDetail.getId()!=null){
-			shopDetail = shopDetailService.getShopDetailById(shopDetail.getId());
+//		List<DicInfo> dic = dicService.getListByTypeCode(Constants.SHOPPING_TYPE_CODE);
+//		if(shopDetail.getId()!=null){
+//			shopDetail = shopDetailService.getShopDetailById(shopDetail.getId());
+//		}
+		List<com.yimayhd.erpcenter.dal.basic.po.DicInfo> shopTypeList = saleCommonFacade.getShopListByTypeCode();
+		
+		com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShopDetail detail = bookingFinanceShopFacade.getShopDetailById(shopDetail.getId());
+//		model.addAttribute("shopDate", shopDate.substring(0, 10));
+//		model.addAttribute("supplierId", supplierId);
+//		model.addAttribute("groupId", groupId);
+		if (detail.getId() == null) {
+			model.addAttribute("shopDetail", shopDetail);
+		}else {
+			
+			model.addAttribute("shopDetail", detail);
 		}
 		model.addAttribute("shopDate", shopDate.substring(0, 10));
 		model.addAttribute("supplierId", supplierId);
 		model.addAttribute("groupId", groupId);
-		model.addAttribute("shopDetail", shopDetail);
-		model.addAttribute("dic", dic);
+		//model.addAttribute("shopDetail", shopDetail);
+		//model.addAttribute("dic", dic);
+		model.addAttribute("dic", shopTypeList);
 		return "operation/guestShop/edit-shopDetail";
 	}
 	
@@ -472,14 +454,14 @@ public class BookingGuestShopController extends BaseController {
 	 */
 	@RequestMapping(value = "/saveShopDetail.do")
 	@ResponseBody
-	public String saveShopDetail(BookingShopDetail shopDetail) {
-		shopDetail.setType((byte)0);//客人购物录入
-		String suc = shopDetailService.save(shopDetail)>0?successJson():errorJson("操作失败！");
-		
+	public String saveShopDetail(com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShopDetail shopDetail) {
+//		shopDetail.setType((byte)0);//客人购物录入
+//		String suc = shopDetailService.save(shopDetail)>0?successJson():errorJson("操作失败！");
+		ResultSupport resultSupport = bookingGuestShopFacade.saveShopDetail(shopDetail);
 		/*if(shopDetail.getId()!=null){
 			financeService.calcTourGroupAmount(shopDetail.getBookingId());
 		}*/
-		return suc;
+		return resultSupport.isSuccess() ? successJson() : errorJson("操作失败！");
 	}
 	
 	
@@ -491,9 +473,11 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/delShopDetail.do",method = RequestMethod.POST)
 	@ResponseBody
 	public String delShopDetail(Integer id,Integer groupId) {
-		String suc = shopDetailService.deleteByPrimaryKey(id)==1?successJson():errorJson("操作失败！");
+		//String suc = shopDetailService.deleteByPrimaryKey(id)==1?successJson():errorJson("操作失败！");
 		//financeService.calcTourGroupAmount(groupId);
-		return suc;
+		ResultSupport resultSupport = bookingGuestShopFacade.delShopDetail(id);
+		
+		return resultSupport.isSuccess() ? successJson() : errorJson("操作失败！");
 
 	}
 	/**
@@ -503,19 +487,20 @@ public class BookingGuestShopController extends BaseController {
 	 */
 	@RequestMapping(value = "/saveDeploy.do")
 	@ResponseBody
-	public String saveShopDetail(BookingShopDetailDeployVO deployVO) {
-		return shopDetailDeployService.insertSelective(deployVO)>0?successJson():errorJson("操作失败！");
+	public String saveShopDetail(com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingShopDetailDeployVO deployVO) {
+		BookingShopDetailDeployDTO bookingShopDetailDeployDTO = new BookingShopDetailDeployDTO();
+		bookingShopDetailDeployDTO.setBookingShopDetailDeployVO(deployVO);
+		int result = bookingShopFacade.saveDeploy(bookingShopDetailDeployDTO);
+		return result>0?successJson():errorJson("操作失败！");
 	}
 	
 	@RequestMapping("delBookingShop.do")
 	@ResponseBody
 	public String delBookingShop(Integer bookingId){
-		//shopDetailService.deleteByBookingId(bookingId);
-		//bookingShopService.deleteByPrimaryKey(bookingId);
 		if(bookingId==null){
 			return errorJson("请选择要删除的购物数据");
 		}
-		int result = shopDetailDeployService.deleteByShopId(bookingId);
+		int result = bookingShopFacade.delBookingShop(bookingId);
 		if(result>0){
 			return successJson();			
 		}
@@ -523,21 +508,13 @@ public class BookingGuestShopController extends BaseController {
 	}
 	@RequestMapping("toEditShop.htm")
 	public String toAddShop(Integer groupId,HttpServletRequest request,HttpServletResponse response,ModelMap model){
-		//List<BookingShop> bookingShops = bookingShopService.getShopListByGroupId(groupId);
-		//
-		//List<GroupOrder> groupOrders = groupOrderService.selectOrderByGroupId(groupId);
 		model.addAttribute("groupId", groupId);
-		//TourGroup tourGroup = tourGroupService.selectByPrimaryKey(groupId);		
-		List<Map<String, Object>> bookingGroups = groupOrderService.getGroupInfoByGroupId(groupId, WebUtils.getCurBizId(request));
-		if(bookingGroups!=null && bookingGroups.size()>0){
-			for(Map<String, Object> map : bookingGroups){				
-				Integer orderId =TypeUtils.castToInt(map.get("orderId"));
-				List<Map<String, Object>> bookingShops = bookingShopService.getBookingShops(groupId, orderId);				
-				map.put("deploys", bookingShops);
-			}
-		}
+		BookingShopDTO bookingShopDTO = new BookingShopDTO();
+		bookingShopDTO.setGroupId(groupId);
+		bookingShopDTO.setBizId(WebUtils.getCurBizId(request));
+		List<Map<String, Object>> result = bookingShopFacade.toEditShop(bookingShopDTO);
 		
-		model.addAttribute("bookingGroups", bookingGroups);		
+		model.addAttribute("bookingGroups", result);		
 		return "operation/guestShop/editShop";
 		
 	}
@@ -545,10 +522,7 @@ public class BookingGuestShopController extends BaseController {
 	@RequestMapping(value = "/saveDeploys.do")
 	@ResponseBody
 	public String saveShopDetails(String shopDetails) {
-		List<BookingShopDetailDeploy> shopDetails2 = JSON.parseArray(shopDetails, BookingShopDetailDeploy.class);
-		BookingShopDetailDeployVO	deployVO=new BookingShopDetailDeployVO();
-		deployVO.setDetail(shopDetails2);
-		shopDetailDeployService.updateBookingShopDetailDeploy(deployVO);
+		bookingShopFacade.saveShopDetails(shopDetails);
 		return successJson();
 	}
 	/*

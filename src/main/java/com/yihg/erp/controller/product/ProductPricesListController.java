@@ -4,9 +4,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.yihg.product.api.ProductGroupExtraItemService;
-import com.yihg.product.po.ProductGroupExtraItem;
-
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
+import org.erpcenterFacade.common.client.service.SaleCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,22 +17,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.erp.aop.RequiresPermissions;
-import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.product.api.ProductGroupPriceService;
-import com.yihg.product.api.ProductGroupService;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.product.po.ProductGroup;
-import com.yihg.product.po.ProductGroupPriceStockallocate;
-import com.yihg.product.po.ProductGroupSupplier;
-import com.yihg.product.po.ProductInfo;
-import com.yihg.product.vo.ProductPriceVo;
+import com.yimayhd.erpcenter.common.contants.BasicConstants;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupExtraItem;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupPriceStockallocate;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
+import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
+import com.yimayhd.erpcenter.dal.product.vo.ProductPriceVo;
+import com.yimayhd.erpcenter.facade.result.ProductGroupResult;
+import com.yimayhd.erpcenter.facade.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade;
+import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
 
 /**
  * @author : xuzejun
@@ -47,18 +44,11 @@ public class ProductPricesListController extends BaseController {
             .getLogger(ProductPricesListController.class);
 
     @Autowired
-    private ProductGroupPriceService groupService;
+    private ProductUpAndDownFrameFacade productUpAndDownFrameFacade;
     @Autowired
-    private DicService dicService;
-	@Autowired
-	private ProductGroupSupplierService groupSupplierService;
-	@Autowired
-	private ProductInfoService infoService;
-	@Autowired
-	private ProductGroupService productGroupService;
-
-	@Autowired
-	private ProductGroupExtraItemService productGroupExtraItemService;
+    private ProductPricePlusFacade productPricePlusFacade;
+    @Autowired
+    private SaleCommonFacade saleCommonFacade;
 	/**
 	 * @author : xuzejun
 	 * @date : 2015年7月1日 下午3:10:12
@@ -67,7 +57,8 @@ public class ProductPricesListController extends BaseController {
 	@RequestMapping(value = "/price_list.htm")
 	// @RequiresPermissions(PermissionConstants.PRODUCT_PRICE)
 	public String toList(ModelMap model,Integer groupId,Integer productId) {
-		List<ProductGroupExtraItem> productGroupExtraItems = productGroupExtraItemService.findByGroupId(groupId);
+//		List<ProductGroupExtraItem> productGroupExtraItems = productGroupExtraItemService.findByGroupId(groupId);
+		List<ProductGroupExtraItem> productGroupExtraItems = productUpAndDownFrameFacade.findByGroupId(groupId);
 		model.addAttribute("productGroupExtraItems", productGroupExtraItems);
 		model.addAttribute("groupId", groupId);
 		model.addAttribute("productId", productId);
@@ -84,19 +75,21 @@ public class ProductPricesListController extends BaseController {
 	// @RequiresPermissions(PermissionConstants.PRODUCT_PRICE)
 	public String toAdd(ModelMap model,Integer groupId,Integer productId) {
 		//查询产品信息
-		ProductInfo info = infoService.findProductInfoById(productId);
+//		ProductInfo info = infoService.findProductInfoById(productId);
 		//查询客户列表
-		List<ProductGroupSupplier> suppliers = groupSupplierService.selectProductGroupSuppliers(groupId);
-		ProductGroup groupInfo = productGroupService.getGroupInfoById(groupId);
+//		List<ProductGroupSupplier> suppliers = groupSupplierService.selectProductGroupSuppliers(groupId);
+//		ProductGroup groupInfo = productGroupService.getGroupInfoById(groupId);
+		ProductGroupResult result = productPricePlusFacade.ToAddPrice(groupId, productId);
 		int groupSetting = 0;
+		ProductGroup groupInfo = result.getProductGroups().get(0);
 		if(groupInfo!=null && groupInfo.getGroupSetting()!=null){
 			groupSetting = groupInfo.getGroupSetting().intValue();
 		}
 		model.addAttribute("groupSetting", groupSetting);
-		model.addAttribute("suppliers", suppliers);
+		model.addAttribute("suppliers", result.getGroupSuppliers());
 		model.addAttribute("groupId", groupId);
 		model.addAttribute("productId", productId);
-		model.addAttribute("info", info);
+		model.addAttribute("info", result.getProductInfo());
 		return "product/price/addPrice_list";
 	}
 	
@@ -109,16 +102,20 @@ public class ProductPricesListController extends BaseController {
 	// @RequiresPermissions(PermissionConstants.PRODUCT_PRICE)
 	public String toEdit(ModelMap model,Integer id,Integer groupId,Integer productId) {
 		//查询产品信息
-		ProductInfo info = infoService.findProductInfoById(productId);
+//		ProductInfo info = infoService.findProductInfoById(productId);
 		//查询客户列表
-		List<ProductGroupSupplier> suppliers = groupSupplierService.selectProductGroupSuppliers(groupId);
-		ProductPriceVo vo = groupService.selectByPrimaryKey(id);
-		ProductGroup groupInfo = productGroupService.getGroupInfoById(groupId);
+//		List<ProductGroupSupplier> suppliers = groupSupplierService.selectProductGroupSuppliers(groupId);
+//		ProductPriceVo vo = groupService.selectByPrimaryKey(id);
+//		ProductGroup groupInfo = productGroupService.getGroupInfoById(groupId);
+		ProductGroupResult result = productPricePlusFacade.ToEditPrice(groupId, productId,id);
+		ProductGroup groupInfo = result.getProductGroups().get(0);
 		int groupSetting = 0;
 		if(groupInfo!=null && groupInfo.getGroupSetting()!=null){
 			groupSetting = groupInfo.getGroupSetting().intValue();
 		}
 		model.addAttribute("groupSetting", groupSetting);
+		List<ProductGroupSupplier> suppliers = result.getGroupSuppliers();
+		ProductPriceVo vo = result.getPriceVo();
 		if(groupSetting==0){
 			List<ProductGroupPriceStockallocate> priceStockallocateList = vo.getPriceStockallocate();
 			for(ProductGroupSupplier s : suppliers){
@@ -146,7 +143,7 @@ public class ProductPricesListController extends BaseController {
 		model.addAttribute("suppliers", suppliers);
 		model.addAttribute("groupId", groupId);
 		model.addAttribute("productId", productId);
-		model.addAttribute("info", info);
+		model.addAttribute("info", result.getProductInfo());
 		model.addAttribute("vo", vo);
 		
 		return "product/price/editPrice_list";
@@ -160,8 +157,9 @@ public class ProductPricesListController extends BaseController {
 	@RequestMapping(value = "/priceListsave.do",method = RequestMethod.POST)
 	@ResponseBody
 	public String save(ProductPriceVo priceVo) {
-		
-		return groupService.save(priceVo)==1?successJson():errorJson("操作失败！");
+		ResultSupport resultSupport = productPricePlusFacade.save(priceVo);
+//		return groupService.save(priceVo)==1?successJson():errorJson("操作失败！");
+		return resultSupport.isSuccess()  ? successJson():errorJson("操作失败！");
 		
 	}
    
@@ -176,14 +174,16 @@ public class ProductPricesListController extends BaseController {
     @RequestMapping(value = "/priceList.do", method = RequestMethod.POST)
     @ResponseBody
     public String list(HttpServletRequest request, @RequestParam Integer groupId, @RequestParam String year, @RequestParam String month) {
-        return JSONArray.toJSONString(groupService.selectProductGroupPrices(groupId, year, month));
+//        return JSONArray.toJSONString(groupService.selectProductGroupPrices(groupId, year, month));
+        return JSONArray.toJSONString(productPricePlusFacade.selectProductGroupPrices(groupId, year, month));
     }
 
     @RequestMapping(value = "/extraDic.do", method = RequestMethod.POST)
     @ResponseBody
     public String extraDic(HttpServletRequest request) {
     	Integer bizId=WebUtils.getCurBizId(request);
-        List<DicInfo> extraTypeList = dicService.getListByTypeCode(BasicConstants.GGXX_LYSFXM,bizId);
+//        List<DicInfo> extraTypeList = dicService.getListByTypeCode(BasicConstants.GGXX_LYSFXM,bizId);
+        List<DicInfo> extraTypeList = saleCommonFacade.getFeeItemsByTypeCode(bizId);
         return JSONArray.toJSONString(extraTypeList);
     }
     /**
@@ -194,8 +194,10 @@ public class ProductPricesListController extends BaseController {
     @RequestMapping(value = "/del.do", method = RequestMethod.POST)
     @ResponseBody
     public String del(@RequestParam Integer id) {
-		boolean success = groupService.delete(id);
-		return success ? successJson() : errorJson("操作失败");
+//		boolean success = groupService.delete(id);
+//		return success ? successJson() : errorJson("操作失败");
+    	ResultSupport resultSupport = productPricePlusFacade.delete(id);
+    	return resultSupport.isSuccess() ? successJson() : errorJson("操作失败");
     }
     /**
      * 批量删除
@@ -206,15 +208,16 @@ public class ProductPricesListController extends BaseController {
     @ResponseBody
     public String batchDel(@RequestParam("id[]") String[] ids) {
         boolean success = true;
-        for (String id : ids) {
-            try {
-                groupService.delete(Integer.valueOf(id));
-                success &= true;
-            } catch (Exception e) {
-                success &= false;
-            }
-        }
-        if(success){
+//        for (String id : ids) {
+//            try {
+//                groupService.delete(Integer.valueOf(id));
+//                success &= true;
+//            } catch (Exception e) {
+//                success &= false;
+//            }
+//        }
+        ResultSupport resultSupport = productPricePlusFacade.batchDel(ids);
+        if(resultSupport.isSuccess()){
             return successJson();
         }else{
             return errorJson("删除失败");

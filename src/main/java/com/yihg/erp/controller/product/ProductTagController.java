@@ -12,10 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
-import com.yihg.basic.api.DicService;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.product.api.ProductTagService;
 import com.yimayhd.erpcenter.dal.product.vo.ProductTagVo;
 import com.yimayhd.erpcenter.facade.query.ProductTagDTO;
 import com.yimayhd.erpcenter.facade.result.ToProductTagResult;
@@ -29,11 +27,6 @@ import com.yimayhd.erpcenter.facade.service.ProductFacade;
 @RequestMapping("/productInfo/tag")
 public class ProductTagController extends BaseController{
 
-    @Autowired
-    private DicService dicService;
-
-    @Autowired
-    private ProductTagService productTagService;
     @Autowired
     private ProductFacade productFacade;
     @RequestMapping(value = "/view.htm", method = RequestMethod.GET)

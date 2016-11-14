@@ -20,18 +20,14 @@ import com.google.gson.Gson;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.images.service.ImgSpaceServie;
 import com.yimayhd.erpcenter.dal.basic.dto.TreeDto;
 import com.yimayhd.erpcenter.dal.basic.po.ImgSpace;
 
 @Controller
 @RequestMapping("/component")
 public class ImageComponentController extends BaseController  {
-	private static final Logger log = LoggerFactory
-			.getLogger(ImageComponentController.class);
+	private static final Logger log = LoggerFactory.getLogger(ImageComponentController.class);
 	
-	@Autowired
-	private ImgSpaceServie imgSpaceServie;
 	@Autowired
 	private SysConfig config;
 	@Autowired

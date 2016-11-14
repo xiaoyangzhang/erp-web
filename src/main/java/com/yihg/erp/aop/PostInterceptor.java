@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 
 import com.google.gson.Gson;
-import com.yihg.basic.exception.ClientException;
+import com.yimayhd.erpcenter.common.exception.ClientException;
 
 @Aspect
 public class PostInterceptor {
