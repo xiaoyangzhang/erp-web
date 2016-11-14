@@ -3778,7 +3778,6 @@ public class QueryController extends BaseController {
 		getNumAndOrderDTO.setSsl(ssl);
 		getNumAndOrderDTO.setSvc(svc);
 
-		getNumAndOrderDTO.setParamters(WebUtils.getQueryParamters(request));
 
 		GetNumAndOrderResult result = dataAnalysisFacade.getNumAndOrder(getNumAndOrderDTO);
 		model.addAttribute("sum", result.getSum());
