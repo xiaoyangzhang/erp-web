@@ -12,9 +12,9 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.yihg.airticket.po.AirTicketLeg;
-import com.yihg.airticket.po.AirTicketResource;
 import com.yihg.erp.controller.airticket.ResourceController;
+import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketLeg;
+import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketResource;
 
 public class AirTicketResourceBO {
 

@@ -12,12 +12,12 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.yihg.airticket.po.AirTicketOrder;
-import com.yihg.airticket.po.AirTicketRequest;
-import com.yihg.airticket.po.AirTicketResource;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.TourGroup;
+import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketOrder;
+import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketRequest;
+import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketResource;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 
 public class AirTicketRequestBO {
 	private static final Logger log = LoggerFactory.getLogger(AirTicketRequestBO.class);

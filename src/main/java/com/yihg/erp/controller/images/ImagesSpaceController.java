@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,25 +25,23 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.yihg.architect.logger.Log;
 import com.yihg.architect.logger.LogFactory;
 import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.controller.images.utils.Common;
+import com.yihg.erp.controller.images.utils.ThumborUtil;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.TfsUpload;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.images.dto.TreeDto;
-import com.yihg.images.po.ImgSpace;
-import com.yihg.images.po.ImgWatermark;
-import com.yihg.images.service.ImgSpaceServie;
-import com.yihg.images.service.ImgWatermarkService;
-import com.yihg.images.util.FileConstant;
-import com.yihg.images.util.StaConstant;
-import com.yihg.erp.controller.images.utils.Common;
-import com.yihg.erp.controller.images.utils.ThumborUtil;
 import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.common.util.FileConstant;
+import com.yimayhd.erpcenter.common.util.StaConstant;
+import com.yimayhd.erpcenter.dal.basic.dto.TreeDto;
+import com.yimayhd.erpcenter.dal.basic.po.ImgSpace;
+import com.yimayhd.erpcenter.dal.basic.po.ImgWatermark;
+import com.yimayhd.erpcenter.facade.basic.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.basic.service.ImgFacade;
 
 
 /**
@@ -60,10 +57,7 @@ public class ImagesSpaceController extends BaseController{
 	Log logger = LogFactory.getLogger(ImagesSpaceController.class);
 
 	@Autowired
-	private ImgSpaceServie imgSpaceServie;
-	
-	@Autowired
-	private ImgWatermarkService imgWatermarkService;
+	private ImgFacade imgFacade;
 	@Autowired
 	private SysConfig sysConfig;
 	@Autowired
@@ -98,8 +92,8 @@ public class ImagesSpaceController extends BaseController{
 			//imgSpace.setUserId(WebUtils.getCurUserId());
 
 			// 加载用户下的所有目录信息
-			dirDate = imgSpaceServie.findImgDirTree(imgSpace);
-
+//			dirDate = imgSpaceServie.findImgDirTree(imgSpace);
+			dirDate = imgFacade.findImgDirTree(imgSpace);
 		} catch (Exception e) {
 
 			logger.error("加载图片管理一级失败," + e.getMessage(), e);
@@ -156,7 +150,8 @@ public class ImagesSpaceController extends BaseController{
 		pageBean.setParameter(imgSpace);
 		
 		try {
-			pageBean = imgSpaceServie.findImgSpaceByConditions(pageBean);
+//			pageBean = imgSpaceServie.findImgSpaceByConditions(pageBean);
+			pageBean = imgFacade.findImgSpaceByConditions(pageBean);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -215,7 +210,7 @@ public class ImagesSpaceController extends BaseController{
 		
 		pageBean.setParameter(imgSpace);
 		try {
-			pageBean = imgSpaceServie.findImgSpaceByConditions(pageBean);
+			pageBean = imgFacade.findImgSpaceByConditions(pageBean);
 		} catch (Exception e) {
 			logger.error("查询回收站出错", e);
 			e.printStackTrace();
@@ -234,8 +229,15 @@ public class ImagesSpaceController extends BaseController{
 	@RequestMapping(value = "/images/restoreImage",method = RequestMethod.POST)
 	@ResponseBody
 	public String restoreImage(@RequestParam("imageId") Integer imageId){
-		int resultCount = this.imgSpaceServie.restoreImageById(imageId);
-		return resultCount > 0 ? successJson() : errorJson("服务器未响应");
+//		int resultCount = imgSpaceServie.restoreImageById(imageId);
+		ResultSupport resultSupport;
+		try {
+			resultSupport = imgFacade.restoreImageById(imageId);
+			return resultSupport.isSuccess() ? successJson() : errorJson("服务器未响应");
+		} catch (Exception e) {
+			logger.error("还原回收站出错，error:{}",e);
+		}
+		return errorJson("操作失败");
 	}
 	
 	/***
@@ -247,8 +249,16 @@ public class ImagesSpaceController extends BaseController{
 	@RequestMapping(value = "/images/perpetualDelRestore",method = RequestMethod.POST)
 	@ResponseBody
 	public String perpetualDelRestore(@RequestParam("imageId") Integer imageId){
-		int resultCount = this.imgSpaceServie.perpetualDelRestore(imageId);
-		return resultCount > 0 ? successJson() : errorJson("服务器未响应");
+//		int resultCount = this.imgSpaceServie.perpetualDelRestore(imageId);
+//		return resultCount > 0 ? successJson() : errorJson("服务器未响应");
+		ResultSupport resultSupport;
+		try {
+			resultSupport = imgFacade.perpetualDelRestore(imageId);
+			return resultSupport.isSuccess() ? successJson() : errorJson("服务器未响应");
+		} catch (Exception e) {
+			logger.error("清空回收站出错，error:{}",e);
+		}
+		return errorJson("操作失败");
 	}
 	
 	/***
@@ -260,8 +270,16 @@ public class ImagesSpaceController extends BaseController{
 	@RequestMapping(value="/images/imageRename",method =RequestMethod.POST)
 	@ResponseBody
 	public String imageRename(@RequestParam("imageId") Integer imageId,@RequestParam("imgName") String imgName)throws Exception{
-		int resultCount = this.imgSpaceServie.imageRename(imageId,imgName);
-		return resultCount > 0 ? successJson() : errorJson("服务器未响应");
+//		int resultCount = this.imgSpaceServie.imageRename(imageId,imgName);
+//		return resultCount > 0 ? successJson() : errorJson("服务器未响应");
+		ResultSupport resultSupport;
+		try {
+			resultSupport = imgFacade.imageRename(imageId,imgName);
+			return resultSupport.isSuccess() ? successJson() : errorJson("服务器未响应");
+		} catch (Exception e) {
+			logger.error("重命名出错，error:{}",e);
+		}
+		return errorJson("操作失败");
 	}
 	
 	
@@ -286,8 +304,16 @@ public class ImagesSpaceController extends BaseController{
 	@RequestMapping(value="/images/moveImage",method =RequestMethod.POST)
 	@ResponseBody
 	public String moveImage(ImgSpace imgSpace,Model model,@RequestParam("imageId") Integer imageId,@RequestParam("parentId") Integer parentId){
-		int resultCount = this.imgSpaceServie.moveImage(imageId,parentId);
-		return resultCount > 0 ? successJson() : errorJson("服务器未响应");
+//		int resultCount = this.imgSpaceServie.moveImage(imageId,parentId);
+//		return resultCount > 0 ? successJson() : errorJson("服务器未响应");
+		ResultSupport resultSupport;
+		try {
+			resultSupport = imgFacade.moveImage(imageId,parentId);
+			return resultSupport.isSuccess() ? successJson() : errorJson("服务器未响应");
+		} catch (Exception e) {
+			logger.error("文件移动出错，error:{}",e);
+		}
+		return errorJson("操作失败");
 	}
 	
 	
@@ -326,8 +352,9 @@ public class ImagesSpaceController extends BaseController{
 			*/
 			
 			
-			int resultCount = this.imgSpaceServie.replaceImage(uploadFileUrl,fileName,Integer.valueOf(imageId));
-			return resultCount > 0 ? successJson() : errorJson("服务器未响应");
+//			int resultCount = this.imgSpaceServie.replaceImage(uploadFileUrl,fileName,Integer.valueOf(imageId));
+			ResultSupport result = imgFacade.replaceImage(uploadFileUrl,fileName,Integer.valueOf(imageId));
+			return result.isSuccess() ? successJson() : errorJson("服务器未响应");
 		} catch (Exception e) {
 			logger.error("图片替换失败",e);
 			e.printStackTrace();
@@ -357,8 +384,9 @@ public class ImagesSpaceController extends BaseController{
 		imgSpace.setType(FileConstant.DIRECTORY_TYPE);
 		imgSpace.setStatus(StaConstant.AVAILABLE_STATUS);
 		imgSpace.setParentId(Integer.parseInt(parentId));
-		int resultCount =  this.imgSpaceServie.saveImgSpace(imgSpace);
-		 return resultCount > 0 ? successJson() : errorJson("");
+//		int resultCount =  this.imgSpaceServie.saveImgSpace(imgSpace);
+		ResultSupport result =  imgFacade.saveImgSpace(imgSpace);
+		 return result.isSuccess() ? successJson() : errorJson("");
 	}
 	
 	/***
@@ -370,8 +398,9 @@ public class ImagesSpaceController extends BaseController{
 	@RequestMapping(value="/images/imageDelete",method =RequestMethod.POST)
 	@ResponseBody
 	public String imageDelete(@RequestParam("parentId") Integer parentId)throws Exception{
-		int resultCount = this.imgSpaceServie.imageDelete(parentId);
-		return resultCount > 0 ? successJson() : errorJson("服务器未响应");
+//		int resultCount = this.imgSpaceServie.imageDelete(parentId);
+		ResultSupport result = imgFacade.imageDelete(parentId);
+		return result.isSuccess() ? successJson() : errorJson("服务器未响应");
 	}
 	
 	
@@ -481,7 +510,8 @@ public class ImagesSpaceController extends BaseController{
         		imgSpaces.add(imgSpace);
         		}
             try {
-				this.imgSpaceServie.saveListImgSpaces(imgSpaces);
+//				this.imgSpaceServie.saveListImgSpaces(imgSpaces);
+				ResultSupport resultSupport = imgFacade.saveListImgSpaces(imgSpaces);
 			} catch (Exception e) {
 				 logger.error("图片保存到数据库失败！！！"+e.getMessage(),e);
 			}

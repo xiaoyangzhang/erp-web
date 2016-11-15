@@ -20,14 +20,13 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import com.baidu.ueditor.ActionEnter;
 import com.yihg.architect.logger.Log;
 import com.yihg.architect.logger.LogFactory;
-import com.yihg.images.dto.PageDto;
-import com.yihg.images.po.ImgSpace;
-import com.yihg.images.service.ImgSpaceServie;
-import com.yihg.images.util.FileConstant;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.controller.images.utils.Common;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
+import com.yimayhd.erpcenter.dal.basic.dto.PageDto;
+import com.yimayhd.erpcenter.dal.basic.po.ImgSpace;
+import com.yimayhd.erpcenter.facade.basic.service.ImgFacade;
 
 	/**
 	 * @author : xusq
@@ -40,7 +39,7 @@ import com.yihg.erp.utils.WebUtils;
 		private static final Log logger = LogFactory.getLogger(UeditorContorller.class);
 		
 		@Autowired
-		private ImgSpaceServie imgSpaceServie;
+		private ImgFacade imgFacade;
 		@Autowired
 		private SysConfig sysConfig;
 		
@@ -179,7 +178,8 @@ import com.yihg.erp.utils.WebUtils;
 	    		
 		  		List<ImgSpace> listImgSpaces=new  ArrayList<ImgSpace>();
 				try {
-					listImgSpaces = imgSpaceServie.findImgSpaceByConditions(pageDto);
+//					listImgSpaces = imgSpaceServie.findImgSpaceByConditions(pageDto);
+					listImgSpaces = imgFacade.findImgSpaceByConditions(pageDto);
 				} catch (Exception e) {
 					 logger.error("查询图片空间列表出错"+e.getMessage(),e);
 				}

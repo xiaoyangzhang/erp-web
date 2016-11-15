@@ -31,13 +31,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSON;
-import com.yihg.air.api.AirLineService;
-import com.yihg.air.api.AirPortService;
-import com.yihg.air.po.AirLine;
-import com.yihg.airticket.api.AirTicketResourceService;
-import com.yihg.airticket.po.AirTicketLeg;
-import com.yihg.airticket.po.AirTicketResource;
-import com.yihg.basic.exception.ClientException;
 import com.yihg.erp.aop.PostHandler;
 import com.yihg.erp.bo.airticket.AirTicketResourceBO;
 import com.yihg.erp.contant.ExcelOptConstant;
@@ -45,10 +38,16 @@ import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.ExcelReporter;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.supplier.api.SupplierService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierInfo;
+import com.yimayhd.erpcenter.common.exception.ClientException;
+import com.yimayhd.erpcenter.dal.basic.po.AirLine;
+import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketLeg;
+import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketResource;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.facade.ticket.query.SaveResourceDTO;
+import com.yimayhd.erpcenter.facade.ticket.query.ShowListResourceDTO;
+import com.yimayhd.erpcenter.facade.ticket.result.EditResourceResult;
+import com.yimayhd.erpcenter.facade.ticket.result.ShowListResourceResult;
+import com.yimayhd.erpcenter.facade.ticket.service.ResourceFacade;
 
 
 @Controller
@@ -57,13 +56,7 @@ public class ResourceController extends BaseController {
 	private static final Logger log = LoggerFactory.getLogger(ResourceController.class);
 	
 	@Autowired
-	private AirTicketResourceService airTicketResourceService;
-	@Autowired
-	private SupplierService supplierService;
-	@Autowired
-	private AirPortService airPortService;
-	@Autowired
-	private AirLineService airLineService;
+	private ResourceFacade resourceFacade;
 	
 	private Map<Integer, String> ticketSuppliers;
 
@@ -92,15 +85,6 @@ public class ResourceController extends BaseController {
 			model.addAttribute("thisPage", "queryList.htm");
 		}else {
 			model.addAttribute("thisPage", "list.htm");
-		}
-		
-		
-		if (pageSize==null){
-			if (ajax!=null && ajax.equals("1")){
-				pageSize="10";
-			}else {
-				pageSize="15";
-			}
 		}
 		
 		String depDateFrom="",  depDateTo="", dateType="";
@@ -134,48 +118,32 @@ public class ResourceController extends BaseController {
 			e.printStackTrace();
 		}
 		
-		PageBean<AirTicketResource> pageBean = new PageBean<AirTicketResource>();
-		try {
-			if (pageSize != null){
-				pageBean.setPageSize(new Integer(pageSize));
-			}
-			if (page != null){
-				pageBean.setPage(new Integer(page));
-			}
-		}catch(Exception e){
-			log.error("Wrong format of page size:" + pageSize + " or page:"+page);
+		ShowListResourceDTO dto = new ShowListResourceDTO();
+		dto.setAjax(ajax);
+		dto.setApply(apply);
+		dto.setBizId(WebUtils.getCurBizId(request));
+		dto.setDateType(dateType);
+		dto.setDepCity(depCity);
+		dto.setDepDateFrom(depDateFrom);
+		dto.setDepDateTo(depDateTo);
+		dto.setEndIssueDateFrom(endIssueDateFrom);
+		dto.setEndIssueDateTo(endIssueDateTo);
+		dto.setLineName(lineName);
+		if(page != null){
+			dto.setPage(Integer.parseInt(page));	
 		}
-		HashMap<String, Object> parameter = new HashMap<String, Object>();
-		parameter.put("bizId", WebUtils.getCurBizId(request));
-		//parameter.put("set", WebUtils.getDataUserIdSet(request));
-		if (resourceNumber != ""){parameter.put("resourceNumber", resourceNumber);}
-		if (depDateFrom != ""){parameter.put("dateType", dateType); parameter.put("depDateFrom", depDateFrom);}
-		if (depDateTo != ""){parameter.put("dateType", dateType); parameter.put("depDateTo", depDateTo);}
-		if (depCity != ""){parameter.put("depCity", depCity);}
-		if (lineName != ""){parameter.put("lineName", lineName);}
-		if (type !=""){parameter.put("type", type);}
-		if (endIssueDateFrom!=null){
-			parameter.put("endIssueDateFrom", endIssueDateFrom);
-			parameter.put("endIssueTimeFrom", endIssueDateFrom+" 00:00");
+		if(pageSize != null){
+			dto.setPageSize(Integer.parseInt(pageSize));
 		}
-		if (endIssueDateTo!=null){
-			parameter.put("endIssueDateTo", endIssueDateTo);
-			parameter.put("endIssueTimeTo", endIssueDateTo +" 24:00");
-		}
+		dto.setResourceNumber(resourceNumber);
+		dto.setType(type);
 		
-		pageBean.setParameter(parameter);
-		HashMap<String, Integer> count = airTicketResourceService.countResourceList(pageBean);
-		pageBean = airTicketResourceService.selectResourceListPage(pageBean);
-
-		ArrayList<AirTicketResourceBO> boList = new ArrayList<AirTicketResourceBO>();
-		for(int i=0; i<pageBean.getResult().size(); i++){
-			AirTicketResourceBO bo = new AirTicketResourceBO(pageBean.getResult().get(i));
-			bo.setLegList(airTicketResourceService.findLegsByResourceId(bo.getPo().getId()));
-			boList.add(bo);
-		}
-		model.addAttribute("page", pageBean);
-		model.addAttribute("result", boList);
-		model.addAttribute("count", count);
+		ShowListResourceResult result = resourceFacade.showList(dto);
+		
+		model.addAttribute("page", result.getPageBean());
+		model.addAttribute("result", result.getBoList());
+		model.addAttribute("count", result.getCount());
+		
 		if (ajax!=null && ajax.equals("1")){
 			if (apply!=null && apply.equals("1")){
 				return "airticket/request_apply_select_resource";
@@ -197,7 +165,7 @@ public class ResourceController extends BaseController {
 	/*  @RequiresPermissions(PermissionConstants.AIR_TICKET_RESOURCE) */
 	public String newResource(HttpServletRequest request, HttpServletResponse reponse, ModelMap model)  {
 		//AirTicketResourceBO resourceBo = new AirTicketResourceBO(new AirTicketResource());
-		model.addAttribute("templateNames", airTicketResourceService.getLineTemplateNames(WebUtils.getCurBizId(request), ""));
+		model.addAttribute("templateNames", resourceFacade.getLineTemplateNames(WebUtils.getCurBizId(request), ""));
 	//	model.addAttribute("resource", resourceBo);
 		//model.addAttribute("suppliers", this.getTicketSuppliers(WebUtils.getCurBizId(request)));
 		return "airticket/resource_edit";
@@ -206,12 +174,11 @@ public class ResourceController extends BaseController {
 	@RequestMapping("edit.htm")
 	/* @RequiresPermissions(PermissionConstants.AIR_TICKET_RESOURCE) */
 	public String editResource(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer id)  {
-		AirTicketResource po = airTicketResourceService.findResource(id, WebUtils.getCurBizId(request));
-		AirTicketResourceBO resourceBo = new AirTicketResourceBO(po);
-		model.addAttribute("resource", resourceBo);
-		model.addAttribute("legList", airTicketResourceService.findLegsByResourceId(po.getId()));
-		model.addAttribute("templateNames", airTicketResourceService.getLineTemplateNames(WebUtils.getCurBizId(request), ""));
-		//model.addAttribute("suppliers", this.getTicketSuppliers(WebUtils.getCurBizId(request)));
+		
+		EditResourceResult result = resourceFacade.editResource(id, WebUtils.getCurBizId(request));
+		model.addAttribute("resource", result.getResourceBo());
+		model.addAttribute("legList", result.getLegList());
+		model.addAttribute("templateNames", result.getTemplateNames());
 		return "airticket/resource_edit";
 	}
 	
@@ -221,25 +188,20 @@ public class ResourceController extends BaseController {
 	public String save(HttpServletRequest request, AirTicketResource po, String legList) throws ParseException{
 		Integer bizId = WebUtils.getCurBizId(request);
 		String endIssueTime = (String)request.getParameter("endIssueTime");
-		po.setEndIssueTime(sdfTime.parse(endIssueTime));
-		po.setBizId(bizId);
 		String saveTemplate = (String)request.getParameter("saveTemplate");
-		if (saveTemplate!=null && saveTemplate.equals("save")){
-			airTicketResourceService.saveTemplate(bizId, po.getLineName(), legList);
-		}
-		po.setDepCity(request.getParameter("depCityFirst"));
-		po.setDepDate(sdf.parse(request.getParameter("depDateFirst")));
+		
 		PlatformEmployeePo userInfo = WebUtils.getCurUser(request);
-		if(po.getId() == null || po.getId() == 0){
-			po.setCreaterId(userInfo.getEmployeeId());
-			po.setCreaterName(userInfo.getName());
-			airTicketResourceService.saveResource(po, legList);
-		}else{
-			po.setOperatorId(userInfo.getEmployeeId());
-			po.setOperatorName(userInfo.getName());
-			po.setOperatorId(WebUtils.getCurUserId(request));
-			airTicketResourceService.updateResource(po, legList);
-		}
+		SaveResourceDTO dto = new SaveResourceDTO();
+		dto.setAirTicketResourcePo(po);
+		dto.setBizId(bizId);
+		dto.setDepCityFirst(request.getParameter("depCityFirst"));
+		dto.setDepDateFirst(sdf.parse(request.getParameter("depDateFirst")));
+		dto.setEmployeeId(userInfo.getEmployeeId());
+		dto.setEmployeeName(userInfo.getName());
+		dto.setEndIssueTime(sdfTime.parse(endIssueTime));
+		dto.setLegList(legList);
+		dto.setSaveTemplate(saveTemplate);
+		resourceFacade.save(dto);
 		return null;
 	} 
 	
@@ -247,7 +209,7 @@ public class ResourceController extends BaseController {
 	@ResponseBody
 	@PostHandler
 	public String delete(HttpServletRequest request, Integer id) {
-		airTicketResourceService.deleteResource(id, WebUtils.getCurBizId(request));
+		resourceFacade.deleteResource(id, WebUtils.getCurBizId(request));
 		return null;
 	}
 
@@ -255,18 +217,7 @@ public class ResourceController extends BaseController {
 		if (this.ticketSuppliers != null){
 			return this.ticketSuppliers;
 		}
-		this.ticketSuppliers=new HashMap<Integer, String>();
-		SupplierInfo supplierInfo = new SupplierInfo();
-		supplierInfo.setSupplierType(Constants.AIRTICKETAGENT);
-		PageBean<SupplierInfo> pageBean = new PageBean<SupplierInfo>();
-		pageBean.setPageSize(1000);
-		pageBean.setParameter(supplierInfo);
-		pageBean.setPage(1);
-		pageBean = supplierService.selectPrivateSupplierList(pageBean, bizId);
-		for (int i=0; i<pageBean.getResult().size(); i++){
-			SupplierInfo s = pageBean.getResult().get(i);
-			this.ticketSuppliers.put(s.getId(), s.getNameFull());
-		}
+		this.ticketSuppliers=resourceFacade.getTicketSuppliers(bizId);
 		return this.ticketSuppliers;
 	}
 	/**
@@ -279,9 +230,9 @@ public class ResourceController extends BaseController {
 	 */
 	@RequestMapping(value = "fuzzyAirPortList.do" ,method = RequestMethod.GET)
 	@ResponseBody
-	public String airPortComplete(HttpServletRequest request, HttpServletResponse reponse, String cityName) throws UnsupportedEncodingException{
+	public String airPortComplete(HttpServletRequest request, HttpServletResponse reponse, String cityName){
 		//transcoding(cityName, request.getCharacterEncoding());
- 		List<Map<String,String>> list = airPortService.getFuzzySearchList(cityName);
+ 		List<Map<String,String>> list = resourceFacade.getFuzzySearchList(cityName);
 		Map<String,Object> map = new HashMap<String,Object>(3);
 		map.put("success", "true");
 		map.put("result", list);
@@ -299,7 +250,7 @@ public class ResourceController extends BaseController {
 	@ResponseBody
 	public String depCityComplete(HttpServletRequest request, HttpServletResponse reponse, String depCity) throws UnsupportedEncodingException{
 		//transcoding(depCity, request.getCharacterEncoding());
-		List<String> list = airTicketResourceService.getFuzzyDepCityList(depCity);
+		List<String> list = resourceFacade.getFuzzyDepCityList(depCity);
 		Map<String,Object> map = new HashMap<String,Object>(3);
 		map.put("success", "true");
 		map.put("result", list);
@@ -323,7 +274,7 @@ public class ResourceController extends BaseController {
 	public String getLineTemplateNames(HttpServletRequest request, HttpServletResponse reponse){
 		String keyword = request.getParameter("name");
 		if (keyword==null){keyword="";}
-		List<String> listNames = airTicketResourceService.getLineTemplateNames(WebUtils.getCurBizId(request), keyword);
+		List<String> listNames = resourceFacade.getLineTemplateNames(WebUtils.getCurBizId(request), keyword);
 		StringBuffer sb = new StringBuffer();
 		for(String name : listNames){
 			sb.append("<option value='").append(name).append("'>").append(name).append("</option>");
@@ -333,7 +284,7 @@ public class ResourceController extends BaseController {
 	@RequestMapping(value="getLineTemplates.do",method = RequestMethod.GET)
 	@ResponseBody
 	public String getLineTemplates(HttpServletRequest request, HttpServletResponse reponse, String templateName){
-		List<Map> templates = airTicketResourceService.getLineTemplates(WebUtils.getCurBizId(request), templateName);
+		List<Map> templates = resourceFacade.getLineTemplates(WebUtils.getCurBizId(request), templateName);
 		return JSON.toJSONString(templates);
 	}
 
@@ -343,7 +294,7 @@ public class ResourceController extends BaseController {
 		SimpleDateFormat sdfLineTime = new SimpleDateFormat("HH:mm");
 		HashMap<String, String> json = new HashMap<String, String>();
 		try {
-			AirLine airLine = airLineService.findAirLine(date, airCode, depCity, arrCity);
+			AirLine airLine = resourceFacade.findAirLine(date, airCode, depCity, arrCity);
 			if (airLine.getDepTerminal()==null){
 				airLine.setDepTerminal("");
 			}
@@ -377,7 +328,7 @@ public class ResourceController extends BaseController {
 		HashMap<String, Object> json = new HashMap<String, Object>();
 		if (name==null){name="";}
 		name = URLDecoder.decode(name, "UTF-8");
-		json.put("result", airTicketResourceService.getLineTemplateNames(WebUtils.getCurBizId(request), name));
+		json.put("result", resourceFacade.getLineTemplateNames(WebUtils.getCurBizId(request), name));
 		json.put("success", "true");
 		return JSON.toJSONString(json);
 	}
@@ -386,7 +337,7 @@ public class ResourceController extends BaseController {
 	@ResponseBody
 	public String deleteLine(HttpServletRequest request, HttpServletResponse reponse, String lineName){
 		HashMap<String, Object> json = new HashMap<String, Object>();
-		airTicketResourceService.deleteLineTemplate(WebUtils.getCurBizId(request), lineName);
+		resourceFacade.deleteLineTemplate(WebUtils.getCurBizId(request), lineName);
 		json.put("success", "true");
 		return JSON.toJSONString(json);
 	}
@@ -465,8 +416,7 @@ public class ResourceController extends BaseController {
 				}
 			}
 			for (Integer i: resources.keySet()){
-				airTicketResourceService.saveTemplate(bizId, resources.get(i).getLineName(), legMap.get(i));
-				airTicketResourceService.saveResource(resources.get(i), legMap.get(i));
+				resourceFacade.save2(bizId, resources.get(i), legMap.get(i));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

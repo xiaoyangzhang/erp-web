@@ -20,6 +20,15 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TeamGroupVO;
+import com.yimayhd.erpcenter.facade.sales.query.*;
+import com.yimayhd.erpcenter.facade.sales.result.*;
+import com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -27,11 +36,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.json.JSONString;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,12 +54,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.dubbo.common.json.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.yihg.airticket.api.AirTicketRequestService;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.common.GroupCodeUtil;
@@ -55,53 +61,22 @@ import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.finance.api.FinanceService;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.sales.api.GroupOrderGuestService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.GroupRequirementService;
-import com.yihg.sales.api.TeamGroupService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupRequirement;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.TeamGroupVO;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
+
 
 @Controller
 @RequestMapping(value = "/teamGroup")
 public class TeamGroupController extends BaseController {
 
-	@Autowired
-	private TourGroupService tourGroupService;
-	@Autowired
-	private GroupOrderService groupOrderService;
-	@Autowired
-	private DicService dicService;
+
 	@Autowired
 	private SysConfig config;
 	@Autowired
-	private PlatformEmployeeService platformEmployeeService;
-	@Autowired
-	private PlatformOrgService orgService;
-	@Autowired
-	private RegionService regionService;
-	@Autowired
-	private TeamGroupService teamGroupService;
-	@Autowired
 	private BizSettingCommon settingCommon;
 	@Autowired
-	private GroupRequirementService groupRequirementService;
+	private TeamGroupFacade teamGroupFacade;
 	@Autowired
-	private FinanceService financeService;
-	@Autowired
-	private GroupOrderGuestService groupOrderGuestService;
-	@Autowired
-	private AirTicketRequestService airTicketRequestService;
-
+	private ProductCommonFacade productCommonFacade;
 	 @InitBinder  
 	  public void initListBinder(WebDataBinder binder)  
 	  {  
@@ -240,7 +215,7 @@ public class TeamGroupController extends BaseController {
 	@RequiresPermissions(PermissionConstants.SALE_TEAM_GROUP)
 	public String toGroupList(HttpServletRequest request, Model model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+		/*List<RegionInfo> allProvince = regionService.getAllProvince();
 		model.addAttribute("allProvince", allProvince);
 		model.addAttribute("orgJsonStr",
 				orgService.getComponentOrgTreeJsonStr(bizId));
@@ -250,14 +225,16 @@ public class TeamGroupController extends BaseController {
 				orgService.getComponentOrgTreeJsonStr(bizId));
 		model.addAttribute("orgUserJsonStr",
 				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-		List<DicInfo> sourceTypeList = dicService.getListByTypeCode(Constants.GUEST_SOURCE_TYPE,bizId);
-		model.addAttribute("sourceTypeList", sourceTypeList);
+		List<DicInfo> sourceTypeList = dicService.getListByTypeCode(Constants.GUEST_SOURCE_TYPE,bizId);*/
+
+		ToGroupListResult toGroupListResult = teamGroupFacade.toGroupList(bizId);
+		model.addAttribute("sourceTypeList", toGroupListResult.getSourceTypeList());
 		return "sales/teamGroup/groupList";
 	}
 
 	@RequestMapping(value = "toAddTeamGroupInfo.htm")
 	public String toAddTeamGroupInfo(HttpServletRequest request, Model model) {
-		GroupOrder groupOrder = new GroupOrder();
+/*		GroupOrder groupOrder = new GroupOrder();
 		groupOrder.setSaleOperatorId(WebUtils.getCurUserId(request));
 		groupOrder.setSaleOperatorName(WebUtils.getCurUser(request).getName());
 		groupOrder.setOperatorId(WebUtils.getCurUserId(request));
@@ -286,6 +263,29 @@ public class TeamGroupController extends BaseController {
 				BasicConstants.GYXX_LYSFXM, WebUtils.getCurBizId(request));
 		model.addAttribute("lysfxmList", lysfxmList);
 		model.addAttribute("operType", "1");
+		model.addAttribute("isEdit", false);*/
+
+		GroupOrder groupOrder = new GroupOrder();
+		groupOrder.setSaleOperatorId(WebUtils.getCurUserId(request));
+		groupOrder.setSaleOperatorName(WebUtils.getCurUser(request).getName());
+		groupOrder.setOperatorId(WebUtils.getCurUserId(request));
+		groupOrder.setOperatorName(WebUtils.getCurUser(request).getName());
+		int bizId = WebUtils.getCurBizId(request);
+		TeamGroupVO teamGroupVO = new TeamGroupVO();
+		teamGroupVO.setGroupOrder(groupOrder);
+		model.addAttribute("teamGroupVO", teamGroupVO);
+		ToAddTeamGroupInfoDTO toAddTeamGroupInfoDTO = new ToAddTeamGroupInfoDTO();
+		toAddTeamGroupInfoDTO.setGroupOrder(groupOrder);
+		toAddTeamGroupInfoDTO.setCurBizId(bizId);
+		ToAddTeamGroupInfoResult toAddTeamGroupInfoResult = teamGroupFacade.toAddTeamGroupInfo(toAddTeamGroupInfoDTO);
+		model.addAttribute("typeList", toAddTeamGroupInfoResult.getTypeList());
+		model.addAttribute("sourceTypeList", toAddTeamGroupInfoResult.getSourceTypeList());
+		model.addAttribute("allProvince", toAddTeamGroupInfoResult.getAllProvince());
+		model.addAttribute("config", config);
+		model.addAttribute("jtfsList", toAddTeamGroupInfoResult.getJtfsList());
+		model.addAttribute("zjlxList", toAddTeamGroupInfoResult.getZjlxList());
+		model.addAttribute("lysfxmList", toAddTeamGroupInfoResult.getLysfxmList());
+		model.addAttribute("operType", "1");
 		model.addAttribute("isEdit", false);
 		return "sales/teamGroup/teamGroupInfo";
 
@@ -294,7 +294,7 @@ public class TeamGroupController extends BaseController {
 	@RequestMapping(value = "toEditTeamGroupInfo.htm")
 	public String toEditTeamGroupInfo(HttpServletRequest request, Model model,
 			Integer groupId, Integer operType) {
-		model.addAttribute("isEdit", true);
+	/*	model.addAttribute("isEdit", true);
 		model.addAttribute("operType", operType);
 		TeamGroupVO teamGroupVO = teamGroupService.selectTeamGroupVOByGroupId(groupId, WebUtils.getCurBizId(request));
 		model.addAttribute("teamGroupVO", teamGroupVO);
@@ -335,8 +335,27 @@ public class TeamGroupController extends BaseController {
 				}
 			}
 		}
-		model.addAttribute("guideStr", guideStr);
-		
+		model.addAttribute("guideStr", guideStr);*/
+
+
+		int bizId = WebUtils.getCurBizId(request);
+		ToEditTeamGroupInfoDTO toEditTeamGroupInfoDTO = new ToEditTeamGroupInfoDTO();
+		toEditTeamGroupInfoDTO.setGroupId(groupId);
+		toEditTeamGroupInfoDTO.setCurBizId(WebUtils.getCurBizId(request));
+		toEditTeamGroupInfoDTO.setBizId(bizId);
+		ToEditTeamGroupInfoResult toEditTeamGroupInfoResult = teamGroupFacade.toEditTeamGroupInfo(toEditTeamGroupInfoDTO);
+		model.addAttribute("isEdit", true);
+		model.addAttribute("operType", operType);
+		model.addAttribute("teamGroupVO", toEditTeamGroupInfoResult.getTeamGroupVO());
+		model.addAttribute("typeList", toEditTeamGroupInfoResult.getTypeList());
+		model.addAttribute("sourceTypeList", toEditTeamGroupInfoResult.getSourceTypeList());
+		model.addAttribute("allProvince", toEditTeamGroupInfoResult.getAllProvince());
+		model.addAttribute("config", config);
+		model.addAttribute("jtfsList", toEditTeamGroupInfoResult.getJtfsList());
+		model.addAttribute("zjlxList", toEditTeamGroupInfoResult.getZjlxList());
+		model.addAttribute("lysfxmList", toEditTeamGroupInfoResult.getLysfxmList());
+		model.addAttribute("allCity", toEditTeamGroupInfoResult.getAllProvince());
+		model.addAttribute("guideStr", toEditTeamGroupInfoResult.getGuideStr());
 		return "sales/teamGroup/teamGroupInfo";
 	}
 
@@ -351,8 +370,10 @@ public class TeamGroupController extends BaseController {
 			TourGroup tourGroup = teamGroupVO.getTourGroup();
 			tourGroup.setGroupCode(GroupCodeUtil.getCode(tourGroup.getGroupCode(), tourGroup.getGroupCodeMark()));
 		}
-		TeamGroupVO tgv = teamGroupService.saveOrUpdateTeamGroupVO(WebUtils.getCurBizId(request), WebUtils.getCurUserId(request), WebUtils.getCurUser(request).getName(), teamGroupVO);
-		return successJson("groupId",tgv.getTourGroup().getId()+"");
+		//TeamGroupVO tgv = teamGroupService.saveOrUpdateTeamGroupVO(WebUtils.getCurBizId(request), WebUtils.getCurUserId(request), WebUtils.getCurUser(request).getName(), teamGroupVO);
+		SaveTeamGroupInfoDTO saveTeamGroupInfoDTO = new SaveTeamGroupInfoDTO();
+		SaveTeamGroupInfoResult saveTeamGroupInfoResult = teamGroupFacade.saveTeamGroupInfo(saveTeamGroupInfoDTO);
+		return successJson("groupId",saveTeamGroupInfoResult.getTeamGroupVO().getTourGroup().getId()+"");
 	}
 
 	/**
@@ -368,86 +389,18 @@ public class TeamGroupController extends BaseController {
 	@RequiresPermissions(PermissionConstants.SALE_TEAM_GROUP)
 	public String findTourGroupByConditionLoadModel(HttpServletRequest request,
 			GroupOrder groupOrder, Model model) throws ParseException {
-
 		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+		FindTourGroupByConditionDTO queryDTO = new FindTourGroupByConditionDTO();
+		queryDTO.setCurBizId(WebUtils.getCurBizId(request));
+		queryDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setGroupOrder(groupOrder);
+		FindTourGroupByConditionResult result = teamGroupFacade.findTourGroupByConditionLoadModel(queryDTO,pageBean);
 
-		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
-				: groupOrder.getPageSize());
-		pageBean.setPage(groupOrder.getPage());
+		model.addAttribute("pageTotalAudit", result.getPageTotalAudit());
+		model.addAttribute("pageTotalChild", result.getPageTotalChild());
+		model.addAttribute("pageTotalGuide", result.getPageTotalGuide());
 
-		// 如果人员为空并且部门不为空，则取部门下的人id
-		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
-				&& StringUtils.isNotBlank(groupOrder.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = groupOrder.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(
-					WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0,
-						salesOperatorIds.length() - 1));
-			}
-		}
-		if (groupOrder.getDateType() != null && groupOrder.getDateType() == 2) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			if (groupOrder.getStartTime() != null
-					&& groupOrder.getStartTime() != "") {
-				groupOrder.setStartTime(sdf.parse(groupOrder.getStartTime())
-						.getTime() + "");
-			}
-			if (groupOrder.getEndTime() != null
-					&& groupOrder.getEndTime() != "") {
-				Calendar calendar = new GregorianCalendar();
-				calendar.setTime(sdf.parse(groupOrder.getEndTime()));
-				calendar.add(calendar.DATE, 1);// 把日期往后增加一天.整数往后推,负数往前移动
-				groupOrder.setEndTime(calendar.getTime().getTime() + "");
-			}
-		}
-		pageBean.setParameter(groupOrder);
-		pageBean = groupOrderService.selectByConListPage(pageBean,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request), 0);
-		Integer pageTotalAudit = 0;
-		Integer pageTotalChild = 0;
-		Integer pageTotalGuide = 0;
-		List<GroupOrder> result = pageBean.getResult();
-		if (result != null && result.size() > 0) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			for (GroupOrder groupOrder2 : result) {
-				if (groupOrder2.getCreateTime() != null) {
-					Long createTime = groupOrder2.getTourGroup()
-							.getCreateTime();
-					String dateStr = sdf.format(createTime);
-					groupOrder2.getTourGroup().setCreateTimeStr(dateStr);
-				}
-				if (groupOrder2.getTourGroup().getUpdateTime() != null) {
-					Long updateTime = groupOrder2.getTourGroup()
-							.getUpdateTime();
-					String dateStr = sdf.format(updateTime);
-					groupOrder2.getTourGroup().setUpdateTimeStr(dateStr);
-				} else {
-					groupOrder2.getTourGroup().setUpdateTimeStr("无");
-					groupOrder2.getTourGroup().setUpdateName("无");
-				}
-				pageTotalAudit += groupOrder2.getNumAdult();
-				pageTotalChild += groupOrder2.getNumChild();
-				pageTotalGuide += groupOrder2.getNumGuide();
-			}
-		}
-
-		model.addAttribute("pageTotalAudit", pageTotalAudit);
-		model.addAttribute("pageTotalChild", pageTotalChild);
-		model.addAttribute("pageTotalGuide", pageTotalGuide);
-		GroupOrder order = groupOrderService.selectTotalByCon(groupOrder,
-				WebUtils.getCurBizId(request),
-				WebUtils.getDataUserIdSet(request), 0);
-
+		GroupOrder order = result.getGroupOrder();
 		model.addAttribute("totalAudit",
 				order == null ? 0 : order.getNumAdult());
 		model.addAttribute("totalChild",
@@ -455,13 +408,13 @@ public class TeamGroupController extends BaseController {
 		model.addAttribute("totalGuide",
 				order == null ? 0 : order.getNumGuide());
 
-		/**
-		 * 根据组团社id获取组团社名称
-		 */
-		List<GroupOrder> groupList = pageBean.getResult();
+//		*//**
+//		 * 根据组团社id获取组团社名称
+//		 *//*
+		List<GroupOrder> groupList = result.getPageBean().getResult();
 		model.addAttribute("groupList", groupList);
 		model.addAttribute("groupOrder", groupOrder);
-		model.addAttribute("page", pageBean);
+		model.addAttribute("page", result.getPageBean());
 
 		return "sales/teamGroup/groupTable";
 	}
@@ -476,7 +429,7 @@ public class TeamGroupController extends BaseController {
 	@RequiresPermissions(PermissionConstants.SALE_TEAM_GROUP)
 	public String toRequirement(Integer orderId,Model model,Integer operType) {
 
-		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
+	/*	GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
 		// 车辆型号
 		List<DicInfo> ftcList = dicService
 				.getListByTypeCode(Constants.FLEET_TYPE_CODE);
@@ -511,6 +464,19 @@ public class TeamGroupController extends BaseController {
 		model.addAttribute("restaurantList", restaurantList);
 		model.addAttribute("orderId", orderId);
 		model.addAttribute("groupId", groupOrder.getGroupId());
+		model.addAttribute("operType",operType);*/
+
+		ToRequirementResult toRequirementResult = teamGroupFacade.toRequirement(orderId, operType);
+		model.addAttribute("ftcList", toRequirementResult.getFtcList());
+		model.addAttribute("jdxjList", toRequirementResult.getJdxjList());
+		model.addAttribute("hotelList", toRequirementResult.getHotelList());
+		model.addAttribute("fleetList", toRequirementResult.getFleetList());
+		model.addAttribute("airTicketList", toRequirementResult.getAirTicketList());
+		model.addAttribute("railwayTicketList", toRequirementResult.getRailwayTicketList());
+		model.addAttribute("guideList", toRequirementResult.getGuideList());
+		model.addAttribute("restaurantList", toRequirementResult.getRestaurantList());
+		model.addAttribute("orderId", orderId);
+		model.addAttribute("groupId", toRequirementResult.getGroupId());
 		model.addAttribute("operType",operType);
 		return "sales/teamGroup/groupRequirement";
 	}
@@ -527,7 +493,7 @@ public class TeamGroupController extends BaseController {
 	@ResponseBody
 	public String deleteGroupOrderById(HttpServletRequest request, Integer orderId, Integer groupId,
 			Model model) {
-		
+		/*
 		if(financeService.hasAuditOrder(groupId)){
 			return errorJson("该团有已审核的订单,不允许删除！");
 		}
@@ -546,13 +512,21 @@ public class TeamGroupController extends BaseController {
 			return successJson();
 		} else {
 			return errorJson("服务器忙！");
-		}
+		}*/
+		return teamGroupFacade.deleteGroupOrderById(orderId,groupId,WebUtils.getCurBizId(request));
+
 	}
 
 	@RequestMapping(value = "/saveRequireMent.do")
 	@ResponseBody
 	public String saveRequireMent(HttpServletRequest request,TeamGroupVO teamGroupVO){
-		teamGroupService.saveOrUpdateRequirement(teamGroupVO, WebUtils.getCurBizId(request), WebUtils.getCurUser(request).getName());
-		return successJson();
+		//teamGroupService.saveOrUpdateRequirement(teamGroupVO, WebUtils.getCurBizId(request), WebUtils.getCurUser(request).getName());
+		SaveRequireMentDTO saveRequireMentDTO = new SaveRequireMentDTO();
+		ResultSupport resultSupport = teamGroupFacade.saveRequireMent(saveRequireMentDTO);
+		if(resultSupport.isSuccess()) {
+			return successJson();
+		}else{
+			return errorJson(resultSupport.getResultMsg());
+		}
 	}
 }

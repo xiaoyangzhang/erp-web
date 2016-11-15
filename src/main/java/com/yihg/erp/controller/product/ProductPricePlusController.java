@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.erpcenterFacade.common.client.query.BrandQueryDTO;
 import org.erpcenterFacade.common.client.result.BrandQueryResult;
+import org.erpcenterFacade.common.client.result.RegionResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,24 +22,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yihg.basic.api.RegionService;
-import com.yihg.basic.po.RegionInfo;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.product.api.ProductGroupPriceService;
-import com.yihg.product.api.ProductGroupService;
-import com.yihg.product.api.ProductGroupSupplierService;
-import com.yihg.product.api.ProductInfoService;
-import com.yihg.supplier.constants.Constants;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
 import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
 import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
 import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
 import com.yimayhd.erpcenter.dal.product.vo.StockStaticCondition;
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
 import com.yimayhd.erpcenter.facade.query.ProductGroupSupplierDTO;
 import com.yimayhd.erpcenter.facade.query.ProductStockStaticDto;
 import com.yimayhd.erpcenter.facade.query.ProductSupplierConditionDTO;
+import com.yimayhd.erpcenter.facade.result.ProductGroupResult;
 import com.yimayhd.erpcenter.facade.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.result.ToAddPriceGroupResult;
 import com.yimayhd.erpcenter.facade.result.ToSupplierListResult;
@@ -58,16 +55,6 @@ public class ProductPricePlusController extends BaseController {
 			.getLogger(ProductPricePlusController.class);
 
 	@Autowired
-	private ProductGroupService productGroupService;
-	@Autowired
-    private ProductGroupPriceService groupService;
-	@Autowired
-	private RegionService regionService;
-	@Autowired
-	private ProductInfoService productInfoService;
-	@Autowired
-	private ProductGroupSupplierService groupSupplierService;
-	@Autowired
 	private ProductStockFacade productStockFacade;
 	@Autowired
 	private ProductPricePlusFacade productPricePlusFacade;
@@ -80,7 +67,8 @@ public class ProductPricePlusController extends BaseController {
 	public String toList(HttpServletRequest request,ModelMap model,ProductInfo productInfo){
 		
 		//省市
-        List<RegionInfo> allProvince = regionService.getAllProvince();
+//        List<RegionInfo> allProvince = regionService.getAllProvince();
+		RegionResult regionResult = productCommonFacade.queryProvinces();
         //产品名称
         Integer bizId = WebUtils.getCurBizId(request);
         
@@ -88,7 +76,7 @@ public class ProductPricePlusController extends BaseController {
         brandQueryDTO.setBizId(bizId);
         BrandQueryResult result = productCommonFacade.brandQuery(brandQueryDTO);
         
-        model.addAttribute("allProvince",allProvince);
+        model.addAttribute("allProvince",regionResult.getRegionList());
         model.addAttribute("brandList", result.getBrandList());
         model.addAttribute("state", productInfo.getState());
         return "product/priceplus/product_list_price";
@@ -97,7 +85,8 @@ public class ProductPricePlusController extends BaseController {
 	@RequestMapping(value = "/priceList.do",method=RequestMethod.POST)	
 	public String toSearchlist(HttpServletRequest request, ModelMap model,ProductInfo productInfo,String productName, String name,Integer page,Integer pageSize){
 		//省市
-		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+		RegionResult regionResult = productCommonFacade.queryProvinces();
 		//产品名称
 		Integer bizId = WebUtils.getCurBizId(request);
 		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
@@ -123,22 +112,23 @@ public class ProductPricePlusController extends BaseController {
 		parameters.put("orgId", WebUtils.getCurUser(request).getOrgId());
 		parameters.put("set", WebUtils.getDataUserIdSet(request));
 	
-		pageBean = productInfoService.findProductInfos(pageBean, parameters);
+//		pageBean = productInfoService.findProductInfos(pageBean, parameters);
 
 		//pageBean = productInfoService.findProductInfos(pageBean, bizId,name, productName,WebUtils.getCurUser(request).getOrgId());
 
-		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
-		for(Object product : pageBean.getResult()){
-			ProductInfo info = (ProductInfo) product;
-			Integer productId = info.getId();
-			String state = productInfoService.getProductPriceState(productId);
-			priceStateMap.put(info.getId(), state);
-		}
-		model.addAttribute("allProvince",allProvince);
+//		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
+//		for(Object product : pageBean.getResult()){
+//			ProductInfo info = (ProductInfo) product;
+//			Integer productId = info.getId();
+//			String state = productInfoService.getProductPriceState(productId);
+//			priceStateMap.put(info.getId(), state);
+//		}
+		ProductGroupResult result = productPricePlusFacade.queryGroupPriceList(pageBean, parameters);
+		model.addAttribute("allProvince",regionResult.getRegionList());
 		model.addAttribute("brandList", brandQueryResult.getBrandList());
-		model.addAttribute("page", pageBean);
+		model.addAttribute("page", result.getPageBean());
 		model.addAttribute("pageNum", page);
-		model.addAttribute("priceStateMap", priceStateMap);
+		model.addAttribute("priceStateMap", result.getMap());
 		return "product/priceplus/product_list_table_price";
 	}
 	

@@ -11,10 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -22,22 +20,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
+import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
+import org.erpcenterFacade.common.client.service.SaleCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.util.TypeUtils;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.exception.ClientException;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.basic.util.NumberUtil;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.contant.BizConfigConstant;
@@ -48,85 +45,58 @@ import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.operation.api.BookingDeliveryPriceService;
-import com.yihg.operation.api.BookingDeliveryService;
-import com.yihg.operation.api.BookingGuideService;
-import com.yihg.operation.api.BookingSupplierDetailService;
-import com.yihg.operation.api.BookingSupplierService;
-import com.yihg.operation.po.BookingDelivery;
-import com.yihg.operation.po.BookingDeliveryOrder;
-import com.yihg.operation.po.BookingDeliveryPrice;
-import com.yihg.operation.po.BookingGuide;
-import com.yihg.operation.po.BookingSupplierDetail;
-import com.yihg.sales.api.GroupOrderGuestService;
-import com.yihg.sales.api.GroupOrderService;
-import com.yihg.sales.api.GroupOrderTransportService;
-import com.yihg.sales.api.GroupRequirementService;
-import com.yihg.sales.api.GroupRouteService;
-import com.yihg.sales.api.TourGroupService;
-import com.yihg.sales.po.GroupOrder;
-import com.yihg.sales.po.GroupOrderGuest;
-import com.yihg.sales.po.GroupOrderPrintPo;
-import com.yihg.sales.po.GroupOrderTransport;
-import com.yihg.sales.po.GroupRequirement;
-import com.yihg.sales.po.GroupRoute;
-import com.yihg.sales.po.TourGroup;
-import com.yihg.sales.vo.TourGroupVO;
-import com.yihg.supplier.api.SupplierImgService;
-import com.yihg.supplier.api.SupplierService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.po.SupplierInfo;
-import com.yihg.sys.api.PlatformOrgService;
+import com.yimayhd.erpcenter.common.util.NumberUtil;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDeliveryPrice;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplierDetail;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRequirement;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
+import com.yimayhd.erpcenter.facade.operation.result.BookingDeliveryResult;
+import com.yimayhd.erpcenter.facade.operation.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.operation.result.WebResult;
+import com.yimayhd.erpcenter.facade.operation.service.BookingDeliveryFacade;
+import com.yimayhd.erpcenter.facade.operation.service.BookingSupplierFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
+import com.yimayhd.erpresource.dal.constants.Constants;
+import com.yimayhd.erpresource.dal.exception.ClientException;
 
 @Controller
 @RequestMapping("/booking")
 public class BookingDeliveryController extends BaseController {
     
     @Autowired
-    private TourGroupService tourGroupService;
-    @Autowired
-    private GroupRouteService routeService;
-    @Autowired
-    private GroupOrderService orderService;
-    @Autowired
-    private SupplierService supplierSerivce;
-    @Autowired
-    private BookingDeliveryService deliveryService;
-    @Autowired
-    private DicService dicService;
-    @Autowired
-    private SupplierImgService imgService;
-    @Autowired
     private SysConfig config;
     @Resource
     private BizSettingCommon bizSettingCommon;
     @Autowired
-    private BookingSupplierService bSupplierService;
-    @Autowired
-    private BookingSupplierDetailService detailService;
-    @Autowired
-    private BookingGuideService guideService;
-    @Autowired
-    private GroupOrderGuestService guestService;
-    @Autowired
-    private GroupRequirementService groupRequirementService;
-    @Autowired
-    private GroupOrderTransportService groupOrderTransportService;
-    @Autowired
-    private BookingDeliveryPriceService bookingDeliveryPriceService;
-    @Autowired
-    private PlatformOrgService orgService;
-    @Autowired
     private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
-//    private PlatformEmployeeService platformEmployeeService;
-    
+    @Autowired
+    private BookingDeliveryFacade bookingDeliveryFacade;
+    @Autowired
+    private SaleCommonFacade saleCommonFacade;
+    @Autowired
+    private BookingSupplierFacade bookingSupplierFacade;
+    @Autowired
+    private ProductCommonFacade productCommonFacade;
     @ModelAttribute
     public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
-        model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
-        model.addAttribute("orgUserJsonStr", sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
+//        model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
+//        model.addAttribute("orgUserJsonStr", sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
+    	Integer bizId = WebUtils.getCurBizId(request);
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult departmentTuneQueryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", departmentTuneQueryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", departmentTuneQueryResult.getOrgUserJsonStr());
     }
     
     @RequestMapping("toDeliveryPriceList.htm")
@@ -142,38 +112,42 @@ public class BookingDeliveryController extends BaseController {
         pageBean.setPage(bookingDeliveryPrice.getPage());
         pageBean.setPageSize(bookingDeliveryPrice.getPageSize() == null ? Constants.PAGESIZE : bookingDeliveryPrice.getPageSize());
         String carInfo = (String) WebUtils.getQueryParamters(request).get("carInfo");
-        if (StringUtils.isNotBlank(carInfo)) {
-            List<Integer> groupIds = bSupplierService.getGroupIdByCarInfo(carInfo);
-            if (groupIds != null && groupIds.size() > 0) {
-                String groupIdStr = groupIds.toString().substring(1, groupIds.toString().length() - 1);
-                bookingDeliveryPrice.setGroupIds(groupIdStr);
-            }
-        }
+//        if (StringUtils.isNotBlank(carInfo)) {
+//            List<Integer> groupIds = bSupplierService.getGroupIdByCarInfo(carInfo);
+//            if (groupIds != null && groupIds.size() > 0) {
+//                String groupIdStr = groupIds.toString().substring(1, groupIds.toString().length() - 1);
+//                bookingDeliveryPrice.setGroupIds(groupIdStr);
+//            }
+//        }
         Map paramters = WebUtils.getQueryParamters(request);
-        if (StringUtils.isBlank((String) paramters.get("saleOperatorIds")) && StringUtils.isNotBlank((String) paramters.get("orgIds"))) {
-            Set<Integer> set = new HashSet<Integer>();
-            String[] orgIdArr = paramters.get("orgIds").toString().split(",");
-            for (String orgIdStr : orgIdArr) {
-                set.add(Integer.valueOf(orgIdStr));
-            }
-            set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-            String salesOperatorIds = "";
-            for (Integer usrId : set) {
-                salesOperatorIds += usrId + ",";
-            }
-            if (!salesOperatorIds.equals("")) {
-                bookingDeliveryPrice.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
-                //paramters.put("saleOperatorIds", salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-            }
-        }
+//        if (StringUtils.isBlank((String) paramters.get("saleOperatorIds")) && StringUtils.isNotBlank((String) paramters.get("orgIds"))) {
+//            Set<Integer> set = new HashSet<Integer>();
+//            String[] orgIdArr = paramters.get("orgIds").toString().split(",");
+//            for (String orgIdStr : orgIdArr) {
+//                set.add(Integer.valueOf(orgIdStr));
+//            }
+//            set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//            String salesOperatorIds = "";
+//            for (Integer usrId : set) {
+//                salesOperatorIds += usrId + ",";
+//            }
+//            if (!salesOperatorIds.equals("")) {
+//                bookingDeliveryPrice.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
+//                //paramters.put("saleOperatorIds", salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+//            }
+//        }
+        String operatorIds = (String) paramters.get("saleOperatorIds");
+        String orgIds = (String) paramters.get("orgIds");
+        bookingDeliveryPrice.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(operatorIds, orgIds, WebUtils.getCurBizId(request)));
         pageBean.setParameter(bookingDeliveryPrice);
-        Map<String, Object> sum = bookingDeliveryPriceService.getSupplierPriceTotal(pageBean, WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
+//        Map<String, Object> sum = bookingDeliveryPriceService.getSupplierPriceTotal(pageBean, WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
         //Map<String, Object> sumPerson = bookingDeliveryPriceService.getSupplierPriceTotalPerson(pageBean, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
-        pageBean = bookingDeliveryPriceService.getSupplierPriceListPage(pageBean, WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
-        model.addAttribute("sum", sum);
+//        pageBean = bookingDeliveryPriceService.getSupplierPriceListPage(pageBean, WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
+        BookingDeliveryResult result = bookingDeliveryFacade.getDeliveryPriceInfo(WebUtils.getCurBizId(request), pageBean, WebUtils.getDataUserIdSet(request), carInfo);
+        model.addAttribute("sum", result.getMap());
         //model.addAttribute("sumPerson", sumPerson) ;
-        model.addAttribute("page", pageBean);
-        model.addAttribute("prices", pageBean.getResult());
+        model.addAttribute("page", result.getPageBean());
+        model.addAttribute("prices", result.getPageBean().getResult());
         return "/operation/delivery/supplierTable";
     }
     
@@ -203,27 +177,29 @@ public class BookingDeliveryController extends BaseController {
         }
         
         //如果人员为空并且部门不为空，则取部门下的人id
-        if (StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())) {
-            Set<Integer> set = new HashSet<Integer>();
-            String[] orgIdArr = group.getOrgIds().split(",");
-            for (String orgIdStr : orgIdArr) {
-                set.add(Integer.valueOf(orgIdStr));
-            }
-            set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-            String salesOperatorIds = "";
-            for (Integer usrId : set) {
-                salesOperatorIds += usrId + ",";
-            }
-            if (!salesOperatorIds.equals("")) {
-                group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
-            }
-        }
-        
+//        if (StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())) {
+//            Set<Integer> set = new HashSet<Integer>();
+//            String[] orgIdArr = group.getOrgIds().split(",");
+//            for (String orgIdStr : orgIdArr) {
+//                set.add(Integer.valueOf(orgIdStr));
+//            }
+//            set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//            String salesOperatorIds = "";
+//            for (Integer usrId : set) {
+//                salesOperatorIds += usrId + ",";
+//            }
+//            if (!salesOperatorIds.equals("")) {
+//                group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
+//            }
+//        }
+        group.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(group.getSaleOperatorIds(),
+        		group.getOrgIds(), WebUtils.getCurBizId(request)));
         //group.setSupplierType(Constants.GUIDE);
         group.setBizId(WebUtils.getCurBizId(request));
         pageBean.setParameter(group);
         
-        pageBean = tourGroupService.getLocalTravelAngencyGroupList(pageBean, group, WebUtils.getDataUserIdSet(request));
+//        pageBean = tourGroupService.getLocalTravelAngencyGroupList(pageBean, group, WebUtils.getDataUserIdSet(request));
+        pageBean = bookingDeliveryFacade.getLocalTravelAngencyGroupList(pageBean, group, WebUtils.getDataUserIdSet(request));
         
         model.addAttribute("pageBean", pageBean);
         model.addAttribute("supplierType", group.getSupplierType());
@@ -242,14 +218,14 @@ public class BookingDeliveryController extends BaseController {
     @RequestMapping("deliveryBookingList.htm")
     @RequiresPermissions(PermissionConstants.JDGL_ANGENCY)
     public String deliveryOrderList(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer gid) {
-        List<BookingDelivery> list = deliveryService.getDeliveryListByGroupId(gid);
-        if (list != null && list.size() > 0) {
-            for (BookingDelivery delivery : list) {
-                delivery.setPriceList(bookingDeliveryPriceService.getPriceListByBookingId(delivery.getId()));
-            }
-        }
-        
-        model.addAttribute("list", list);
+//        List<BookingDelivery> list = deliveryService.getDeliveryListByGroupId(gid);
+//        if (list != null && list.size() > 0) {
+//            for (BookingDelivery delivery : list) {
+//                delivery.setPriceList(bookingDeliveryPriceService.getPriceListByBookingId(delivery.getId()));
+//            }
+//        }
+        BookingDeliveryResult result = bookingDeliveryFacade.getDeliveryBookingDetailList(gid);
+        model.addAttribute("list", result.getBookingDeliveries());
         model.addAttribute("deliverBroker", getDeliveryBrokerUser(request));
         return "/operation/delivery/delivery-booking-list";
     }
@@ -267,16 +243,16 @@ public class BookingDeliveryController extends BaseController {
     @RequestMapping("groupDeliveryBookingList.htm")
     @RequiresPermissions(PermissionConstants.JDGL_YDAP)
     public String groupDeliveryBookingList(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer gid) {
-        List<BookingDelivery> list = deliveryService.getDeliveryListByGroupId(gid);
-        if (list != null && list.size() > 0) {
-            for (BookingDelivery delivery : list) {
-                delivery.setPriceList(bookingDeliveryPriceService.getPriceListByBookingId(delivery.getId()));
-            }
-        }
-        
-        model.addAttribute("list", list);
+//        List<BookingDelivery> list = deliveryService.getDeliveryListByGroupId(gid);
+//        if (list != null && list.size() > 0) {
+//            for (BookingDelivery delivery : list) {
+//                delivery.setPriceList(bookingDeliveryPriceService.getPriceListByBookingId(delivery.getId()));
+//            }
+//        }
+        BookingDeliveryResult result = bookingDeliveryFacade.getDeliveryBookingArrangeList(gid);
+        model.addAttribute("list", result.getBookingDeliveries());
         model.addAttribute("groupId", gid);
-        model.addAttribute("groupCanEdit", tourGroupService.checkGroupCanEdit(gid));
+        model.addAttribute("groupCanEdit", result.isGroupCanEdit());
         model.addAttribute("deliverBroker", getDeliveryBrokerUser(request));
         return "/operation/delivery/group-delivery-booking-list";
     }
@@ -299,69 +275,68 @@ public class BookingDeliveryController extends BaseController {
     
     private void loadAngencyInfo(HttpServletRequest request, ModelMap model, Integer gid, Integer bid) {
         int bizId = WebUtils.getCurBizId(request);
-        List<DicInfo> typeList = dicService
-                .getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
-        model.addAttribute("typeList", typeList);
-        
-        TourGroup groupInfo = tourGroupService.selectByPrimaryKey(gid);
-        List<GroupRoute> routeList = routeService.selectByGroupId(gid);
-        if (groupInfo.getGroupMode() < 1) {
-            List<GroupOrder> orderList = orderService.selectOrderByGroupId(gid);
-            if (orderList != null && orderList.size() > 0) {
-                for (GroupOrder order : orderList) {
-                    SupplierInfo supplierInfo = supplierSerivce.selectBySupplierId(order.getSupplierId());
-                    if (supplierInfo != null) {
-                        order.setSupplierName(supplierInfo.getNameFull());
-                    }
-                }
-            }
-            model.addAttribute("orderList", orderList);
-        }
-        model.addAttribute("group", groupInfo);
+//        List<DicInfo> typeList = dicService
+//                .getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
+        model.addAttribute("typeList", saleCommonFacade.getDeliveryItemList(bizId));
+        BookingDeliveryResult result = bookingDeliveryFacade.getDeliveryEditInfo(gid, bid);
+//        TourGroup groupInfo = tourGroupService.selectByPrimaryKey(gid);
+//        List<GroupRoute> routeList = routeService.selectByGroupId(gid);
+//        if (groupInfo.getGroupMode() < 1) {
+//            List<GroupOrder> orderList = orderService.selectOrderByGroupId(gid);
+//            if (orderList != null && orderList.size() > 0) {
+//                for (GroupOrder order : orderList) {
+//                    SupplierInfo supplierInfo = supplierSerivce.selectBySupplierId(order.getSupplierId());
+//                    if (supplierInfo != null) {
+//                        order.setSupplierName(supplierInfo.getNameFull());
+//                    }
+//                }
+//            }
+            model.addAttribute("orderList", result.getGroupOrders());
+//        }
+        model.addAttribute("group", result.getTourGroup());
         /*if(groupInfo!=null && routeList!=null){
             for(GroupRoute route : routeList){
 				route.setGroupDate(DateUtils.addDays(groupInfo.getDateStart(), route.getDayNum()));
 			}
 		}*/
-        model.addAttribute("routeList", routeList);
-        if (bid != null) {
-            BookingDelivery delivery = deliveryService.getBookingInfoById(bid);
-            model.addAttribute("booking", delivery);
-        }
+        model.addAttribute("routeList", result.getGroupRoutes());
+//        if (bid != null) {
+//            BookingDelivery delivery = deliveryService.getBookingInfoById(bid);
+            model.addAttribute("booking", result.getBookingDelivery());
+//        }
     }
     
     /**
-     * @param request
-     * @param response
-     * @param model
-     * @param booking
-     * @return
+     * 
+    * created by zhangxiaoyang
+    * @date 2016年10月25日
+    * @Description:保存地接计调订单
+    * @param 
+    * @return String
+    * @throws
      */
     @RequestMapping(value = "saveBooking.do", method = RequestMethod.POST)
     @ResponseBody
-    public String saveBooking(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            ModelMap model,
+    public String saveBooking( HttpServletRequest request, HttpServletResponse response, ModelMap model,
             String booking) {
-        BookingDelivery bookingDelivery = JSON.parseObject(booking, BookingDelivery.class);
-        if (!tourGroupService.checkGroupCanEdit(bookingDelivery.getGroupId())) {
-            return errorJson("该团已审核或封存，不允许修改该信息");
-        }
-        if (bookingDelivery.getId() == null) {
-            PlatformEmployeePo userInfo = WebUtils.getCurUser(request);
-            bookingDelivery.setUserId(userInfo.getEmployeeId());
-            bookingDelivery.setUserName(userInfo.getName());
-            bookingDelivery.setStateBooking(0);
-            bookingDelivery.setStateFinance(0);
-            bookingDelivery.setBookingDate(new Date());
-            bookingDelivery.setCreateTime(System.currentTimeMillis());
-        }
-        int id = deliveryService.saveBooking(bookingDelivery);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("groupId", bookingDelivery.getGroupId());
-        map.put("bookingId", id);
-        
+//        BookingDelivery bookingDelivery = JSON.parseObject(booking, BookingDelivery.class);
+//        if (!tourGroupService.checkGroupCanEdit(bookingDelivery.getGroupId())) {
+//            return errorJson("该团已审核或封存，不允许修改该信息");
+//        }
+//        if (bookingDelivery.getId() == null) {
+//            PlatformEmployeePo userInfo = WebUtils.getCurUser(request);
+//            bookingDelivery.setUserId(userInfo.getEmployeeId());
+//            bookingDelivery.setUserName(userInfo.getName());
+//            bookingDelivery.setStateBooking(0);
+//            bookingDelivery.setStateFinance(0);
+//            bookingDelivery.setBookingDate(new Date());
+//            bookingDelivery.setCreateTime(System.currentTimeMillis());
+//        }
+//        int id = deliveryService.saveBooking(bookingDelivery);
+//        Map<String, Object> map = new HashMap<String, Object>();
+//        map.put("groupId", bookingDelivery.getGroupId());
+//        map.put("bookingId", id);
+        WebResult<Map<String, Object>> result = bookingDeliveryFacade.saveDeliveryBooking(booking, WebUtils.getCurUser(request));
         // 推送信息给接口中心
 //        List<GroupOrder> groupOrder = orderService
 //                .selectOrderByGroupId(bookingDelivery.getGroupId());
@@ -610,27 +585,45 @@ public class BookingDeliveryController extends BaseController {
 //            return errorJson("推送信息失败,请检查客人信息是否正确");
 //        }
         
-        return successJson(map);
+        return successJson(result.getValue());
     }
-    
+    /**
+     * 
+    * created by zhangxiaoyang
+    * @date 2016年10月25日
+    * @Description:
+    * @param 
+    * @return String
+    * @throws
+     */
     @RequestMapping(value = "agencyConfirm.do", method = RequestMethod.POST)
     @ResponseBody
     public String agencyConfirm(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer id) {
-        deliveryService.angencyConfirm(id);
+        //deliveryService.angencyConfirm(id);
+    	ResultSupport result = bookingDeliveryFacade.angencyConfirm(id);
         return successJson();
     }
-    
+    /**
+     * 
+    * created by zhangxiaoyang
+    * @date 2016年10月25日
+    * @Description:
+    * @param 
+    * @return String
+    * @throws
+     */
     @RequestMapping(value = "agencyDelele.do", method = RequestMethod.POST)
     @ResponseBody
     public String agencyDelele(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer id) {
         try {
-            deliveryService.angencyDelete(id);
+            //deliveryService.angencyDelete(id);
+        	ResultSupport result = bookingDeliveryFacade.angencyDelete(id);
             return successJson();
         } catch (ClientException ex) {
             return errorJson(ex.getMessage());
         }
     }
-    
+    //TODO 待抽取
     private String getDeliveryBrokerUser(HttpServletRequest request) {
         String userId = WebUtils.getBizConfigValue(request, BizConfigConstant.DELIVERY_BROKER_USER);
         if (StringUtils.isNotEmpty(userId)) {
@@ -647,6 +640,15 @@ public class BookingDeliveryController extends BaseController {
         }
         return null;
     }
+    /**
+     * 
+    * created by zhangxiaoyang
+    * @date 2016年10月25日
+    * @Description:打印地接订单
+    * @param 
+    * @return String
+    * @throws
+     */
     
     @RequestMapping(value = "deliveryExport.do")
     public String deliveryExport(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer bookingId, Integer type, Integer preview) {
@@ -655,7 +657,8 @@ public class BookingDeliveryController extends BaseController {
             
             SysBizInfo bizInfo = WebUtils.getCurBizInfo(request);
             PlatformEmployeePo userInfo = WebUtils.getCurUser(request);
-            BookingDelivery delivery = deliveryService.getBookingInfoById(bookingId);
+            BookingDeliveryResult result = bookingDeliveryFacade.getBookingDeliveryInfo(bookingId,bizInfo.getId());
+           // BookingDelivery delivery = deliveryService.getBookingInfoById(bookingId);
             //要打印的订单
             //GroupOrder groupOrder = orderService.selectByPrimaryKey(orderId);
             //旅行社信息
@@ -667,19 +670,19 @@ public class BookingDeliveryController extends BaseController {
             List<Map<String, String>> routeMapList = new ArrayList<Map<String, String>>();
             Map<String, Object> staffsMap = new HashMap<String, Object>();
             Map<String, Object> groupMap = new HashMap<String, Object>();
-            TourGroup groupInfo = tourGroupService.selectByPrimaryKey(delivery.getGroupId());
-            if (groupInfo.getGroupMode() < 1) {
+            //TourGroup groupInfo = tourGroupService.selectByPrimaryKey(delivery.getGroupId());
+            if (result.getTourGroup().getGroupMode() < 1) {
                 
                 exporter = new WordReporter(request.getSession().getServletContext().getRealPath("/") + "template/booking_delivery_individual.docx");
             }
-            if (groupInfo.getGroupMode() > 0) {
+            if (result.getTourGroup().getGroupMode() > 0) {
                 
                 exporter = new WordReporter(request.getSession().getServletContext().getRealPath("/") + "template/booking_delivery_team.docx");
             }
             String imgPath = "";
-            orderMapList = getDeliveryDetail(preview, request, userInfo, delivery,
+            orderMapList = getDeliveryDetail(preview, request, userInfo,
                     priceMapList, type, otherMap, orderMapList, remarkMap, agencyMap,
-                    routeMapList, staffsMap, groupMap, groupInfo);
+                    routeMapList, staffsMap, groupMap,result);
             
             
             exporter.init();
@@ -749,15 +752,16 @@ public class BookingDeliveryController extends BaseController {
      * @return
      */
     private List<Map<String, String>> getDeliveryDetail(Integer preview,
-                                                        HttpServletRequest request, PlatformEmployeePo userInfo,
-                                                        BookingDelivery delivery, List<Map<String, String>> priceMapList, Integer type,
-                                                        Map<String, Object> otherMap,
-                                                        List<Map<String, String>> orderMapList,
-                                                        Map<String, Object> remarkMap, Map<String, Object> agencyMap,
-                                                        List<Map<String, String>> routeMapList,
-                                                        Map<String, Object> staffsMap, Map<String, Object> groupMap,
-                                                        TourGroup groupInfo) {
+                    HttpServletRequest request, PlatformEmployeePo userInfo,
+                     List<Map<String, String>> priceMapList, Integer type,
+                    Map<String, Object> otherMap,
+                    List<Map<String, String>> orderMapList,
+                    Map<String, Object> remarkMap, Map<String, Object> agencyMap,
+                    List<Map<String, String>> routeMapList,
+                    Map<String, Object> staffsMap, Map<String, Object> groupMap,BookingDeliveryResult result
+                    ) {
         String imgPath = "";
+        BookingDelivery delivery = result.getBookingDelivery();
         if (type == null || type.equals(1)) {//计调-》地接社
             agencyMap.put("suppliername", delivery.getSupplierName());
             agencyMap.put("contact", delivery.getContact());
@@ -823,15 +827,20 @@ public class BookingDeliveryController extends BaseController {
             otherMap.put("logo", "");
         }
         //团信息
-        List<GroupRoute> routeList = routeService.selectByGroupIdAndBookingId(delivery.getGroupId(), delivery.getId());
-//	groupMap.put("company", bizInfo.getName());
-        
+//        BookingDeliveryQueryDTO dto = new BookingDeliveryQueryDTO();
+//        dto.setBizId(WebUtils.getCurBizId(request));
+//        dto.setBookingId(delivery.getId());
+//        dto.setGroupId(groupInfo.getId());
+//        BookingSupplierResult result = bookingSupplierFacade.getDeliveryExportInfo(dto);
+        //List<GroupRoute> routeList = routeService.selectByGroupIdAndBookingId(delivery.getGroupId(), delivery.getId());
+        TourGroup groupInfo = result.getTourGroup();
         groupMap.put("totaladult", delivery.getPersonAdult().toString());
         groupMap.put("totalchild", delivery.getPersonChild().toString());
         groupMap.put("total_guide", delivery.getPersonGuide().toString());
         groupMap.put("groupcode", groupInfo.getGroupCode());
         groupMap.put("productBrand", groupInfo.getProductBrandName().toString());
         groupMap.put("productName", groupInfo.getProductName().toString());        //行程
+        List<GroupRoute> routeList = result.getGroupRoutes();
         if (routeList != null && routeList.size() > 0) {
             for (GroupRoute route : routeList) {
                 Map<String, String> routeMap = new HashMap<String, String>();
@@ -874,27 +883,28 @@ public class BookingDeliveryController extends BaseController {
         }
         //团工作人员信息
         //获取司机信息
-        List<BookingSupplierDetail> driversList = detailService.getDriversByGroupIdAndType(groupInfo.getId(), Constants.FLEET);
+        //List<BookingSupplierDetail> driversList = detailService.getDriversByGroupIdAndType(groupInfo.getId(), Constants.FLEET);
         //获取导游信息
-        List<BookingGuide> bGuides = guideService.selectByGroupId2(groupInfo.getId());
+        //List<BookingGuide> bGuides = guideService.selectByGroupId2(groupInfo.getId());
         //获取接站信息
-        List<GroupOrder> orderList = null;
-        if (groupInfo.getGroupMode() > 0) {//团队
-            orderList = orderService.selectOrderByGroupId(groupInfo.getId());
-        } else {//散客
-            List<BookingDeliveryOrder> deliveryOrderList = delivery.getOrderList();
-            orderList = new ArrayList<GroupOrder>();
-            if (deliveryOrderList != null && deliveryOrderList.size() > 0) {
-                for (BookingDeliveryOrder deliveryOrder : deliveryOrderList) {
-                    orderList.add(orderService.selectByPrimaryKey(deliveryOrder.getOrderId()));
-                }
-            }
-        }
+        List<GroupOrder> orderList = result.getGroupOrders();
+//        if (groupInfo.getGroupMode() > 0) {//团队
+//            orderList = orderService.selectOrderByGroupId(groupInfo.getId());
+//        } else {//散客
+//            List<BookingDeliveryOrder> deliveryOrderList = delivery.getOrderList();
+//            orderList = new ArrayList<GroupOrder>();
+//            if (deliveryOrderList != null && deliveryOrderList.size() > 0) {
+//                for (BookingDeliveryOrder deliveryOrder : deliveryOrderList) {
+//                    orderList.add(orderService.selectByPrimaryKey(deliveryOrder.getOrderId()));
+//                }
+//            }
+//        }
         
         //获取全陪领队信息
         if (orderList != null && orderList.size() > 0) {
-            List<GroupOrderGuest> guestList = guestService.selectByOrderId(orderList.get(0).getId());
-            if (guestList != null && guestList.size() > 0) {
+//            List<GroupOrderGuest> guestList = guestService.selectByOrderId(orderList.get(0).getId());
+        	List<GroupOrderGuest> guestList = result.getNotGuests();
+            if (!CollectionUtils.isEmpty(guestList)) {
                 /*for (GroupOrderGuest guest : guestList) {
                     if(guest.getIsLeader()==1){
 						staffsMap.put("leadername", guest.getName()==null?"":guest.getName());
@@ -919,7 +929,7 @@ public class BookingDeliveryController extends BaseController {
             staffsMap.put("accompanyInfo", "");
             //staffsMap.put("accompanytel", "");
         }
-        
+        List<BookingSupplierDetail> driversList = result.getSupplierDetails();
         if (driversList != null && driversList.size() > 0) {
             //staffsMap.put("drivername", driversList.get(0).getDriverName());
             staffsMap.put("driverInfo", getDriverInfo(driversList));
@@ -927,6 +937,7 @@ public class BookingDeliveryController extends BaseController {
             staffsMap.put("driverInfo", "");
             
         }
+        List<BookingGuide> bGuides = result.getBookingGuides();
         if (bGuides != null && bGuides.size() > 0) {
             //staffsMap.put("guidename", bGuide.getGuideName());
             staffsMap.put("guideInfo", getGuideInfo(bGuides));
@@ -941,58 +952,64 @@ public class BookingDeliveryController extends BaseController {
             staffsMap.put("receivemode", "");
         }
         /////////////////////添加地接社确认单打印内容增加接送明细，客人名单，酒店用房需求///////////////////////////
-        List<GroupOrderPrintPo> gopps = new ArrayList<GroupOrderPrintPo>();
-        GroupOrderPrintPo gopp = null;
+//        List<GroupOrderPrintPo> gopps = new ArrayList<GroupOrderPrintPo>();
+//        GroupOrderPrintPo gopp = null;
+        List<GroupOrderPrintPo> gopps = result.getOrderPrints();
         // 房量总计
         String total = "";
         if (groupInfo != null && groupInfo.getGroupMode() < 1) {
-            for (GroupOrder order : orderList) {
+//            for (GroupOrder order : orderList) {
+        	for (GroupOrderPrintPo gopp : gopps) {
+				
                 // 拿到单条订单信息
-                gopp = new GroupOrderPrintPo();
-                gopp.setPlace((order.getProvinceName() == null ? "" : order
-                        .getProvinceName())
-                        + (order.getCityName() == null ? "" : order.getCityName()));
-                gopp.setRemark(order.getRemarkInternal());
+//                gopp.setPlace((order.getProvinceName() == null ? "" : order
+//                        .getProvinceName())
+//                        + (order.getCityName() == null ? "" : order.getCityName()));
+//                gopp.setRemark(order.getRemarkInternal());
                 // 根据散客订单统计客人信息
-                List<GroupOrderGuest> guests = guestService
-                        .selectByOrderId(order.getId());
+//                List<GroupOrderGuest> guests = guestService
+//                        .selectByOrderId(order.getId());
                 //客人-接送方式
-                gopp.setGuesStatic(order.getReceiveMode());
-                if (guests.size() > 0) {
+//                gopp.setGuesStatic(order.getReceiveMode());
+        		List<GroupOrderGuest> guests = gopp.getGuests();
+                if (!CollectionUtils.isEmpty(guests)) {
                     gopp.setGuestInfo(getGuestInfoNoPhone(guests));
                 }
                 
                 // 根据散客订单统计人数
-                Integer numAdult = guestService
-                        .selectNumAdultByOrderID(order.getId());
-                Integer numChild = guestService
-                        .selectNumChildByOrderID(order.getId());
-                gopp.setPersonNum(numAdult + "+" + numChild);
+//                Integer numAdult = guestService
+//                        .selectNumAdultByOrderID(order.getId());
+//                Integer numChild = guestService
+//                        .selectNumChildByOrderID(order.getId());
+//                gopp.setPersonNum(numAdult + "+" + numChild);
                 
                 // 根据散客订单统计酒店信息
-                List<GroupRequirement> grogShopList = groupRequirementService
-                        .selectByOrderAndType(order.getId(), 3);
-                if (grogShopList.size() > 0) {
-                    if (grogShopList.get(0).getHotelLevel() != null) {
-                        gopp.setHotelLevel(dicService.getById(
-                                grogShopList.get(0).getHotelLevel()).getValue()
-                                + "\n");
-                    }
+//                List<GroupRequirement> grogShopList = groupRequirementService
+//                        .selectByOrderAndType(order.getId(), 3);
+                List<GroupRequirement> grogShopList = gopp.getGroupRequirements();
+                if (!CollectionUtils.isEmpty(grogShopList)) {
+//                    if (grogShopList.get(0).getHotelLevel() != null) {
+//                        gopp.setHotelLevel(dicService.getById(
+//                                grogShopList.get(0).getHotelLevel()).getValue()
+//                                + "\n");
+//                    }
                     gopp.setHotelNum(getHotelNum(grogShopList));
                 }
                 total = getHotelTotalNum(grogShopList);
                 // 省外交通
                 // 根据散客订单统计接机信息
-                List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
-                        .selectByOrderId(order.getId());
+//                List<GroupOrderTransport> groupOrderTransports = groupOrderTransportService
+//                        .selectByOrderId(order.getId());
+                List<GroupOrderTransport> groupOrderTransports = gopp.getOrderTransports();
                 gopp.setAirPickup(getAirInfo(groupOrderTransports, 0));
                 // 根据散客订单统计送机信息
                 gopp.setAirOff(getAirInfo(groupOrderTransports, 1));
                 
                 // 省内交通
                 gopp.setTrans(getSourceType(groupOrderTransports));
-                gopps.add(gopp);
-            }
+//                gopps.add(gopp);
+//            }
+        }
         
 		/*
          * 第二个表格
@@ -1023,11 +1040,12 @@ public class BookingDeliveryController extends BaseController {
         //如果是定制团
         if (groupInfo != null && groupInfo.getGroupMode() > 0) {
             orderMapList = new ArrayList<Map<String, String>>();
-            Map parameters = new HashMap();
-            parameters.put("groupId", groupInfo.getId());
-            parameters.put("supplierId", null);
-            parameters.put("bizId", WebUtils.getCurBizId(request));
-            List<GroupOrderGuest> orderGuests = guestService.getGroupOrderGuests(parameters);
+//            Map parameters = new HashMap();
+//            parameters.put("groupId", groupInfo.getId());
+//            parameters.put("supplierId", null);
+//            parameters.put("bizId", WebUtils.getCurBizId(request));
+//            List<GroupOrderGuest> orderGuests = guestService.getGroupOrderGuests(parameters);
+            List<GroupOrderGuest> orderGuests = result.getGuests();
             int index = 1;
             for (GroupOrderGuest guest : orderGuests) {
                 Map<String, String> map = new HashMap<String, String>();
@@ -1284,7 +1302,9 @@ public class BookingDeliveryController extends BaseController {
     public String deliveryDetailPreview(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer bookingId, Integer type, Integer preview) {
         SysBizInfo bizInfo = WebUtils.getCurBizInfo(request);
         PlatformEmployeePo userInfo = WebUtils.getCurUser(request);
-        BookingDelivery delivery = deliveryService.getBookingInfoById(bookingId);
+        BookingDeliveryResult result = bookingDeliveryFacade.getBookingDeliveryInfo(bookingId, bizInfo.getId());
+//        BookingDelivery delivery = deliveryService.getBookingInfoById(bookingId);
+//        BookingDelivery delivery = result.getBookingDelivery();
         //要打印的订单
         //GroupOrder groupOrder = orderService.selectByPrimaryKey(orderId);
         //旅行社信息
@@ -1296,8 +1316,9 @@ public class BookingDeliveryController extends BaseController {
         List<Map<String, String>> routeMapList = new ArrayList<Map<String, String>>();
         Map<String, Object> staffsMap = new HashMap<String, Object>();
         Map<String, Object> groupMap = new HashMap<String, Object>();
-        TourGroup groupInfo = tourGroupService.selectByPrimaryKey(delivery.getGroupId());
-        orderMapList = getDeliveryDetail(preview, request, userInfo, delivery, priceMapList, type, otherMap, orderMapList, remarkMap, agencyMap, routeMapList, staffsMap, groupMap, groupInfo);
+//        TourGroup groupInfo = tourGroupService.selectByPrimaryKey(delivery.getGroupId());
+        TourGroup groupInfo = result.getTourGroup();
+        orderMapList = getDeliveryDetail(preview, request, userInfo, priceMapList, type, otherMap, orderMapList, remarkMap, agencyMap, routeMapList, staffsMap, groupMap,result);
         String imgPath = bizSettingCommon.getMyBizLogo(request);
         model.addAttribute("imgPath", imgPath);
         model.addAttribute("priceMapList", priceMapList);

@@ -7,10 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import com.yihg.erp.controller.CommonController;
 import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.supplier.constants.SupplierConstant;
+import com.yimayhd.erpresource.dal.constants.SupplierConstant;
 
 /**
  * 处理响应资源
