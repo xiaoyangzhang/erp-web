@@ -408,9 +408,9 @@ public class FitOrderController extends BaseController {
 		
 		SaveFitOrderInfoResult result=fitOrderFacade.saveFitOrderInfo(saveFitOrderInfoDTO);
 		if(result.isSuccess()){
-			return errorJson(result.getError());
-		}else{
 			return successJson("orderId", result.getOrderId() + "");
+		}else{
+			return errorJson(result.getError());
 		}
 	}
 
@@ -678,7 +678,7 @@ public class FitOrderController extends BaseController {
 		
 		DelGroupOrderDTO delGroupOrderDTO=new DelGroupOrderDTO();
 		delGroupOrderDTO.setBizId(bizId);
-		delGroupOrderDTO.setId(bizId);
+		delGroupOrderDTO.setId(id);
 		
 		BaseStateResult result=fitOrderFacade.delGroupOrder(delGroupOrderDTO);
 		if(result.isSuccess()){
