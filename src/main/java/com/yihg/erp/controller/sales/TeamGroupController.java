@@ -372,6 +372,10 @@ public class TeamGroupController extends BaseController {
 		}
 		//TeamGroupVO tgv = teamGroupService.saveOrUpdateTeamGroupVO(WebUtils.getCurBizId(request), WebUtils.getCurUserId(request), WebUtils.getCurUser(request).getName(), teamGroupVO);
 		SaveTeamGroupInfoDTO saveTeamGroupInfoDTO = new SaveTeamGroupInfoDTO();
+		saveTeamGroupInfoDTO.setCurBizId(WebUtils.getCurBizId(request));
+		saveTeamGroupInfoDTO.setCurUserId(WebUtils.getCurUserId(request));
+		saveTeamGroupInfoDTO.setCurUserName(WebUtils.getCurUser(request).getName());
+		saveTeamGroupInfoDTO.setTeamGroupVO(teamGroupVO);
 		SaveTeamGroupInfoResult saveTeamGroupInfoResult = teamGroupFacade.saveTeamGroupInfo(saveTeamGroupInfoDTO);
 		return successJson("groupId",saveTeamGroupInfoResult.getTeamGroupVO().getTourGroup().getId()+"");
 	}
