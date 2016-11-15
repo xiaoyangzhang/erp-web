@@ -118,7 +118,7 @@ public class SupplierController extends BaseController {
 		model.addAttribute("supplierType", supplierType);
 		model.addAttribute("allProvince", webResult.getAllProvince());
 
-		model.addAttribute("travelagencylevelList", webResult.getTrainticketagentlevelList());
+		model.addAttribute("travelagencylevelList", webResult.getTravelagencylevelList());
 
 		model.addAttribute("restaurantlevelList", webResult.getRestaurantlevelList());
 
