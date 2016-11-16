@@ -307,7 +307,8 @@ function toSaveSeatInCoach(strr) {
 				var count = $("#"+strr+"Data").children('tr').length;
 				html = template('trans_template', {index : count});
 				$("#"+strr+"Data").append(html);
-				$("input[name='groupOrderTransportList["+count+"].departureTime']").val(infos[0]);
+				$("input[name='groupOrderTransportList["+count+"].departureDate']").val(infos[0]);
+				$("input[name='groupOrderTransportList["+count+"].departureTime']").val(infos[1]);
 				$("input[name='groupOrderTransportList["+count+"].arrivalTime']").val(infos[1]);
 				$("input[name='groupOrderTransportList["+count+"].classNo']").val(infos[2]);
 				$("input[name='groupOrderTransportList["+count+"].departureCity']").val(infos[3]);
