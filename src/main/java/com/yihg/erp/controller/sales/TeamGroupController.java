@@ -215,19 +215,21 @@ public class TeamGroupController extends BaseController {
 	@RequiresPermissions(PermissionConstants.SALE_TEAM_GROUP)
 	public String toGroupList(HttpServletRequest request, Model model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		/*List<RegionInfo> allProvince = regionService.getAllProvince();
-		model.addAttribute("allProvince", allProvince);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
-		List<DicInfo> sourceTypeList = dicService.getListByTypeCode(Constants.GUEST_SOURCE_TYPE,bizId);*/
+//		List<RegionInfo> allProvince = regionService.getAllProvince();
+//		model.addAttribute("orgJsonStr",
+//				orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr",
+//				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+//		model.addAttribute("orgJsonStr",
+//				orgService.getComponentOrgTreeJsonStr(bizId));
+//		model.addAttribute("orgUserJsonStr",
+//				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+//		List<DicInfo> sourceTypeList = dicService.getListByTypeCode(Constants.GUEST_SOURCE_TYPE,bizId);
 
 		ToGroupListResult toGroupListResult = teamGroupFacade.toGroupList(bizId);
+		model.addAttribute("allProvince", toGroupListResult.getAllProvince());
+		model.addAttribute("orgJsonStr",toGroupListResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",toGroupListResult.getOrgUserJsonStr());
 		model.addAttribute("sourceTypeList", toGroupListResult.getSourceTypeList());
 		return "sales/teamGroup/groupList";
 	}

@@ -63,7 +63,7 @@ public class RouteController extends BaseController {
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	@RequestMapping(value = "getNameList.do" ,method = RequestMethod.GET)
+	@RequestMapping(value = "getNameList.do" ,method = RequestMethod.POST)
 	@ResponseBody
 	public String getUserNameList(HttpServletRequest request, HttpServletResponse reponse, String name) throws UnsupportedEncodingException{
 		List<Map<String, String>> list  = new ArrayList<Map<String,String>>() ;

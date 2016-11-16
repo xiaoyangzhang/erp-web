@@ -295,7 +295,7 @@
 								</c:forEach>
 							</select>
 						</td>
-						<td>客源地：</td>
+						<td><i class="red">* </i>客源地：</td>
 						<td>
 							<input type="hidden" name="groupOrder.provinceName" class="IptText300" id="provinceName" value="${teamGroupVO.groupOrder.provinceName }" /> 
 							<select name="groupOrder.provinceId" id="provinceCode">

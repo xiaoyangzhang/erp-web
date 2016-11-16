@@ -25,8 +25,8 @@ var ProductRoute = function ProductRoute(dataConstruct){
     			  source: function( request, response ) {
     				  var name=encodeURIComponent(request.term);
     				  $.ajax({
-    					  type : "get",
-    					  url : "../../route/getNameList.do",
+    					  type : "post",
+    					  url : getContextPath()+"/route/getNameList.do",
     					  data : {
     						  name : name
     					  },
