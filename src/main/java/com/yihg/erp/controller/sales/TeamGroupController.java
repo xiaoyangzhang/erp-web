@@ -528,6 +528,9 @@ public class TeamGroupController extends BaseController {
 	public String saveRequireMent(HttpServletRequest request,TeamGroupVO teamGroupVO){
 		//teamGroupService.saveOrUpdateRequirement(teamGroupVO, WebUtils.getCurBizId(request), WebUtils.getCurUser(request).getName());
 		SaveRequireMentDTO saveRequireMentDTO = new SaveRequireMentDTO();
+		saveRequireMentDTO.setTeamGroupVO(teamGroupVO);
+		saveRequireMentDTO.setCurBizId(WebUtils.getCurBizId(request));
+		saveRequireMentDTO.setCurUserName(WebUtils.getCurUser(request).getName());
 		ResultSupport resultSupport = teamGroupFacade.saveRequireMent(saveRequireMentDTO);
 		if(resultSupport.isSuccess()) {
 			return successJson();
