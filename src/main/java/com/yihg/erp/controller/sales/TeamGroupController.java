@@ -356,7 +356,7 @@ public class TeamGroupController extends BaseController {
 		model.addAttribute("jtfsList", toEditTeamGroupInfoResult.getJtfsList());
 		model.addAttribute("zjlxList", toEditTeamGroupInfoResult.getZjlxList());
 		model.addAttribute("lysfxmList", toEditTeamGroupInfoResult.getLysfxmList());
-		model.addAttribute("allCity", toEditTeamGroupInfoResult.getAllProvince());
+		model.addAttribute("allCity", toEditTeamGroupInfoResult.getCityList());
 		model.addAttribute("guideStr", toEditTeamGroupInfoResult.getGuideStr());
 		return "sales/teamGroup/teamGroupInfo";
 	}
