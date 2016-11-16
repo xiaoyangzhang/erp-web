@@ -6,7 +6,7 @@ function selectAttachment(el){
 	layer.openImgSelectLayer({
 		callback: function(arr){
 			var addhtml="";
-			var html1 = $('#imgTemp').html();
+			var html1 = $('#imgTemp').html()+"";
 			var imgsLength = $(el).prev('.addImg').children().length;
 			for(var i=0;i<arr.length;i++){
 				addhtml= addhtml +  html1.replace(/\$src/g, arr[i].thumb).replace(/\$path/g, arr[i].path);
