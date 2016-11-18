@@ -622,8 +622,10 @@ public class BookingGuideController extends BaseController {
 		BookingGuideResult result = bookingGuideFacade.financeSupplierView(financeGuide);
 		BigDecimal count=new BigDecimal(0);
 		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier> bookingSuppliers = result.getBookingSuppliers();
-		for (com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier l : bookingSuppliers) {
+		if(null != bookingSuppliers && bookingSuppliers.size()>0){
+			for (com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier l : bookingSuppliers) {
 				count=count.add(l.getFtotal());
+			}
 		}
 //		getSupplierDetail(bookingSuppliers);
 		model.addAttribute("count", count);

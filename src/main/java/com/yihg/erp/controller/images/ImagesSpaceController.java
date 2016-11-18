@@ -113,8 +113,8 @@ public class ImagesSpaceController extends BaseController{
 	 */
 	@RequestMapping(value = "/images/v_model",method =RequestMethod.POST)
 	public String loadModel(HttpServletRequest request,@RequestParam("imgId")Integer imgId,String name, PageBean<ImgSpace> pageBean ,Model model){
-		
 		ImgSpace imgSpace = new ImgSpace();
+		loadTreeInfo(request,imgSpace,model);
 		
 		if(!StringUtils.isEmpty(name)){
 			imgSpace.setImgName(name);

@@ -564,6 +564,7 @@ function deleteImageNode(){
 						floadDubble(parentImageId);
 					}else{
 						window.location = window.location;
+						floadDubble(parentImageId);
 					}
 				}
 			},error:function(){
