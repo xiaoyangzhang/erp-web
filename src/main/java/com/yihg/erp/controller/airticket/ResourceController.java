@@ -47,6 +47,7 @@ import com.yimayhd.erpcenter.facade.ticket.query.SaveResourceDTO;
 import com.yimayhd.erpcenter.facade.ticket.query.ShowListResourceDTO;
 import com.yimayhd.erpcenter.facade.ticket.result.EditResourceResult;
 import com.yimayhd.erpcenter.facade.ticket.result.ShowListResourceResult;
+import com.yimayhd.erpcenter.facade.ticket.result.WebResult;
 import com.yimayhd.erpcenter.facade.ticket.service.ResourceFacade;
 
 
@@ -293,8 +294,10 @@ public class ResourceController extends BaseController {
 	public String getAirLine(HttpServletRequest request, HttpServletResponse reponse, String date, String airCode, String depCity, String arrCity) throws IOException{
 		SimpleDateFormat sdfLineTime = new SimpleDateFormat("HH:mm");
 		HashMap<String, String> json = new HashMap<String, String>();
+		WebResult<AirLine> airLineResult = null;
 		try {
-			AirLine airLine = resourceFacade.findAirLine(date, airCode, depCity, arrCity);
+			airLineResult = resourceFacade.findAirLine(date, airCode, depCity, arrCity);
+			AirLine airLine = airLineResult.getValue();
 			if (airLine.getDepTerminal()==null){
 				airLine.setDepTerminal("");
 			}
@@ -314,10 +317,10 @@ public class ResourceController extends BaseController {
 			json.put("arrTime", sdfLineTime.format(airLine.getArrTime()));
 		}catch(ClientException ce){
 			json.put("result", "40001");
-			json.put("message", "<span style='color:red;'>"+ce.getMessage() +"</span>");
+			json.put("message", "<span style='color:red;'>"+airLineResult.getResultMsg() +"</span>");
 		}catch(Exception e){
 			json.put("result", "40001");
-			json.put("message", "<span style='color:red;'>"+e.getMessage() +"</span>");
+			json.put("message", "<span style='color:red;'>"+airLineResult.getResultMsg() +"</span>");
 		}
 		return JSON.toJSONString(json);
 	}

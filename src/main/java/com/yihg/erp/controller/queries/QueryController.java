@@ -7047,7 +7047,7 @@ public class QueryController extends BaseController {
 		queryDTO.setGroupOrder(order);
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
-		QueryResult queryResult = queryFacade.productTrendTableList(queryDTO);
+		QueryResult queryResult = queryFacade.deservedCashTable(queryDTO);
 
 		model.addAttribute("pageBean", queryResult.getPageBean());
 		model.addAttribute("sum", queryResult.getSum());
