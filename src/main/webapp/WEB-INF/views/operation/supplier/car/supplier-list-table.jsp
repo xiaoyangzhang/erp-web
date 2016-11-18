@@ -75,7 +75,7 @@
 				                  </td> 
 				                  <td>${groupInfo.adultCount==null?0:groupInfo.adultCount}大
 				                  ${groupInfo.childCount==null?0:groupInfo.childCount}小
-				                 ${groupInfo.tourGroup.guideCount==null?0:groupInfo.tourGroup.guideCount}陪</td> 
+				                 ${groupInfo.guideCount==null?0:groupInfo.guideCount}陪</td> 
 				                  <td>${groupInfo.operatorName}</td>
 				                  <td>${groupInfo.groupStatus}</td>				                 
 				                  	

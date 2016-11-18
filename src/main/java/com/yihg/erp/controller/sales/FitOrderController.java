@@ -371,8 +371,8 @@ public class FitOrderController extends BaseController {
 //			}
 //			
 //			
-//			fitOrderVO.getGroupOrder().setOrderNo(
-//					settingCommon.getMyBizCode(request));
+			fitOrderVO.getGroupOrder().setOrderNo(
+					bizSettingCommon.getMyBizCode(request));
 //			String bizConfigValue = WebUtils.getBizConfigValue(request,
 //					BizConfigConstant.AUTO_MERGE_ORDER);
 //			boolean mergeGroup = false;

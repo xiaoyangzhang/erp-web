@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.yihg.erp.controller.airticket.ResourceController;
+import com.yimayhd.erpcenter.common.util.DateUtils;
 import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketLeg;
 import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketResource;
 
@@ -44,11 +45,13 @@ public class AirTicketResourceBO {
     }
     
     public String getStartDate(){
-    	return sdf.format(this.po.getStartDate());
+//    	return sdf.format(this.po.getStartDate());
+    	return DateUtils.format(po.getStartDate(), "yyyy-MM-dd");
     }
     public String getEndDate(){
     	if (this.po.getEndDate()==null){return "";}
-    	return sdf.format(this.po.getEndDate());
+//    	return sdf.format(this.po.getEndDate());
+    	return DateUtils.format(po.getEndDate(), "yyyy-MM-dd");
     }
 
     public Integer getLegSize(){
@@ -122,7 +125,8 @@ public class AirTicketResourceBO {
         return this.po.getComment();
     }
     public String getEndIssueTime(){
-    	return sdfTime.format(this.po.getEndIssueTime());
+//    	return sdfTime.format(this.po.getEndIssueTime());
+    	return DateUtils.format(po.getEndIssueTime(), "yyyy-MM-dd");
     }
 
 	public void setLegList(List<AirTicketLeg> legList) {
