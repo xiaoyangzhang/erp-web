@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.dal.product.constans.Constants;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -4521,6 +4523,7 @@ public class TourGroupController extends BaseController {
 		return url;*/
 
 		ToSaleChargeResult toPreviewResult = tourGroupFacade.toSaleCharge( orderId,  num, WebUtils.getCurUserId(request), WebUtils.getCurBizId(request),WebUtils.getCurUser(request).getOrgId());
+		model.addAttribute("otherPrice", toPreviewResult.getOtherPrice());
 		model.addAttribute("person", toPreviewResult.getGroupOrder().getNumAdult() + "+" + toPreviewResult.getGroupOrder().getNumChild() + "+" + toPreviewResult.getGroupOrder().getNumGuide());
 		model.addAttribute("guest_guide", toGetGuideString(toPreviewResult.getGuests())); // 姓名和电话
 		model.addAttribute("guest_leader", toGetLeaderString(toPreviewResult.getGuests())); // 姓名和电话

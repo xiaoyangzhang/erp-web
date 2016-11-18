@@ -54,8 +54,11 @@ import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceGuide;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuideListCount;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuideListSelect;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.facade.operation.query.BookingGuideQueryDTO;
 import com.yimayhd.erpcenter.facade.operation.result.BookingGuideResult;
 import com.yimayhd.erpcenter.facade.operation.result.ResultSupport;
@@ -895,19 +898,19 @@ public class BookingGuideController extends BaseController {
 	}
 	@RequestMapping("previewGuideRoute.htm")
 	public String previewGuideRoute(HttpServletRequest request,Model model,Integer id,Integer num){
-		com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup tourGroup = null ;
+		TourGroup tourGroup = null ;
 		BookingGuide bookingGuide = null ;
 		String guestGuideString = "" ;
 		String guestIsLeaderString ="" ;
 		String driverString ="" ;
 		String trans = "" ;
 		// 查询导游信息
-		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide> guides = null;
+		List<BookingGuide> guides = null;
 		String guideString = "" ;
 		BookingGuideResult result = null;
-		List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo> ggpp = null ;
+		List<GroupGuidePrintPo> ggpp = null ;
 		if(num==3){
-		    result = bookingGuideFacade.getGroupRouteInfo(id);
+		    result = bookingGuideFacade.getGuideRouteInfo(id);
 //			tourGroup = tourGroupService.selectByPrimaryKey(id);
 //			guides = bookingGuideService.selectGuidesByGroupId(id);
 			tourGroup = result.getTourGroup();
@@ -932,7 +935,7 @@ public class BookingGuideController extends BaseController {
 			driverString = result.getDriverString();
 //			//接送信息
 //			List<GroupOrderTransport> gots = groupOrderTransportService.selectByGroupId(id) ;
-			List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport> gots = result.getOrderTransports();
+			List<GroupOrderTransport> gots = result.getOrderTransports();
 			trans = "接机："+getAirInfo(gots, 0)+"\n"
 				   +"送机："+getAirInfo(gots, 1)+"\n"
 				   +"省内交通："+getSourceType(gots) ;
@@ -967,16 +970,16 @@ public class BookingGuideController extends BaseController {
 //			}
 			//接送信息
 		//	List<GroupOrderTransport> gots = groupOrderTransportService.selectByGroupId(tourGroup.getId()) ;
-				List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport> gots = result.getOrderTransports();
+				List<GroupOrderTransport> gots = result.getOrderTransports();
 			trans = "接机："+getAirInfo(gots, 0)+"\n"
 					   +"送机："+getAirInfo(gots, 1)+"\n"
 					   +"省内交通："+getSourceType(gots) ;
-			com.yimayhd.erpresource.dal.po.SupplierGuide sg = result.getSupplierGuide();
+			SupplierGuide sg = result.getSupplierGuide();
 			model.addAttribute("tourGuide",bookingGuide.getGuideName()+" "+bookingGuide.getGuideMobile()+" "+sg.getLicenseNo());
 			ggpp = getOperatorInfo(tourGroup.getId(),bookingGuide.getBookingDetailId(),num) ;
 		}
 		if(tourGroup==null){
-			tourGroup = new com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup() ;
+			tourGroup = new TourGroup() ;
 		}
 		if(bookingGuide==null){
 			bookingGuide = new BookingGuide() ;
@@ -991,7 +994,7 @@ public class BookingGuideController extends BaseController {
 //		}
 		//行程
 //		List<GroupRoute> routeList = routeService.selectByGroupId(tourGroup.getId());
-		List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute> routeList = result.getGroupRoutes();
+		List<GroupRoute> routeList = result.getGroupRoutes();
 		//商家信息
 //		List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo> ggpp = null ;
 //		if(num==3){

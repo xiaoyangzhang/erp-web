@@ -86,7 +86,7 @@ public class ProductSalesController extends BaseController {
 		BrandQueryDTO brandQueryDTO  = new BrandQueryDTO();
 		brandQueryDTO.setBizId(WebUtils.getCurBizId(request));
 		BrandQueryResult brandList = productCommonFacade.brandQuery(brandQueryDTO);
-		model.addAttribute("brandList", brandList);
+		model.addAttribute("brandList", brandList.getBrandList());
 		return "product/sales/list";
 	}
 
