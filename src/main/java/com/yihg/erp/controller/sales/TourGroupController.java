@@ -3531,6 +3531,9 @@ public class TourGroupController extends BaseController {
 	 * @return
 	 */
 	public String toGetGuestString(List<GroupOrderGuest> guests) {
+		if(null == guests || guests.size() <=0){
+			return null;
+		}
 		StringBuilder sb = new StringBuilder();
 		String gender = "男";
 		for (GroupOrderGuest guest : guests) {
@@ -3870,6 +3873,9 @@ public class TourGroupController extends BaseController {
 	 * @return
 	 */
 	public String getHotelNum(List<GroupRequirement> grogShopList) {
+		if(null == grogShopList || grogShopList.size() <= 0){
+			return null;
+		}
 		StringBuilder sb = new StringBuilder();
 		if (grogShopList.size() > 0) {
 			String sr = "";
@@ -3908,6 +3914,9 @@ public class TourGroupController extends BaseController {
 	 */
 	public String getAirInfo(List<GroupOrderTransport> groupOrderTransports,
 			Integer flag) {
+		if(null == groupOrderTransports || groupOrderTransports.size() <= 0){
+			return null;
+		}
 		StringBuilder sb = new StringBuilder();
 		if (flag == 0) {
 			for (GroupOrderTransport transport : groupOrderTransports) {
@@ -3965,6 +3974,9 @@ public class TourGroupController extends BaseController {
 	 * @return
 	 */
 	public String getSourceType(List<GroupOrderTransport> groupOrderTransports) {
+		if(null == groupOrderTransports || groupOrderTransports.size() <=0 ){
+			return null;
+		}
 		StringBuilder sb = new StringBuilder();
 		for (GroupOrderTransport transport : groupOrderTransports) {
 			if (transport.getSourceType() == 0) {
@@ -4455,7 +4467,7 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("guestList", toGetGuestString(toPreviewResult.getGuests()));
 		model.addAttribute("orderId", orderId);
 		model.addAttribute("guests", toPreviewResult.getGuests());
-		model.addAttribute("orderType", toPreviewResult.getGroupOrder().getOrderType());
+		model.addAttribute("orderType", toPreviewResult.getGroupOrder()==null?"":toPreviewResult.getGroupOrder().getOrderType());
 		model.addAttribute("hotelNum", getHotelNum(toPreviewResult.getGrogShopList()));
 		model.addAttribute("upAndOff",
 				"接机：" + getAirInfo(toPreviewResult.getGroupOrderTransports(), 0) + "\n" + "送机："
