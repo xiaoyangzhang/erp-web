@@ -47,6 +47,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import com.yihg.erp.aop.RequiresPermissions;
+import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.contant.BizConfigConstant;
 import com.yihg.erp.contant.OpenPlatformConstannt;
 import com.yihg.erp.contant.PermissionConstants;
@@ -133,7 +134,8 @@ public class TourGroupController extends BaseController {
 
 	@Autowired
 	private TourGroupFacade tourGroupFacade;//
-
+	@Autowired
+	private BizSettingCommon bizSettingCommon;
 	@Autowired
 	private TeamGroupFacade teamGroupFacade;//
 
@@ -271,6 +273,8 @@ public class TourGroupController extends BaseController {
 		copyTourGroupDTO.setInfo(info);
 		copyTourGroupDTO.setOrderId(orderId);
 		copyTourGroupDTO.setGroupId(groupId);
+		copyTourGroupDTO.setCurUserOrgId(WebUtils.getCurUser(request).getOrgId());
+		copyTourGroupDTO.setCurBizId(WebUtils.getCurBizId(request));
 		copyTourGroupDTO.setGroupOrder(groupOrder);
 		copyTourGroupDTO.setTourGroup(tourGroup);
 		teamGroupFacade.copyTourGroup(copyTourGroupDTO);
@@ -1930,7 +1934,7 @@ public class TourGroupController extends BaseController {
 		}
 
 		// logo图标和标题
-		String imgPath = toPreviewResult.getImgPath();
+		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		Map<String, Object> params1 = new HashMap<String, Object>();
 		params1.put("print_time", DateUtils.format(new Date()));
 		params1.put("product", groupOrder.getProductName());
@@ -2300,7 +2304,7 @@ public class TourGroupController extends BaseController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		String imgPath = toPreviewResult.getImgPath();
+		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		Map<String, Object> params1 = new HashMap<String, Object>();
 		params1.put("print_time", DateUtils.format(new Date()));
 		params1.put("printName", WebUtils.getCurUser(request).getName());
@@ -2685,7 +2689,7 @@ public class TourGroupController extends BaseController {
 		/**
 		 * logo图标和标题
 		 */
-		String imgPath = toPreviewResult.getImgPath();
+		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		Map<String, Object> params1 = new HashMap<String, Object>();
 		params1.put("print_time", DateUtils.format(new Date()));
 		params1.put("printName", WebUtils.getCurUser(request).getName());
@@ -3029,7 +3033,7 @@ public class TourGroupController extends BaseController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		String imgPath = toPreviewResult.getImgPath();
+		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		Map<String, Object> params1 = new HashMap<String, Object>();
 		params1.put("print_time", DateUtils.format(new Date()));
 		params1.put("printName", WebUtils.getCurUser(request).getName());
@@ -3237,7 +3241,7 @@ public class TourGroupController extends BaseController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		String imgPath = toPreviewResult.getImgPath();
+		String imgPath =bizSettingCommon.getMyBizLogo(request);
 		Map<String, Object> params1 = new HashMap<String, Object>();
 		params1.put("printTime", DateUtils.format(new Date()));
 		params1.put("printName", WebUtils.getCurUser(request).getName());
@@ -3531,6 +3535,9 @@ public class TourGroupController extends BaseController {
 	 * @return
 	 */
 	public String toGetGuestString(List<GroupOrderGuest> guests) {
+		if(null == guests || guests.size() <=0){
+			return null;
+		}
 		StringBuilder sb = new StringBuilder();
 		String gender = "男";
 		for (GroupOrderGuest guest : guests) {
@@ -3870,6 +3877,9 @@ public class TourGroupController extends BaseController {
 	 * @return
 	 */
 	public String getHotelNum(List<GroupRequirement> grogShopList) {
+		if(null == grogShopList || grogShopList.size() <= 0){
+			return null;
+		}
 		StringBuilder sb = new StringBuilder();
 		if (grogShopList.size() > 0) {
 			String sr = "";
@@ -3908,6 +3918,9 @@ public class TourGroupController extends BaseController {
 	 */
 	public String getAirInfo(List<GroupOrderTransport> groupOrderTransports,
 			Integer flag) {
+		if(null == groupOrderTransports || groupOrderTransports.size() <= 0){
+			return null;
+		}
 		StringBuilder sb = new StringBuilder();
 		if (flag == 0) {
 			for (GroupOrderTransport transport : groupOrderTransports) {
@@ -3965,6 +3978,9 @@ public class TourGroupController extends BaseController {
 	 * @return
 	 */
 	public String getSourceType(List<GroupOrderTransport> groupOrderTransports) {
+		if(null == groupOrderTransports || groupOrderTransports.size() <=0 ){
+			return null;
+		}
 		StringBuilder sb = new StringBuilder();
 		for (GroupOrderTransport transport : groupOrderTransports) {
 			if (transport.getSourceType() == 0) {
@@ -4436,7 +4452,7 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("guestGuideString", toPreviewResult.getGuestGuideString());
 		model.addAttribute("printTime", DateUtils.format(new Date()));
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
-		model.addAttribute("imgPath", toPreviewResult.getImgPath());
+		model.addAttribute("imgPath", bizSettingCommon.getMyBizLogo(request));
 		model.addAttribute("groupOrder", toPreviewResult.getGroupOrder());
 		model.addAttribute("supplier", toPreviewResult.getSupplier());
 		model.addAttribute("company",toPreviewResult.getCompany()); // 当前单位
@@ -4455,7 +4471,7 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("guestList", toGetGuestString(toPreviewResult.getGuests()));
 		model.addAttribute("orderId", orderId);
 		model.addAttribute("guests", toPreviewResult.getGuests());
-		model.addAttribute("orderType", toPreviewResult.getGroupOrder().getOrderType());
+		model.addAttribute("orderType", toPreviewResult.getGroupOrder()==null?"":toPreviewResult.getGroupOrder().getOrderType());
 		model.addAttribute("hotelNum", getHotelNum(toPreviewResult.getGrogShopList()));
 		model.addAttribute("upAndOff",
 				"接机：" + getAirInfo(toPreviewResult.getGroupOrderTransports(), 0) + "\n" + "送机："
@@ -4529,7 +4545,7 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("guest_leader", toGetLeaderString(toPreviewResult.getGuests())); // 姓名和电话
 		model.addAttribute("printTime", DateUtils.format(new Date()));
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
-		model.addAttribute("imgPath", toPreviewResult.getImgPath());
+		model.addAttribute("imgPath", bizSettingCommon.getMyBizLogo(request));
 		model.addAttribute("groupOrder", toPreviewResult.getGroupOrder());
 		model.addAttribute("supplier", toPreviewResult.getSupplier());
 		model.addAttribute("company",toPreviewResult.getCompany()); // 当前单位
@@ -4691,7 +4707,7 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("groupRouteDayVOs", result.getGroupRouteDayVOs());
 		model.addAttribute("supplierList", result.getSupplierList());
 		model.addAttribute("po", result.getPo());
-		model.addAttribute("imgPath", result.getImgPath());
+		model.addAttribute("imgPath", bizSettingCommon.getMyBizLogo(request));
 		model.addAttribute("tour", result.getTour());
 		model.addAttribute("printTime", DateUtils.format(new Date()));
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
@@ -4820,7 +4836,7 @@ public class TourGroupController extends BaseController {
 		// model.addAttribute("groupRouteDayVOs", groupRouteDayVOs);
 		model.addAttribute("supplierList", toSKChargePreviewResult.getSupplier());
 		model.addAttribute("po", toSKChargePreviewResult.getPo());
-		model.addAttribute("imgPath", toSKChargePreviewResult.getImgPath());
+		model.addAttribute("imgPath", bizSettingCommon.getMyBizLogo(request));
 		model.addAttribute("tour", toSKChargePreviewResult.getTour());
 		model.addAttribute("printTime", DateUtils.format(new Date()));
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
@@ -5116,7 +5132,7 @@ public class TourGroupController extends BaseController {
 		
 		String url = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis() + ".doc";
 		
-		String imgPath = result.getImgPath();
+		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		GroupOrder supplier = result.getSupplier();
 		TourGroup tour = result.getTour();
 		String guideStr = result.getGuide();
