@@ -214,7 +214,9 @@ public class FitGroupController extends BaseController {
 //		model.addAttribute("page", pageBean);
 		
 		ToSecImpNotGroupListDTO toSecImpNotGroupListDTO=new ToSecImpNotGroupListDTO();
-		
+		toSecImpNotGroupListDTO.setGroupOrder(groupOrder);
+		toSecImpNotGroupListDTO.setCurBizId(WebUtils.getCurBizId(request));
+		toSecImpNotGroupListDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 		
 		ToSecImpNotGroupListResult result=fitGroupFacade.toSecImpNotGroupList(toSecImpNotGroupListDTO);
 		

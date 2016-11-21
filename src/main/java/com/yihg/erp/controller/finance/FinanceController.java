@@ -2203,7 +2203,7 @@ public class FinanceController extends BaseController {
 		PlatformEmployeePo emp = WebUtils.getCurUser(request);
 		
 		AuditShopDTO dto = new AuditShopDTO();
-		dto.setCheckedIds(unCheckedIds);
+		dto.setCheckedIds(checkedIds);
 		dto.setEmployeeId(emp.getEmployeeId());
 		dto.setEmployeeName(emp.getName());
 		dto.setUnCheckedIds(unCheckedIds);
