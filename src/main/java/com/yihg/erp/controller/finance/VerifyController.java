@@ -12,6 +12,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceVerifyDetail;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
@@ -171,12 +172,31 @@ public class VerifyController extends BaseController {
 	public String verifyDetail(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, String verifyId) {
 		
 		VerifyDetailResult result = verifyFacade.verifyDetail(WebUtils.getCurBizId(request), verifyId);
-		
-		model.put("verify", result.getVerify());
-		model.put("total_price", result.getTotalPrice());
-		model.put("total_cash", result.getTotalCash());
-		model.put("total_not", result.getTotalNot());
-		model.put("total_adjust", result.getTotalAdjust());
+
+		List<FinanceVerifyDetail> financeVerifyDetailSum = result.getFinanceVerifyDetailSum();
+		if(financeVerifyDetailSum != null && financeVerifyDetailSum.size()>0){
+			Map map= (Map) financeVerifyDetailSum.get(0);
+			if(map != null){
+				model.put("total_price", map.get("total_price"));
+				model.put("total_cash", map.get("total_cash"));
+				BigDecimal total_price = (BigDecimal)map.get("total_price");
+				BigDecimal total_cash = (BigDecimal)map.get("total_cash");
+				if(null==total_price){
+					total_price=new BigDecimal(0);
+				}
+				if(null==total_cash){
+					total_cash=new BigDecimal(0);
+				}
+				model.put("total_not",total_price.subtract(total_cash));
+				model.put("total_adjust", map.get("total_adjust"));
+			}
+		}
+
+		 model.put("verify", result.getVerify());
+		//model.put("total_price", result.getTotalPrice());
+		//model.put("total_cash", result.getTotalCash());
+		//model.put("total_not", result.getTotalNot());
+		//model.put("total_adjust", result.getTotalAdjust());
 		
 		return "finance/verify/verify-detail";
 	}
