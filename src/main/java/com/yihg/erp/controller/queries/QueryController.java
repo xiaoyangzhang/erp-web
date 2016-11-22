@@ -2902,6 +2902,7 @@ public class QueryController extends BaseController {
 		modelMap.addAttribute("allProvince", result.getAllProvince());
 		modelMap.addAttribute("cashType", result.getCashTypes());
 		modelMap.addAttribute("Type1", result.getType1());
+		modelMap.addAttribute("levelList", result.getLevelList());
 
 		return "queries/trainTicket/trainTicketList";
 	}
@@ -2952,6 +2953,7 @@ public class QueryController extends BaseController {
 		model.addAttribute("allProvince", result.getAllProvince());
 		model.addAttribute("cashType", result.getCashTypes());
 		model.addAttribute("Type1", result.getType1());
+		model.addAttribute("levelList", result.getLevelList());
 
 		return "queries/trainTicket/trainTicketJSFSList";
 	}
