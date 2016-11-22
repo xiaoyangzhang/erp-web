@@ -361,30 +361,9 @@ public class TeamGroupController extends BaseController {
 		return "sales/teamGroup/teamGroupInfo";
 	}
 
-	@RequestMapping(value = "saveTeamGroupInfo.do")
-	@ResponseBody
-	public String saveTeamGroupInfo(HttpServletRequest request,
-			TeamGroupVO teamGroupVO) throws ParseException {
-		if(teamGroupVO.getTourGroup().getId()==null){
-			teamGroupVO.getTourGroup().setGroupCode(settingCommon.getMyBizCode(request));
-			teamGroupVO.getGroupOrder().setOrderNo(settingCommon.getMyBizCode(request));
-		}else{
-			TourGroup tourGroup = teamGroupVO.getTourGroup();
-			tourGroup.setGroupCode(GroupCodeUtil.getCode(tourGroup.getGroupCode(), tourGroup.getGroupCodeMark()));
-		}
-		//TeamGroupVO tgv = teamGroupService.saveOrUpdateTeamGroupVO(WebUtils.getCurBizId(request), WebUtils.getCurUserId(request), WebUtils.getCurUser(request).getName(), teamGroupVO);
-		SaveTeamGroupInfoDTO saveTeamGroupInfoDTO = new SaveTeamGroupInfoDTO();
-		saveTeamGroupInfoDTO.setCurBizId(WebUtils.getCurBizId(request));
-		saveTeamGroupInfoDTO.setCurUserId(WebUtils.getCurUserId(request));
-		saveTeamGroupInfoDTO.setCurUserName(WebUtils.getCurUser(request).getName());
-		saveTeamGroupInfoDTO.setTeamGroupVO(teamGroupVO);
-		SaveTeamGroupInfoResult saveTeamGroupInfoResult = teamGroupFacade.saveTeamGroupInfo(saveTeamGroupInfoDTO);
-		return successJson("groupId",saveTeamGroupInfoResult.getTeamGroupVO().getTourGroup().getId()+"");
-	}
-
 	/**
 	 * 获取团队列表数据
-	 * 
+	 *
 	 * @param request
 	 * @param groupOrder
 	 * @param model
@@ -424,10 +403,31 @@ public class TeamGroupController extends BaseController {
 
 		return "sales/teamGroup/groupTable";
 	}
-	
+
+	@RequestMapping(value = "saveTeamGroupInfo.do")
+	@ResponseBody
+	public String saveTeamGroupInfo(HttpServletRequest request,
+									TeamGroupVO teamGroupVO) throws ParseException {
+		if(teamGroupVO.getTourGroup().getId()==null){
+			teamGroupVO.getTourGroup().setGroupCode(settingCommon.getMyBizCode(request));
+			teamGroupVO.getGroupOrder().setOrderNo(settingCommon.getMyBizCode(request));
+		}else{
+			TourGroup tourGroup = teamGroupVO.getTourGroup();
+			tourGroup.setGroupCode(GroupCodeUtil.getCode(tourGroup.getGroupCode(), tourGroup.getGroupCodeMark()));
+		}
+		//TeamGroupVO tgv = teamGroupService.saveOrUpdateTeamGroupVO(WebUtils.getCurBizId(request), WebUtils.getCurUserId(request), WebUtils.getCurUser(request).getName(), teamGroupVO);
+		SaveTeamGroupInfoDTO saveTeamGroupInfoDTO = new SaveTeamGroupInfoDTO();
+		saveTeamGroupInfoDTO.setCurBizId(WebUtils.getCurBizId(request));
+		saveTeamGroupInfoDTO.setCurUserId(WebUtils.getCurUserId(request));
+		saveTeamGroupInfoDTO.setCurUserName(WebUtils.getCurUser(request).getName());
+		saveTeamGroupInfoDTO.setTeamGroupVO(teamGroupVO);
+		SaveTeamGroupInfoResult saveTeamGroupInfoResult = teamGroupFacade.saveTeamGroupInfo(saveTeamGroupInfoDTO);
+		return successJson("groupId",saveTeamGroupInfoResult.getTeamGroupVO().getTourGroup().getId()+"");
+	}
+
 	/**
 	 * 跳转到组团新增中计调需求页面
-	 * 
+	 *
 	 * @param model
 	 * @return
 	 */
@@ -486,10 +486,10 @@ public class TeamGroupController extends BaseController {
 		model.addAttribute("operType",operType);
 		return "sales/teamGroup/groupRequirement";
 	}
-	
+
 	/**
 	 * 删除订单
-	 * 
+	 *
 	 * @param orderId
 	 * @param groupId
 	 * @param model
@@ -503,7 +503,7 @@ public class TeamGroupController extends BaseController {
 		if(financeService.hasAuditOrder(groupId)){
 			return errorJson("该团有已审核的订单,不允许删除！");
 		}
-		
+
 		if(financeService.hasPayOrIncomeRecord(groupId)){
 			return errorJson("该团有收付款记录,不允许删除！");
 		}
