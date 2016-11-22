@@ -2958,69 +2958,9 @@ public class QueryController extends BaseController {
 
 	@RequestMapping("trainTicketDetailList.htm")
 	public String trainTicketDetailQueries(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
-
-		 Integer bizId = WebUtils.getCurBizId(request);
-		// // getOrgAndUserTreeJsonStr(model, bizId);
-		// // model.addAttribute("bizId", bizId);
-		 Map parameters = WebUtils.getQueryParamters(request);
-		 if (null == parameters.get("startTime")
-		 && null == parameters.get("endTime")) {
-		 Calendar c = Calendar.getInstance();
-		 int year = c.get(Calendar.YEAR);
-		 int month = c.get(Calendar.MONTH);
-		 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		 c.set(year, month, 1, 0, 0, 0);
-		 // condition.setStartTime(df.format(c.getTime()));
-		 parameters.put("startTime", df.format(c.getTime()));
-		 // c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
-		 parameters.put("endTime", df.format(c.getTime()));
-		 // condition.setEndTime(df.format(c.getTime()));
-		
-		 }
-		// // condition.setSupplierType(Constants.AIRTICKETAGENT);
-		// if (StringUtils.isNotBlank((String) parameters.get("orgIds"))) {
-		// Set<Integer> set = new HashSet<Integer>();
-		// String[] orgIdArr = ((String) parameters.get("orgIds")).split(",");
-		// for (String orgIdStr : orgIdArr) {
-		// set.add(Integer.valueOf(orgIdStr));
-		// }
-		// List<PlatformOrgPo> orgList = orgService.getOrgListByIdSet(
-		// WebUtils.getCurBizId(request), set);
-		// StringBuilder sb = new StringBuilder();
-		// for (PlatformOrgPo orgPo : orgList) {
-		// sb.append(orgPo.getName() + ",");
-		// }
-		// // condition.setOrgNames(sb.substring(0, sb.length()-1));
-		// parameters.put("orgNames", sb.substring(0, sb.length() - 1));
-		//
-		// }
-		// // 如果计调不为null，查询计调名字
-		// if (StringUtils.isNotBlank((String)
-		// parameters.get("saleOperatorIds"))) {
-		// Set<Integer> set = new HashSet<Integer>();
-		// String[] userIdArr = ((String) parameters.get("saleOperatorIds"))
-		// .split(",");
-		// for (String userIdStr : userIdArr) {
-		// set.add(Integer.valueOf(userIdStr));
-		// }
-		// List<PlatformEmployeePo> empList = platformEmployeeService
-		// .getEmpList(WebUtils.getCurBizId(request), set);
-		// StringBuilder sb = new StringBuilder();
-		// for (PlatformEmployeePo employeePo : empList) {
-		// sb.append(employeePo.getName() + "");
-		// }
-		// // condition.setSaleOperatorName(sb.substring(0, sb.length()-1));
-		// parameters
-		// .put("saleOperatorName", sb.substring(0, sb.length() - 1));
-		// }
-		 parameters.put("supplierType", Constants.TRAINTICKETAGENT);
-		// model.put("condition", parameters);
-		// List<DicInfo> cashTypes = dicService.getListByTypeCode(
-		// BasicConstants.GYXX_JSFS, bizId);
-		// model.addAttribute("cashType", cashTypes);
-
+		Map parameters = WebUtils.getQueryParamters(request);
 		AirTicketDetailQueriesDTO airTicketDetailQueriesDTO = new AirTicketDetailQueriesDTO();
-		airTicketDetailQueriesDTO.setBizId(WebUtils.getCurBizId(request));
+		airTicketDetailQueriesDTO.setBizId(Integer.valueOf(WebUtils.getCurBizId(request)));
 		airTicketDetailQueriesDTO.setParameters(parameters);
 
 		AirTicketDetailQueriesResult result = dataAnalysisFacade.trainTicketDetailQueries(airTicketDetailQueriesDTO);
