@@ -173,7 +173,7 @@ public class ProductPricePlusController extends BaseController {
 		//model.addAttribute("groupId", groupId);
 		model.addAttribute("groupSuppliers", result.getGroupSuppliers());
 		model.addAttribute("supplierName", condition.getSupplierName());
-		model.addAttribute("city", condition.getSupplierName());
+		model.addAttribute("city", condition.getCity());
 		return "product/priceplus/newSupplier";
 	}
 	/**

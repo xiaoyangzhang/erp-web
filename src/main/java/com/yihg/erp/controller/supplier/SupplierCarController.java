@@ -133,6 +133,7 @@ public class SupplierCarController extends BaseController {
 			HttpServletResponse reponse, ModelMap model, Integer id) {
 		EditSupplierCarResult webResult = supplierCarFacade.toEditSupplierCar(id, Constants.FLEET_TYPE_CODE);
 		
+		model.addAttribute("supplierCarVO", webResult.getSupplierCarVO());
 		model.addAttribute("carType", webResult.getList());
 		model.addAttribute("config", config);
 		return "supplier/car/editSupplierCar";

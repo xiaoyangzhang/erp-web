@@ -1,23 +1,22 @@
 package com.yihg.erp.controller.airticket;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.net.URLDecoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.alibaba.fastjson.JSON;
+import com.yihg.erp.aop.PostHandler;
+import com.yihg.erp.contant.ExcelOptConstant;
+import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.utils.ExcelReporter;
+import com.yihg.erp.utils.WebUtils;
+import com.yimayhd.erpcenter.common.exception.ClientException;
+import com.yimayhd.erpcenter.dal.basic.po.AirLine;
+import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketLeg;
+import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketResource;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.facade.ticket.query.SaveResourceDTO;
+import com.yimayhd.erpcenter.facade.ticket.query.ShowListResourceDTO;
+import com.yimayhd.erpcenter.facade.ticket.result.EditResourceResult;
+import com.yimayhd.erpcenter.facade.ticket.result.ShowListResourceResult;
+import com.yimayhd.erpcenter.facade.ticket.result.WebResult;
+import com.yimayhd.erpcenter.facade.ticket.service.ResourceFacade;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -30,25 +29,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.alibaba.fastjson.JSON;
-import com.yihg.erp.aop.PostHandler;
-import com.yihg.erp.bo.airticket.AirTicketResourceBO;
-import com.yihg.erp.contant.ExcelOptConstant;
-import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.utils.ExcelReporter;
-import com.yihg.erp.utils.WebUtils;
-import com.yihg.mybatis.utility.PageBean;
-import com.yimayhd.erpcenter.common.exception.ClientException;
-import com.yimayhd.erpcenter.dal.basic.po.AirLine;
-import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketLeg;
-import com.yimayhd.erpcenter.dal.sales.client.airticket.po.AirTicketResource;
-import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
-import com.yimayhd.erpcenter.facade.ticket.query.SaveResourceDTO;
-import com.yimayhd.erpcenter.facade.ticket.query.ShowListResourceDTO;
-import com.yimayhd.erpcenter.facade.ticket.result.EditResourceResult;
-import com.yimayhd.erpcenter.facade.ticket.result.ShowListResourceResult;
-import com.yimayhd.erpcenter.facade.ticket.result.WebResult;
-import com.yimayhd.erpcenter.facade.ticket.service.ResourceFacade;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 
 @Controller
