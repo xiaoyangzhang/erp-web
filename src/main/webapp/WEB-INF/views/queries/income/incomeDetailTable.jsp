@@ -65,7 +65,7 @@
 						pattern="yyyy-MM-dd" /></td>
 				<td>${v.cashType}</td>
 				<td>${v.type1Name }</td>
-				<td>${v.itemBrief }</td>
+				<td>${v.remark }</td>
 				<td>	<fmt:formatNumber value="${v.itemPrice }" pattern="#.##" type="currency"/></td>
 				<td>	<fmt:formatNumber value="${v.itemNum }" pattern="#.#" type="number"/></td>
 					
