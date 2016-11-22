@@ -1640,58 +1640,21 @@ public class BookingGuideController extends BaseController {
 	
 	@RequestMapping(value = "/paymentDetail.htm")
 	public String paymentDetail(Integer groupId,Integer bookingId,ModelMap model,HttpServletRequest request){
-//		TourGroup group = tourGroupService.selectByPrimaryKey(groupId);//团信息
-//		BookingGuidesVO guidesVo = bookingGuideService.selectBookingGuideVoByGroupIdAndId(bookingId);
-		
-		HashMap<Object, Object> map =new HashMap<Object, Object>();
-		FinanceGuide financeGuide =new FinanceGuide();
-		financeGuide.setBookingId(bookingId);
-		financeGuide.setGroupId(groupId);
-//		List<BookingSupplier> bookingSuppliers = bookingSupplierService.selectByGroupId(groupId);
-//		for (BookingSupplier bookingSupplier : bookingSuppliers) {
-//			financeGuide.setSupplierType(bookingSupplier.getSupplierType());
-//			List<BookingSupplier> bookingSupplierList = financeGuideService.getFinanceSupplier(financeGuide);
-//			getSupplierDetail(bookingSupplierList);
-//			map.put(bookingSupplier.getSupplierType(), bookingSupplierList);
-//		}
-		
-//		PageBean commPageBean = new PageBean();
-//		Map<String,Object> commMap  = new HashMap<String, Object>();
-//		commMap.put("groupId", groupId);
-//		commMap.put("guideId", guidesVo.getGuide().getGuideId());
-//		commPageBean.setParameter(commMap);
-		BookingGuideResult result = bookingGuideFacade.paymentDetail(groupId, bookingId);
+
+		BookingGuideResult result = bookingGuideFacade.paymentDetail(groupId, bookingId,WebUtils.getCurBizId(request));
 		model.addAttribute("groupId", groupId);
 		model.addAttribute("guideId", result.getGuidesVO().getGuide().getGuideId());
-		
-//		List<FinanceCommission> guideComms = financeGuideService.getCommisions(commPageBean);
-		model.addAttribute("guideComms", result.getFinanceCommissions());
-		
-//		List<FinanceCommission> guideCommDeductions = financeGuideService.getCommisionDeductions(commPageBean);
+		model.addAttribute("guideComms", result.getGuideComms());
 		model.addAttribute("guideCommDeductions", result.getGuideCommDeductions());
-		
 		model.addAttribute("guideName", result.getGuidesVO().getGuide().getGuideName());
 		model.addAttribute("group", result.getTourGroup());
-		model.addAttribute("map", map);
+		model.addAttribute("map", result.getMap());
 		model.addAttribute("supplierTypeMap",SupplierConstant.supplierTypeMap);
-		
-//		List<DicInfo> dicInfoList = dicService.getListByTypeCode(BasicConstants.YJ_XMLX, WebUtils.getCurBizId(request));
-		//List<com.yimayhd.erpcenter.dal.basic.po.DicInfo> dicInfoList = saleCommonFacade.getCommissionItemListByTypeCode(WebUtils.getCurBizId(request));
-
-		DicListResult dicListResult = saleCommonFacade.getDicList(WebUtils.getCurBizId(request));
-		model.addAttribute("dicInfoList", dicListResult.getCommissionTypes());
-		
-//		List<DicInfo> bankList = dicService
-//				.getListByTypeCode(BasicConstants.SUPPLIER_BANK);
-		model.addAttribute("bankList", dicListResult.getBankList());
-//		List<DicInfo> payTypeList = dicService.getListByTypeCode(BasicConstants.CW_ZFFS);
-		model.addAttribute("payTypeList", dicListResult.getPayChannels());
-		
-//		List<SysBizBankAccount> bizAccountList = sysBizBankAccountService.getListByBizId(WebUtils.getCurBizId(request));
-		model.addAttribute("bizAccountList", dicListResult.getBizAccountList());
-		
+		model.addAttribute("dicInfoList", result.getDicInfoList());
+		model.addAttribute("bankList", result.getBankList());
+		model.addAttribute("payTypeList", result.getPayTypeList());
+		model.addAttribute("bizAccountList", result.getBizAccountList());
 		model.addAttribute("pay_user_name",WebUtils.getCurUser(request).getName());
-		
 		return "operation/guide/guide-finance-payment";
 	}
 	
