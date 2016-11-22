@@ -398,7 +398,7 @@ public class ContractController extends BaseController{
     public String deleteFleetContract(HttpServletRequest request,
                                  @PathVariable("contractId") Integer contractId){
         Integer bizId = WebUtils.getCurBizId(request);
-        WebResult<Boolean> webResult = contractFacade.copyContract(bizId, contractId);
+        WebResult<Boolean> webResult = contractFacade.deleteFleetContract(bizId, contractId);
         if(!webResult.isSuccess()){
 			return errorJson("操作失败");
 		}

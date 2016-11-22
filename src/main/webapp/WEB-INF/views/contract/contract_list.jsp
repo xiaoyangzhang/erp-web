@@ -145,6 +145,7 @@
                     <form id="queryForm"  action="<%=path%>/contract/fleet-list.htm" method="post">
                         <input type="hidden" name="page" value="${page.page}" id="searchPage" />
                         <input type="hidden" name="pageSize" value="${page.pageSize}" id="searchPageSize" />
+                        <input type="hidden" name="shopSupplierId" value="${supplierId}"  />
                         <ul>
                             <li class="text">
                                 <label class="control-label" for="contractName">合同名称：</label>
