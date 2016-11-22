@@ -118,6 +118,7 @@ public class TourGroupController extends BaseController {
 
 	@Autowired
 	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
+	@Autowired
 	private SysPlatformOrgFacade sysPlatformOrgFacade;
 
 //	@Autowired
