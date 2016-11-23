@@ -7069,7 +7069,8 @@ public class QueryController extends BaseController {
 		queryDTO.setTourGroup(tourGroup);
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
-		QueryResult queryResult = queryFacade.productTrendTableList(queryDTO);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		QueryResult queryResult = queryFacade.groupDateQueryData(queryDTO);
 		model.addAttribute("page", queryResult.getPageBean());
 		model.addAttribute("tg", queryResult.getTourGroup());
 		if (tourGroup.getOperType() != null && tourGroup.getOperType() == 1) {
