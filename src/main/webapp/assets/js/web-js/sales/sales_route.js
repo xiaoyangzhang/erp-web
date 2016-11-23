@@ -25,7 +25,7 @@ var SalesRoute = function SalesRoute(dataConstruct){
     			  source: function( request, response ) {
     				  var name=encodeURIComponent(request.term);
     				  $.ajax({
-    					  type : "get",
+    					  type : "post",
     					  url : "../route/getNameList.do",
     					  data : {
     						  name : name
