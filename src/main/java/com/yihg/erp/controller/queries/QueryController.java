@@ -7445,6 +7445,11 @@ public class QueryController extends BaseController {
 		queryDTO.setPage(page);
 		queryDTO.setPageSize(pageSize);
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setGroup(group);
+		queryDTO.setSvc(svc);
+		queryDTO.setRp(rp);
+		queryDTO.setSl(sl);
+		queryDTO.setSsl(ssl);
 		QueryResult queryResult = queryFacade.settleListPage(queryDTO);
 		model.addAttribute("guideMap", queryResult.getGuideMap());
 		model.addAttribute("sum", queryResult.getSum());
