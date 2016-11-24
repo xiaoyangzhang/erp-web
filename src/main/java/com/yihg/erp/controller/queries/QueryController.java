@@ -6905,6 +6905,7 @@ public class QueryController extends BaseController {
 		queryDTO.setGroupOrder(order);
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 		QueryResult queryResult = queryFacade.productGuestNumTable(queryDTO);
 		model.addAttribute("pageBean", queryResult.getPageBean());
 		return "queries/productGuestNum/productGuestNumTable";
@@ -7105,7 +7106,7 @@ public class QueryController extends BaseController {
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
 		QueryResult queryResult = queryFacade.productTrendTableList(queryDTO);
-		model.addAttribute("allProvince", queryResult.getRegionInfoList());
+		model.addAttribute("allProvince", productCommonFacade.queryProvinces().getRegionList());
 		return "queries/guestSourceShop/supplier-guest_source-shopping-list";
 
 	}
@@ -7152,6 +7153,7 @@ public class QueryController extends BaseController {
 		queryDTO.setGroupOrder(groupOrder);
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 		QueryResult queryResult = queryFacade.supplierGuestSourceShop(queryDTO);
 		model.addAttribute("shopState", groupOrder.getShopDetailDeploy().getShoppingDataState());
 		model.addAttribute("pageBean",queryResult.getPageBean());

@@ -314,7 +314,7 @@
 	
 	/* 打印 */
 	function goPrintOrder(obj){
-		alert("id="+obj);
+		/*alert("id="+obj);*/
 	}
 	
 	/* 出票管理 */
