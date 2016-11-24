@@ -193,6 +193,7 @@ public class TourGroupController extends BaseController {
 		ChangeGroupDTO changeGroupDTO = new ChangeGroupDTO();
 		changeGroupDTO.setGroupId(groupId);
 		changeGroupDTO.setOrderIds(orderIds);
+		changeGroupDTO.setTourGroup(tourGroup);
 		changeGroupDTO.setInfo(info);
 		changeGroupDTO.setCurUserId(WebUtils.getCurUserId(request));
 		changeGroupDTO.setCurUserName(WebUtils.getCurUser(request).getName());

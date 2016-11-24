@@ -7070,7 +7070,8 @@ public class QueryController extends BaseController {
 		queryDTO.setTourGroup(tourGroup);
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
-		QueryResult queryResult = queryFacade.productTrendTableList(queryDTO);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		QueryResult queryResult = queryFacade.groupDateQueryData(queryDTO);
 		model.addAttribute("page", queryResult.getPageBean());
 		model.addAttribute("tg", queryResult.getTourGroup());
 		if (tourGroup.getOperType() != null && tourGroup.getOperType() == 1) {
@@ -7446,6 +7447,11 @@ public class QueryController extends BaseController {
 		queryDTO.setPage(page);
 		queryDTO.setPageSize(pageSize);
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setGroup(group);
+		queryDTO.setSvc(svc);
+		queryDTO.setRp(rp);
+		queryDTO.setSl(sl);
+		queryDTO.setSsl(ssl);
 		QueryResult queryResult = queryFacade.settleListPage(queryDTO);
 		model.addAttribute("guideMap", queryResult.getGuideMap());
 		model.addAttribute("sum", queryResult.getSum());
