@@ -41,7 +41,9 @@ function mergeGroup(ids) {
 
 }
 
-
+function reset() {
+	$("#toImpNotGroupListForm").clearForm();
+}
 
 
 
@@ -79,7 +81,7 @@ function mergeGroup(ids) {
 						<li class="text"></li>
 						<li><button type="submit"
 								class="button button-primary button-small">查询</button>
-							<button type="reset"
+							<button type="reset" onclick="reset()"
 								class="button button-primary button-small">重置</button>
 							<button type="button"
 								class="button button-primary button-small" onclick="mergeGroup('${idLists}')">确定</button>

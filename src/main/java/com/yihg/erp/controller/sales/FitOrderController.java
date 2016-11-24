@@ -370,9 +370,9 @@ public class FitOrderController extends BaseController {
 //				return errorJson("由于库存剩余数有变化，目前剩余库存不足【" + newNum + "】！实际库存还有【" + freeCount + "】");
 //			}
 //			
-//			
-			fitOrderVO.getGroupOrder().setOrderNo(
-					bizSettingCommon.getMyBizCode(request));
+			if (fitOrderVO.getGroupOrder().getId() == null) {
+				fitOrderVO.getGroupOrder().setOrderNo(bizSettingCommon.getMyBizCode(request));
+			}
 //			String bizConfigValue = WebUtils.getBizConfigValue(request,
 //					BizConfigConstant.AUTO_MERGE_ORDER);
 //			boolean mergeGroup = false;
@@ -402,6 +402,7 @@ public class FitOrderController extends BaseController {
 		
 		SaveFitOrderInfoDTO saveFitOrderInfoDTO=new SaveFitOrderInfoDTO();
 		saveFitOrderInfoDTO.setFitOrderVO(fitOrderVO);
+//		saveFitOrderInfoDTO.set
 		saveFitOrderInfoDTO.setCurBizId(WebUtils.getCurUserId(request));
 		saveFitOrderInfoDTO.setCurUserName(WebUtils.getCurUser(request).getName());
 		saveFitOrderInfoDTO.setCurBizId(WebUtils.getCurBizId(request));
