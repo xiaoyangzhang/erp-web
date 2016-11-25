@@ -1,17 +1,19 @@
 package com.yihg.erp.utils;
 
-import com.yihg.erp.contant.SecurityConstant;
-import com.yihg.sys.po.PlatformEmployeePo;
-import com.yihg.sys.po.PlatformOrgPo;
-import com.yihg.sys.po.SysBizInfo;
-import com.yihg.sys.po.UserSession;
-import org.apache.commons.lang.StringUtils;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.yihg.erp.contant.SecurityConstant;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
+import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
+import com.yimayhd.erpcenter.dal.sys.po.UserSession;
 
 public class WebUtils {
 	/**
