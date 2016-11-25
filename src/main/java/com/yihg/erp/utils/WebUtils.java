@@ -1,20 +1,17 @@
 package com.yihg.erp.utils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import com.yihg.erp.contant.SecurityConstant;
+import com.yihg.sys.po.PlatformEmployeePo;
+import com.yihg.sys.po.PlatformOrgPo;
+import com.yihg.sys.po.SysBizInfo;
+import com.yihg.sys.po.UserSession;
+import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang.StringUtils;
-
-import com.alibaba.fastjson.JSONObject;
-import com.yihg.erp.contant.SecurityConstant;
-import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
-import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
-import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
-import com.yimayhd.erpcenter.dal.sys.po.UserSession;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class WebUtils {
 	/**
@@ -128,16 +125,7 @@ public class WebUtils {
     		}
     	}
 		return null;*/
-		
-		//TODO 后续统一替换成新的代码模式 liyong
-		com.yimayhd.erpcenter.dal.sys.po.UserSession uss =(com.yimayhd.erpcenter.dal.sys.po.UserSession)request.getAttribute("userSession");
-		if(uss != null){
-//			String json = JSONObject.toJSONString(uss);
-//			return JSONObject.parseObject(json, UserSession.class);
-			return uss;
-		}else{
-			return null;
-		}
+		return (UserSession)request.getAttribute("userSession");
 	}	
 	
 	public static String getBizConfigValue(HttpServletRequest request,String key){
@@ -197,7 +185,7 @@ public class WebUtils {
 		Set<String> keys = rm.keySet();
 		for (String k : keys) {
 			String val =request.getParameter(k);
-			pm.put(k, StringUtils.isBlank(val) ? null : val);
+			pm.put(k, StringUtils.isBlank(val) ? null : val.trim());
 		}
 		return pm;
 	}

@@ -244,12 +244,18 @@ var addPrice =function(type,str, rowObj){
 var addPriceFromPersonEdit =function(type, str, rowObj){
 		var isExists = priceRowIsExists(rowObj.itemName);
 		if (rowObj && isExists != -1){
-				$("input[name='groupOrderPriceList["+isExists+"].numPerson']").val(rowObj.numPerson);
-				priceRowCals(isExists);
-				priceRow_setReadonly(isExists); //设置为只读
-				countTotalPrice(isExists); //此方法在：taobaoOrderList.js
+				if (parseInt(rowObj.numPerson) <= 0){
+					var txtObj = document.getElementsByName("groupOrderPriceList["+isExists+"].numPerson")[0];
+					delPriceTable(txtObj,'newPrice')
+				}else{
+					$("input[name='groupOrderPriceList["+isExists+"].numPerson']").val(rowObj.numPerson);
+					priceRowCals(isExists);
+					priceRow_setReadonly(isExists); //设置为只读
+					countTotalPrice(isExists); //此方法在：taobaoOrderList.js
+				}
 			}else{
-				addPrice(type, str, rowObj);
+				if (parseInt(rowObj.numPerson) > 0)
+					addPrice(type, str, rowObj);
 			}
 }
 var priceRowIsExists = function(remark){

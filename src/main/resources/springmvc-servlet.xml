@@ -90,6 +90,8 @@
 						<value>/logout.**</value>
 						<value>/assets/**</value>
 						<value>/b2b/**</value>
+						<value>/taobaoJst/**</value>
+						<value>/visa.**</value>
 					</list>
 				</property>				
 			</bean>

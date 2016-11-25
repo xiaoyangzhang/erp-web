@@ -2,7 +2,6 @@
 $(function(){
 	loadRoute();
 	queryList();
-	 var see=$("#see").val();
 	$("#provinceCode").change(
 			function() {
 				if ($("#provinceCode").val() != -1) {
@@ -21,28 +20,6 @@ $(function(){
 					});
 				}else {
 					$("#cityCode").html("<option value='-1'>请选择市</option>");
-					$("#provinceName").val('');
-				}
-
-	});
-	$("#departProvinceCode").change(
-			function() {
-				if ($("#departProvinceCode").val() != -1) {
-					
-					$.getJSON("../basic/getRegion.do?id="
-							+ $("#departProvinceCode").val(), function(data) {
-						data = eval(data);
-						var s = "<option value='-1'>请选择市</option>";
-						$.each(data, function(i, item) {
-							s += "<option value='" + item.id + "'>" + item.name
-									+ "</option>";
-						});
-						$("#departCityCode").html(s);
-						$("#departProvinceName").val($("#departProvinceCode option:selected").text());
-						
-					});
-				}else {
-					$("#departCityCode").html("<option value='-1'>请选择市</option>");
 					$("#provinceName").val('');
 				}
 
@@ -71,13 +48,7 @@ $(function(){
 		}
 	});
 	
-	$("#departCityCode").change(function(){
-		if($("#departCityCode").val()!=-1){
-			$("#departCityName").val($("#departCityCode option:selected").text());
-		}else{
-			$("#departCityName").val('');
-		}
-	});
+
 	
 	
 	
@@ -108,6 +79,9 @@ $(function(){
 				digits : true
 			},
 			'groupOrder.departureDate' : {
+				required : true
+			},
+			'groupOrder.productBrandName' : {
 				required : true
 			},
 			'groupOrder.productName' : {
@@ -150,19 +124,14 @@ $(function(){
 				return;
 			}
 			//checkProvince();
+			
+			
 
 		      if($("#orderMode").val()==-1){
 		    	  $.warn('请选择业务类别');
 		    	  return ;
 		      }
 		      
-		      if($("#requireTraffic").val() == "1"){
-		    	  if ($("#newTransportData tr").length <= 0){
-		    		  $.warn('请输入接送信息！');
-		    		  return;
-		    	  }
-		      }
-		 
 			var options = {
 				url : "saveSpecialGroup.do",
 				type : "post",
@@ -170,7 +139,7 @@ $(function(){
 				success : function(data) {
 					if (data.success) {
 						$.success('操作成功',function(){
-							refreshWindow('编辑订单','toEditTaobaoOrder.htm?id='+data.groupId+'&see='+see)
+							refreshWindow('编辑订单','toEditTaobaoOrder.htm?id='+data.groupId)
 						});
 					} else {
 						$.error(data.msg);
@@ -624,7 +593,7 @@ function editGroup(id){
  */
 function delGroup(id){
 	$.confirm("确认删除吗？", function() {
-		$.getJSON("../groupOrder/delTaobaoGroupOrder.do?id=" + id, function(data) {
+		$.getJSON("../groupOrder/delGroupOrder.do?id=" + id, function(data) {
 			if (data.success) {
 				$.success('操作成功',function(){
 					refershPage();
@@ -651,7 +620,7 @@ function queryList(page,pageSize) {
 	$("#orderPageSize").val(pageSize);
 	var options = {
 		/*url:"getSpecialGroupData.do",*/
-		url:"taobaoOrderList_table.htm",
+		url:"taobaoOrderListByOp_table.htm",
     	type:"post",
     	dataType:"html",
     	success:function(data){
@@ -663,6 +632,52 @@ function queryList(page,pageSize) {
     };
     $("#specialGroupListForm").ajaxSubmit(options);	
 }
+
+
+/* 导出到Excel */
+function toTaoBaoOperatorExcel(){
+	$("#toTaoBaoOperatorExcelId").attr("href","toOperatorOrderPreview.htm?startTime="+$("#startTime").val()
+			+"&endTime="+$("#endTime").val()
+			+"&dateType="+$("#dateType").val()
+			+"&groupCode="+$("#groupCode").val()
+			+"&supplierName="+$("#supplierName").val()
+			+"&receiveMode="+$("#receiveMode").val()
+			+"&orderMode="+$("#orderMode").val()
+			+"&stateFinance="+$("#stateFinance").val()
+			+"&buyerNick="+$("#buyerNick").val()
+			+"&guestName="+$("#guestName").val()
+			+"&orderLockState="+$("#orderLockState").val()
+			+"&orgIds="+$("#orgIds").val()
+			+"&operType="+$("#operType").val()
+			+"&saleOperatorIds="+$("#saleOperatorIds").val()
+			+"&productBrandId="+$("#productBrandId").val()
+			+"&productName="+$("#productName").val() 
+			+"&page="+$("#orderPage").val()
+			+"&pageSize="+$("#orderPageSize").val());
+}
+
+/* 导出简表 */
+function toTaoBaoSummaryTable(){
+	$("#toTaoBaoSummaryTableId").attr("href","toOperatorSummaryTable.do?startTime="+$("#startTime").val()
+			+"&endTime="+$("#endTime").val()
+			+"&dateType="+$("#dateType").val()
+			+"&groupCode="+$("#groupCode").val()
+			+"&supplierName="+$("#supplierName").val()
+			+"&receiveMode="+$("#receiveMode").val()
+			+"&orderMode="+$("#orderMode").val()
+			+"&stateFinance="+$("#stateFinance").val()
+			+"&buyerNick="+$("#buyerNick").val()
+			+"&guestName="+$("#guestName").val()
+			+"&orderLockState="+$("#orderLockState").val()
+			+"&orgIds="+$("#orgIds").val()
+			+"&operType="+$("#operType").val()
+			+"&saleOperatorIds="+$("#saleOperatorIds").val()
+			+"&productBrandId="+$("#productBrandId").val()
+			+"&productName="+$("#productName").val() 
+			+"&page="+$("#orderPage").val()
+			+"&pageSize="+$("#orderPageSize").val());
+}
+
 
 function searchBtn() {
 	var pageSize=$("#orderPageSize").val();
@@ -697,17 +712,26 @@ function toSaveSeatInCoach(strr) {
 				$.warn("第" + eval(i + 1) + "行输入格式有误！");
 				return false ;
 			}
-			var count = $("#"+strr+"Data").children('tr').length;
-			html = template('trans_template', {index : count});
-			$("#"+strr+"Data").append(html);
-			$("input[name='groupOrderTransportList["+count+"].departureDate']").val(infos[0]);
-			$("input[name='groupOrderTransportList["+count+"].departureTime']").val(infos[1]);
-			$("input[name='groupOrderTransportList["+count+"].classNo']").val(infos[2]);
 			if(infos.length==5){
+				var count = $("#"+strr+"Data").children('tr').length;
+				html = template('trans_template', {index : count});
+				$("#"+strr+"Data").append(html);
+				$("input[name='groupOrderTransportList["+count+"].departureDate']").val(infos[0]);
+				$("input[name='groupOrderTransportList["+count+"].departureTime']").val(infos[1]);
+				//$("input[name='groupOrderTransportList["+count+"].arrivalTime']").val(infos[1]);
+				$("input[name='groupOrderTransportList["+count+"].classNo']").val(infos[2]);
 				$("input[name='groupOrderTransportList["+count+"].departureCity']").val(infos[3]);
 				$("input[name='groupOrderTransportList["+count+"].arrivalCity']").val(infos[4]);
 			}
-			
+			if(infos.length==3){
+				var count = $("#"+strr+"Data").children('tr').length;
+				html = template('trans_template', {index : count});
+				$("#"+strr+"Data").append(html);
+				$("input[name='groupOrderTransportList["+count+"].departureDate']").val(infos[0]);
+				$("input[name='groupOrderTransportList["+count+"].departureTime']").val(infos[1]);
+				//$("input[name='groupOrderTransportList["+count+"].arrivalTime']").val(infos[1]);
+				$("input[name='groupOrderTransportList["+count+"].classNo']").val(infos[2]);
+			}
 			
 		}
 	}
@@ -718,7 +742,7 @@ function toSubmit(strName) {
 	var html = $("#guest_template").html();
 	var count = $("#"+strName+"Data").children('tr').length; // 订单id
 	var type = "1"; // 客人类型
-	var sum = 0 ; //总人数
+	var sum = 0 ;
 	var str = $("#batchInputText").val();
 
 	if (str == "" || str == null) {
@@ -748,7 +772,6 @@ function toSubmit(strName) {
 				}
 		}
 	}
-	
 	// 比对当前输入人数是否定制团人数范围之内
 	var numAdult =$("input[name='groupOrder.numAdult']").val();
 	var numChild =$("input[name='groupOrder.numChild']").val();
@@ -766,58 +789,129 @@ function toSubmit(strName) {
 		return ;
 	}
 	
-	//开始导入
-	for (var i = 0; i < strs.length; i++) {
-		if (strs[i] != "") {
-			var infos = new Array();
-			var va = strs[i].toString().replace("\n", "").replace(/，/g, ",").replace(/。/g, ",").replace(/，/g, ",").replace(/；/g, ",").replace(/;/g, ",");
-			infos = va.split(",");
+			for (var i = 0; i < strs.length; i++) {
+				if (strs[i] != "") {
+					var infos = new Array();
+					var va = strs[i].toString().replace("\n", "").replace(/，/g, ",").replace(/。/g, ",").replace(/，/g, ",").replace(/；/g, ",").replace(/;/g, ",");
+					infos = va.split(",");
 					
-			if (infos.length < 2) {
-				$.warn("第" + eval(i + 1) + "行输入格式有误！");
-				return false ;
-			}
+					if (infos.length != 3 && infos.length != 2) {
+						$.warn("第" + eval(i + 1) + "行输入格式有误！");
+						return false ;
+					}
 
-	        if($("input[name='groupOrder.receiveMode']").val()==''){
-				$("input[name='groupOrder.receiveMode']").val(infos[0]);
-			}
-			
-	        //开始处理客人信息
-	        var count = $("#"+strName+"Data").children('tr').length;
-			html = template('guest_template', {index : count});
-			$("#"+strName+"Data").append(html);
-			$("input[name='groupOrderGuestList["+count+"].name").val(infos[0]);
-			$("input[name='groupOrderGuestList["+count+"].certificateNum").val(infos[1]);
-			if(infos.length>=3){
-				$("input[name='groupOrderGuestList["+count+"].mobile").val(infos[2]);
-			}
-
-			$("input[name='groupOrderGuestList["+count+"].age']").change( function(e) {
-				if($(this).val().trim()<=12){
-					$("select[name='groupOrderGuestList["+count+"].type").val("2");
-				}else{
-					$("select[name='groupOrderGuestList["+count+"].type").val("1");
+			        if(infos.length == 3 && infos[2].trim()!=""){
+			        	if (infos[2].trim().length!=11){
+			        		$.warn('请输入有效的手机号码！');
+			        		return false;
+			        	}
+			        }
+			        
+			        if($("input[name='groupOrder.receiveMode']").val()==''){
+						$("input[name='groupOrder.receiveMode']").val(infos[0]);
+					}
+			     
+			        
+			        infos[1]= infos[1].trim();
+					if(reg.test(infos[1]) === true) {
+						infos[1]=infos[1].toUpperCase();
+						var data =  $.parseIDCard(infos[1]);
+						
+							if (data.age <=12) {
+								type = "2";
+							}else{
+								type="1" ;					
+							}
+							if(infos.length==2){
+								
+								
+								var count = $("#"+strName+"Data").children('tr').length;
+								html = template('guest_template', {index : count});
+								$("#"+strName+"Data").append(html);
+								$("input[name='groupOrderGuestList["+count+"].name").val(infos[0]);
+								if(data.gender=='男'){
+									$("input[name='groupOrderGuestList["+count+"].gender'][value=1]").attr("checked", "checked");
+								}else{
+									$("input[name='groupOrderGuestList["+count+"].gender'][value=0]").attr("checked", "checked");
+								}
+								$("input[name='groupOrderGuestList["+count+"].age").val(data.age);
+								$("select[name='groupOrderGuestList["+count+"].type").val(type);
+								$("input[name='groupOrderGuestList["+count+"].nativePlace").val(data.birthPlace);
+								$("input[name='groupOrderGuestList["+count+"].certificateNum").val(infos[1]);
+								$("input[name='groupOrderGuestList["+count+"].age']").change(
+										function(e) {
+									if($(this).val().trim()<=12){
+										$("select[name='groupOrderGuestList["+count+"].type").val("2");
+									}else{
+										$("select[name='groupOrderGuestList["+count+"].type").val("1");
+									}
+								});
+								
+							}
+							if(infos.length==3){
+								var count = $("#"+strName+"Data").children('tr').length;
+								html = template('guest_template', {index : count});
+								$("#"+strName+"Data").append(html);
+								$("input[name='groupOrderGuestList["+count+"].name").val(infos[0]);
+								if(data.gender=='男'){
+									$("input[name='groupOrderGuestList["+count+"].gender'][value=1]").attr("checked", "checked");
+								}else{
+									$("input[name='groupOrderGuestList["+count+"].gender'][value=0]").attr("checked", "checked");
+								}
+								$("input[name='groupOrderGuestList["+count+"].age").val(data.age);
+								$("select[name='groupOrderGuestList["+count+"].type").val(type);
+								$("input[name='groupOrderGuestList["+count+"].nativePlace").val(data.birthPlace);
+								$("input[name='groupOrderGuestList["+count+"].certificateNum").val(infos[1]);
+								$("input[name='groupOrderGuestList["+count+"].mobile").val(infos[2]);
+								$("input[name='groupOrderGuestList["+count+"].age']").change(
+										function(e) {
+									if($(this).val().trim()<=12){
+										$("select[name='groupOrderGuestList["+count+"].type").val("2");
+									}else{
+										$("select[name='groupOrderGuestList["+count+"].type").val("1");
+									}
+								});
+							}
+					}else{
+						if(infos.length==2){
+							var count = $("#"+strName+"Data").children('tr').length;
+							html = template('guest_template', {index : count});
+							$("#"+strName+"Data").append(html);
+							$("input[name='groupOrderGuestList["+count+"].name").val(infos[0]);
+							$("input[name='groupOrderGuestList["+count+"].certificateNum").val(infos[1]);
+							$("input[name='groupOrderGuestList["+count+"].certificateNum").after("<span style='color:red'></br>该证件号码不是身份证号</span>");
+							$("input[name='groupOrderGuestList["+count+"].age']").change(
+									function(e) {
+								if($(this).val().trim()<=12){
+									$("select[name='groupOrderGuestList["+count+"].type").val("2");
+								}else{
+									$("select[name='groupOrderGuestList["+count+"].type").val("1");
+								}
+							});
+						}
+						if(infos.length==3){
+							var count = $("#"+strName+"Data").children('tr').length;
+							html = template('guest_template', {index : count});
+							$("#"+strName+"Data").append(html);
+							$("input[name='groupOrderGuestList["+count+"].name").val(infos[0]);
+							$("input[name='groupOrderGuestList["+count+"].certificateNum").val(infos[1]);
+							$("input[name='groupOrderGuestList["+count+"].mobile").val(infos[2]);
+							$("input[name='groupOrderGuestList["+count+"].certificateNum").after("<span style='color:red'></br>该证件号码不是身份证号</span>");
+							$("input[name='groupOrderGuestList["+count+"].age']").change(
+									function(e) {
+								if($(this).val().trim()<=12){
+									$("select[name='groupOrderGuestList["+count+"].type").val("2");
+								}else{
+									$("select[name='groupOrderGuestList["+count+"].type").val("1");
+								}
+							});
+						}
+					}
 				}
-			});
-			
-	        //处理身份证
-			infos[1]= infos[1].trim();
-			if(reg.test(infos[1]) === true) {
-				infos[1]=infos[1].toUpperCase();
-				var data =  $.parseIDCard(infos[1]);
-				
-				type = (data.age <=12)?"2":"1";
-				$("select[name='groupOrderGuestList["+count+"].type").val(type);
-				$("input[name='groupOrderGuestList["+count+"].gender'][value="+(data.gender=='男'?"1":"0")+"]").attr("checked", "checked");
-				$("input[name='groupOrderGuestList["+count+"].nativePlace").val(data.birthPlace);
-				$("input[name='groupOrderGuestList["+count+"].age").val(data.age);
-			}else{
-				$("input[name='groupOrderGuestList["+count+"].certificateNum").after("<span style='color:red'></br>该证件号码不是身份证号</span>");
 			}
-		}
-	}
 
 	$("#bi").hide();
+	receiverMode_setValue(); //设置 接站牌的内容
 	checkProvince();
 }
 
@@ -856,56 +950,26 @@ function checkProvince(){
 	*/
 }
 
-function taobao_getReceiveText(sellerRemark){
-	var retArray = [];
-	
-	var startInd = sellerRemark.indexOf("<"),  endInd = sellerRemark.indexOf(">");
+function taobao_PorcessSellerMemo(aObj){
+	/*
+	 * 卖家备注提取：格式
+	 * {赵倩}操作20160911牟叶<牟叶|640103199401261522|15009612735,马喜迪|642221198811140702|,史超|640221199207282715|,罗超|640103198712100318|>[七彩盛宴6天5晚游]，4大。用房2标。银川出发。满额立减券： 100元
+	 */
+	var currOrder = $(aObj).closest("tr").find("td").text();
+	var startInd = currOrder.indexOf("<"),  endInd = currOrder.indexOf(">");
 	if (startInd != -1 && endInd != -1 && startInd < endInd){
-		var dateStart = '', dateStr = '';
-		var receiveMode = sellerRemark.substring(0, parseInt(startInd));
-		var guestMemo = sellerRemark.substring(startInd+1, parseInt(endInd));  //取出了尖括号内的结果
+		var guestMemo = currOrder.substring(startInd+1, parseInt(endInd));  //取出了尖括号内的结果
 		var guestArray = guestMemo.split(",");
 		$.each(guestArray, function(i, value){
 			guestArray[i] = guestArray[i].replace("|", ",").replace("|", ",").replace("|", ",");
 		});
-		if (receiveMode != '' && receiveMode.length>=8){
-			dateStart = receiveMode.substr(0,4)+"-"+receiveMode.substr(4,2)+"-"+receiveMode.substr(6,2);
-			dateStr =  receiveMode.substr(0,4)+receiveMode.substr(4,2)+receiveMode.substr(6,2);
-			receiveMode = receiveMode.substr(8,100);
-		}
-		retArray.push(dateStart);
-		retArray.push(receiveMode);
-		retArray.push(guestArray.join("\r"));
-		retArray.push(dateStr);
-	}
-	
-	return retArray;
-}
-function taobao_PorcessSellerMemo2(text, wangwang){
-	/*
-	 * 卖家备注提取：格式
-	 * 20160911牟叶<牟叶|640103199401261522|15009612735,马喜迪|642221198811140702|,史超|640221199207282715|,罗超|640103198712100318|>[七彩盛宴6天5晚游]，4大。用房2标。银川出发。满额立减券： 100元
-	 */
-	var resultArray = taobao_getReceiveText(text);
-	if (resultArray.length > 0){
-		var receiveMode = resultArray[3]+resultArray[1] ;
-		var dateStart = resultArray[0] ;
-		// if (wangwang != '') receiveMode = receiveMode + "("+wangwang+")";
-
-		if (receiveMode!='') $("#groupOrder_receiveMode").val(receiveMode);
-		if (dateStart != '') $("#groupOrder_departureDate").val(dateStart);
-
+		
 		//把结果放到：客人名称导入框里
-		$("#batchInputText").val(resultArray[2]);
+		$("#batchInputText").val(guestArray.join("\r"));
 		//执行导入操作
 		toSubmit('newGuest');
 	}
 
 }
-function taobao_PorcessSellerMemo(id, wangwang){
-	var text = $("#"+id).text();
-	if (text=='') 
-		text = $("#"+id).val();
-	taobao_PorcessSellerMemo2(text, wangwang);
-}
+
 
