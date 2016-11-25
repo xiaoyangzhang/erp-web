@@ -1,11 +1,14 @@
 package com.yihg.erp.controller.traffic;
 
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.erpcenterFacade.common.client.service.SaleCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +31,13 @@ import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
 import com.yimayhd.erpcenter.dal.product.po.TrafficRes;
 import com.yimayhd.erpcenter.dal.product.po.TrafficResProduct;
 import com.yimayhd.erpcenter.dal.product.vo.TrafficResVo;
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
 import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePay;
 import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePayDetail;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplierDetail;
+import com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.SpecialGroupOrderVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
@@ -50,6 +58,7 @@ import com.yimayhd.erpcenter.facade.tj.client.result.ToTraficEditResult;
 import com.yimayhd.erpcenter.facade.tj.client.result.TrafficAddResOrderResult;
 import com.yimayhd.erpcenter.facade.tj.client.result.WebResult;
 import com.yimayhd.erpcenter.facade.tj.client.service.ResTrafficFacade;
+import com.yimayhd.erpresource.dal.po.SupplierItem;
 
 @Controller
 @RequestMapping("/resTraffic")
@@ -65,6 +74,8 @@ public class ResTrafficController extends BaseController{
 	
 	@Autowired
 	private ResTrafficFacade resTrafficFacade;
+	@Autowired
+	private SaleCommonFacade saleCommonFacade;
 	
 	/**
 	 * 交通资源
@@ -242,10 +253,13 @@ public class ResTrafficController extends BaseController{
 		TrafficDTO trafficDTO = new TrafficDTO();
 		trafficDTO.setPage(page);
 		trafficDTO.setPageSize(pageSize);
+		String[] deftMappingSupplier = settingCommon.getOrgMappingSupplierId(WebUtils.getCurUser(request).getOrgId()); //获取当前登录用户默认对应的组团社ID
+		Map pm = WebUtils.getQueryParamters(request);
+		pm.put("currentOrgIdMappingSupplierId", deftMappingSupplier[0]);
 		trafficDTO.setPm(WebUtils.getQueryParamters(request));
 		PageBean result = resTrafficFacade.resProductList_table(trafficDTO);
 	    model.addAttribute("pageBean", result);
-
+	    model.addAttribute("config", config);
 		return "resTraffic/resProductList_table";
 	}
 	
@@ -264,6 +278,9 @@ public class ResTrafficController extends BaseController{
 		trafficResDTO.setBizId(WebUtils.getCurBizId(request));
 		String orgSupplierMapping = WebUtils.getBizConfigValue(request,BizConfigConstant.ORG_SUPPLIER_MAPPING);
 		trafficResDTO.setOrgSupplierMapping(orgSupplierMapping);
+		String[] defaultMappingSupplier = settingCommon.getOrgMappingSupplierId(WebUtils.getCurUser(request).getOrgId()); //获取当前登录用户默认对应的组团社ID
+		trafficResDTO.setSupplierId(Integer.parseInt(defaultMappingSupplier[0]));
+		trafficResDTO.setSupplierName(defaultMappingSupplier[1]);
 		trafficResDTO.setCurUser(WebUtils.getCurUser(request));
 		TrafficAddResOrderResult result = resTrafficFacade.addResOrder(trafficResDTO);
 		model.addAttribute("operType", 1);
@@ -564,6 +581,131 @@ public class ResTrafficController extends BaseController{
 		model.addAttribute("pageNum", result.getPage());
 		log.info("跳转到产品列表");
 		return "resTraffic/resProNameTable";
+	}
+	
+	@RequestMapping(value = "/ticketInfo.do")
+	public String ticketInfo(HttpServletRequest request, Integer resId,
+			ModelMap model) {
+		model.addAttribute("list",resTrafficFacade.ticketInfo(resId));
+		model.addAttribute("resId",resId);
+		return "resTraffic/ticketInfo";
+	}
+	
+	@RequestMapping("addTicket.do")
+	public String addTicket(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId, Integer bookingId, Integer resId,String guestIds,Integer num,
+			Integer adultNum,Integer childNum,Integer babyNum) {
+		if(guestIds!=null&&guestIds!=""){
+			guestIds=guestIds.substring(0,guestIds.length()-1);
+		}
+		Integer bizId = WebUtils.getCurBizId(request);
+		toAddSupplier(model, groupId, bookingId, bizId);
+		model.addAttribute("supplierType", Constants.AIRTICKETAGENT);
+		//机票
+		List<DicInfo> airTypes =saleCommonFacade.getAirTicketTypesByTypeCode();
+		model.addAttribute("airTypes", airTypes);
+		TrafficRes trafficRes=resTrafficFacade.addTicket(resId);
+		model.addAttribute("trafficRes", trafficRes);
+		model.addAttribute("guestIds", guestIds);
+		model.addAttribute("num", num);
+		model.addAttribute("adultNum", adultNum);
+		model.addAttribute("childNum", childNum);
+		model.addAttribute("babyNum", babyNum);
+		model.addAttribute("groupId", groupId);
+		return "resTraffic/addTicket";
+	}
+	
+	/**
+	 * 跳转到供应商编辑或新增页面
+	 *
+	 * @param model
+	 * @param groupId
+	 * @param bookingId
+	 */
+	private void toAddSupplier(ModelMap model, Integer groupId, Integer bookingId, Integer bizId) {
+		BookingSupplierDTO bookingSupplierDTO = new BookingSupplierDTO();
+		bookingSupplierDTO.setBookingId(bookingId);
+		bookingSupplierDTO.setGroupId(groupId);
+		bookingSupplierDTO.setBizId(bizId);
+		ToAddSupplierResult result =resTrafficFacade.toAddSupplier(bookingSupplierDTO);
+		
+		if (bookingId != null) {
+			model.addAttribute("supplier", result.getSupplier());
+			model.addAttribute("bookingDetailList", result.getDetailList);
+			
+			model.addAttribute("bookingId", bookingId);
+			if (null!=result.getSupplier() && result.getSupplier().getSupplierType().equals(Constants.SCENICSPOT)) {
+				model.addAttribute("supplierItems", result.getSupplierItems());
+			}
+		}
+		
+		model.addAttribute("groupId", groupId);
+		if (groupId != null) {
+			model.put("bookingGuides", result.getBookingGuides());
+		}
+		
+		//从字典中查询结算方式
+		model.addAttribute("cashTypes", result.getCashTypes());
+	}
+	
+	/**
+	 * 保存新增出票
+	 *
+	 * @param request
+	 * @param reponse
+	 * @param booking
+	 * @param groupId
+	 * @param supplierType
+	 * @param supplierId
+	 * @return
+	 * @throws ParseException s
+	 */
+	@RequestMapping("saveBooking.do")
+	@ResponseBody
+	public String saveBooking(HttpServletRequest request, HttpServletResponse reponse, BookingSupplier bookingSupplier, String financeGuideJson,BookingGroup detailVo) {
+		SaveBookingDTO saveBookingDTO = new SaveBookingDTO();
+		saveBookingDTO.setDetails(detailVo.getBookingSupplierDetails());
+		bookingSupplier.setUserId(WebUtils.getCurUserId(request));
+		bookingSupplier.setUserName(WebUtils.getCurUser(request).getName());
+		bookingSupplier.setCreateTime((new Date()).getTime());
+		bookingSupplier.setBookingDate(new Date());
+		saveBookingDTO.setBookingSupplier(bookingSupplier);
+		saveBookingDTO.setCode(settingCommon.getMyBizCode(request));
+		resTrafficFacade.saveBooking(saveBookingDTO);
+		return successJson();
+	}
+	
+	/**
+	 * 跳转至机位库存状态页面
+	 * @param request
+	 * @param resId
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value = "/toUpdateResNumStockChange.htm")
+	public String toUpdateResNumStockState(HttpServletRequest request,Integer id,ModelMap model){
+		ToUpdateResNumStockStateResult result = resTrafficFacade.toUpdateResNumStockState(id);
+		
+		model.addAttribute("resBindingProList",result.getResBindingProList());
+		model.addAttribute("trafficResBean", result.getTrafficResBean());
+		model.addAttribute("id", id);
+		model.addAttribute("sumResProBean",result.getSumResProBean());
+		return "resTraffic/resResNumStockChange";
+	}
+	
+	/**
+	 * 保存机位库存信息
+	 * @param request
+	 * @param productBean
+	 * @return
+	 */
+	@RequestMapping(value = "/toSaveResNumsSold.do")
+	@ResponseBody
+	public String toSaveResNumsSold(HttpServletRequest request,String productList,String numStock,String numDisable, String id,
+			Integer poorNumStock,Integer poorNumDisable){
+		ToSaveResNumsSoldDTO toSaveResNumsSoldDTO = new ToSaveResNumsSoldDTO();
+		//TODO jiatiaojian
+		
+		return resTrafficFacade.toSaveResNumsSold(toSaveResNumsSoldDTO);
 	}
 
 }
