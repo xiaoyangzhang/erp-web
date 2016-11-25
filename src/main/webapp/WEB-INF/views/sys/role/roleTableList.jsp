@@ -15,7 +15,7 @@
 				      },
 				      function (data) //回传函数
 				      {
-				    	  location.reload();
+				    	  queryList($("#page").val(), $("#pageSize").val());
 				      }
 			    );
 			}
@@ -26,8 +26,8 @@
 		             <thead>
 		<tr>					
 			<th>序号<i class="w_table_split"></i></th>
-			<th>名称<i class="w_table_split"></i></th>
 			<th>角色组<i class="w_table_split"></i></th>
+			<th>名称<i class="w_table_split"></i></th>
 			<th>备注<i class="w_table_split"></i></th>
 			<th>状态<i class="w_table_split"></i></th>
 			<th>创建时间<i class="w_table_split"></i></th>
@@ -39,8 +39,8 @@
 		<c:forEach var="role" items="${pageBean.result }" varStatus="status" >
 			<tr>
 				 <td>${status.count }</td> 
-				<td><a href="javascript:void(0)" onclick="newWindow('修改角色','<%=path %>/role/editRole?roleId=${role.roleId}')">${role.name }</a></td>
 				<td>${role.groupName }</td>
+				<td><a href="javascript:void(0)" onclick="newWindow('修改角色','<%=path %>/role/editRole?roleId=${role.roleId}')">${role.name }</a></td>
 				<td>${role.comment }</td>
 				<td>
 					<c:choose>

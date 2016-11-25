@@ -322,33 +322,31 @@
 						${supplierInfo.contractState}
 						
 						</td>
-						<td><a class="def" onclick="newWindow('<c:if test="${supplierInfo.supplierType==1 }">组团社</c:if><c:if test="${supplierInfo.supplierType==2 }">餐厅</c:if><c:if test="${supplierInfo.supplierType==3 }">酒店</c:if><c:if test="${supplierInfo.supplierType==4 }">车队</c:if><c:if test="${supplierInfo.supplierType==5 }">景区</c:if><c:if test="${supplierInfo.supplierType==6 }">购物</c:if><c:if test="${supplierInfo.supplierType==7 }">娱乐</c:if><c:if test="${supplierInfo.supplierType==8 }">导游</c:if><c:if test="${supplierInfo.supplierType==9 }">机票代理</c:if><c:if test="${supplierInfo.supplierType==10 }">火车票代理</c:if><c:if test="${supplierInfo.supplierType==11 }">高尔夫</c:if><c:if test="${supplierInfo.supplierType==12 }">其他</c:if><c:if test="${supplierInfo.supplierType==15 }">保险</c:if><c:if test="${supplierInfo.supplierType==16 }">地接社</c:if>详情', '<%=ctx%>/supplier/toEditSupplier.htm?id=${supplierInfo.id}&operType=0')"
-							href="javascript:void(0)">查看</a> <c:if test="${optMap['EDIT'] }">
-								<a class="def"
-									onclick="newWindow('修改<c:if test="${supplierInfo.supplierType==1 }">组团社</c:if><c:if test="${supplierInfo.supplierType==2 }">餐厅</c:if><c:if test="${supplierInfo.supplierType==3 }">酒店</c:if><c:if test="${supplierInfo.supplierType==4 }">车队</c:if><c:if test="${supplierInfo.supplierType==5 }">景区</c:if><c:if test="${supplierInfo.supplierType==6 }">购物</c:if><c:if test="${supplierInfo.supplierType==7 }">娱乐</c:if><c:if test="${supplierInfo.supplierType==8 }">导游</c:if><c:if test="${supplierInfo.supplierType==9 }">机票代理</c:if><c:if test="${supplierInfo.supplierType==10 }">火车票代理</c:if><c:if test="${supplierInfo.supplierType==11 }">高尔夫</c:if><c:if test="${supplierInfo.supplierType==12 }">其他</c:if><c:if test="${supplierInfo.supplierType==15 }">保险</c:if>', '<%=ctx%>/supplier/toEditSupplier.htm?id=${supplierInfo.id}&operType=1')"
-									href="javascript:void(0)">修改</a>
+						<td><a class="def" onclick="newWindow('<c:if test="${supplierInfo.supplierType==1 }">组团社</c:if>
+						<c:if test="${supplierInfo.supplierType==2 }">餐厅</c:if><c:if test="${supplierInfo.supplierType==3 }">酒店</c:if>
+						<c:if test="${supplierInfo.supplierType==4 }">车队</c:if><c:if test="${supplierInfo.supplierType==5 }">景区</c:if>
+						<c:if test="${supplierInfo.supplierType==6 }">购物</c:if><c:if test="${supplierInfo.supplierType==7 }">娱乐</c:if>
+						<c:if test="${supplierInfo.supplierType==8 }">导游</c:if><c:if test="${supplierInfo.supplierType==9 }">机票代理</c:if>
+						<c:if test="${supplierInfo.supplierType==10 }">火车票代理</c:if><c:if test="${supplierInfo.supplierType==11 }">高尔夫</c:if>
+						<c:if test="${supplierInfo.supplierType==12 }">其他</c:if><c:if test="${supplierInfo.supplierType==15 }">保险</c:if>详情', '<%=ctx%>/supplier/toEditSupplier.htm?id=${supplierInfo.id}&operType=0')"
+							href="javascript:void(0)">查看</a> 
+							<c:if test="${optMap['EDIT'] }">
+								<a class="def" onclick="newWindow('修改<c:if test="${supplierInfo.supplierType==1 }">组团社</c:if><c:if test="${supplierInfo.supplierType==2 }">餐厅</c:if><c:if test="${supplierInfo.supplierType==3 }">酒店</c:if><c:if test="${supplierInfo.supplierType==4 }">车队</c:if><c:if test="${supplierInfo.supplierType==5 }">景区</c:if><c:if test="${supplierInfo.supplierType==6 }">购物</c:if><c:if test="${supplierInfo.supplierType==7 }">娱乐</c:if><c:if test="${supplierInfo.supplierType==8 }">导游</c:if><c:if test="${supplierInfo.supplierType==9 }">机票代理</c:if><c:if test="${supplierInfo.supplierType==10 }">火车票代理</c:if><c:if test="${supplierInfo.supplierType==11 }">高尔夫</c:if><c:if test="${supplierInfo.supplierType==12 }">其他</c:if><c:if test="${supplierInfo.supplierType==15 }">保险</c:if>', '<%=ctx%>/supplier/toEditSupplier.htm?id=${supplierInfo.id}&operType=1')" href="javascript:void(0)">修改</a>
 								<c:choose>
 									<c:when test="${supplierInfo.supplierType ==4 }">
-
-										<a class="def"
-											onclick="newWindow('协议车队 ', '<%=ctx%>/contract/fleet-list.htm?supplierId=${supplierInfo.id}')"
-											href="javascript:void(0)">协议</a>
+										<a class="def" onclick="newWindow('协议车队 ', '<%=ctx%>/contract/fleet-list.htm?supplierId=${supplierInfo.id}')" href="javascript:void(0)">协议</a>
 									</c:when>
 									<c:otherwise>
-										<a class="def"
-											onclick="newWindow('协议<c:if test="${supplierInfo.supplierType==1 }">组团社</c:if><c:if test="${supplierInfo.supplierType==2 }">餐厅</c:if><c:if test="${supplierInfo.supplierType==3 }">酒店</c:if><c:if test="${supplierInfo.supplierType==5 }">景区</c:if><c:if test="${supplierInfo.supplierType==6 }">购物</c:if><c:if test="${supplierInfo.supplierType==7 }">娱乐</c:if><c:if test="${supplierInfo.supplierType==8 }">导游</c:if><c:if test="${supplierInfo.supplierType==9 }">机票代理</c:if><c:if test="${supplierInfo.supplierType==10 }">火车票代理</c:if><c:if test="${supplierInfo.supplierType==11 }">高尔夫</c:if><c:if test="${supplierInfo.supplierType==12 }">其他</c:if><c:if test="${supplierInfo.supplierType==15 }">保险</c:if>', '<%=ctx%>/contract/${supplierInfo.id}/${flag }/view-list.htm')"
-											href="javascript:void(0)">协议</a>
+										<a class="def" onclick="newWindow('协议<c:if test="${supplierInfo.supplierType==1 }">组团社</c:if><c:if test="${supplierInfo.supplierType==2 }">餐厅</c:if><c:if test="${supplierInfo.supplierType==3 }">酒店</c:if><c:if test="${supplierInfo.supplierType==5 }">景区</c:if><c:if test="${supplierInfo.supplierType==6 }">购物</c:if><c:if test="${supplierInfo.supplierType==7 }">娱乐</c:if><c:if test="${supplierInfo.supplierType==8 }">导游</c:if><c:if test="${supplierInfo.supplierType==9 }">机票代理</c:if><c:if test="${supplierInfo.supplierType==10 }">火车票代理</c:if><c:if test="${supplierInfo.supplierType==11 }">高尔夫</c:if><c:if test="${supplierInfo.supplierType==12 }">其他</c:if><c:if test="${supplierInfo.supplierType==15 }">保险</c:if>', '<%=ctx%>/contract/${supplierInfo.id}/${flag }/view-list.htm')" href="javascript:void(0)">协议</a>
 									</c:otherwise>
 								</c:choose>
 								<a href="javascript:void(0);" class="def" onclick="delSupplier(${supplierInfo.id})">删除</a>
-									<a href="javascript:void(0);" class="def" title="更新业务订单商家名称与当前一致" onclick="upSupplier(${supplierInfo.id},${supplierInfo.supplierType},'${supplierInfo.nameFull}')">更新</a>
+								<a href="javascript:void(0);" class="def" title="更新业务订单商家名称与当前一致" onclick="upSupplier(${supplierInfo.id},${supplierInfo.supplierType},'${supplierInfo.nameFull}')">更新</a>
 								<c:if test="${supplierInfo.state==1}">
-									<a href="javascript:void(0);" class="def"
-										onclick="changeState(${supplierInfo.id},3)">停用</a>
+									<a href="javascript:void(0);" class="def" onclick="changeState(${supplierInfo.id},3)">停用</a>
 								</c:if>
 								<c:if test="${supplierInfo.state==3}">
-									<a href="javascript:void(0);" class="def"
-										onclick="changeState(${supplierInfo.id},1)">启用</a>
+									<a href="javascript:void(0);" class="def" onclick="changeState(${supplierInfo.id},1)">启用</a>
 								</c:if>
 							</c:if></td>
 					</tr>

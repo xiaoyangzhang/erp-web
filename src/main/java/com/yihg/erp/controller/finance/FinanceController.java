@@ -52,6 +52,7 @@ import org.yimayhd.erpcenter.facade.finance.query.FinAuditDTO;
 import org.yimayhd.erpcenter.facade.finance.query.IncomeJoinTableListDTO;
 import org.yimayhd.erpcenter.facade.finance.query.IncomeOrPayDTO;
 import org.yimayhd.erpcenter.facade.finance.query.PayDTO;
+import org.yimayhd.erpcenter.facade.finance.query.PushWapListTableDTO;
 import org.yimayhd.erpcenter.facade.finance.query.QuerySettleCommissionDTO;
 import org.yimayhd.erpcenter.facade.finance.query.QuerySettleListDTO;
 import org.yimayhd.erpcenter.facade.finance.query.QueryShopCommissionStatsDTO;
@@ -68,6 +69,7 @@ import org.yimayhd.erpcenter.facade.finance.query.VerifyBillDTO;
 import org.yimayhd.erpcenter.facade.finance.result.CheckBillResult;
 import org.yimayhd.erpcenter.facade.finance.result.DiatributeBillResult;
 import org.yimayhd.erpcenter.facade.finance.result.IncomeOrPaytResult;
+import org.yimayhd.erpcenter.facade.finance.result.QueryPushWapListTableResult;
 import org.yimayhd.erpcenter.facade.finance.result.QuerySettleCommissionResult;
 import org.yimayhd.erpcenter.facade.finance.result.QuerySettleListResult;
 import org.yimayhd.erpcenter.facade.finance.result.QueryShopCommissionStatsResult;
@@ -420,6 +422,69 @@ public class FinanceController extends BaseController {
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
 		return "finance/settle-list";
 	}
+	
+	/**
+	 * 跳转到行程助手推送页面
+	 */
+	@RequestMapping(value = "pushWapList.htm")
+	public String pushWapList(HttpServletRequest request,
+			HttpServletResponse reponse, ModelMap model) {
+		List<TourGroup> auditorList = financeFacade.getAuditorList();
+		model.addAttribute("auditorList", auditorList);
+		Integer bizId = WebUtils.getCurBizId(request);
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult result = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
+		return "finance/pushWapList";
+	}
+	
+	/**
+	 * 行程助手推送
+	 * 
+	 * @author zhoumi
+	 * @param sl
+	 *            sqlId
+	 * @param rp
+	 *            返回页面
+	 * @param svc
+	 *            在Spring中声明的服务BeanID
+	 * @return
+	 */
+	@RequestMapping(value = "pushWapList_table.htm")
+	public String pushWapList_table(HttpServletRequest request,
+			HttpServletResponse reponse, ModelMap model, String sl, String ssl,
+			String rp, Integer page, Integer pageSize, String svc,TourGroupVO group) {
+
+		
+		PushWapListTableDTO queryDTO = new PushWapListTableDTO();
+		if(page != null){
+			queryDTO.setPage(page);
+		}
+		if(pageSize != null){
+			queryDTO.setPageSize(pageSize);
+		}
+		queryDTO.setOrgIds(group.getOrgIds());
+		queryDTO.setSaleOperatorIds(group.getSaleOperatorIds());
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setRp(rp);
+		queryDTO.setSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setSl(sl);
+		queryDTO.setSsl(ssl);
+		queryDTO.setSvc(svc);
+		QueryPushWapListTableResult result = financeFacade.pushWapListTable(queryDTO);
+		
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("guideMap", result.getGuideMap());
+		model.addAttribute("sum", result.getSum());
+		
+		return "finance/pushWapList_table";
+	}
+	
+	
 	/**
 	 * 结算单审核预览
 	 * @param request

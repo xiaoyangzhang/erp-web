@@ -8,7 +8,9 @@
 
 <table cellspacing="0" cellpadding="0" class="w_table" > 
 		             	<col width="4%" /><col width="12%" /><col width="5%" /><col width="5%" /><col width="5%" />
-		             	<col width="15%" /><col width="15%" /><col width="5%" /><col width="5%" /><col width="5%" /><col width="15%" /><col width="8%" />
+		             	<col  />
+		             	<%-- <col width="15%" /> --%>
+		             	<col width="8%" /><col width="5%" /><col width="5%" /><col width="15%" /><col width="5%" />
 			             <thead>
 			             	<tr>
 			             		<th>序号<i class="w_table_split"></i></th>
@@ -17,7 +19,7 @@
 			             		<th>散团日期<i class="w_table_split"></i></th>
 			             		<th>类别<i class="w_table_split"></i></th>
 			             		<th>产品名称<i class="w_table_split"></i></th>
-			             		<th>组团社<i class="w_table_split"></i></th>
+			             		<!-- <th>组团社<i class="w_table_split"></i></th> -->
 			             		<th>人数<i class="w_table_split"></i></th>
 			             		<th>计调<i class="w_table_split"></i></th>
 			             		<th>状态<i class="w_table_split"></i></th>
@@ -34,23 +36,26 @@
 				                  		${status.index+1}
 				                  </td>
 				                  <td style="text-align: left">
-				                  
-				                 
 				                  <c:choose>
 				                  		<c:when test="${groupInfo.groupMode < 1}">
-				                  			<a class="def" href="javascript:void(0)" onclick="newWindow('查看散客团信息','<%=ctx %>/fitGroup/toFitGroupInfo.htm?groupId=${groupInfo.groupId}&operType=0')">${groupInfo.groupCode}</a></td>
+				                  			<%-- 
+				                  			<a class="def" href="javascript:void(0)" onclick="newWindow('查看散客团信息','<%=ctx %>/fitGroup/toFitGroupInfo.htm?groupId=${groupInfo.groupId}&operType=0')">${groupInfo.groupCode}</a>
+				                  			 --%>
+				                  			<a class="def" href="<%=ctx %>/groupOrder/previewFitGuide.htm?groupId=${groupInfo.groupId}" target="_blank">${groupInfo.groupCode}</a>
+				                  			
 				                  		</c:when>
 				                  		<c:otherwise>
-								 			<a class="def" href="javascript:void(0)" onclick="newWindow('查看定制团信息','<%=ctx %>/teamGroup/toEditTeamGroupInfo.htm?groupId=${groupInfo.groupId }&operType=0')">${groupInfo.groupCode}</a></td> 
+								 			<a class="def" href="javascript:void(0)" onclick="newWindow('查看定制团信息','<%=ctx %>/teamGroup/toEditTeamGroupInfo.htm?groupId=${groupInfo.groupId }&operType=0')">${groupInfo.groupCode}</a> 
 				                  		</c:otherwise>
 				                  	</c:choose>
-				                  
 				                  </td> 
 				                  <td><fmt:formatDate value="${groupInfo.dateStart}" pattern="yyyy-MM-dd"/> </td> 
 				                  <td><fmt:formatDate value="${groupInfo.dateEnd}" pattern="yyyy-MM-dd"/> </td> 
 				                  <td><c:if test='${groupInfo.groupMode  <1}'>散客</c:if><c:if test='${groupInfo.groupMode > 0}'>团队</c:if></td>
 				                  <td style="text-align: left">【${groupInfo.productBrandName}】${groupInfo.productName}</td>
+				                  <c:if test="1 == 2">
 				                  <td style="text-align: left">${groupInfo.supplierName}</td> 
+				                  </c:if>
 				                  <td>${groupInfo.adultCount}大 ${groupInfo.childCount}小 ${groupInfo.guideCount}陪</td> 
 				                  <td>${groupInfo.operatorName}</td>
 				                  <td>${groupInfo.groupStatus}</td>

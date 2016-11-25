@@ -37,6 +37,7 @@ function searchBtn(){
 	var dateTo = $("input[name='dateTo']").val();
 	var orderNo = $("input[name='orderNo']").val();
 	var productName = $("input[name='productName']").val();
+	var saleName = $("input[name='saleName']").val();
 	var lineName = $("input[name='lineName']").val();
 	var contactName = $("input[name='contactName']").val();
 	var receiveMode = $("input[name='receiveMode']").val();
@@ -50,6 +51,7 @@ function searchBtn(){
 	if (dateFrom || dateTo){vars['dateType']=$("select[name='dateType']").val();}
 	if (orderNo){vars["orderNo"]=orderNo;}
 	if (productName){vars["productName"]=productName;}
+	if (saleName){vars["saleName"]=saleName;}
 	if (lineName){vars["lineName"]=lineName;}
 	if (contactName){vars["contactName"]=contactName;}
 	if (receiveMode){vars["receiveMode"]=receiveMode;}
@@ -61,6 +63,7 @@ function searchBtn(){
 	window.location.href = "${arrange}list.htm" + $.makeUrlFromVars(vars);
 }
 function doAction(action, id){
+	var ind=0;
 	layer.open({
 		type : 1,
 		title : '确认执行',
@@ -71,17 +74,18 @@ function doAction(action, id){
 		btn : [ '确认', '取消' ],
 		yes : function(index) {
 			comment=$("#action_confirm textarea[name='comment']").val();
-			layer.close(index);
+			layer.closeAll();
+			ind = layer.load(0, { shade: [0.4,'#000']});
 			
 			YM.post(action,{"id":id, "comment":comment}, function(){
-				$.success("执行成功");
-				window.setTimeout(function(){
-				  refreshPage();
-				}, 1000);
+				layer.closeAll();
+				$.success("执行成功", function(){ refreshPage();});
+			}, function(){
+				layer.close(ind);
 			});
 		},
 		cancel : function(index) {
-			layer.close(index);
+			layer.closeAll();
 		}
 	});
 }
@@ -145,6 +149,11 @@ $(function(){
 			<div class="dd_left">接站牌：</div>
 			<div class="dd_right"><input name="receiveMode" type="text" value="${page.parameter.receiveMode }"/></div>
 			<div class="clear"></div></dd>
+			<dd class="inl-bl">
+			<div class="dd_left">销售：</div>
+			<div class="dd_right"><input name="saleName" type="text" value="${page.parameter.saleName }"/></div>
+			<div class="clear"></div></dd>
+			
 			<dd class="inl-bl">
 			<div class="dd_left">出票状态：</div>
 			<div class="dd_right"><select name="issueStatus"><!-- <option></option><option value="N">未出票</option><option value="Y">已出票</option> -->
@@ -247,19 +256,27 @@ $(function(){
            <td rowspan="${bo.resourceBo.legSize}"><a class='opLog' href="javascript:void(0);" title="${bo.comment}">${bo.operatorName }<br/>${bo.updateTime}</a></td>
            <td rowspan="${bo.resourceBo.legSize}">${bo.po.remark}</td>
            <td rowspan="${bo.resourceBo.legSize}">${bo.status }</td>
-           <td rowspan="${bo.resourceBo.legSize}"><a class="button button-tinier" href="javascript:newWindow('查看机票申请${bo.groupOrder.orderNo }', '<%=path%>/airticket/request/${arrange }view.htm?id=${bo.id }')">查看明细</a>
-           ${bo.operations }</td>
+           <td rowspan="${bo.resourceBo.legSize}">
+           		<a class="button button-tinier" href="javascript:newWindow('查看机票申请${bo.groupOrder.orderNo }', '<%=path%>/airticket/request/${arrange }view.htm?id=${bo.id }')">查看明细</a>
+           		${bo.operations }
+           </td>
            </tr>
-           <c:forEach items="${bo.resourceBo.legList}" var="leg" varStatus="li"><c:if test="${li.index>0}">
+           <c:forEach items="${bo.resourceBo.legList}" var="leg" varStatus="li">
+           <c:if test="${li.index>0}">
 			<tr><td><fmt:formatDate value="${leg.depDate}" pattern="yyyy-MM-dd" /></td>
                  	<td>${leg.airCode}</td>
                  	<td>${leg.depCity}-${leg.arrCity}</td>
                  	<td><fmt:formatDate value="${leg.depTime}" pattern="HH:mm"/>-<fmt:formatDate value="${leg.arrTime}" pattern="HH:mm"/></td></tr>
-			</c:if></c:forEach>
+			</c:if>
+			</c:forEach>
          </c:forEach>
-         <tr><td colspan="10" style="text-align:right;">合计：</td><td>${count.total}</td><td>${count.applied}</td><td>${count.available}</td><td colspan="6"></td></tr>
         </tbody>
-    		</table>
+        <tfoot>
+         <tr class="footer1">
+        	 <td colspan="10" style="text-align:right;">合计：</td><td>${count.total}</td><td>${count.applied}</td><td>${count.available}</td><td colspan="6"></td>
+        </tr>
+    	</tfoot>
+    </table>
 <jsp:include page="/WEB-INF/include/page.jsp">
 	<jsp:param value="${page.page }" name="p" />
 	<jsp:param value="${page.totalPage }" name="tp" />

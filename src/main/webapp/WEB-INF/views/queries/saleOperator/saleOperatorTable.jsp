@@ -57,19 +57,7 @@
               		</tr>
              	</c:otherwise>
              </c:choose>
-       <%--        		<c:forEach items="${gl.guests}" var="l">
-              			<tr>
-              				<td style="text-align: left" width="30%">
-              					${l.name}
-              				</td>
-              				<td style="text-align: left" width="50%">
-              					${l.certificateNum}
-              				</td>
-              				<td style="text-align: left;" width="20%">
-              					${l.mobile}
-              				</td>
-              			</tr>
-              		</c:forEach> --%>
+      
               	</table>
               </td>
               <td width="4%" class="hl">${gl.hotelLevels}</td>
@@ -87,8 +75,8 @@
          <c:set var="sum_guide" value="${ sum_guide+gl.numGuide}"/>
        	</c:forEach>
 	</tbody>
-	<tbody>
-		<tr>
+	<tfoot>
+		<tr class="footer1">
 			<td colspan="5">合计：</td>
 			<td>${sum_adult }大${sum_child }小${ sum_guide}陪</td>
 			<td></td>
@@ -100,12 +88,9 @@
 			<td></td>
 			<td></td>
 			<td></td>
-			<td></td>
-			<td></td>
+
 		</tr>
-	</tbody>
-	<tbody>
-		<tr>
+		<tr class="footer2">
 			<td colspan="5">总计：</td>
 			<td>${sumPerson.totalAdult }大${sumPerson.totalChild }小${ sumPerson.totalGuide}陪</td>
 			<td></td>
@@ -117,10 +102,9 @@
 			<td></td>
 			<td></td>
 			<td></td>
-			<td></td>
-			<td></td>
+
 		</tr>
-	</tbody>
+	<tfoot>
 </table>
 <jsp:include page="/WEB-INF/include/page.jsp">
 	<jsp:param value="${page.page }" name="p" />

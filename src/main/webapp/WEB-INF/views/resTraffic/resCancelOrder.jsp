@@ -29,10 +29,10 @@ margin:3% 3%;
 				<div class="clear"></div>
 				<div class="dd_right"  id="textarea_id">
 					<label><select name="cause" id="cause_id">
-							<option value="0">信息填写错误</option>
-							<option value="1">下错单</option>
-							<option value="2">客户取消了行程</option>
-							<option value="3">其他原因</option>
+							<option value="信息填写错误">信息填写错误</option>
+							<option value="下错单">下错单</option>
+							<option value="客户取消了行程">客户取消了行程</option>
+							<option value="其他原因">其他原因</option>
 					</select></label>
 				</div>
 				<div class="clear"></div>

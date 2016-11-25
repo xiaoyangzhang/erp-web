@@ -123,7 +123,7 @@ div {
 					<td style="font-weight: bold;width: 90%" align=""left"">${staffsMap.leaderInfo }</td>
 				</tr>
 				<tr>
-					<td style="font-weight: bold;width: 10%" align="center">接站信息</td>
+					<td style="font-weight: bold;width: 10%" align="center">客人信息</td>
 					<td style="font-weight: bold;width: 90%" align=""left"">${staffsMap.receivemode }</td>
 				</tr>
 			</tbody>

@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.alibaba.fastjson.JSONObject;
 import com.yihg.erp.contant.SecurityConstant;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
@@ -128,16 +127,7 @@ public class WebUtils {
     		}
     	}
 		return null;*/
-		
-		//TODO 后续统一替换成新的代码模式 liyong
-		com.yimayhd.erpcenter.dal.sys.po.UserSession uss =(com.yimayhd.erpcenter.dal.sys.po.UserSession)request.getAttribute("userSession");
-		if(uss != null){
-//			String json = JSONObject.toJSONString(uss);
-//			return JSONObject.parseObject(json, UserSession.class);
-			return uss;
-		}else{
-			return null;
-		}
+		return (UserSession)request.getAttribute("userSession");
 	}	
 	
 	public static String getBizConfigValue(HttpServletRequest request,String key){
@@ -197,7 +187,7 @@ public class WebUtils {
 		Set<String> keys = rm.keySet();
 		for (String k : keys) {
 			String val =request.getParameter(k);
-			pm.put(k, StringUtils.isBlank(val) ? null : val);
+			pm.put(k, StringUtils.isBlank(val) ? null : val.trim());
 		}
 		return pm;
 	}

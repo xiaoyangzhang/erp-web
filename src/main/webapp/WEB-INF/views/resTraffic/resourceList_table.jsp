@@ -25,7 +25,6 @@
     <col width="4%"/>
     <col width="4%"/>
     <col width="4%"/>
-    <col width="4%"/>
     <col width="7%"/>
     <col />
     <col width="4%"/>
@@ -40,12 +39,11 @@
         <th>成本价<i class="w_table_split"></i></th>
         <th>总数量<i class="w_table_split"></i></th>
         <th>机动位<i class="w_table_split"></i></th>
-        <th>预留<i class="w_table_split"></i></th>
         <th>已售<i class="w_table_split"></i></th>
-        <th>剩余<i class="w_table_split"></i></th>
         <th>取消<i class="w_table_split"></i></th>
-        <th>订单<i class="w_table_split"></i></th>
-        <th>最晚预定<i class="w_table_split"></i></th>
+        <th>剩余<i class="w_table_split"></i></th>
+        <th>出票<i class="w_table_split"></i></th>
+        <th>截止报名时间<i class="w_table_split"></i></th>
         <th>备注<i class="w_table_split"></i></th>
         <th>状态<i class="w_table_split"></i></th>
         <th>操作</th>
@@ -66,11 +64,10 @@
             <td><fmt:formatNumber value="${res.costPrice}" pattern="#.##"/></td>            
             <td><a href="javascript:void(0)"   onclick="stocklog(this,'${res.id }')" class="def">${res.numStock }</a></td>            
             <td>${res.numDisable } </td>
-            <td>${res.numReserved } </td>   
             <td>${res.numSold } </td>   
+             <td>${res.numCancel + res.numClean }</td>  
             <td>${res.numBalance } </td>   
-            <td>${res.numCancel }</td>  
-            <td></td>   
+            <td><a href="javascript:void(0)"   onclick="ticketInfo(this,'${res.id }')" class="def">出票</a></td>   
             <td><fmt:parseDate value="${fn:replace(res.dateLatest, ':00.0', ':00')}" pattern="yyyy-MM-dd HH:mm:ss" var="date1"></fmt:parseDate>  
             	<fmt:formatDate pattern="yyyy-MM-dd" value="${date1}" /><br/>
             	<fmt:formatDate pattern="HH:mm:ss" value="${date1}" /> 
@@ -99,7 +96,7 @@
 			<c:set var="numReserved" value="${numReserved+res.numReserved}" />
 			<c:set var="numSold" value="${numSold+res.numSold}" />
 			<c:set var="numBalance" value="${numBalance+res.numBalance}" />
-			<c:set var="numCancel" value="${numCancel+res.numCancel}" />
+			<c:set var="numCancel" value="${numCancel+res.numCancel+res.numClean}" />
 	
     </c:forEach>
     </tbody>
@@ -113,10 +110,9 @@
             <td></td>            
             <td>${numStock }</td>            
             <td>${numDisable } </td>
-            <td>${numReserved } </td>   
             <td>${numSold } </td>   
+              <td>${numCancel }</td> 
             <td>${numBalance } </td>   
-            <td>${numCancel }</td>   
             <td></td>   
             <td><td>
             <td></td>		
@@ -134,6 +130,10 @@
 <script type="text/javascript">
 	function stocklog(obj,resId){
 		newWindow("资源销售明细","resTraffic/resDetails.do?resId="+resId);
+	}
+	
+	function ticketInfo(obj,resId){
+		newWindow("订单出票","resTraffic/ticketInfo.do?resId="+resId);
 	}
 	
 	function goOrder(resId){

@@ -18,10 +18,9 @@
 			<th style="width: 13%">日期<i class="w_table_split"></i></th>
 			<th style="width: 10%">入库<i class="w_table_split"></i></th>
 			<th style="width: 10%">机动位<i class="w_table_split"></i></th>
-			<th style="width: 10%">已售<i class="w_table_split"></i></th>
-			<th style="width: 10%">预留<i class="w_table_split"></i></th>
-			<th style="width: 10%">清预留<i class="w_table_split"></i></th>
-			<th style="width: 10%">取消<i class="w_table_split"></i></th>
+			<th style="width: 10%">待确认(订单)<i class="w_table_split"></i></th>
+			<th style="width: 10%">已确认(订单)<i class="w_table_split"></i></th>
+			<th style="width: 10%">取消(订单)<i class="w_table_split"></i></th>
 			<th style="width: 10%">剩余<i class="w_table_split"></i></th>
 			<th style="width: 11%">操作人<i class="w_table_split"></i></th>
 		</tr>
@@ -29,14 +28,13 @@
        <tbody>
  			<c:forEach items="${list}" var="orders" varStatus="v">
 		 <tr>
-		 <c:set var="surplus" value="${surplus+orders.STOCK-orders.STOCKDISABLE-orders.ORDERSOLD-orders.ORDERRESERVE+orders.ORDERCLEAN+orders.ORDERCANCEL+0}"/>
+		 <c:set var="surplus" value="${surplus+orders.STOCK-orders.STOCKDISABLE-orders.ORDERUNCONFIRM-orders.ORDERCONFIRM+0}"/>
 		 		<td>${v.count}</td>
 				<td>${orders.adjustTime}</td>
 				<td>${orders.STOCK}</td>
 				<td>${orders.STOCKDISABLE}</td>
-				<td>${orders.ORDERSOLD}</td>
-				<td>${orders.ORDERRESERVE}</td>
-				<td>${orders.ORDERCLEAN}</td>
+				<td>${orders.ORDERUNCONFIRM}</td>
+				<td>${orders.ORDERCONFIRM}</td>
 				<td>${orders.ORDERCANCEL}</td>
 				<td>${surplus} </td>
 				<td>${orders.userName}</td>

@@ -45,7 +45,7 @@
 							</div>
 						</dd>
 						<dd class="inl-bl">
-							<div class="dd_left">客人信息：</div>
+							<div class="dd_left">接站牌：</div>
 							<div class="dd_right grey">
 								<input type="text" name="receiveMode" id="receive_mode_id" value="" />
 							</div>
@@ -75,7 +75,7 @@
 							<div class="dd_left">尾款时限</div>
 							<div class="dd_right grey">
 								<input type="text" name="extHour" id="ext_res_clean_time_id" value=""  
-									onkeyup="value=value.replace(/[^\d]/g,'')" /><span>小时内</span>
+									onkeyup="value=value.replace(/[^\d]/g,'')" /><span>分钟内</span>
 							</div>
 						</dd>
 						<dd class="inl-bl">
@@ -147,7 +147,14 @@ $(function () {
 	}
 	setTime();
 });
-	
+
+function reloadPage(){
+	$.success('操作成功',function(){
+		layer.closeAll();
+		queryList($("#searchPage").val(), $("#searchPageSize").val());
+	});
+}
+
 function queryList(page,pageSize) {
 	if (!page || page < 1) {
 		page = 1;

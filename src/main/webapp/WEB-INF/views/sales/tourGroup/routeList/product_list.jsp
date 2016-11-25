@@ -74,7 +74,7 @@
                  </dd> -->
                    <dd class="inl-bl">
                     <div class="dd_right">
-                    	<button type="button" onclick="searchBtn();" class="button button-primary button-small">查询</button>
+                    	<button id="pro_btn_id" type="button" onclick="searchBtn();" class="button button-primary button-small">查询</button>
                     </div>
                     <div class="clear"></div>
                 </dd>
@@ -142,6 +142,15 @@ function queryList(page,pageSize) {
 }
 function searchBtn() {
 	queryList();
+}
+</script>
+<script type="text/javascript">
+document.onkeydown = function (e) { 
+	var theEvent = window.event || e; 
+	var code = theEvent.keyCode || theEvent.which; 
+	if (code == 13) { 
+		$("#pro_btn_id").click(); 
+	} 
 }
 </script>
 </html>

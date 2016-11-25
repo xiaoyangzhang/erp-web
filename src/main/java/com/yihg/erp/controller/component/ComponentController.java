@@ -41,6 +41,7 @@ import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.TfsUpload;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
 import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
 import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
 import com.yimayhd.erpcenter.dal.product.vo.ProductSupplierCondition;
@@ -511,6 +512,31 @@ public class ComponentController extends BaseController {
 		}*/
 		long end = new Date().getTime();
 		return successJson("时间",String.valueOf(end-start));
+	}
+	
+	@RequestMapping("dicItemDlg.htm")
+	public String dicItemTree(HttpServletRequest request,HttpServletResponse reponse,ModelMap model,String typeCode, String checkIds){	
+		if(StringUtils.isBlank(typeCode)){
+			typeCode = "ouZongYing";
+		}
+		Integer bizId = WebUtils.getCurBizId(request);
+		List<DicInfo> typeList = dicFacade.getListByTypeCode(typeCode, bizId);
+		
+		List<Map<String,String>> mapList = new ArrayList<Map<String,String>>();
+		Map<String,String> map = null;
+		for(DicInfo item:typeList){
+			map = new HashMap<String,String>();
+			map.put("id", item.getId().toString());
+			map.put("pId","0");
+			map.put("name", item.getValue());
+			mapList.add(map);
+		}
+		
+
+		model.addAttribute("dicJSON", JSON.toJSONString(mapList));
+		model.addAttribute("checkIds", checkIds);
+		
+		return "component/comm/dicItemDlg";
 	}
 
 }

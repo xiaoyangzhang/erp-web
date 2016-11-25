@@ -98,6 +98,17 @@
     				</select>
     				</div>
 	    			<div class="clear"></div>
+	    		</dd>	
+	    		<dd class="inl-bl">
+	    			<div class="dd_left">金额:</div>
+	    			<div class="dd_right">	
+	    			<select name="groupMode">
+	    				<option value=""></option>
+    					<option value="1">大于0</option>
+    					<option value="0">小于0</option>
+    				</select>
+    				</div>
+	    			<div class="clear"></div>
 	    		</dd>		
 	    		<dd class="inl-bl">
 	    			<div class="dd_left">

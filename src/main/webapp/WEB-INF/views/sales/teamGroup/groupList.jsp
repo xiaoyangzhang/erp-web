@@ -6,61 +6,34 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>未确认团</title>
+<title>团队列表</title>
 <%@ include file="../../../include/top.jsp"%>
-<style type="text/css">
-	.Wdate{width:95px;}
-</style>
 <script type="text/javascript" src="<%=ctx%>/assets/js/web-js/sales/groupOrder.js"></script>
 <script type="text/javascript" src="<%=ctx%>/assets/js/web-js/sales/regional.js"></script>
 </head>
 <body>
-	<%@ include file="/WEB-INF/views/component/org-user/org_user_multi.jsp"%>
-	<div class="p_container">
-		<div class="p_container_sub pl-10 pr-10">
-			<dl class="p_paragraph_content">
-				<form   method="post" id="tourGroupForm">
-					<input type="hidden" name="pageSize" id="size" value="${page.pageSize}"/>
-					<input type="hidden" id="searchPage" name="page"  value="${page.page}"/>
-
-					<dd class="inl-bl">
-						<div class="dd_left">
-							<select name="dateType">
+	
+<div class="p_container">
+	<form method="post" id="tourGroupForm">
+	<div class="p_container_sub">
+			<div class="searchRow">
+					<input type="hidden" name="page" id="orderPage" value="${page.page}"> 
+					<input type="hidden" name="pageSize" id="orderPageSize" value="${page.pageSize}">
+					<ul >
+					<li class="text">
+						<select name="dateType" id="dateType">
 								<option value="1">出团日期</option>
 								<option value="2">输单日期</option>
 							</select>
-						</div>
-						<div class="dd_right grey">
-							<input type="text" id="tourGroupStartTime" name="startTime" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" value=""/> 
-							<input type="text" id="tourGroupEndTime" name="endTime" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" value=""/>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">团号:</div>
-						<div class="dd_right grey">
-							<input type="text" name="tourGroup.groupCode" id="tourGroupGroupCode" value="${groupOrder.tourGroup.groupCode}"/>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">组团社:</div>
-						<div class="dd_right grey">
-							<input type="text" name="supplierName" id="supplierName" value="${groupOrder.supplierName}"/>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">产品:</div>
-						<div class="dd_right grey">
-							<input type="text" name="tourGroup.productName" id="tourGroupProductName" value="${groupOrder.tourGroup.productName}"/>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">客源地:</div>
-						<div class="dd_right grey">
-							<select name="provinceId" id="provinceCode">
+					</li>
+					<li > <input type="text" id="tourGroupStartTime" name="startTime" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" value=""/>~ 
+							<input type="text" id="tourGroupEndTime" name="endTime" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" value=""/></li>
+					<li class="text"> 团号:</li>
+					<li ><input type="text" name="tourGroup.groupCode" id="tourGroupGroupCode" value="${groupOrder.tourGroup.groupCode}"/> </li>
+					<li class="text"> 组团社:</li>
+					<li ><input type="text" name="supplierName" id="supplierName" value="${groupOrder.supplierName}" /></li>
+					<li class="text"> 客源地:</li>
+					<li ><select name="provinceId" id="provinceCode">
 									<option value="-1">请选择省</option>
 									<c:forEach items="${allProvince }" var="province">
 										<option value="${province.id }" <c:if test="${groupOrder.provinceId==province.id  }"> selected="selected" </c:if>>${province.name}</option>
@@ -72,86 +45,69 @@
 									<option value="${city.id }" <c:if test="${groupOrder.cityId==city.id  }"> selected="selected" </c:if>>${city.name }</option>
 									</c:forEach>
 							</select>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">客源类别:</div>
-						<div class="dd_right grey">
 							<select name="sourceTypeId" >
-								<option value="-1">请选择</option>
+								<option value="-1">客源类别</option>
 								<c:forEach items="${sourceTypeList }" var="source">
 									<option value="${source.id }">${source.value}</option>
 								</c:forEach>
 							</select>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">
-							部门:
-						</div>
-						<div class="dd_right">
-						
-	    				<input type="text" name="orgNames" id="orgNames" stag="orgNames" value="" readonly="readonly" onclick="showOrg()"/>
-						<input name="orgIds" id="orgIds" stag="orgIds" value="" type="hidden" value=""/>	
-						计调:
-						<select name="operType">
-								<option value="1">销售计调</option>
-								<option value="2">操作计调</option>
-								<option value="3">输单员</option>
-							</select>
-							<input type="text" name="saleOperatorName" id="saleOperatorName" stag="userNames" value="${groupOrder.saleOperatorName}" readonly="readonly" onclick="showUser()"/>
-							<input name="saleOperatorIds" id="saleOperatorIds" stag="userIds" type="hidden" value="${groupOrder.saleOperatorIds}"/>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">
-						团状态:
-						</div>
-						<div class="dd_right">
-						<select name="tourState">
-								<option value="">全部</option>
+					</li>
+					<li class="clear"/>
+					</ul>
+					
+					<ul>
+					<li class="text"> 部门:</li>
+					<li >
+						<input type="text" name="orgNames" id="orgNames" stag="orgNames" value="${groupOrder.orgNames }" readonly="readonly" onclick="showOrg()" style="width:181px;" />
+					</li>						
+					<li class="text"> 
+						<select name="operType" id="operType">
+								<option value="1" <c:if test="${groupOrder.operType==1 }">selected="selected"</c:if>>销售</option>
+								<option value="2" <c:if test="${groupOrder.operType==2 }">selected="selected"</c:if>>计调</option>
+								<option value="3" <c:if test="${groupOrder.operType==3 }">selected="selected"</c:if>>输单</option>
+						</select>
+					</li>
+					<li > 
+						<input type="text" name="saleOperatorName" id="saleOperatorName" value="${groupOrder.saleOperatorName}" stag="userNames" readonly="readonly"  onclick="showUser()"/> 
+						<input name="saleOperatorIds" id="saleOperatorIds" stag="userIds" type="hidden" value="${groupOrder.saleOperatorIds}" />
+						<input name="orgIds" id="orgIds" stag="orgIds" value="${groupOrder.orgIds }" type="hidden" value=""/>	
+					</li>
+					<li class="text"> 产品:</li>
+					<li >
+						<input type="text" name="tourGroup.productName" id="tourGroupProductName" value="${groupOrder.tourGroup.productName}"/>
+					</li>
+					<li class="text">状态:</li>
+					<li>
+					<select name="tourState">
+								<option value="">团状态</option>
 								<option value="0">未确认</option>
 								<option value="1">已确认</option>
-								<option value="2">废弃</option>
+								<option value="2">已废弃</option>
 								<option value="3">已审核</option>
 								<option value="4">已封存</option>
 							</select>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">
-						锁单状态:
-						</div>
-						<div class="dd_right">
-						<select name="orderLockState">
-								<option value="">全部</option>
-								<option value="1">锁单</option>
+							<select name="orderLockState">
+								<option value="">锁单状态</option>
+								<option value="1">已锁单</option>
 								<option value="0">未锁单</option>
 							</select>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_right">
-							<a type="button" onclick="searchBtn();"  style="margin-left: 35px;" class="button button-primary button-small">查询</a>
-								<a href="javascript:void(0);" class="button button-primary button-small" onclick="newWindow('新增团订单','teamGroup/toAddTeamGroupInfo.htm')">新增</a>
-						</div>
-						<div class="clear"></div>
-					</dd>			
-				</form>
-				</dl>
-		 <dl class="p_paragraph_content">
-	    	<dd>
-				<div id="content"></div>
-			</dd>
-		</dl>
+					</li>
+					<li class="text"> </li>
+					<li >
+					<button type="button" onclick="searchBtn()" class="button button-primary button-small">查询</button>
+					<button type="button" class="button button-primary button-small" onclick="newWindow('新增团订单','teamGroup/toAddTeamGroupInfo.htm')">新增</button>
+					<li class="clear"/>
+					</ul>
+			</div>
 	</div>
+	</form>
+	
+	<dl class="p_paragraph_content">
+		<div id="content"></div>
+	</dl>
 </div>
-
+	
+<%@ include file="/WEB-INF/views/component/org-user/org_user_multi.jsp"%>
 </body>
 	<!-- 改变状态 -->
 	<div id="stateModal" style="display: none">

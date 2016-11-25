@@ -113,6 +113,28 @@
 						</c:forEach>
 					</tbody>
 				</table>
+				
+				<div style="margin-left: 5%">
+						<!-- <button type="button" class="button button-primary button-small pp" id="trafficImport">批量录入</button> -->
+						<span style="font-weight: bold;">批量录入：</span>
+						<div id="bbb">
+							<div>
+								<textarea class="l_textarea" name="bit" value="" id="bit"
+									placeholder="出发日期,出发时间,航班号,出发城市,到达城市"
+									style="width: 600px; height: 250px"></textarea>
+							</div>
+							<span>
+								<i style="color: gray;"> 格式：出发日期,出发时间,航班号,出发城市,到达城市</i>
+							</span>
+							<div style="margin-top: 20px;">
+								<a href="javascript:void(0);"
+									onclick="toSaveSeatInCoach('newTransport')"
+									class="button button-primary button-small">保存</a> 
+									<i class="red">按照上面的格式填写后提交即可，回车换行添加多人信息。 </i>
+							</div>
+							
+						</div>
+					</div>
 			</div>
 		</form>
 	</div>
@@ -139,6 +161,60 @@
 				}
 			};
 			$("#transportInfoForm").ajaxSubmit(options);	
+		}
+		
+		/* $(".pp").toggle(function() {
+			$("#bbb").show();
+		}, function() {
+			$("#bbb").hide();
+		}); */
+		
+		function toSaveSeatInCoach(strr) {
+			var html = $("#trans_template").html();
+			// 订单id
+			var orderId = $("#orderId").val();
+			var str = $("#bit").val();
+			if (str == "" || str == null) {
+				$.warn("输入信息为空");
+				return false;
+			}
+			var strs = new Array();
+			strs = str.split("\n");
+
+			for (var i = 0; i < strs.length; i++) {
+				if (strs[i] != "") {
+					var infos = new Array();
+					var va = strs[i].toString().replace("\n", "").replace(/，/g,
+							",").replace(/。/g, ",");
+					infos = va.split(",");
+					if (infos.length != 5&&infos.length!=3) {
+						$.warn("第" + eval(i + 1) + "行输入格式有误！");
+						return false ;
+					}
+					if(infos.length==5){
+						var count = $("#"+strr+"Data").children('tr').length;
+						html = template('trans_template', {index : count});
+						$("#"+strr+"Data").append(html);
+						$("input[name='groupOrderTransportList["+count+"].departureDate']").val(infos[0]);
+						$("input[name='groupOrderTransportList["+count+"].departureTime']").val(infos[1]);
+						//$("input[name='groupOrderTransportList["+count+"].arrivalTime']").val(infos[1]);
+						$("input[name='groupOrderTransportList["+count+"].classNo']").val(infos[2]);
+						$("input[name='groupOrderTransportList["+count+"].departureCity']").val(infos[3]);
+						$("input[name='groupOrderTransportList["+count+"].arrivalCity']").val(infos[4]);
+					}
+					if(infos.length==3){
+						var count = $("#"+strr+"Data").children('tr').length;
+						html = template('trans_template', {index : count});
+						$("#"+strr+"Data").append(html);
+						$("input[name='groupOrderTransportList["+count+"].departureDate']").val(infos[0]);
+						$("input[name='groupOrderTransportList["+count+"].departureTime']").val(infos[1]);
+						//$("input[name='groupOrderTransportList["+count+"].arrivalTime']").val(infos[1]);
+						$("input[name='groupOrderTransportList["+count+"].classNo']").val(infos[2]);
+					}
+					
+				}
+			}
+			/* $("#bbb").hide(); */
 		}
 	</script>
 </body>

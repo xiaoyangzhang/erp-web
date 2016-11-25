@@ -554,6 +554,9 @@
 									placeholder="出发日期,出发时间,航班号,出发城市,到达城市"
 									style="width: 600px; height: 250px"></textarea>
 							</div>
+							<span>
+								<i style="color: gray;"> 格式：出发日期,出发时间,航班号,出发城市,到达城市</i>
+							</span>
 							<div style="margin-top: 20px;">
 								<a href="javascript:void(0);"
 									onclick="toSaveSeatInCoach('newTransport')"
@@ -854,6 +857,9 @@
 									id="batchInputText" placeholder="姓名,证件号码,手机号或者姓名,证件号码"
 									style="width: 600px; height: 250px"></textarea>
 							</div>
+							<span>
+								<i style="color: gray;"> 格式：姓名,证件号码,手机号或者姓名,证件号码</i>
+							</span>
 							<div style="margin-top: 20px;">
 								<a href="javascript:void(0);" onclick="toSubmit('newGuest')"
 									class="button button-primary button-small">导入</a> <span>

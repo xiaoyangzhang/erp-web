@@ -10,8 +10,8 @@
 	<col width="23%" />
 	<col width="7%" />
 	<col width="5%" />
-	<col width="10%" />
-	<col width="8%" />
+	<col width="9%" />
+	<col width="5%" />
 	<col width="5%" />
 	<col width="5%" />
 	<col width="5%" />
@@ -23,6 +23,13 @@
 			<th>序号<i class="w_table_split"></i></th>
 			<th>团号<i class="w_table_split"></i></th>
 			<th>产品名称<i class="w_table_split"></i></th>
+			
+			
+			<th>客户<i class="w_table_split"></i></th>
+			<th>客人<i class="w_table_split"></i></th>
+			
+			
+			
 			<th>人数<i class="w_table_split"></i></th>
 			<th>计调<i class="w_table_split"></i></th>
 			<th>导游<i class="w_table_split"></i></th>
@@ -57,15 +64,31 @@
 	              </c:if>
              	</td>
 				<td style="text-align: left;">【${item.product_brand_name}】${item.product_name} </td>
-				<td>
-					<c:if test="${not empty item.total_adult}">${item.total_adult}大</c:if><c:if test="${not empty item.total_child}">${item.total_child}小</c:if><c:if test="${not empty item.total_guide}">${item.total_guide}陪</c:if>
+				
+				<td style="text-align: left;">${item.supplier_name}</td>
+				<td style="text-align: left;">${item.receive_mode}</td>
+				
+				<td  style="text-align: left;">
+					<c:if test="${not empty item.total_adult}">${item.total_adult}大</c:if>
+					<c:if test="${not empty item.total_child}">${item.total_child}
+						<c:if test="${item.total_baby == null}"></c:if>
+						<c:if test="${item.total_baby != null}"><span style="color: red;">(${item.total_baby})</span></c:if>
+					小
+					
+					</c:if>
+					<c:if test="${not empty item.total_guide}">${item.total_guide}陪</c:if>
 				</td>
+				
 				<td>${item.operator_name}</td>
+				
+				
 				<c:forEach items="${guideMap}" var="m">
 					<c:if test="${m.key==item.id }">
 						<td >${m.value }<sub><font color="gray" >${item.userName }</font></sub></td>
 					</c:if>
 				</c:forEach>
+				
+				
 				<td style="text-align: left;"><fmt:formatDate value="${item.date_start}" pattern="MM-dd" />/
 					<fmt:formatDate value="${item.date_end}" pattern="MM-dd" />
 				</td>
@@ -112,7 +135,7 @@
 			<c:set var="sum_total_guide" value="${sum_total_guide+item.total_guide }" />
 		</c:forEach>
 		<tr>
-			<td colspan="3">合计:</td>
+			<td colspan="5">合计:</td>
 			<td>${sum_total_adult }大${sum_total_child }小${sum_total_guide }陪</td>
 			<td></td>
 			<td></td>

@@ -16,7 +16,8 @@
  */
   $(function(){
 	 queryList();
- }) 
+ })
+
 function queryList(page,pagesize) {
     
     if (!page || page < 1) {
@@ -58,7 +59,7 @@ function del(id,name){
 		        		 $.warn("");
 		        	 }else{
 		        		 $.success("删除成功");
-		        		 window.location=window.location;
+		        		 queryList($("#page").val(), $("#pageSize").val());
 		        	 }
 		         },error:function(data){
 		        	 $.warn("操作失败");
@@ -69,7 +70,8 @@ function del(id,name){
 }
 
 function add(){
-	window.location.href="addRole";
+	//window.location.href="addRole";
+	newWindow('新增角色','<%=ctx %>/role/addRole');
 }
 function copyRole(roleId){
 	$.ajax({
@@ -99,13 +101,14 @@ function copyRole(roleId){
 	<div class="searchRow"><ul>
 			<form id="queryForm">
 					
-	       			<input name="page" type="hidden" id="page">
-	       			 <input name="pageSize" type="hidden" id="pageSize" value="${pageSize }"> 
-	 				<li class="text">名称：</li><li><input type="text" name="name"
-						id="" /></li>
+	       			<input name="page" type="hidden" id="page" value="${pageBean.page}">
+	       			 <input name="pageSize" type="hidden" id="pageSize" value="${pageBean.pageSize }"> 
+	       			 <li class="text">组名称：</li><li><input type="text" name="groupName" id="" /></li>
+	 				<li class="text">名称：</li><li><input type="text" name="name" id="" /></li>
 					<li>
+					&nbsp;&nbsp;
 					<input type="button" id="btnQuery" value="查询" class="button button-primary button-small"   />
-					&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;
 					</li>
 			</form>
 					<li><button class="button button-primary button-small" id="btnAdd" onclick="add()">新增</button></li>
