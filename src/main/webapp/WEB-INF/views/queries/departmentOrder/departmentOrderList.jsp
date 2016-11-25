@@ -14,7 +14,17 @@
 <script type="text/javascript"
 	src="<%=staticPath%>/assets/js/web-js/sales/regional.js"></script>
 	<%@ include file="/WEB-INF/views/component/org-user/org_user_multi.jsp" %>
+	<script type="text/javascript">
 	
+	$(function() {
+		var vars={
+   			 dateFrom : $.currentMonthFirstDay(),
+   		 	dateTo : $.currentMonthLastDay()
+   		 	};
+		 $("input[name='startTime']").val(vars.dateFrom);
+		 $("input[name='endTime']").val(vars.dateTo ); 
+});
+	</script>
 </head>
 <body>
 	<div class="p_container">
@@ -30,29 +40,28 @@
 							<option value="0">输单日期</option>
 							<option value="1">订单日期</option>
 						</select>
-					<input id="startTime" name="startTime" type="text" style="width: 120px" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd',onpicked:function(){changeMaxDate();}})" value="${startTime }" />
-					~<input id="endTime" name="endTime" type="text" readOnly style="width: 120px" class="Wdate" value="${endTime }" />
+					<%-- <input id="startTime" name="startTime" type="text" style="width: 120px" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd',onpicked:function(){changeMaxDate();}})" value="${startTime }" />
+					~<input id="endTime" name="endTime" type="text" style="width: 120px" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd',onpicked:function(){changeMaxDate();}})"  value="${endTime }" /> --%>
+					<input name="startTime" id="startTime" type="text"  class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})"/> 
+						~ 
+					<input name="endTime" id="endTime"  type="text"  class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />
 					</li>
 					<li class="text">产品名称：</li>
 					<li><input id="productName"  name="productName" type="text"/></li>
 					<li class="text">组团社</li>
 					<li><input id="supplierName"  name="supplierName" style="width: 200px" type="text"/></li>
-					
-						<li class="text">部门:</li>
-					
-						<li>
-	    				<input type="text" name="orgNames" id="orgNames" stag="orgNames" value="" readonly="readonly" onclick="showOrg()"/>
+					<li class="text">部门:</li>
+					<li>
+    					<input type="text" name="orgNames" id="orgNames" stag="orgNames" value="" readonly="readonly" onclick="showOrg()"/>
 						<input name="orgIds" id="orgIds" stag="orgIds" value="" type="hidden" value=""/>	
-						</li>
-						<li class="text">计调:</li>
+					</li>
+					<li class="text">销售:</li>
 					<li>	<!-- <select name="operType">
 								<option value="0">操作计调</option>
 								<option value="1">销售计调</option>
 							</select> -->
-							<input type="text" name="operatorName" id="operatorName" stag="userNames" value="" readonly="readonly" onclick="showUser()"/>
-							<input name="operatorIds" id="operatorIds" stag="userIds" type="hidden" value=""/>
-						
-						
+							<input type="text" name="saleOperatorName" id="saleOperatorName"  stag="userNames" readonly="readonly"  onclick="showUser()"/> 
+							<input name="saleOperatorIds" id="saleOperatorIds" stag="userIds" type="hidden" />
 					</li>
 						<li class="text"></li>
 					<li>
@@ -64,14 +73,14 @@
 			</div>
 		</form>
 	</div>
-	<dl class="p_paragraph_content">
+	<!-- <dl class="p_paragraph_content">
 		
 			<div style="padding-left:20px; padding-right:20px;">
 				<button type="button" style="float:left;" onclick="dateGo(-7);" class="button button-primary button-small">前7天</button>
 				<button type="button" style="float:right;" onclick="dateGo(7);" class="button button-primary button-small">后7天</button>
 			</div>
 			<div class="clear"></div>
-	</dl>
+	</dl> -->
 	<div id="tableDiv"></div>
 	<script type="text/javascript">
 	function queryList(page,pagesize) {	
@@ -82,7 +91,7 @@
 		$("#pageSize").val(pagesize);
 		
 		var options = {
-				url:"../query/departmentOrderList.do",
+				url:"../query/departmentOrderListPage.do",
 				type:"post",
 				dataType:"html",
 				
@@ -136,7 +145,7 @@ function changeMinDate(){
 	$("#startTime").val(minDateStr);
 }
 		
-	function dateGo(day){
+	/* function dateGo(day){
 		//修改开始日期
 		var dateStr =  $("#startTime").val();	
 		var date = new Date(dateStr.replace(/-/g,"/"));
@@ -165,7 +174,7 @@ function changeMinDate(){
 		$("#endTime").val(maxDateStr);
 		
 		queryList();
-	}
+	} */
 	</script>
 </body>
 </html>

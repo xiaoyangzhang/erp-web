@@ -93,18 +93,40 @@
 				               <c:set  var="sumChildNum" value="${groupInfo.childNum + sumChildNum }"/>
 				               <c:if test="${shoppingDataState ==0  }">
 				                   <c:set  var="sumTotalFee" value=""/>
-				                  					 </c:if><c:if test="${shoppingDataState ==1  }">
-				               <c:set  var="sumTotalFee" value="${groupInfo.totalFee + sumTotalFee }"/>
-				               </c:if>
+				              </c:if>
+				              <c:if test="${shoppingDataState ==1  }">
+				              	 <c:set  var="sumTotalFee" value="${groupInfo.totalFee + sumTotalFee }"/>
+				              </c:if>
+				              
 			              </c:forEach>
-				               <tr>
-				               	<td colspan="4">合计：</td>
+			              </tbody>
+			              <tfoot>
+				               <tr class="footer1">
+				               	<td colspan="4">本页合计：</td>
 				               	<td>${sumAdultNum}大${sumChildNum}小</td>
 				               	<td colspan="4"/>
 				               	<td><fmt:formatNumber type="currency"  value="${sumTotalFee}" pattern="#.##" /></td>
-			               		<td colspan="4"/>
+				               	<td></td>
+			               		<td>
+			               			<c:if test="${shoppingDataState ==1 && (sumAdultNum+sumChildNum) != 0 }">
+				                 		<fmt:formatNumber type="currency"  value="${sumTotalFee /(sumAdultNum+sumChildNum) }" pattern="#.##" />
+				                  	</c:if>
+			               		</td>
 				               </tr>
-			             </tbody>
+				               
+				               <tr class="footer2">
+				               	<td colspan="4">总合计：</td>
+				               	<td>${queryGuideShop.adultNumTotal}大${queryGuideShop.childNumTotal}小</td>
+				               	<td colspan="4"/>
+				               	<td><fmt:formatNumber type="currency"  value="${queryGuideShop.allTotalFee}" pattern="#.##" /></td>
+			               		<td/>
+			               		<td>
+			               			<c:if test="${shoppingDataState ==1 && (queryGuideShop.adultNumTotal+queryGuideShop.childNumTotal) != 0 }">
+				                 		<fmt:formatNumber type="currency"  value="${queryGuideShop.allTotalFee /(queryGuideShop.adultNumTotal+queryGuideShop.childNumTotal)}" pattern="#.##" />
+				                  	</c:if>
+			               		</td>
+				               </tr>
+			             </tfoot>
 	          		 </table>
           		
  <jsp:include page="/WEB-INF/include/page.jsp">

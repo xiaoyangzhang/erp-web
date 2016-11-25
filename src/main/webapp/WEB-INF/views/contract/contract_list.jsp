@@ -145,7 +145,6 @@
                     <form id="queryForm"  action="<%=path%>/contract/fleet-list.htm" method="post">
                         <input type="hidden" name="page" value="${page.page}" id="searchPage" />
                         <input type="hidden" name="pageSize" value="${page.pageSize}" id="searchPageSize" />
-                        <input type="hidden" name="shopSupplierId" value="${supplierId}"  />
                         <ul>
                             <li class="text">
                                 <label class="control-label" for="contractName">合同名称：</label>
@@ -227,13 +226,13 @@
                             <li class="clear" />
                             <li class="text"></li>
                             <li>
-                                <button type="submit" class="button button-primary button-small" id="searchTitle" onclick="searchBtn();">
-                                    查询
-                                </button>
+                                <button type="submit" class="button button-primary button-small" id="searchTitle" onclick="searchBtn();">查询</button>
                                 <c:if test="${flag eq 1 }">
-                                <button type="button" class="button button-primary button-small" id="searchTitle" onclick="newWindow('新增协议', '<%=path%>/contract/${supplierId }/add.htm')">
-                                    新增
-                                </button></c:if>
+                                <button type="button" class="button button-primary button-small" id="searchTitle" onclick="newWindow('新增协议', '<%=path%>/contract/${supplierId }/add.htm')">新增 </button>
+                                <c:if test="${supplierInfo.getSupplierType() eq 16}">
+                                <button type="button" class="button button-primary button-small" id="searchTitle" onclick="newWindow('新增协议', '<%=path%>/contract/${supplierId }/delivery-add.htm')">新增2 </button>
+                                </c:if>
+                                </c:if>
                             </li>
                         </ul>
                     </form>
@@ -275,6 +274,9 @@
                             <a class="def" onclick="newWindow('修改协议', '<%=path%>/contract/${supplierId}/${contract.id}/edit.htm')" href="javascript:void(0);">修改</a>&nbsp;
                             <a class="def" onclick="deleteContract('${supplierId}', '${contract.id}', '${contract.contractName}');" href="javascript:void(0);">删除</a>
                             <a class="def" onclick="copyContract('${supplierId}', '${contract.id}', '${contract.contractName}');" href="javascript:void(0);">复制</a>
+                            <c:if test="${supplierInfo.getSupplierType() eq 16}">
+                            <a class="def" onclick="newWindow('修改协议', '<%=path%>/contract/${contract.id}/delivery-edit.htm')" href="javascript:void(0);">修改2</a>
+                            </c:if>
                         </c:otherwise>
                     </c:choose>
                 </td>

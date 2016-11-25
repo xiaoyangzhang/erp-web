@@ -26,16 +26,6 @@
 <link href="<%=ctx%>/assets/css/product/product_rote.css"
 	rel="stylesheet" />
 <style type="text/css">
-.pp {
-	font-family: "Arial Normal", "Arial";
-	font-weight: 400;
-	font-style: normal;
-	font-size: 13px;
-	cursor: pointer;
-	color: #09F;
-	text-align: left;
-}
-
 .p {
 	font-family: "Arial Normal", "Arial";
 	font-weight: 400;
@@ -131,9 +121,17 @@ table.gridtable td {
 </script>
 
 <script type="text/javascript">
+function showInfo(title,width,height,url){
+ 	layer.open({ 
+ 		type : 2,
+ 		title : title,
+ 		shadeClose : true,
+ 		shade : 0.5,
+ 		area : [width,height],
+ 		content : url
+ 	});
+ }
 
-	
-	
 	/** * 选择组团社 */
 	function selectSupplier(){
 		layer.openSupplierLayer({
@@ -192,7 +190,6 @@ table.gridtable td {
 		});
 	}
 	
-	var stockCount;
 	var orderBusiness;
 	/**
 	 * 选择联系人
@@ -241,41 +238,30 @@ table.gridtable td {
 	function limitInput(o){   
         var adult = $("input[name='groupOrder.numAdult']").val(),
         	child = $("input[name='groupOrder.numChild']").val(),
-        	totalPerson=$("#totalPerson").val();
+        	oAdult = $("#totalPerson_adult").val(),
+        	oChild = $("#totalPerson_child").val(),
+        	totalPerson=$("#totalPerson").val(),
+        	allowNum = $("#allowNum").val();
         
-        if (_.isNaN(parseInt(adult))){
-        	$("input[name='groupOrder.numAdult']").val(0);
-        	return;
-        }
-        if (_.isNaN(parseInt(child))){
-        	$("input[name='groupOrder.numChild']").val(0);
-        	return;
-        }
-     
-     
-        var current = parseInt(adult)+parseInt(child);
-    
-        var max1=$("#allowNum").val();
-        max2=parseInt(max1)+parseInt(totalPerson);
-        var max=$("#stockCount").val();
-        if(parseInt(max1)>0){
-		        	 if(parseInt(current)>max2){
-		                 alert('订单人数不允许大于库存人数！');
-		             	$("input[name='groupOrder.numAdult']").val(0);
-		         		$("input[name='groupOrder.numChild']").val(0);
-		         		$("input[name='groupOrder.numGuide']").val(0);
-             }
-        }else{
-		       	 if(parseInt(current)>max){
-		            alert('订单人数不允许大于库存人数！');
-		        	$("input[name='groupOrder.numAdult']").val(0);
-		    		$("input[name='groupOrder.numChild']").val(0);
-		    		$("input[name='groupOrder.numGuide']").val(0);
-        }
-        }
-       
+        	oAdult = (oAdult==""?0:oAdult);
+        	oChild = (oChild==""?0:oChild);
+        	totalPerson = (totalPerson==""?0:totalPerson);
+        	allowNum = (allowNum==""?0:allowNum);
+        	
+     	var isStock = $("#orderBusiness").val();
+    	if (isStock == "stock"){
+        	var maxEdit = parseInt(allowNum)+parseInt(totalPerson); //修改时的最大库存数
+        	var maxNew = $("#stockCount").text(); //新增时的最大库存数（从选择框带进来）
+        	var max = Math.max(maxEdit, maxNew);
+	        var current = parseInt(adult)+parseInt(child);
+        	if(parseInt(current)>max){
+	       		alert('订单人数不允许大于库存人数！');
+             	$("input[name='groupOrder.numAdult']").val(oAdult);
+         		$("input[name='groupOrder.numChild']").val(oChild);
+         	}
+        	
+    	}
     }
-
 </script>
 
 </head>
@@ -284,6 +270,50 @@ table.gridtable td {
 	<%@ include file="/WEB-INF/views/sales/template/groupRouteTemplate.jsp"%>
 	<div class="p_container">
 		<div class="p_container_sub" id="tab1">
+		    <c:if test="${vo.groupOrder.id != null }">
+		    <c:if test="${msgInfoList.size() > 0 }">
+		    <p class="p_paragraph_title">
+                    <b>消息记录</b>
+                </p>
+                <dl class="p_paragraph_content">
+                    <dd>
+                        <div class="dd_left">
+                            <span class="btnTianjia"><i></i>&nbsp;&nbsp;</span>
+                        </div>
+                        <div class="dd_right" style="width: 90%">
+                            <table cellspacing="0" cellpadding="0" class="w_table">
+                                <thead>
+                                    <tr>
+                                        <!-- <th width="7%">状态<i class="w_table_split"></i></th> -->
+                                        <th width="10%">标题<i class="w_table_split"></i></th>
+                                        <th>内容<i class="w_table_split"></i></th>
+                                        <th width="10%">发送人<i class="w_table_split"></i></th>
+                                        <th width="15%">发送时间<i class="w_table_split"></i></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach items="${msgInfoList}" var="msg">
+                                    <tr onclick="showMsgView(${msg.id});">
+                                        <%-- <td>
+                                        <c:if test="${msg.status==0}">
+                                          <a href="javascript:void(0);">未读</a>
+                                        </c:if>
+                                        <c:if test="${msg.status==1}">已读</c:if>
+                                        </td> --%>
+                                    <td style="text-align:left;">${msg.msgTitle}</td>
+                                    <td style="text-align:left;">${msg.msgText}</td>
+						            <td>${msg.operatorName}</td>
+						            <td>${msg.createTime}</td>
+						        </tr>
+						    </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="clear"></div>
+                    </dd>
+                </dl>
+		      </c:if>
+		      </c:if>
 			<form id="SpecialGroupOrderForm">
 				<p class="p_paragraph_title">
 					<b>基本信息</b>
@@ -298,7 +328,9 @@ table.gridtable td {
 					</colgroup>
 					<tr style="display:none;">
 						<td>订单号：</td>
-						<td><input type="hidden" name="groupOrder.id"value="${vo.groupOrder.id}" /> <input type="hidden"name="groupOrder.orderType" value="-1" /> <input type="text"name="groupOrder.orderNo" value="${vo.groupOrder.orderNo}"
+						<td>
+						<input type="hidden" id="orderId" name="groupOrder.id" value="${vo.groupOrder.id}" />
+						<input type="text"name="groupOrder.orderNo" value="${vo.groupOrder.orderNo}"
 							readonly="readonly" placeholder="订单号系统自动生成" /></td>
 						<td></td>
 						<td></td>
@@ -326,12 +358,16 @@ table.gridtable td {
 							onClick="WdatePicker({onpicking: function(dp){startDate=new Date(dp.cal.getNewDateStr()).getTime() ;},dateFmt:'yyyy-MM-dd'})"
 							value="${vo.groupOrder.departureDate }" /></td>
 						<td><i class="red">* </i>业务类别：</td>
-								<td><select name="GroupMode" id="GroupMode">
+								<td><select name="groupOrder.orderMode" id="orderMode" onchange="orderModeChange()">
 								<option value="-1">请选择</option>
 								<c:forEach items="${typeList}" var="v" varStatus="vs">
-								<option value="${v.id}"<c:if test='${vo.groupOrder.tourGroup.groupMode==v.id}'>selected='selected'</c:if> >${v.value}</option>
+								<option lang="${v.note}" value="${v.id}"<c:if test='${vo.groupOrder.orderMode==v.id}'>selected='selected'</c:if> >${v.value}</option>
 							</c:forEach>		
-							</select></td>
+							</select>
+							<input type="hidden" id="requireTraffic" value="0" />
+							<span id="wuliu_id"></span>
+							<input type="hidden" name="bookingDate" value="" />
+							</td>
 					</tr>		
 			
 					<tr>
@@ -342,55 +378,53 @@ table.gridtable td {
 							<input id="supplierName_t" type="text" class="IptText300" value="${vo.groupOrder.supplierName }" /> 
 							<a href="javascript:void(0)" onclick="selectSupplier();">请选择</a></td>
 						<td>客户单号：</td>
-						<td><input type="text" name="groupOrder.supplierCode" class="IptText300" placeholder="组团社团号" value="${vo.groupOrder.supplierCode }" /></td>
+						<td><input type="text" name="groupOrder.supplierCode" class="IptText300" placeholder="客户单号" value="${vo.groupOrder.supplierCode }" /></td>
 					</tr>
 
 					<tr>
 						<td>客户联系人：</td>
-						<td><input type="text" name="groupOrder.contactName" id="contactName" class="IptText100" placeholder="姓名"
-							value="${vo.groupOrder.contactName }" /> <input type="text"
-							name="groupOrder.contactTel" id="contactTel" class="IptText100"
-							placeholder="座机" value="${vo.groupOrder.contactTel }" /> <input
-							type="text" name="groupOrder.contactMobile" id="contactMobile"
-							class="IptText100" placeholder="手机"
-							value="${vo.groupOrder.contactMobile }" /> <input type="text"
-							name="groupOrder.contactFax" id="contactFax" class="IptText100"
-							placeholder="传真" value="${vo.groupOrder.contactFax} " /> <a
-							href="javascript:void(0)" onclick="selectContact();">请选择</a></td>
-						<td></td>
+						<td><input type="text" name="groupOrder.contactName" id="contactName" style="width:80px" placeholder="姓名" value="${vo.groupOrder.contactName }" /> 
+						<input type="text" name="groupOrder.contactTel" id="contactTel" style="width:90px" placeholder="座机" value="${vo.groupOrder.contactTel }" /> 
+						<input type="text" name="groupOrder.contactMobile" id="contactMobile" style="width:90px" placeholder="手机" value="${vo.groupOrder.contactMobile }" /> 
+						<input type="text" name="groupOrder.contactFax" id="contactFax" style="width:90px" placeholder="传真" value="${vo.groupOrder.contactFax} " /> <a href="javascript:void(0)" onclick="selectContact();">请选择</a>
+						</td>
+						<td><i class="red">* </i>客人内容：</td>
+						<td><input type="text" name="groupOrder.receiveMode" id='groupOrder_receiveMode'
+							class="IptText300" 
+							value="${vo.groupOrder.receiveMode}" /></td>
 					</tr>
 					<tr>
 						<td><i class="red">* </i>团人数：</td>
-						<td><input style="width: 92px;" type="text" onblur="limitInput(this);"
-							name="groupOrder.numAdult" placeholder="成人数"
+						<td><input style="width: 80px;" type="text" onblur="limitInput(this);"
+							name="groupOrder.numAdult" id="groupOrder_numAdult" placeholder="成人数"
 							value="${(empty vo.groupOrder.numAdult)?0:vo.groupOrder.numAdult}" />
-							~<input style="width: 92px;" type="text"
+							<input style="width: 90px;" type="text"
 							name="groupOrder.numChild" placeholder="小孩数" onblur="limitInput(this);"
 							value="${(empty vo.groupOrder.numChild)?0:vo.groupOrder.numChild}" />
-							~<input style="width: 92px;" type="text"
+							<input style="width: 90px;" type="text"
 							name="groupOrder.numGuide" placeholder="全陪数" onblur="limitInput(this);"
 							value="${(empty vo.groupOrder.numGuide)?0:vo.groupOrder.numGuide}" />
 							(成人数~小孩数~全陪)</td>
-							<td><i class="red">* </i>客人内容：</td>
-						<td><input type="text" name="groupOrder.receiveMode" id='groupOrder_receiveMode'
-							class="IptText300" placeholder="接站牌内容"
-							value="${vo.groupOrder.receiveMode}" /></td>
-							
+							<td>旺旺号：</td>
+						<td><input type="text" name="groupOrder.buyerNick" id='groupOrder_buyerNick'
+							class="IptText300" 
+							value="${vo.groupOrder.buyerNick}" /></td>
+							</tr>
 					<tr>
 						<td><i class="red">* </i>产品名称：</td>
 						<td><input type="hidden" name="groupOrder.productBrandId"value="${vo.groupOrder.productBrandId }" /> 
-						<input type="text"name="groupOrder.productBrandName"value="${vo.groupOrder.productBrandName }" readonly="readonly" />
+						<input type="text"name="groupOrder.productBrandName"value="${vo.groupOrder.productBrandName }" readonly="readonly" placeholder="产品品牌" />
 						~ <input type="hidden" name="groupOrder.productId" id="productId"value="${vo.groupOrder.productId }" /> 
-						<input type="text"name="groupOrder.productName"value="${vo.groupOrder.productName }" style="width: 300px"readonly="readonly" /> 
-
-						<c:if test="${vo.groupOrder.id == null }"><div class="tab-operate">
-							<a href="####" class="btn-show">选择产品<span class="caret"></span></a>
-					<div class="btn-hide" id="asd">
+						<input type="text"name="groupOrder.productName"value="${vo.groupOrder.productName }" style="width: 300px" placeholder="产品名称" /> 
+						<span id="stockCount" style="color:red"></span>
+						<div class="tab-operate">
+							<a href="javascript:void(0)" class="btn-show">选择产品<span class="caret"></span></a>
+							<div class="btn-hide" id="asd">
 						  <a href="javascript:void(0)"onclick="importRoute();">模板选择</a>
-						  <a href="javascript:void(0)"onclick="stockOpt()">库存选择</a>
-					</div></div></c:if> 
-					</td>						
-						<td>客源地：</td>
+						  <a href="javascript:void(0)"onclick="stockOpt_TaobaoProduct();">库存选择</a>
+							</div></div>
+					</td>		
+								<td>客源地：</td>
 						<td><input type="hidden" name="groupOrder.provinceName"class="IptText300" id="provinceName"value="${vo.groupOrder.provinceName }" /> 
 						<select name="groupOrder.provinceId" id="provinceCode">
 								<option value="-1">请选择省</option>
@@ -409,12 +443,37 @@ table.gridtable td {
 								</c:forEach>
 						</select></td>
 					</tr>
+					<tr>
+					<td>出发地：</td>
+						<td><input type="hidden" name="groupOrder.departProvinceName"class="IptText300" id="departProvinceName"value="${vo.groupOrder.departProvinceName }" /> 
+						<select name="groupOrder.departProvinceId" id="departProvinceCode">
+								<option value="-1">请选择省</option>
+								<c:forEach items="${allProvince }" var="province">
+									<option value="${province.id }"
+										<c:if test="${province.id==vo.groupOrder.departProvinceId }"> selected="selected" </c:if>>${province.name}</option>
+								</c:forEach>
+						</select> <input type="hidden" name="groupOrder.departCityName" class="IptText300" id="departCityName" value="${vo.groupOrder.departCityName}" /> 
+						<select name="groupOrder.departCityId" id="departCityCode">
+								<option value="-1">请选择市</option>
+								<c:forEach items="${allCity1}" var="city">
+									<option value="${city.id }"
+										<c:if test="${city.id==vo.groupOrder.departCityId}"> selected="selected" </c:if>>${city.name}</option>
+								</c:forEach>
+						</select></td>
+						<c:if test="${vo.groupOrder.id == null }">
+							<td class="red">成团方式：</td>
+							<td class="red">
+								<div class="dd_right"  id="a">
+		    					<label ><input type="radio" name="groupOrder.orderType" value="1" <c:if test="${vo.groupOrder.orderType != '0'}"> checked="checked" </c:if> /><span>不需并团</span></label>
+								<label ><input type="radio" name="groupOrder.orderType" value="0" <c:if test="${vo.groupOrder.orderType == 0 }"> checked="checked" </c:if> /><span>需要并团</span></label>
+		    					</div>
+		    				<div class="clear"></td>
+	    				</c:if>
+	    			<c:if test="${vo.groupOrder.id != null }">
+	    				<input type="hidden" name="groupOrder.orderType" value="${vo.groupOrder.orderType}"/>
+	    			</c:if>
+					</tr>
 				</table>
-                    
-                    
-                    
-				
-				
 
 				<p class="p_paragraph_title">
 					<b>酒店需求</b>
@@ -571,19 +630,23 @@ table.gridtable td {
 					</dd>
 					<div class="clear"></div>
 					<div style="margin-left: 6%">
-						<p class="pp">批量录入</p>
+						</br>
+						<button type="button" class="button button-primary button-small pp" id="trafficImport">文本导入</button>
 						</br> </br>
 						<div id="bbb" style="display: none;">
 							<div>
-								<textarea class="l_textarea" name="bit" value="" id="bit"
+								<textarea class=""w_textarea"" name="bit" value="" id="bit"
 									placeholder="出发日期,出发时间,航班号,出发城市,到达城市"
-									style="width: 600px; height: 250px"></textarea>
+									></textarea>
 							</div>
+							<span>
+								<i style="color: gray;"> 格式：出发日期,出发时间,航班号,出发城市,到达城市</i>
+							</span>
 							<div style="margin-top: 20px;">
 								<a href="javascript:void(0);"
 									onclick="toSaveSeatInCoach('newTransport')"
-									class="button button-primary button-small">保存</a> <span>
-									<i class="red"> 按照上面格式填写后提交即可，回车换行添加多人信息 </i>
+									class="button button-primary button-small">导入 </a> <span>
+									<i class="red"> 格式：出发日期,出发时间,航班号,出发城市,到达城市 </i>
 								</span>
 							</div>
 						</div>
@@ -746,7 +809,7 @@ table.gridtable td {
 													</c:forEach>
 											</select></td>
 											<td><input type="text"
-												name="groupOrderGuestList[${index.index}].certificateNum" data-rule-required="true"
+												name="groupOrderGuestList[${index.index}].certificateNum" 
 												class="certificateNum" value="${guest.certificateNum }"
 												onblur="recCertifNum(${index.index})" style="width: 130px" <c:if test="${!guest.editType }"> readonly="readonly" </c:if>/>
 											</td>
@@ -791,19 +854,19 @@ table.gridtable td {
 					<div class="clear"></div>
 					<div style="margin-left: 6%;margin-bottom:50px;margin-top: 5px;">
 						<input type="hidden" id="certificateNum" />
-							<button type="button" class="p">文本导入</button>
-							<button type="button" onclick="textImport()">excel导入</button>
+							<button type="button" class="button button-primary button-small p">文本导入</button>
+							<button type="button" class="button button-primary button-small" onclick="textImport()">excel导入</button>
 						</br></br>
 						<div id="bi" style="display: none;">
 							<div>
-								<textarea class="l_textarea" name="batchInputText" value=""
-									id="batchInputText" placeholder="姓名,证件号码,手机号或者姓名,证件号码"
-									style="width: 600px; height: 250px"></textarea>
+								<textarea class="w_textarea" name="batchInputText" value=""
+									id="batchInputText" placeholder="姓名, 证件号码, 手机号  或者   姓名, 证件号码"
+									></textarea>
 							</div>
 							<div style="margin-top: 20px;">
 								<a href="javascript:void(0);" onclick="toSubmit('newGuest')"
 									class="button button-primary button-small">导入</a> <span>
-									<i class="red"> 按照上面格式填写后提交即可，回车换行添加多人信息 </i>
+									<i class="red"> 格式 ：姓名,证件号码,手机号 </i>
 								</span>
 							</div>
 						</div>
@@ -835,11 +898,8 @@ table.gridtable td {
 
 								</tbody>
 							</table>
-							<div
-								<c:if test="${ empty vo.groupOrder.id }">style="display: none"</c:if>
-								id="addBtn">
-								<button type="button"
-									class="proAdd_btn button button-action button-small">增加</button>
+							<div  id="addBtn">
+								<button type="button" class="proAdd_btn button button-action button-small">增加</button>
 							</div>
 
 						</div>
@@ -859,9 +919,12 @@ table.gridtable td {
 							<textarea class="w_textarea" name="groupOrder.remark" id="remark"
 								placeholder="备注">${vo.groupOrder.remark }</textarea>
 						</div>
+						<p>
+							<a href="javascript:void(0)" onclick="taobao_PorcessSellerMemo('remark','')">提取</a>
+						</p>
 						<div class="clear"></div>
 					</dd>
-					<dd>
+					<dd style="display:none">
 						<div class="dd_left">内部备注</div>
 						<div class="dd_right">
 							<textarea class="w_textarea" name="groupOrder.remarkInternal"
@@ -869,20 +932,242 @@ table.gridtable td {
 						</div>
 						<div class="clear"></div>
 					</dd>
+					
+					<c:if test="${vo.groupOrder.groupId >0}">
+					<p class="p_paragraph_title">
+					<b>计调操作</b>
+				</p>
+				<div style="margin-left: 6%">
+						</br>
+				<a class="button button-primary button-small"href="javascript:void(0)"onclick="newWindow('新增安排','<%=ctx %>/booking/AYToAddSight?groupId=${vo.groupOrder.groupId }&orderId=${vo.groupOrder.id}')">新增安排</a>
+				<a class="button button-primary button-small"  href="javascript:void(0)" onclick="newWindow('新增地接社','<%=ctx %>/booking/AYDelivery.htm?gid=${vo.groupOrder.groupId }&orderId=${vo.groupOrder.id}')">新增地接社</a>
+				<a class="button button-primary button-small"  href="javascript:void(0)" onclick="F5()">刷新</a>
+				<a class="button button-primary button-small"  href="javascript:void(0)" onclick="printInsure(${vo.groupOrder.groupId})">打印投保单</a>
+				</div>
+							<dd>
+							<div class="dd_left">
+							<span class="btnTianjia"><i></i>&nbsp;&nbsp;</span>
+						</div>
+						<div class="dd_right" style="width: 90%">
+						<dl class="p_paragraph_content">
+					<table cellspacing="0" cellpadding="0" class="w_table">
+						<%-- <col width="10%" /> --%>
+						<col width="10%" />
+						<col width="" />
+						<col width="15%" />
+						<col width="10%" />
+						<col width="8%" />
+						<col width="8%" />
+						<col width="8%" />
+						<col width="8%" />
+						<col width="8%" />
+						<col width="8%" />
+						<thead>
+							<tr>
+								<th>商家类别</th>
+								<th>商家</th>
+								<th>价格明细(单价*人数)</th>
+								<th>支出金额</th>
+								<th>收入金额</th>
+								<th>已结</th>
+								<th>未结</th>
+								<th>操作员</th>
+								<th>备注</th>
+								<th>操作</th>
+							</tr>
+						</thead>
+						<tbody>
+						<c:forEach items="${bookingInfo.bookingList  }" var="booking">
+								<tr <c:if test="${booking.stateFinance==1}">style="color:red"</c:if>>
+									<td><c:if test="${booking.supplierType==3}">酒店</c:if> <c:if test="${booking.supplierType==2}">餐厅</c:if> <c:if test="${booking.supplierType==5}">景区</c:if>
+									<c:if test="${booking.supplierType==15}">保险</c:if><c:if test="${booking.supplierType==9}">机票</c:if><c:if test="${booking.supplierType==120}">其他收入</c:if>
+									<c:if test="${booking.supplierType==121}">其他支出</c:if></td>
+									<td style="text-align: left">${booking.supplierName }</td>
+									<td>数量：${booking.detailList[0].itemNum }&nbsp;&nbsp;&nbsp;&nbsp;价格：${booking.detailList[0].itemPrice }</td>
+											<td><c:choose>
+											<c:when test="${booking.total eq null  }">0</c:when>
+											<c:when test="${booking.supplierType==120}">0</c:when>
+											<c:otherwise>
+												<fmt:formatNumber value="${booking.total }" pattern="#.##"
+													type="currency" />
+											</c:otherwise>
+										</c:choose></td>
+										<td><c:choose>
+											<c:when test="${booking.total eq null  }">0</c:when>
+											<c:when test="${booking.supplierType==120}"><fmt:formatNumber value="${booking.total }" pattern="#.##"
+													type="currency" /></c:when>
+											<c:otherwise>0</c:otherwise>
+										</c:choose></td>
+											<td><c:choose>
+											<c:when test="${booking.totalCash eq null  }">0</c:when>
+											<c:otherwise>
+												<fmt:formatNumber value="${booking.totalCash }" pattern="#.##"
+													type="currency" />
+											</c:otherwise>
+										</c:choose></td>
+										<td><fmt:formatNumber value="${booking.total - booking.totalCash}" pattern="#.##" type="currency" /></td>
+									<td>${booking.userName }</td>
+										<td>${booking.remark } </td>
+									<td>
+										<div class="tab-operate">
+											<a href="javascript:void(0);" class="btn-show">操作<span class="caret"></span></a>
+											<div class="btn-hide" id="asd">	
+											<a class="def" href="javascript:void(0)"  onclick="toPreview1(${booking.id})">打印</a>
+											<a class="def" href="javascript:void(0)"
+											onclick="newWindow('查看预定安排','<%=staticPath %>/booking/AYToAddSight.do?groupId=${booking.groupId }&bookingId=${booking.id}&supplierId=${booking.supplierId }&orderId=${vo.groupOrder.id}&see=1')">查看</a>
+												<c:if test="${booking.stateFinance==null || booking.stateFinance==0}">
+												<a class="def" href="javascript:void(0)"
+													onclick="newWindow('修改订单','<%=staticPath %>/booking/AYToAddSight?groupId=${booking.groupId }&bookingId=${booking.id}&supplierId=${booking.supplierId}&orderId=${vo.groupOrder.id}')">修改</a>
+											<a class="def" href="javascript:void(0)"
+													onclick="del(this,'${booking.id}','${booking.supplierType}')">删除</a> 
+													</c:if>
+											</div>
+										</div>
+									</td>
+								</tr>
+								<c:if test="${booking.supplierType!=120}">
+								<c:set var="sum_price" value="${sum_price+booking.total}" />
+								</c:if>
+								<c:if test="${booking.supplierType==120}">
+								<c:set var="sum_income" value="${sum_income+booking.total}" />
+								</c:if>
+								<c:set var="sum_totalCash" value="${sum_totalCash+booking.totalCash}" />
+								<c:set var="sum_blan" value="${sum_price-sum_totalCash}" />
+							</c:forEach>
+							<c:forEach items="${bdList}" var="info">
+								<tr <c:if test="${info.stateFinance==1}">style="color:red"</c:if>>
+								<td>地接社</td>
+								<td style="text-align: left">${info.supplierName}</td>
+								<td>
+          					<c:if test="${info.priceList!=null and fn:length(info.priceList)>0 }">
+          						<table class="in_table">
+          						<col width="30%" /><col width="40%" /><col width="30%" />
+          							<c:forEach var="price" items="${info.priceList }">
+          								<tr>
+          									<td>
+          										单价<fmt:formatNumber value="${price.unitPrice }" pattern="#.##" type="currency"/>*
+          										人数<fmt:formatNumber value="${price.numPerson }" pattern="#.##" type="currency"/>
+          									</td>
+          								</tr>
+	          						</c:forEach>
+          						</table>
+          					</c:if>
+          				</td>
+								<td> 
+								<c:choose>
+          						<c:when test="${ info.total eq null}">0</c:when>
+          						<c:otherwise> 
+          						<fmt:formatNumber value="${info.total}" pattern="#.##" type="currency"/>
+          						 </c:otherwise>
+          					</c:choose> </td>
+          					<td>0</td>
+								<td><c:choose>
+          						<c:when test="${ info.totalCash eq null}">0</c:when>
+          						<c:otherwise>
+          						<fmt:formatNumber value="${info.totalCash}" pattern="#.##" type="currency"/>
+          						 </c:otherwise>
+          					</c:choose> </td>
+								<td><fmt:formatNumber value="${info.total-info.totalCash}" pattern="#.##" type="currency"/></td>
+								<td>${info.userName }</td>
+								<td>${info.priceList[0].remark }</td>
+								<td><div class="tab-operate">
+						<a href="javascript:void(0);" class="btn-show">操作<span class="caret"></span></a>
+						<div class="btn-hide" id="asd">						
+							<a class="def" href="javascript:void(0)" onclick="newWindow('查看下接社订单','<%=staticPath %>/booking/AYDelivery.htm?gid=${info.groupId }&bid=${info.id}&see=1')">查看</a>
+							<c:if test="${info.stateFinance==null || info.stateFinance==0}">
+								<a class="def" href="javascript:void(0)" onclick="newWindow('修改下接社订单','<%=staticPath %>/booking/AYDelivery.htm?gid=${info.groupId }&bid=${info.id}&orderId=${vo.groupOrder.id}')">修改</a>
+				         		<a class="def" href="javascript:void(0)" onclick="agencyDelete(this,${info.id })">删除</a></c:if>
+				         		<a class="def" href="javascript:void(0)"  onclick="toPreview(${info.id})">打印</a>
+	         			</div>
+					</div></td>
+								</tr>
+								<c:set var="sum_price1" value="${sum_price1+info.total}" />
+								<c:set var="sum_totalCash1" value="${sum_totalCash1+info.totalCash}" />
+								<c:set var="sum_blan1" value="${sum_price1-sum_totalCash1}" />
+								</c:forEach>
+						</tbody>
+						<tfoot>
+							<tr>
+								<td colspan="3" style="text-align: right">合计</td>
+								<td><fmt:formatNumber value="${sum_price+sum_price1 }" pattern="#.##" type="currency" /></td>
+								<td><fmt:formatNumber value="${sum_income }" pattern="#.##" type="currency" /></td>
+										<td><fmt:formatNumber value="${sum_totalCash+sum_totalCash1 }" pattern="#.##" type="currency" /></td>
+										<td><fmt:formatNumber value="${sum_blan + sum_blan1}" pattern="#.##" type="currency" /></td>
+								<td colspan="3"></td>
+							</tr>
+						</tfoot>
+					</table>
+				</dl>
+							</div>
+					</dd>
+					</br>
+							<dd>
+						<div class="dd_left">
+							<span class="btnTianjia"><i></i>&nbsp;&nbsp;</span>
+						</div>
+						<div class="dd_right" style="width: 90%">
+							<table cellspacing="0" cellpadding="0" class="w_table">
+								<thead>
+									<tr>
+										<th width="20%">团号<i class="w_table_split"></i></th>
+										<th width="20%">计调<i class="w_table_split"></i></th>
+										<th width="20%">收入<i class="w_table_split"></i></th>
+										<th width="20%">支出<i class="w_table_split"></i></th>
+										<th width="20%">利润<i class="w_table_split"></i></th>
+									</tr>
+								</thead>
+								<tbody >
+								<tr>
+								<td>${tg.groupCode}</td>
+								<td>${tg.operatorName}</td>
+								<td><fmt:formatNumber value="${tg.totalIncome}" pattern="#.##" type="currency" /></td>
+								<td><fmt:formatNumber value="${tg.totalCost}" pattern="#.##" type="currency" /></td>
+								<td><fmt:formatNumber value="${tg.totalIncome-tg.totalCost}" pattern="#.##" type="currency" /></td>
+								</tr>
+								</tbody>
+							</table>
+						</div>
+					</dd>
+					<div class="clear"></div>
+					</br>
+					</br>
+				</c:if>
 				</dl>	
 				<c:set var="totalPerson" value="${vo.groupOrder.numChild+vo.groupOrder.numAdult}" />
-				<input type="hidden" name="totalPerson" id="totalPerson"value="${totalPerson}" /> 
+				<input type="hidden" name="totalPerson" id="totalPerson"value="${totalPerson}" />
+				<input type="hidden" name="totalPerson_adult" id="totalPerson_adult"value="${vo.groupOrder.numAdult}" /> 
+				<input type="hidden" name="totalPerson_child" id="totalPerson_child"value="${vo.groupOrder.numChild}" /> 
+				
 				<input type="hidden" name="allowNum"   id="allowNum" value="${allowNum}" />
-				<input type="hidden" name="stockCount"  id="stockCount" value="1000" />
+				<input type="hidden" name="see"   id="see" value="${see}" />
+				<input type="hidden" name="groupOrder.aiyouGroupId"   value="-1" />
 				<input type="hidden" name="ids"  id="ids" value="${tbIds}" />
 				<input type="hidden" name="id"  id="id" />
 				<input type="hidden" name="groupOrder.orderBusiness"  id="orderBusiness"value="${vo.groupOrder.orderBusiness}"/>
 				<az></az>
 				<div class="Footer" style="position:fixed;bottom:0px; right:0px; background-color: rgba(58,128,128,0.7);width: 100%;padding-bottom: 4px;margin-bottom:0px; text-align: center;">
+				    <c:if test="${see !=0 }">
 						<button type="submit" class="button button-primary button-small">保存</button>
 						<button type="button" onclick="importTaobaoOrder()" class="button button-primary button-small">淘宝订单导入</button>
+			        </c:if>
+			        <c:if test="${vo.groupOrder.id != null }">
+                     <button class="button button-primary button-small" type="button" onclick="saveMsg();">发送消息</button>
+                     <c:if test="${(see ==null || see ==1) && vo.groupOrder.orderLockState == 0 }">
+                    <button class="button button-primary button-small" type="button" onclick="changeorderLockState(${vo.groupOrder.id})">提交给计调</button>
+                    </c:if>
+                     <c:if test="${see ==2 && vo.groupOrder.orderLockState ne 0}">
+                    <c:if test="${vo.groupOrder.orderLockState == 1}">
+                    <button class="button button-primary button-small" type="button" onclick="changeorderLockStateByOp(${vo.groupOrder.id})">确认接收</button>
+                    </c:if>
+                    <button class="button button-primary button-small" type="button" onclick="goBackOrderLockStateByOp(${vo.groupOrder.id})">退回</button>
+                      <c:if test="${vo.groupOrder.groupId !=null && vo.groupOrder.orderLockState == 2}">
+                    <c:if test="${SH}">
+                    <button class="button button-primary button-small" type="button" onclick="newWindow('结算单详情', '<%=staticPath%>/finance/auditGroup.htm?groupId=${vo.groupOrder.groupId}')">审核</button>
+                    </c:if>
+                    </c:if>
+                    </c:if>
+                     </c:if>
 				</div>
-			
 			</form>
 			<div id="fileUpload" style="display: none">
 				<form id="uploadForm" method="post" action="" enctype="multipart/form-data">
@@ -904,10 +1189,114 @@ table.gridtable td {
 		</div>
 	</div>
 
-
-<input id="showTradeDetail" type=""  value="" />
-
 <script type ="text/javascript">
+function F5(){
+	location.reload();
+}
+
+function toPreview(bookingId,type){
+	if(!type){type=1;}
+	window.open("../booking/deliveryDetailPreview.htm?bookingId="+bookingId+"&type="+type+"&preview=1");
+	
+}
+function toPreview1(bookingId){
+	window.open("../booking/bookingDetailPreview.htm?bookingId="+bookingId);
+}
+/* 加载页面时获取业务类别的值 */
+$(function(){
+	//默认组团社为【淘宝】
+	if ($("#supplierId").val()=='' || $("#supplierId").val()=='0'){
+		$("#supplierName").val('淘宝');
+		$("#supplierName_t").val('淘宝');
+		$("#supplierId").val('2490');
+	}
+	
+	var orderMode = $("#orderMode").val();
+	
+	if(orderMode==1476){
+		$('#wuliu_id').append('<a href="javascript:void(0);" id="addVisaId">物流</a>');
+		$("#wuliu_id").on("click","a", function() {
+			 var orderId = $("#orderId").val();
+			if(orderId != ""){
+				var bookingDateId = $("#bookingDateId").val();
+			    var orderMode = $("#orderMode").val();
+			    //alert("orderMode="+orderMode);
+			   
+			    
+			    layer.open({
+			  		type : 2,
+			  		title : '新增签证信息',
+			  		shadeClose : true,
+			  		shade : 0.5,
+			  		area: ['600px', '230px'],
+			  		content: '<%=path%>/taobao/visa.htm?orderMode='+orderMode+'&orderId='+orderId+'&bookingDate='+bookingDateId
+			  	});
+			}else{
+				$.error("请先保存信息！");
+			}
+			
+		  
+		});
+	  }else{
+		  $('#wuliu_id a').remove();
+	  };
+})
+function orderModeChange(){
+	/* 点击业务类别时获取选中的值，并添加点击事件 */
+	var orderMode = $("#orderMode").val();
+	if(orderMode==1476){
+		$('#wuliu_id').append('<a href="javascript:void(0);" id="addVisaId">物流</a>');
+		$("#wuliu_id").on("click","a", function() {
+	    var orderId = $("#orderId").val();
+	    if(orderId != ""){
+			var bookingDateId = $("#bookingDateId").val();
+		    var orderMode = $("#orderMode").val();
+		    //alert("orderMode="+orderMode);
+		    layer.open({
+		  		type : 2,
+		  		title : '新增签证信息',
+		  		shadeClose : true,
+		  		shade : 0.5,
+		  		area: ['600px', '230px'],
+		  		content: '<%=path%>/taobao/visa.htm?orderMode='+orderMode+'&orderId='+orderId+'&bookingDate='+bookingDateId
+		  	});
+	    }else{
+			$.error("请先保存信息！");
+		}
+	 });
+	  }else{
+		  $('#wuliu_id a').remove();
+	  }
+	//通过 【业务类别】下拉框（字典设置的规则 yihg_erp_basic.sys_dic.type_code='SALES_TEAM_TYPE' 的note字段）满足业务需求
+	//note字段信息 绑定在#orderMode的lang里
+	var lang = $("#orderMode").find("option:selected").attr("lang");
+	<c:if test="${vo.groupOrder.id == null }">
+		if(lang.indexOf('SK,')!=-1){
+			$("input[name='groupOrder.orderType']").get(1).checked=true; 
+		}else{
+			$("input[name='groupOrder.orderType']").get(0).checked=true; 
+		}
+		
+		
+		//默认操作计调
+		if(lang.indexOf('@')!=-1){
+			var ary = lang.split(',');
+			for(var i=0; i<ary.length; i++){
+				if (ary[i].indexOf('@') != -1){
+					var opAry = ary[i].split('@');
+					$("#operatorName").val(opAry[0]);
+					$("#operatorId").val(opAry[1]);
+				}
+			}
+		}
+	</c:if>
+	//若业务类别：长线，要求保存时，检查接送信息至少有一行！
+	if(lang.indexOf('REQUIRE_TRAFFIC,')!=-1){
+		$("#requireTraffic").val("1");
+	}else{
+		$("#requireTraffic").val("0");
+	}
+}
 function importTaobaoOrder(){
 	layer.open({
 		type : 2,
@@ -920,11 +1309,26 @@ function importTaobaoOrder(){
 }
 
 $(document).ready(function(){
+	var salesRoute = new SalesRoute();
+	if ($("#orderId").val() == '' && $("#groupOrder_departureDate").val()==''){
+		$("#groupOrder_departureDate").val($.currentDay());
+		salesRoute.dayAdd();
+	}
+	
+	
 	var taobaoIds = $("#ids").val();
 	 loadTaobaoDataAjax(taobaoIds, "");
+	 
+		//从原始单直接点击新增
+		var originalIds='${retVal}';
+		if (originalIds != ''){
+			$("#ids").val(originalIds);
+			 loadTaobaoDataAjax(originalIds, "import");
+		}
 });
 
-
+	
+	
 function remove_tbRow(obj){
 	//从窗口移除
 	var id = $(obj).closest("table[class*='tbDataRow']").find("#tbdata_id").val();
@@ -959,8 +1363,17 @@ function remove_tbRow(obj){
 function loadTaobaoData(taobaoIdAry) {
 	if (taobaoIdAry.length == 0) return;
 	var Ids = taobaoIdAry.join(',');
-	$("#ids").val(Ids);
 	 loadTaobaoDataAjax(Ids, "import");
+
+	 if ($("#ids").val() != ""){
+		var origIdsAry = $("#ids").val().split(',');
+		if (origIdsAry.length > 0){
+			taobaoIdAry = taobaoIdAry.concat(origIdsAry);
+			Ids = taobaoIdAry.join(',');
+		}
+	}
+	$("#ids").val(Ids);
+	
 }
 
 //扩展Date的format方法
@@ -996,8 +1409,20 @@ function getFormatDate(date, pattern) {
 	return date.format(pattern);
 }
 
+function html_encode(str) {
+    var s = "";
+    if (str.length == 0) {
+        return "";
+    }
+    
+    s = str.replace(/</g, "&lt;");
+    s = s.replace(/>/g, "&gt;");
+  return s;   
+}
+
 function loadTaobaoDataAjax(ids, opType){
 	//todo 通过ajax取淘宝订单数据
+	//alert('loadTaobaoDataAjax');
 	 $.ajax({
 				  type : "post",
 				  url : "<%=path%>/taobao/getTaobaoOrders.do",
@@ -1006,22 +1431,27 @@ function loadTaobaoDataAjax(ids, opType){
 				  },
 				  dataType : "json",
 				  success : function(data){
-					  //console.log(data);
 					  if (data.length == 0) return;
 					  var templateStr = "", templateRow = "";
 					  for(var i=0;  i<data.length;  i++){
-						  	templateRow = $("#template_taobao").html(); 
+						  templateRow = $("#template_taobao").html(); 
+						  	templateRow = templateRow.replace("$id", data[i].id);
+						  	templateRow = templateRow.replace("$id", data[i].id);
 						  	templateRow = templateRow.replace("$id", data[i].id);
 						  	templateRow = templateRow.replace("$title", data[i].title);
 						  	templateRow = templateRow.replace("$skuPropertiesName", data[i].skuPropertiesName);
 						  	templateRow = templateRow.replace("$tid", data[i].tid);
+						  	templateRow = templateRow.replace("$tid", data[i].tid);
 						  	
 						  	templateRow = templateRow.replace("$oid", data[i].oid);
 						  	templateRow = templateRow.replace("$outerIid", data[i].outerIid);
+						  	templateRow = templateRow.replace("$outerIid", data[i].outerIid);
+
 						  	templateRow = templateRow.replace("$tradeFrom", data[i].tradeFrom);
 						  	templateRow = templateRow.replace("$created", getFormatDate(new Date(data[i].created)));
-						  	
+						  	templateRow = templateRow.replace("$created", getFormatDate(new Date(data[i].created)));
 						  	templateRow = templateRow.replace("$payTime", getFormatDate(new Date(data[i].payTime)));
+						  	templateRow = templateRow.replace("$buyerNick", data[i].buyerNick);
 						  	templateRow = templateRow.replace("$buyerNick", data[i].buyerNick);
 						  	templateRow = templateRow.replace("$buyerNick", data[i].buyerNick);
 						  	templateRow = templateRow.replace("$buyerAlipayNo", data[i].buyerAlipayNo);
@@ -1041,12 +1471,12 @@ function loadTaobaoDataAjax(ids, opType){
 						  	templateRow = templateRow.replace("$receiverDistrict", data[i].receiverDistrict);
 						  	templateRow = templateRow.replace("$receiverAddress", data[i].receiverAddress);
 						  	templateRow = templateRow.replace("$buyerMemo", data[i].buyerMemo);
-							templateRow = templateRow.replace("$sellerMemo", data[i].sellerMemo);
+						  	templateRow = templateRow.replace("$sellerMemo", html_encode(data[i].sellerMemo));
 						  	templateStr +=  templateRow;
 						  	
 						  	//插入价格
 						  	if (opType=="import")
-						  		addPrice(0,'newPrice',{priceLockState:data[i].id, unitPrice:data[i].payment, remark: data[i].tid+' '+data[i].title});
+						  		addPrice(0,'newPrice',{priceLockState:data[i].id, unitPrice:data[i].payment, remark: data[i].oid+' '+data[i].title});
 					  }
 					  if ($("#tbData_Container table").text() == "")
 					  		$("#tbData_Container").html(templateStr);
@@ -1057,7 +1487,9 @@ function loadTaobaoDataAjax(ids, opType){
 					  if ($(".switch").attr("lang") == "close" && opType=="import"){
 						  $(".switch").click();
 					  }
-					  receiverMode_setValue();
+					  //导入后提取
+					  if (opType == 'import')
+					  	receiverMode_setValue();
 				  },
 				  error : function(data,msg){
 					  alert('获取淘宝订单出错！+msg');
@@ -1171,31 +1603,108 @@ function loadTaobaoDataAjax(ids, opType){
 		$("#supplierName_t").click(function(){$(this).trigger(eKeyDown);});
 		
 		$("#groupOrder_departureDate").blur( function(){
-			receiverMode_setValue();
+			receiverMode_setDate();
 		});
 	});
 
+function receiverMode_setDate(){
+	var $receiverMode = $("#groupOrder_receiveMode");
+	var departureDate = $("#groupOrder_departureDate").val();
+	
+	departureDate = departureDate.replace("-","");
+	departureDate = departureDate.replace("-","");
+	departureDate = departureDate.replace("-","");
+	var receiverValue = $receiverMode.val() ;
+	if (receiverValue.length ==0) {
+		$receiverMode.val(departureDate);
+	}
+	else{
+		if (receiverValue.length>=8){
+			if (checkDate(receiverValue.substr(0,4)+"-"+receiverValue.substr(4,2)+"-"+receiverValue.substr(6,2))){
+				$("#groupOrder_receiveMode").val(departureDate.substr(0,8)+receiverValue.substr(8));
+			}
+		}
+	}
+}
+	
 function receiverMode_setValue(){
+	//alert('receiverMode_setValue');
+	var ingoreStr = "差价", personNum =0;
 	var $receiverMode = $("#groupOrder_receiveMode");
 	var departureDate = $("#groupOrder_departureDate").val();
 	var firstGuestName =  $("input[name='groupOrderGuestList[0].name").val();
 	if (firstGuestName==undefined || firstGuestName== 'undefined' || firstGuestName==null)
 		firstGuestName = "";
 	
-	var taobao_buyerNick="";
-	$("#taobao_buyerNick").each(function(){
-		if (taobao_buyerNick=="")
-			taobao_buyerNick = $(this).val();
-	});	
-	taobao_buyerNick = taobao_buyerNick==""?"":" 旺旺:"+taobao_buyerNick;
+	var taobao_outerIid = "";
+	var taobao_buyerNick=$("#groupOrder_buyerNick").val();
 	
-	departureDate = departureDate.replace("-","");
-	departureDate = departureDate.replace("-","");
-	departureDate = departureDate.replace("-","");
+	//产品赋值，默认为SKU
+	//if ($("input[name='groupOrder.productName']").val()==''){
+		var importTaobaoNum = $("input[name='taobao_outerIid']").length;
+		var isIngore = true;
+		$("input[name='taobao_outerIid']").each(function(){
+			isIngore = (importTaobaoNum == 1);
+			if (importTaobaoNum > 1)
+			{
+					isIngore = ($(this).val().indexOf(ingoreStr)==-1) ;
+			}
+			if (isIngore)
+				personNum += parseInt($(this).closest("table").find("#taobao_num").text());
+				if (taobao_outerIid=="") taobao_outerIid = $(this).val();
+				if (taobao_buyerNick=="")
+					taobao_buyerNick =  $(this).closest("table").find("#taobao_buyerNick").val();
+				else{
+					if(taobao_buyerNick.indexOf($(this).closest("table").find("#taobao_buyerNick").val())) taobao_buyerNick =taobao_buyerNick+","+$(this).closest("table").find("#taobao_buyerNick").val();
+				}
+				if (firstGuestName == ""){
+					var ary = taobao_getReceiveText( $(this).closest("table").find("span[id*='PicketMemo']").text());
+					if (ary.length > 0) {
+						firstGuestName=ary[1];
+						departureDate = ary[0];
+						 $("#groupOrder_departureDate").val(departureDate);
+					}
+				}
+		});
+		if (taobao_buyerNick != '') $("#groupOrder_buyerNick").val(taobao_buyerNick);
+		if (taobao_outerIid != '') $("input[name='groupOrder.productName']").val(taobao_outerIid);
+		if (personNum > 0) $("#groupOrder_numAdult").val(personNum);
 
-	$receiverMode.val(departureDate+firstGuestName+taobao_buyerNick);
+		departureDate = departureDate.replace("-","");
+		departureDate = departureDate.replace("-","");
+		departureDate = departureDate.replace("-","");
+		if (firstGuestName != '')
+			$receiverMode.val(departureDate+firstGuestName);
+	//}
+	
+	//客户单号，默认为淘宝单号
+	if ($("input[name='groupOrder.supplierCode']").val()==''){
+		var taobao_tid = "";
+		$("#taobao_tid").each(function(){
+			if (taobao_tid=="")
+				taobao_tid = $(this).val();
+		});
+		$("input[name='groupOrder.supplierCode']").val(taobao_tid);
+	}
+	
+	if ($("input[name='bookingDate']").val()==''){
+		var booking_date = "";
+		$("#bookingDateId").each(function(){
+			if (booking_date=="")
+				booking_date = $(this).val();
+		});
+		$("input[name='bookingDate']").val(booking_date);
+	}
 }
 	
+function checkDate(obj){
+    // var strDate=obj.value;//获取对象的值
+    re=/^(\d{4})(-|\/)(\d{2})\2(\d{2})$/g;//正则表达式
+    if(re.test(obj))//判断日期格式符合YYYY-MM-DD
+        return true;
+	else
+		return false;
+}	
 function showGuideList(obj){
 	 var e = $.Event('keydown');
 	 e.keyCode = 40; // DOWN
@@ -1369,15 +1878,15 @@ function changeType(count){
 			<th colspan="3" class="line">$title</th><th style="text-align:right"><a href="javascript:void(0)" onclick="remove_tbRow(this)">移除</a></th>
 	</tr>
 	<tr>
-		<th style="width:60px">主订单号</th><td  style="width:190px">$tid</td>
+		<th style="width:60px">主订单号</th><td  style="width:190px">$tid<input type="hidden" id="taobao_tid" value="$tid" /></td>
 		<th style="width:60px">子订单号</th><td>$oid</td>
 	</tr>
 	<tr>
-		<th>自编号</th><td>$outerIid</td>
+		<th>自编号</th><td>$outerIid<input type="hidden" name="taobao_outerIid" value="$outerIid" /></td>
 		<th>购买来源</th><td>$tradeFrom</td>
 	</tr>
 	<tr>
-		<th>下单时间</th><td>$created</td>
+		<th>下单时间</th><td>$created <input type="hidden" id="bookingDateId" value="$created" /></td>
 		<th>购买时间</th><td>$payTime</td>
 	</tr>
 	<tr>
@@ -1389,11 +1898,11 @@ function changeType(count){
 		<th>买家邮箱</th><td>$buyerEmail</td>
 	</tr>
 	<tr>
-		<th >SKU数据</th><td colspan="3">$skuPropertiesName</td>
+		<th >SKU数据</th><td colspan="3">$skuPropertiesName </td>
 	</tr>
 	<tr>
 		<th>商品单价</th><td>$price</td>
-		<th>购买数量</th><td>$num</td>
+		<th>购买数量</th><td id="taobao_num">$num</td>
 	</tr>
 	<tr>
 		<th>应付金额</th><td>$payment</td>
@@ -1414,8 +1923,9 @@ function changeType(count){
 		<th>买家备注</th><td colspan="3">$buyerMemo</td>
 	</tr>
 	<tr>
-		<th>卖家备注</br><a href="javascript:void(0)" onclick="taobao_PorcessSellerMemo(this)">提取</a></th><td colspan="3">$sellerMemo</td>
+		<th>卖家备注</br><a href="javascript:void(0)" id="aPicketMemo" onclick="taobao_PorcessSellerMemo('PicketMemo$id', '$buyerNick')">提取</a></th><td colspan="3"><span id="PicketMemo$id">$sellerMemo</span></td>
 	</tr>
+
 </table>
 </script>
 <div class="hoverBlock clearfix">
@@ -1426,5 +1936,219 @@ function changeType(count){
 
 </div>
 </div>
+<script type="text/javascript">
+
+	function saveMsg() {
+		var msg_title;
+		var msg_info;
+		var operatorName;
+		var operatorIds;
+		var orderId;
+		layer.open({ 
+	        type : 2,
+	        title : '发送消息',
+	        closeBtn : false,
+	        area : [ '450px', '470px' ],
+	        shadeClose : true,
+	        content : '../msgInfo/showMsg.htm',
+	        btn: ['确定', '取消'],
+	        success:function(layero, index){
+	            win = window[layero.find('iframe')[0]['name']];
+	        	
+	        	msg_title = win.$("#msg_title");
+	            msg_info = win.$("#msg_info");
+	            operatorName = win.$("#operatorName");
+	            operatorIds = win.$("#operatorIds");
+	            
+	            msg_title.val($("#groupOrder_receiveMode").val());
+	            orderId = $("#orderId");
+	        },
+	        yes: function(index){
+	        	if(msg_title.val() == "") {
+	        		layer.msg("消息标题不能为空！");
+	        		return;
+	        	} else if (msg_info.val() == "") {
+	        		layer.msg("消息内容不能为空！");
+	        		return;
+	        	} else if (operatorName.val() == "") {
+	        		layer.msg("接收人员不能为空！");
+	        		return;
+	        	}
+	        	
+	        	$.post(
+	        			"../msgInfo/sendMsg.do", 
+	        			{
+	        			    orderId: orderId.val(),
+	        				title: msg_title.val(),
+	        				info: msg_info.val() ,
+	        				ids: operatorIds.val(),
+	        				names: operatorName.val(),
+	        				msgType: 1
+	        			}, function(data){
+	        				if(data.success){
+	        					layer.msg("发送成功！");
+	        				}else{
+	        					layer.msg("发送失败！");
+	        				}
+	        			},
+	        	"json");
+                
+                layer.close(index);
+	        },cancel: function(index){
+	            layer.close(index);
+	        }
+	    });
+	}
+	
+	function showMsgView(mid) {
+		layer.open({ 
+            type : 2,
+            title : '消息详细',
+            closeBtn : false,
+            area : [ '400px', '300px' ],
+            shadeClose : true,
+            content : '../msgInfo/showMsgDetail.htm?mid='+mid,
+            btn: ['关闭'],
+            success:function(layero, index){
+            	/* $.ajax({
+                    type : "post",
+                    url : "<%=staticPath%>/msgInfo/modifyStatus.do",
+                    data : {
+                        midId : mid
+                    },
+                    dataType : "json",
+                    success : function(data){
+                        if(data.success){
+                            searchBtn();
+                        }
+                    },
+                    error : function(data,msg){
+                        layer.msg(msg);
+                    }
+                }); */
+            },
+            cancel: function(index){
+                layer.close(index);
+            }
+        });
+	}
+	
+	function del(obj,id,type){
+		$.ajax({
+			url:"<%=staticPath%>/booking/delBookingSupplier.do",
+			type:"post",
+			dataType:"json",
+			async:false,
+			data:{
+				bookingId:id
+			},
+			success:function(data){
+				if(data.success){
+					$.successR("删除成功",function(){
+						//$(obj).parent().parent().remove();
+						location.reload();
+					});
+				}
+				else{
+					$.errorR(data.msg);
+				}
+			},
+			error:function(){
+				$.errorR("服务器忙，请稍后再试");
+			}
+		})	
+	}
+	
+	function agencyDelete(obj,id){
+		$.post("<%=staticPath%>/booking/agencyDelele.do",{id:id},function(data){
+			if(data.success){
+				$.successR('删除成功！',function(){
+					$(obj).closest("tr").remove();					
+				});
+			}else{
+				$.errorR(data.msg);
+			}
+		},"json");
+	}
+	
+	function changeorderLockState(orderId){
+		$.confirm("是否确认提交给计调？",  function(){
+			$.getJSON("../taobao/changeOrderLockState.do?orderId=" + orderId, function(data) {
+				if (data.success) {
+					$.success('操作成功',function(){
+						layer.close(stateIndex);
+						location.reload();
+					});
+				}
+			});
+		}, function(){
+		$.info('操作取消！');
+		})
+	}
+	
+	function goBackOrderLockStateByOp(orderId){
+		$.confirm("是否确认退回？",  function(){
+			$.getJSON("../taobao/goBackOrderLockStateByOp.do?orderId=" + orderId, function(data) {
+				if (data.success) {
+					$.success('操作成功',function(){
+						layer.close(stateIndex);
+						location.reload();
+					});
+				}
+			});
+		}, function(){
+		$.info('操作取消！');
+		})
+	}
+	
+	function changeorderLockStateByOp(orderId){
+		$.confirm("是否确认接收？",  function(){
+			$.getJSON("../taobao/changeorderLockStateByOp.do?orderId=" + orderId, function(data) {
+				if (data.success) {
+					$.success('操作成功',function(){
+						layer.close(stateIndex);
+						location.reload();
+					});
+				}
+			});
+		}, function(){
+		$.info('操作取消！');
+		})
+	}
+	
+	function printInsure(groupId){
+		location.href="<%=ctx%>/tourGroup/downloadInsure.htm?groupId="+groupId ; //供应商确认订单 
+		
+	}
+/* 	function updateLockStateToFinance(orderId){
+		$.confirm("是否确认提交？",  function(){
+			$.getJSON("../taobao/updateLockStateToFinance.do?orderId=" + orderId, function(data) {
+				if (data.success) {
+					$.success('操作成功',function(){
+						layer.close(stateIndex);
+						location.reload();
+					});
+				}
+			});
+		}, function(){
+		$.info('操作取消！');
+		})
+	} */
+	
+	/* function goBackToOP(orderId){
+		$.confirm("是否确认退回给计调？",  function(){
+			$.getJSON("../taobao/goBackToOP.do?orderId=" + orderId, function(data) {
+				if (data.success) {
+					$.success('操作成功',function(){
+						layer.close(stateIndex);
+						location.reload();
+					});
+				}
+			});
+		}, function(){
+		$.info('操作取消！');
+		})
+	} */
+</script>
 </body>
 </html>

@@ -134,7 +134,12 @@
 					<div class="clear"></div>
 	    			</dd> 
 				
-					
+					<dd>
+		    			<div class="dd_left"> 映射客户Id: </div> 
+		    			<div class="dd_right"><input type="text" id="form-field-1" name="mappingSupplierId"
+								value="${org.mappingSupplierId }" class="IptText300"></div>
+						<div class="clear"></div>
+	    			</dd> 
 					<dd>
 	    			<div class="dd_left">是否启用: </div> 
 	    			<div class="dd_right" style="width: auto;">

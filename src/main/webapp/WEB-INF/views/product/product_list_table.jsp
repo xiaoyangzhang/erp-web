@@ -43,6 +43,9 @@ String staticPath = request.getContextPath();
             	<c:if test="${productInfo.state!=2 }"><span class="log_action delete">未上架</span></c:if>
             </td>            
             <td>
+            <div class="tab-operate">
+					<a href="####" class="btn-show">操作<span class="caret"></span></a>
+					<div class="btn-hide" id="asd">
             	<a href="javascript:void(0)"
                    <c:if test="${priceMode == 'GROUP_ANGENCY' }">
                    	onclick="newWindow('产品详情', '<%=path%>/productSales/detail.htm?id=${productInfo.id }')"
@@ -54,10 +57,13 @@ String staticPath = request.getContextPath();
                 <c:if test="${optMap['EDIT'] }">
 	                <a href="javascript:void(0)" onclick="dataRight(this,'${productInfo.id }')" class="def">权限</a>
                     <a href="javascript:void(0)" onclick="newWindow('编辑产品-${productInfo.nameCity}', '<%=path%>/productInfo/edit.htm?productId=${productInfo.id }')" class="def">编辑</a>
+                    <a href="javascript:void(0)" class="def aEditRight" onclick="newWindow('复制产品-${productInfo.id}', '<%=path%>/productInfo/copy.htm?productId=${productInfo.id }')" >复制</a>
                 </c:if>
-                &nbsp;<a href="javascript:void(0)" onclick="delProduct(${productInfo.id})" class="def">删除</a>
+                <a href="javascript:void(0)" onclick="delProduct(${productInfo.id})" class="def">删除</a>
                 <%-- <a href="download.htm?productId=${productInfo.id }" class="def">打印</a> --%>
                 <a href="javascript:void(0)" class="def"  id="preview" onclick="toPreview(${productInfo.id })" >导出</a>
+                </div>
+                </div>
             </td>
         </tr>
     </c:forEach>

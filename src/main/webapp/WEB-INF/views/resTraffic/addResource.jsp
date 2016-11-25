@@ -52,23 +52,28 @@
 	    		
 	    		 <dd>
 	    			<div class="dd_left">成本价:</div> 
-	    			<div class="dd_right"><c:if test="${trafficRes.id>=0}"><fmt:formatNumber value="${trafficRes.costPrice}" pattern="#.##"/></c:if>
-	    			<c:if test="${trafficRes.id==null}"><input type="text" name="trafficRes.costPrice" value="${(empty trafficRes.costPrice)?0:trafficRes.costPrice}" " class="IptText300"></c:if></div>
+	    			<div class="dd_right">
+	    			<c:if test="${trafficRes.id>=0}">成人：<fmt:formatNumber value="${trafficRes.costPrice}" pattern="#.##"/>
+												    				儿童：<fmt:formatNumber value="${trafficRes.childPrice}" pattern="#.##"/>
+												    				婴儿：<fmt:formatNumber value="${trafficRes.babyPrice}" pattern="#.##"/></c:if>
+	    			<c:if test="${trafficRes.id==null}">成人：<input type="text" name="trafficRes.costPrice" value="${(empty trafficRes.costPrice)?0:trafficRes.costPrice}" " >
+	    																儿童：<input type="text" name="trafficRes.childPrice" value="${(empty trafficRes.childPrice)?0:trafficRes.childPrice}" " >
+	    																婴儿：<input type="text" name="trafficRes.babyPrice" value="${(empty trafficRes.babyPrice)?0:trafficRes.babyPrice}" " ></c:if></div>
 					<div class="clear"></div>
 	    		</dd> 
 	    		
 	    		<dd>
 	    			<div class="dd_left"><i class="red">*</i>开始日期：</div> 
-	    			<div class="dd_right"><c:if test="${trafficRes.id>=0}">${trafficRes.dateStart}</c:if>
-	    			<c:if test="${trafficRes.id==null}"><input name="trafficRes.dateStart" type="text" value="${trafficRes.dateStart}" style="width:120px;"
+	    			<div class="dd_right"><c:if test="${trafficRes.id>=0}">${trafficRes.dateStart}<input name="trafficRes.dateStart" type="hidden" id="d1" value="${trafficRes.dateStart}"/></c:if>
+	    			<c:if test="${trafficRes.id==null}"><input name="trafficRes.dateStart" type="text" id="d1" value="${trafficRes.dateStart}" style="width:120px;"
 							       class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})"/></c:if></div>
 					<div class="clear"></div>
 	    		</dd> 
 	    		<dd>
-	    			<div class="dd_left"><i class="red">*</i>最晚预定:</div> 
-	    			<div class="dd_right"><c:if test="${trafficRes.id>=0}">${trafficRes.dateLatest}</c:if>
-	    			<c:if test="${trafficRes.id==null}"><input name="trafficRes.dateLatest" type="text" value="${trafficRes.dateLatest}" style="width:120px;"
-							       class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm'})"/></c:if>
+	    			<div class="dd_left"><i class="red">*</i>截止报名时间:</div> 
+	    			<div class="dd_right">
+	    			<input name="trafficRes.dateLatest" type="text" value="${trafficRes.dateLatest}" style="width:120px;"
+							       class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm'})"/>
 						</div>
 					<div class="clear"></div>
 	    		</dd> 
@@ -94,7 +99,7 @@
 		             <tbody id="addContacts">
 		             	<c:forEach items="${trafficResLine}" var="line" varStatus="index">
 		             <tr>
-							<td> <input name="trafficResLine[${index.index}].lineDate" type="text" value="${line.lineDate}" style="width:90px;" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})"/> 
+							<td> <input name="trafficResLine[${index.index}].lineDate" type="text" value="${line.lineDate}" style="width:90px;" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'d1\')}'})"/> 
 							                                <input name="trafficResLine[${index.index}].id" type="hidden" value="${line.id}" /> </td>
 							<td><input name="trafficResLine[${index.index}].classNo" type="text" value="${line.classNo}" /> </td>
 							<td><input name="trafficResLine[${index.index}].departureCity" type="text" value="${line.departureCity}" /> </td>
@@ -207,7 +212,7 @@ $('#returnBtn').on('click', function(){
 					<tr>
 							<td> 
 								<input type="hidden" name="trafficResLine[{{index}}].id"  value="${line.id}" /> 
-							<input name="trafficResLine[{{index}}].lineDate" type="text" value="${line.lineDate}" style="width:90px;" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})"/> </td>
+							<input name="trafficResLine[{{index}}].lineDate" type="text" value="${line.lineDate}" style="width:90px;" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'d1\')}'})"/> </td>
 							<td><input name="trafficResLine[{{index}}].classNo" type="text" value="${line.classNo}" /> </td>
 							<td><input name="trafficResLine[{{index}}].departureCity" type="text" value="${line.departureCity}" /> </td>
 							<td><input name="trafficResLine[{{index}}].arrivalCity" type="text" value="${line.arrivalCity}" /> </td>

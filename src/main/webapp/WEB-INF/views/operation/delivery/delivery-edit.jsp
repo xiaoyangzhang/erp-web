@@ -71,7 +71,14 @@
 	    			<div class="dd_left"><i class="red">* </i>到达日期：</div> 
 	    			<div class="dd_right">
 	    				<input type="text" name="dateArrival" id="dateArrival" class="Wdate"
-							onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" value="<fmt:formatDate value="${booking.dateArrival}" pattern="yyyy-MM-dd"/>"/>
+							onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" 
+							<c:if test="${not empty booking}">
+								value="<fmt:formatDate value="${booking.dateArrival}" pattern="yyyy-MM-dd"/>"
+							</c:if>
+							<c:if test="${empty booking}">
+								value="<fmt:formatDate value="${group.dateStart}" pattern="yyyy-MM-dd"/>"
+							</c:if> 
+							/>
 	    			</div>
 					<div class="clear"></div>
 	    		</dd> 
@@ -328,6 +335,9 @@ showGroupInfo();
     $(function(){
         var param = "";
         JAutocompleteEx("#supplierName", "<%=staticPath %>/tourGroup/getSupplier?supplierType=16", param, "supplierId", customerTicketCallback, 1);
+        <c:if test='${booking==null }'>
+        	$(".itemChk").attr("checked", "checked");
+        </c:if>
     });
     function customerTicketCallback(event, value) {
          

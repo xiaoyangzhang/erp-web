@@ -155,6 +155,26 @@
 				</table>
 			</c:if>
 			<table style="width:100%;border-collapse:collapse;margin: 0px"  border="1">
+					<tr>
+			  			<th style="width:25%">银行名称</th>
+			  			<th style="width:25%">开户行</th>
+			  			<th style="width:25%">开户名</th>
+			  			<th style="width:25%">账号</th>
+			  		</tr>
+		  			<c:forEach items="${accountList}" var="v">
+		  			<tr>
+		  				<td style="text-align: center">${v.bankName}</td>
+			  			
+			  			<td style="text-align: center">
+			  				${v.bankAccount}
+			  			</td>
+			  			<td style="text-align: center">${v.accountName}</td>
+			  			<td style="text-align: center">${v.accountNo}</td>
+			  			</tr>
+		  			</c:forEach>
+				</table>
+				
+			<table style="width:100%;border-collapse:collapse;margin: 0px"  border="1">
 				<tr>
 				    <td style="text-align: right" style="width:8%">房量<br/>统计</td>
 				    <td class="rich_text">${hotelNum}</td>
