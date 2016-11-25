@@ -83,6 +83,12 @@ $.extend({
 	  var curMonth = curDate.getMonth()+1; if(curMonth<10){curMonth='0'+curMonth;}
 	  return curDate.getFullYear()+"-"+curMonth+"-01";
   },
+  currentMonthFirstDay2: function(addMonth){
+	  var curDate=new Date();
+	  var curMonth = curDate.getMonth()+1+addMonth; 
+	  if(curMonth<10){curMonth='0'+curMonth;}
+	  return curDate.getFullYear()+"-"+curMonth+"-01";
+  },
   currentMonthLastDay: function(){
 	  var curDate=new Date();
 	  var curMonth = curDate.getMonth()+1;
@@ -96,5 +102,29 @@ $.extend({
 	  var curMonth = curDate.getMonth()+1; if(curMonth<10){curMonth='0'+curMonth;}
 	  var curDay = curDate.getDate(); if(curDay<10){curDay='0'+curDay;}
 	  return curDate.getFullYear()+"-"+curMonth+"-"+curDay;
+  },
+  dicItemDlg: function(typeCode, objName, objId){
+	  //弹框选择字典，可多选
+	  var win , checkIds = $("#"+objId).val();
+	layer.open({ 
+		type : 2,
+		title : '选择',
+		shadeClose : true,
+		shade : 0.5,
+	    area : ['500px','300px'],
+		content : '../component/dicItemDlg.htm?typeCode='+typeCode+'&checkIds='+checkIds,
+		btn: ['确定', '取消'],
+		success:function(layero, index){
+			win = window[layero.find('iframe')[0]['name']];
+		},
+		yes: function(index){
+			var body = layer.getChildFrame('body', index);
+			$("#"+objId).val(body.find("#dicIds").val());
+			$("#"+objName).val(body.find("#dicNames").val());
+	        layer.close(index);
+	    },cancel: function(index){
+	    	layer.close(index);
+	    }
+	});
   }
 });

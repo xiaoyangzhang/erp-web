@@ -18,30 +18,31 @@
        <thead>
     <tr>
     		<th style="width: 10%">序号<i class="w_table_split"></i></th>
-			<th style="width: 13%">日期<i class="w_table_split"></i></th>
-			<th style="width: 11%">入库<i class="w_table_split"></i></th>
-			<th style="width: 11%">机动位<i class="w_table_split"></i></th>
-			<th style="width: 11%">已售<i class="w_table_split"></i></th>
-			<th style="width: 11%">预留<i class="w_table_split"></i></th>
-			<th style="width: 11%">清预留<i class="w_table_split"></i></th>
-			<th style="width: 11%">取消<i class="w_table_split"></i></th>
-			<th style="width: 11%">剩余<i class="w_table_split"></i></th>
+			<th style="width: 10%">日期<i class="w_table_split"></i></th>
+			<th style="width: 10%">昨日结余<i class="w_table_split"></i></th>
+			<th style="width: 10%">入库<i class="w_table_split"></i></th>
+			<th style="width: 10%">机动位<i class="w_table_split"></i></th>
+			<th style="width: 10%">待确认(订单)<i class="w_table_split"></i></th>
+			<th style="width: 10%">已确认(订单)<i class="w_table_split"></i></th>
+			<th style="width: 10%">取消(订单)<i class="w_table_split"></i></th>
+			<th style="width: 10%">当天剩余<i class="w_table_split"></i></th>
 		</tr>
     </thead>
        <tbody>
  			<c:forEach items="${list}" var="orders" varStatus="v">
 		 <tr>
-		 <c:set var="surplus" value="${surplus+orders.STOCK-orders.STOCKDISABLE-orders.ORDERSOLD-orders.ORDERRESERVE+orders.ORDERCLEAN+orders.ORDERCANCEL+0}"/>
+		  		<c:set var="surplus" value="${surplus+orders.numBalance+0}"/>
 		 		<td>${v.count}</td>
 				<td><a href="javascript:void(0)"   onclick="detailsStocklog(this,'${orders.id }','${orders.adjustTime}')" class="def">${orders.adjustTime}</a></td>
+				<td>${balance eq null?0:balance}</td>
 				<td>${orders.STOCK}</td>
 				<td>${orders.STOCKDISABLE}</td>
-				<td>${orders.ORDERSOLD}</td>
-				<td>${orders.ORDERRESERVE}</td>
-				<td>${orders.ORDERCLEAN}</td>
+				<td>${orders.ORDERUNCONFIRM}</td>
+				<td>${orders.ORDERCONFIRM}</td>
 				<td>${orders.ORDERCANCEL}</td>
 				<td>${surplus} </td>
 				</tr> 
+			<c:set var="balance" value="${surplus}"/>
 		</c:forEach>
       </tbody>
 </table>
@@ -52,7 +53,7 @@ function detailsStocklog(obj,resId,adjustTime){
 		title : '资源销售日明细',
 		shadeClose : true,
 		shade : 0.5,
-		area: ['600px', '400px'],
+		area: ['800px', '500px'],
 		content: 'detailsStocklog.do?resId='+resId+ "&adjustTime=" + adjustTime
 	}); 
 }

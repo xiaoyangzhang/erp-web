@@ -50,7 +50,7 @@
 			<th>序号</th>
 			<th>订单号</th>
 			<th>产品名称</th>
-			<th>日期</th>
+			<th>出团日期</th>
 			<th>预留</th>
 			<th>下单员</th>
 			
@@ -103,10 +103,10 @@
             		<span class='log_action insert'>已确认</span>
             	</c:when>
             	<c:when test="${resOrder.extResState  =='2'}">
-            		<span class='log_action delete'>取消</span>
+            		<span class='log_action delete'>已取消</span>
             	</c:when>
             	<c:otherwise>
-            		<span class='log_action delete'>清位</span>
+            		<span class='log_action delete'>已清位</span>
             	</c:otherwise>
             </c:choose>
             </td>
@@ -127,35 +127,33 @@
             </c:choose>
             </td>
             <td>
-            	${resOrder.limitTime }
-            	<c:if test="${times>resOrder.limitTime && resOrder.extResState =='0'}">
-		            	<span style='color:red'>超时</span>
-		        </c:if>
-            	<%-- <c:if test="${resOrder.extResCleanTime ne ''}">
-	            	<fmt:parseDate value="${fn:replace(resOrder.extResCleanTime, ':00.0', ':00')}" pattern="yyyy-MM-dd HH:mm:ss" var="date1"></fmt:parseDate>  
+            	<c:if test="${resOrder.extResCleanTime != 0  && resOrder.extResState =='0'}">
+            		<fmt:parseDate value="${resOrder.limitTime}" pattern="yyyy-MM-dd HH:mm:ss" var="date1"></fmt:parseDate>  
 	            	<fmt:formatDate pattern="yyyy-MM-dd" value="${date1}" /><br/>
 	            	<fmt:formatDate pattern="HH:mm:ss" value="${date1}" />
-	            	<c:if test="${times > resOrder.extResCleanTime && resOrder.extResState =='0'}">
+            		<c:if test="${times>resOrder.limitTime }">
 		            	<span style='color:red'>超时</span>
-		            </c:if>
-	            </c:if> --%>
+		        	</c:if>
+		        </c:if>
             </td>
-            <td style="text-align:left;">${resOrder.remark }</td>            
+            <td style="text-align:left;">${resOrder.remark }<span style="color:red;">${resOrder.remarkInternal }</span></td>            
             <td>
             	<div class="tab-operate">
 					<a href="####" class="btn-show">操作<span class="caret"></span></a>
 					<div class="btn-hide" id="asd">
 						<a href="javascript:queryOrder(${resOrder.id });" class="def">查看订单</a>
 						<c:choose>
-			            	<c:when test="${resOrder.extResState  =='2'}">
+			            	<%-- <c:when test="${resOrder.extResState  =='2'}">
 			            		 <a href="javascript:void(0)"onclick="toDeleteOrderDatil(${resOrder.id})"class="def">删除订单</a>
-			            	</c:when>
+			            	</c:when> --%>
 			            	<c:when test="${resOrder.extResState  =='0'}">
-			            		 <a href="javascript:void(0)"onclick="toProductOrderDatil(${resOrder.id})"class="def">修改订单</a>
-				                <a href="javascript:goOrder(${resOrder.id });" class="def">取消订单</a>
-				                <a href="javascript:void(0)"onclick="toDeleteOrderDatil(${resOrder.id})"class="def">删除订单</a>
+			            		<a href="javascript:void(0)"onclick="toProductOrderDatil(${resOrder.id})"class="def">修改订单</a>
+				                
+				                <c:if test="${resOrder.totalCash <=0}">
+				                	<a href="javascript:goOrder(${resOrder.id });" class="def">取消订单</a>
+				                </c:if>
+				                <%-- <a href="javascript:void(0)"onclick="toDeleteOrderDatil(${resOrder.id})"class="def">删除订单</a> --%>
 			            	</c:when>
-
 			            </c:choose>
 			            <a href="javascript:void(0)" class="def" onclick="paymentLog(${resOrder.id})" >收款日志</a>
 				        <a href="javascript:void(0)" class="def" onclick="goLogStock(${resOrder.id})" >操作日志</a>
@@ -232,7 +230,7 @@
 		newWindow('订单详情','<%=path%>/resTraffic/editResOrder.htm?id='+obj+'&see='+1)
 	}
 	
-	function toDeleteOrderDatil(obj){
+<%-- 	function toDeleteOrderDatil(obj){
 		$.ajax({
 			type : "post",
 			url : "<%=path%>/resOrder/toDeleteOrderInfo.do",
@@ -248,7 +246,7 @@
 				alert('系统异常，请与管理员联系');
 			}
 		});
-	}
+	} --%>
 	
 	function paymentLog(obj){
 		layer.open({

@@ -69,7 +69,10 @@
 						<input name="orgIds" id="orgIds" stag="orgIds" value="" type="hidden" value=""/>	    				
 	    			</div>
 	    			<div class="dd_right">
-	    				计调:
+	    				<select name="operType" id="operType">
+								<option value="1" <c:if test="${groupOrder.operType==1 }">selected="selected"</c:if>>计调</option>
+								<option value="2" <c:if test="${groupOrder.operType==2 }">selected="selected"</c:if>>操作员</option>
+						</select>
 	    				<input type="text" name="operatorName" id="operatorName" stag="userNames" value="" readonly="readonly" onclick="showUser()"/>
 						<input name="operatorIds" id="operatorIds" stag="userIds" value="" type="hidden" value=""/>	    				
 	    			</div>
@@ -186,6 +189,66 @@ function downState(id) {
     });
 
 }
+
+function dataRight(obj,productid){
+	var win;
+	layer.open({ 
+		type : 2,
+		title : '选择单位',
+		closeBtn : false,
+		area : [ '400px', '490px' ],
+		shadeClose : false,
+		content : 'rightTree.htm?productId='+productid,
+		btn: ['确定', '取消'],
+		success:function(layero, index){
+			win = window[layero.find('iframe')[0]['name']];
+		},
+		yes: function(index){    				
+			var orgArr = win.getOrgList();
+			if(orgArr.length==0){
+				alert("请选择单位");
+				return false;
+			}
+			var orgIdArr = new Array();
+			//var orgNameArr = new Array();
+			for(var i=0;i<orgArr.length;i++){
+				orgIdArr.push(orgArr[i].id);
+				//orgNameArr.push(orgArr[i].name);;
+			}
+			
+			$.ajax({
+				url:"saveRight.do",
+				dataType:"json",
+				type:"post",
+				data:{
+					productId:productid,
+					orgIdArr:JSON.stringify(orgIdArr)
+				},
+				success:function(data){
+					if(data.success){
+						//$(obj).closest("tr").find("td[tag='right']").html(orgNameArr.join(","));
+						alert("操作成功");
+					}
+					else{
+						alert("操作失败");
+					}
+					
+					//一般设定yes回调，必须进行手工关闭
+			        layer.close(index); 
+				},
+				error:function(XMLHttpRequest, textStatus, errorThrown){
+					alert("服务器忙，请稍候再试");
+				}
+			});
+			
+			 
+	    },cancel: function(index){
+	    	layer.close(index);
+	    }
+	});
+	
+}
+
 </script>
 <%@ include file="/WEB-INF/views/component/org-user/org_user_multi.jsp" %>
 

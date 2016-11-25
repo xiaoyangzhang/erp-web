@@ -49,6 +49,8 @@
 					<div class="btn-hide" id="asd">
                     	<a href="javascript:void(0)" class="def aEditRight" onclick="newWindow('编辑产品-${productInfo.id}', '<%=path%>/productInfo/edit.htm?productId=${productInfo.id }')" >编辑</a>
                     	<a href="javascript:void(0)" class="def aEditRight" onclick="newWindow('产品价格组', '<%=path%>/productInfo/price/list.htm?productId=${productInfo.id }')">价格</a>
+                    	<a href="javascript:void(0)" class="def aEditRight" onclick="newWindow('复制产品-${productInfo.id}', '<%=path%>/productInfo/copy.htm?productId=${productInfo.id }')" >复制</a>
+	                    <a href="javascript:void(0)" onclick="dataRight(this,'${productInfo.id }')" class="def">权限</a>
 	                   <c:if test="${productInfo.state== 1 or productInfo.state== 3}">
                     	<a href="javascript:void(0)" onclick="upState(${productInfo.id})" class="def aEditRight">上架</a>
                        </c:if>

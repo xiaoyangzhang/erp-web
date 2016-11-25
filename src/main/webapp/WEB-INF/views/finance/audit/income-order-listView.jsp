@@ -9,7 +9,7 @@
 
 <table cellspacing="0" cellpadding="0" class="w_table">
 	<col width="3%" />
-	<col width="15%" />
+	<col width="13%" />
 	<col width="5%" />
 	<col width="5%" />
 	<col width="7%" />
@@ -73,7 +73,14 @@
 				<td class="serialnum">
 					<div class="serialnum_btn" subId="${order.id}"></div> ${status.index+1}
 				</td>
-				<td>${order.supplier_name}</td>
+				
+				<c:if test="${empty order.supplier_code }">
+					<td>${order.supplier_name}
+				</c:if>
+				<c:if test="${not empty order.supplier_code }">
+					<td>${order.supplier_name}<br>【${order.supplier_code }】
+				</c:if>
+				
 				<td>${order.sale_operator_name}</td>
 				<td>${order.receive_mode}<br/>${order.province_name}${order.city_name}</td>
 				<td>

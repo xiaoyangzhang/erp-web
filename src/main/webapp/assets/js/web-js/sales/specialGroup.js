@@ -209,7 +209,7 @@ function insertGroupOnly(tid){
 			$.post("../specialGroup/insertGroup.do", { id: tid, code: code }, function(data){
 				  if(data.success){
 					  $.success('操作成功',function(){
-							searchBtn();
+						  refreshCurrentPage();
 						});
 				  }else{
 					  $.error(data.msg);
@@ -256,7 +256,7 @@ function insertGroupByList(){
 							$.post("../specialGroup/insertGroupMany.do", { ids: chk_value.toString(), code: code }, function(data){
 								  if(data.success){
 									  $.success('操作成功',function(){
-										  searchBtn();
+										  refreshCurrentPage();
 										  layer.close(index); 
 										  	
 										});
@@ -448,7 +448,7 @@ function delGroup(id){
 		$.getJSON("../groupOrder/delGroupOrder.do?id=" + id, function(data) {
 			if (data.success) {
 				$.success('操作成功',function(){
-					searchBtn();
+					refreshCurrentPage();
 				});
 			}else {
 				$.warn(data.msg);
@@ -487,6 +487,11 @@ function queryList(page,pageSize) {
 function searchBtn() {
 	var pageSize=$("#orderPageSize").val();
 	queryList(1,pageSize);
+}
+function refreshCurrentPage() {
+	var page=$("#orderPage").val();
+	var pageSize=$("#orderPageSize").val();
+	queryList(page,pageSize);
 }
 function toSaveSeatInCoach(strr) {
 	var html = $("#trans_template").html();

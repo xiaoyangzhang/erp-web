@@ -183,5 +183,14 @@ window.onload=function(){
 		var th = dh+"px";
 		$("table.w_table").freezeHeader({ highlightrow: true,'height': th });	
     }
+    
+    /* 百度统计 */
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?049f7397b8a8519aee23e94f0f816d2e";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();    
 </script>
 

@@ -35,6 +35,7 @@ function refreshPage(){
 	 var endIssueDateTo = $("input[name='endIssueDateTo']").val();
 	 var dep_city = $("input[name='dep_city']").val();
 	 var line_name = $("input[name='line_name']").val();
+	 var airCode = $("input[name='airCode']").val();
 	 var type = $("select[name='type']").val();
 	 if (resource_number){vars["resource_number"]=resource_number;}
 	 // 三种选择：dep_date_from, start_date_from,  end_issue_date_from
@@ -50,6 +51,7 @@ function refreshPage(){
 	 if (endIssueDateTo){vars["endIssueDateTo"]=endIssueDateTo;}
 	 if (dep_city){vars["dep_city"]=dep_city;}
 	 if (line_name){vars["line_name"]=line_name;}
+	 if (airCode){vars["airCode"]=airCode;}
 	 if (type){vars['type']=type;}
 	 window.location.href = "${thisPage}" + $.makeUrlFromVars(vars);
  }
@@ -103,7 +105,8 @@ function refreshPage(){
 					value="${page.parameter.endIssueDateFrom }"/>—
 					<input name="endIssueDateTo" type="text"  class="Wdate" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})"
 					value="${page.parameter.endIssueDateTo }"/><li class="seperator">
-
+				<li class="text">航班号：</li>
+				<li><input name="airCode" type="text" value="${page.parameter.airCode }"/></li>
 				<li class="text" style="width:100px;">资源类型：</li>
 				<li><select name="type"><option value="">全部</option><option value="AIR">机票</option><option value="TRAIN">火车票</option></select><li class="seperator">
 

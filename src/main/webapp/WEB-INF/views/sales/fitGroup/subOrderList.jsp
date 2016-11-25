@@ -25,7 +25,7 @@
 	</thead>
 	<tbody>
 		<c:forEach items="${orders}" var="groupOrder" varStatus="v">
-			<tr title="创建时间:${groupOrder.createTimeStr}">
+			<tr title="创建时间:${groupOrder.createTimeStr}" <c:if test="${groupOrder.stateFinance eq 1}">style="color:blue"</c:if>>
 				<td>${v.count}</td>
 				<td style="text-align: left;">【${groupOrder.productBrandName}】${groupOrder.productName}</td>
 				<td style="text-align: left;">${groupOrder.supplierName}</td>
@@ -41,18 +41,27 @@
 			   		<div class="tab-operate">
 						 <a href="####" class="btn-show">操作<span class="caret"></span></a>
 						 <div class="btn-hide" id="asd">
-							<c:if test="${groupOrder.orderType==0}"> 
-							 	<c:if test="${empty groupOrder.priceId }">
-						   		<a href="javascript:void(0);" class="def" onclick="newWindow('查看订单','fitOrder/toEditFirOrder.htm?orderId=${groupOrder.id}&operType=0')">查看</a>
-						   		</c:if>
-						   		<c:if test="${!empty groupOrder.priceId }">
-						   		<a href="javascript:void(0);" class="def" onclick="newWindow('查看订单','groupOrder/toLookGroupOrder.htm?id=${groupOrder.id}')">查看</a>
-						   		</c:if>
-						 	</c:if>	
-						 	
-						 
-						 		
+						 	<c:if test="${groupOrder.aiyouGroupId==-1}">
+						 		<a href="javascript:void(0);" class="def" onclick="newWindow('查看订单','taobao/toEditTaobaoOrder.htm?see=1&id=${groupOrder.id}')">查看</a>
+						 	</c:if>
+						 	<c:if test="${groupOrder.aiyouGroupId!=-1}"> 
+								<c:if test="${groupOrder.orderType==0}"> 
+								 	<c:if test="${empty groupOrder.priceId }">
+							   		<a href="javascript:void(0);" class="def" onclick="newWindow('查看订单','fitOrder/toEditFirOrder.htm?orderId=${groupOrder.id}&operType=0')">查看</a>
+							   		</c:if>
+							   		<c:if test="${!empty groupOrder.priceId }">
+							   		<a href="javascript:void(0);" class="def" onclick="newWindow('查看订单','groupOrder/toLookGroupOrder.htm?id=${groupOrder.id}')">查看</a>
+							   		</c:if>
+							 	</c:if>	
+							</c:if>
+							
+							
 							<c:if test="${groupOrder.stateFinance!=1}">
+								<c:if test="${groupOrder.aiyouGroupId==-1}">
+						 			<a href="javascript:void(0);" class="def" onclick="newWindow('编辑订单','taobao/toEditTaobaoOrder.htm?id=${groupOrder.id}')">编辑</a>
+						 		</c:if>
+						 		
+								<c:if test="${groupOrder.aiyouGroupId!=-1}"> 
 									<c:if test="${groupOrder.orderType==0}"> 
 										<a href="javascript:void(0);" class="def" onclick="newWindow('编辑订单','fitOrder/toEditFirOrder.htm?orderId=${groupOrder.id}&operType=1')">编辑</a>
 										<%-- <c:if test="${empty groupOrder.priceId }">
@@ -60,14 +69,17 @@
 										<c:if test="${!empty groupOrder.priceId }">
 										<a href="javascript:void(0);" class="def" onclick="newWindow('编辑订单','groupOrder/toEditGroupOrder.htm?id=${groupOrder.id}')">编辑</a>
 										</c:if> --%>
-									
 									</c:if>
 									
 									<c:if test="${groupOrder.orderType==-1}">  
 								 		<a href="javascript:void(0);" onclick="newWindow('编辑订单','specialGroup/toEditSpecialGroup.htm?id=${groupOrder.id}')" class="def">编辑</a>
 								 	</c:if>	
+							 	</c:if>
+								 	
 									<a href="javascript:void(0);" class="def" onclick="delGroupOrder(${groupOrder.id})">删除</a>
 							</c:if> 
+							
+							
 								<a href="javascript:void(0);" onclick="printOrder1(${groupOrder.id})" class="def">打印</a></td>
 						  </div>
 					</div>

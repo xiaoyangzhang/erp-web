@@ -11,8 +11,8 @@
 	<script type="text/javascript" src="<%=staticPath %>/assets/js/moment.js"></script>
 	<SCRIPT type="text/javascript">
 		$(function () {
-			$("#startMin").val(moment().format("YYYY-MM-DD"));
-			$("#startMax").val(moment().add(7, 'day').format("YYYY-MM-DD"));
+			//$("#startMin").val(moment().format("YYYY-MM-DD"));
+			//$("#startMax").val(moment().add(7, 'day').format("YYYY-MM-DD"));
 
 			//queryList();
 		});

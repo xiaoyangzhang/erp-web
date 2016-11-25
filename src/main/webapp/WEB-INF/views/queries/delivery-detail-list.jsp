@@ -114,7 +114,7 @@ function queryList(page,pagesize) {
     	}
     }
     $("#queryForm").ajaxSubmit(options);
-    $("#supplier_id").val("");
+    //$("#supplier_id").val("");
 }
 
 	$(function() {

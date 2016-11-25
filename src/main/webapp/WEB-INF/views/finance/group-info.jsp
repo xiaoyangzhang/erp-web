@@ -21,7 +21,12 @@
 			<dd class="inl-bl w-300">
 				<div class="dd_left">人数：</div>
 				<div class="dd_right">
-					<c:if test="${not empty one.total_adult}">${one.total_adult}大</c:if><c:if test="${not empty one.total_child}">${one.total_child}小</c:if><c:if test="${not empty one.total_guide}">${one.total_guide}陪</c:if>
+					<c:if test="${not empty one.total_adult}">${one.total_adult}大</c:if>
+					<c:if test="${not empty one.total_child}">${one.total_child}
+						<c:if test="${one.total_baby == null}"></c:if>
+						<c:if test="${one.total_baby != null}"><span style="color: red;">(${one.total_baby})</span></c:if>
+					小</c:if>
+					<c:if test="${not empty one.total_guide}">${one.total_guide}陪</c:if>
 				</div>
 				<div class="clear"></div>
 			</dd>

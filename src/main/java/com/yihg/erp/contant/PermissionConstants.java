@@ -6,6 +6,10 @@ public class PermissionConstants {
 	public static final String JDGL_DYJDSH = "JDGL_DYJDSH";
 	public static final String JDGL_GUIDE_LOCK = "DYJSSH_LOCK";
 	public static final String JDGL_GUIDE_UNLOCK = "DYJSSH_UNLOCK";
+	
+	public static final String JDGL_JDCZD = "JDGL_JDCZD"; //计调管理〉计调操作单 **菜单权限
+	public static final String CHANGE_PRICE="CHANGE_PRICE"; //改价格
+	public static final String JDCZD_SH="JDCZD_SH";//审核
 	/**
 	 * 购物安排
 	 */
@@ -67,6 +71,21 @@ public class PermissionConstants {
 	 * 计调管理-预定安排
 	 */
 	public static final String JDGL_YDAP="JDGL_YDAP";
+	
+	public static final String YDAP_SIGHT="YDAP_SIGHT";
+	public static final String YDAP_HOTEL="YDAP_HOTEL";
+	public static final String YDAP_EAT="YDAP_EAT";
+	public static final String YDAP_CAR="YDAP_CAR";
+	
+	public static final String YDAP_AIR="YDAP_AIR";
+	public static final String YDAP_TRAIN="YDAP_TRAIN";
+	public static final String YDAP_INSURANCE="YDAP_INSURANCE";
+	public static final String YDAP_SHOP="YDAP_SHOP";
+	
+	public static final String YDAP_GUIDE="YDAP_GUIDE";
+	public static final String YDAP_OTHERIN="YDAP_OTHERIN";
+	public static final String YDAP_OTHEROUT="YDAP_OTHEROUT";
+	public static final String YDAP_DELIVERY="YDAP_DELIVERY";
 	
 
 	/**
@@ -232,4 +251,15 @@ public class PermissionConstants {
 	public static final String TRAFFICRES_EDIT = "EDIT";
 	public static final String TRAFFICRES_PAY = "PAY";
 	public static final String TRAFFICRES = "TRAFFICRES_ADMIN_ORDER"; 
+	
+	//----------------------业务查询-------------------------//
+	public static final String SALES_QUERIES_TAOBAO = "QUERIES_TAOBAO"; //销售管理〉淘宝原始单 **菜单权限
+	//销售管理〉操作单（销售订单）**菜单权限 下面的４个按扭操作权限 
+	public static final String SALES_TAOBAO_AY="AY"; //爱游
+	public static final String SALES_TAOBAO_YM="YM"; //怡美
+	public static final String SALES_TAOBAO_TX="TX"; //天翔
+	public static final String SALES_TAOBAO_JY="JY"; //景怡
+	public static final String SALES_TAOBAO_OUTSIDE="OUTSIDE"; //出境
+	
+	
 }

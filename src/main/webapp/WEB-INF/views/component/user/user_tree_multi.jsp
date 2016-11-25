@@ -107,5 +107,14 @@
 		<ul id="treeArea" class="ztree"></ul>
 	</div>
 </body>
+<script type="text/javascript">
+document.onkeydown = function (e) { 
+	var theEvent = window.event || e; 
+	var code = theEvent.keyCode || theEvent.which; 
+	if (code == 13) { 
+		$("#btnQuery").click(); 
+	} 
+}
+</script>
 </html>
 
