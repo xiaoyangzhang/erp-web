@@ -101,9 +101,10 @@ public class RequestController extends BaseController {
 			dateTo = request.getParameter("dateTo");
 			dateType = request.getParameter("dateType");
 		}
-		String productName="", lineName="", contactName="", orderNo="", endIssueDateFrom="", endIssueDateTo="", type;
+		String productName="", lineName="", contactName="", orderNo="", endIssueDateFrom="", endIssueDateTo="", saleName = "", type;
 		try {
 			productName = request.getParameter("productName");
+			saleName = request.getParameter("saleName");
 			lineName = request.getParameter("lineName");
 			contactName = request.getParameter("contactName");
 			endIssueDateFrom = request.getParameter("endIssueDateFrom");
@@ -113,6 +114,7 @@ public class RequestController extends BaseController {
 			dateTo = dateTo==null?"":dateTo;
 			productName = productName==null?"":productName;
 			lineName = lineName==null?"":lineName;
+			saleName = saleName==null?"":saleName;
 			contactName = contactName==null?"":contactName;
 			orderNo = orderNo==null?"":orderNo;
 		}catch(Exception e){
@@ -141,6 +143,7 @@ public class RequestController extends BaseController {
 		dto.setEndIssueDateTo(endIssueDateTo);
 		dto.setIssueStatus(request.getParameter("issueStatus"));
 		dto.setLineName(lineName);
+		dto.setSaleName(saleName);
 		dto.setOrderNo(orderNo);
 		
 		dto.setProductName(productName);
