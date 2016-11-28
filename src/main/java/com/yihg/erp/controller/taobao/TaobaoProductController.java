@@ -2,56 +2,42 @@ package com.yihg.erp.controller.taobao;
 
 import java.text.ParseException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Date;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
-import com.yihg.images.util.DateUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yihg.product.api.ProductStockService;
-import com.yihg.product.api.TaoBaoStockService;
-import com.yihg.product.constants.Constants;
-import com.yihg.product.po.ProductInfo;
-import com.yihg.product.po.TaobaoProduct;
-import com.yihg.product.po.TaobaoStock;
-import com.yihg.product.po.TaobaoStockProduct;
-import com.yihg.product.vo.TaoBaoProducts;
-import com.yihg.product.po.TaobaoStockDate;
-import com.yihg.product.po.TaobaoStockLog;
+import com.yimayhd.erpcenter.dal.product.po.TaobaoProduct;
+import com.yimayhd.erpcenter.dal.product.po.TaobaoStock;
+import com.yimayhd.erpcenter.dal.product.po.TaobaoStockDate;
+import com.yimayhd.erpcenter.dal.product.po.TaobaoStockLog;
+import com.yimayhd.erpcenter.facade.tj.client.service.TaobaoProductFacade;
 
 @Controller
 @RequestMapping("/taobaoProect")
 public class TaobaoProductController extends BaseController {
 	
 	@Autowired
-	private TaoBaoStockService taoBaoStockService;
-
-	@Autowired
-	private ProductStockService stockService;
-
+	private TaobaoProductFacade taoBaoProductFacade;
+	
 	@RequestMapping(value = "/stockLogDetails.do")
 	public String stockLogDetails(HttpServletRequest request, Integer stockDateId,String stockDate,
 			ModelMap model) {
-	        String startMin=(stockDate+ " 00:00:00") ;
-	        String startMax=(stockDate+ " 23:59:59") ;
-		List<TaobaoStockLog> list=stockService.selectByStockDateIdAndCreateTime(stockDateId, startMax, startMin);
+		List<TaobaoStockLog> list = taoBaoProductFacade.stockLogDetails( stockDateId, stockDate, model );
 		model.addAttribute("list", list);
 		return "sales/taobaoOrder/stockLogDetails";
 	}
@@ -64,11 +50,9 @@ public class TaobaoProductController extends BaseController {
 	@RequestMapping(value="stockMonth.do",method=RequestMethod.POST)
 	@ResponseBody
 	public String stockMonth(ModelMap model,Integer stockId,Integer year,Integer month){
-		String beginDateStr = year+"-"+(month<10 ? ("0"+month):(""+month))+"-01";
-    	String endDateStr = month==12 ? ((year+1)+"-01-01"):(year+"-"+(month<9 ? ("0"+(month+1)):(""+(month+1)))+"-01");    	
-    	Date startDate = DateUtils.parse(beginDateStr, "yyyy-MM-dd");
-    	Date endDate = DateUtils.parse(endDateStr,"yyyy-MM-dd");
-    	 List<TaobaoStockDate> list=stockService.selectTaobaoStocksByProductIdAndDate(stockId, startDate, endDate);
+		
+		List<TaobaoStockDate> list = taoBaoProductFacade.stockMonth(stockId, year, month);
+		
 		return successJson("data",JSON.toJSONString(list));
 	}
 
@@ -81,30 +65,8 @@ public class TaobaoProductController extends BaseController {
 		if(StringUtils.isBlank(stockStr)){
 			return errorJson("数据为空");
 		}
-		String beginDateStr = year+"-"+(month<10 ? ("0"+month):(""+month))+"-01";
-    	String endDateStr = month==12 ? ((year+1)+"-01-01"):(year+"-"+(month<9 ? ("0"+(month+1)):(""+(month+1)))+"-01");    	
-    	Date startDate = DateUtils.parse(beginDateStr, "yyyy-MM-dd");
-    	Date endDate = DateUtils.parse(endDateStr,"yyyy-MM-dd");
-		// List<ProductStock> stockList = JSON.parseArray(stockStr, ProductStock.class);
-		// stockService.saveStock(stockId,stockList,startDate,endDate);
-		List<TaobaoStockDate> stockDateList= JSON.parseArray(stockStr, TaobaoStockDate.class);
-		if(stockDateList!=null&&stockDateList.size()>0){
-		for(TaobaoStockDate item:stockDateList){
-			TaobaoStockLog taobaoStockLog=new TaobaoStockLog();
-			taobaoStockLog.setCreateUser(WebUtils.getCurUser(request).getName());
-			taobaoStockLog.setNum(item.getStockCount());
-			taobaoStockLog.setStockId(item.getStockId());
-			taobaoStockLog.setTaobaoOrderId(0);
-				if(item.getId()==null){
-					Integer dateId=stockService.insertTaobaoStockDateSelective(item);
-					taobaoStockLog.setStockDateId(dateId);
-				}else{
-					taobaoStockLog.setStockDateId(item.getId());
-				}
-		   Integer logId=stockService.insertTaobaoStockLogSelective(taobaoStockLog);
-		   stockService.updateByLog(item.getId());   // 计算库存
-		}
-		}
+		
+		taoBaoProductFacade.saveStock( WebUtils.getCurUser(request).getName(), stockId, stockStr, year, month );
 		return successJson();
 	}
 	
@@ -128,26 +90,13 @@ public class TaobaoProductController extends BaseController {
 	 * @return
 	 * @throws ParseException
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping("findTaoBaoStockList.do")
 	public String findTaoBaoStockList(HttpServletRequest request, ModelMap model,
 			Integer pageSize, Integer page) throws ParseException {
-		PageBean<TaobaoStock> pageBean = new PageBean<TaobaoStock>();
-		Map<String,Object> psBean  = WebUtils.getQueryParamters(request);
-		if(page==null){
-			pageBean.setPage(1);
-		}else{
-			pageBean.setPage(page);
-		}
-		if(pageSize==null){
-			pageBean.setPageSize(Constants.PAGESIZE);
-		}else{
-			pageBean.setPageSize(pageSize);
-		}
-		pageBean.setPage(page);
-		pageBean.setParameter(psBean);
-		
-		pageBean=taoBaoStockService.selectByStockListPage(pageBean);
-		model.addAttribute("pageBean", pageBean);	
+		Map<String,Object> psBean = WebUtils.getQueryParamters(request);
+		model.addAttribute("pageBean", 
+				taoBaoProductFacade.findTaoBaoStockList(psBean, pageSize, page));	
 		return "taoBao/taoBaoStockTable";
 		
 	}
@@ -163,7 +112,8 @@ public class TaobaoProductController extends BaseController {
 	@RequestMapping("toUpdatetbStockChange.htm")
 	public String toUpdatetbStockChange(HttpServletRequest request,
 			Integer id,ModelMap model) throws ParseException {
-		TaobaoStock taobaoStockBean = taoBaoStockService.selectByPrimaryKey(id);
+		
+		TaobaoStock taobaoStockBean = taoBaoProductFacade.toUpdatetbStockChange( id );
 		model.addAttribute("taobaoStockBean", taobaoStockBean);
 		return "taoBao/taoBaoModifyStock";
 	}
@@ -182,12 +132,7 @@ public class TaobaoProductController extends BaseController {
 	@ResponseBody
 	public String toSaveTbStock(HttpServletRequest request, Integer id,String stockName,
 			Integer clearDayReset,String brief,ModelMap model) throws ParseException {
-		TaobaoStock tbs = new TaobaoStock();
-		tbs.setId(id);
-		tbs.setStockName(stockName);
-		tbs.setClearDayReset(clearDayReset);
-		tbs.setBrief(brief);
-		int num = taoBaoStockService.updateByPrimaryKeySelective(tbs);
+		int num = taoBaoProductFacade.toSaveTbStock(id, stockName, clearDayReset, brief, model);
 		Map<String,Object> map = new HashMap<String,Object>();
 		map.put("success", num);
 		return JSON.toJSONString(map);
@@ -202,17 +147,7 @@ public class TaobaoProductController extends BaseController {
 	 */
 	@RequestMapping(value = "/toStockProductBindingList.do")
 	public String toStockProductBindingList(HttpServletRequest request,Integer stockId,ModelMap model){
-		List<TaobaoStockProduct> stockProList = 
-				taoBaoStockService.findStockProductStockId(stockId);
-		Set<Integer> proIdSets = new HashSet<Integer>();
-		for(TaobaoStockProduct spBean: stockProList){
-			proIdSets.add(spBean.getProductId());
-		}
-		//根据taobao_stock_product中的product_id获取产品名称
-		List<TaobaoProduct> proInfoList = null;
-		if(proIdSets.size()>0){
-			proInfoList = taoBaoStockService.findTaobaoProductById(proIdSets);
-		}
+		List<TaobaoProduct> proInfoList = taoBaoProductFacade.toStockProductBindingList(stockId, model);
 		model.addAttribute("proInfoList", proInfoList);
 		model.addAttribute("stockId", stockId);
 		return "taoBao/taobaoProductBindingList";
@@ -233,26 +168,12 @@ public class TaobaoProductController extends BaseController {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	@RequestMapping("findTaoBaoProduct.do")
 	public String findTaoBaoProduct(HttpServletRequest request, ModelMap model,
 			Integer pageSize, Integer page) throws ParseException {
-		PageBean<TaobaoProduct> pageBean = new PageBean<TaobaoProduct>();
 		Map<String,Object> psBean  = WebUtils.getQueryParamters(request);
-		if(page==null){
-			pageBean.setPage(1);
-		}else{
-			pageBean.setPage(page);
-		}
-		if(pageSize==null){
-			pageBean.setPageSize(Constants.PAGESIZE);
-		}else{
-			pageBean.setPageSize(pageSize);
-		}
-		pageBean.setPage(page);
-		pageBean.setParameter(psBean);
-		
-		pageBean=taoBaoStockService.findTaoBaoProductListPage(pageBean);
-		model.addAttribute("pageBean", pageBean);	
+		model.addAttribute("pageBean", taoBaoProductFacade.findTaoBaoProduct(psBean, pageSize, page));	
 		return "taoBao/taoBaoProductTable";
 		
 	}
@@ -263,25 +184,15 @@ public class TaobaoProductController extends BaseController {
 		model.addAttribute("stockDate", stockDate);
 		return "taoBao/taoBaoProductStockDlg";
 	}
+	
+	@SuppressWarnings("unchecked")
 	@RequestMapping("TaoBaoProductStock_Table.do")
 	public String TaoBaoProductStock_Table(HttpServletRequest request, ModelMap model,
 			Integer pageSize, Integer page) throws ParseException {
-		PageBean<TaobaoProduct> pageBean = new PageBean<TaobaoProduct>();
 		Map<String,Object> psBean  = WebUtils.getQueryParamters(request);
-		if(page==null){
-			pageBean.setPage(1);
-		}else{
-			pageBean.setPage(page);
-		}
-		if(pageSize==null){
-			pageBean.setPageSize(Constants.PAGESIZE);
-		}else{
-			pageBean.setPageSize(pageSize);
-		}
-		pageBean.setPage(page);
-		pageBean.setParameter(psBean);
 		
-		pageBean=taoBaoStockService.findTaoBaoProductStockListPage(pageBean);
+		PageBean<TaobaoProduct> pageBean = taoBaoProductFacade.TaoBaoProductStock_Table( psBean, pageSize, page );
+		
 		model.addAttribute("pageBean", pageBean);	
 		return "taoBao/taoBaoProductStockDlgTable";
 		
@@ -298,26 +209,7 @@ public class TaobaoProductController extends BaseController {
 	@ResponseBody
 	public String saveStockProBinding(HttpServletRequest request,String productId,
 			Integer stockId,ModelMap model){
-		Map<String,Object> map = new HashMap<String,Object>();
-		String[] arrProId= productId.split(",");
-		for(int i=0;i<arrProId.length;i++){
-			//proIdSets.add(Integer.valueOf(arrProId[i]));
-			
-			TaobaoStockProduct tbspBean = new TaobaoStockProduct();
-			tbspBean.setProductId(Integer.valueOf(arrProId[i]));
-			tbspBean.setStockId(stockId);
-			//插入淘宝库存产品关联信息
-			TaobaoStockProduct taobaoStockProduct = taoBaoStockService.findStockProductInfo(tbspBean);
-			if(taobaoStockProduct != null){
-				//model.addAttribute("spError", "选择的产品名称已经存在！");
-				map.put("error", "spError");
-			}else{
-				taoBaoStockService.insertTbStockProduct(tbspBean);
-				map.put("success", 1);
-			}
-			
-		}
-		return JSON.toJSONString(map);
+		return JSON.toJSONString(taoBaoProductFacade.saveStockProBinding( productId, stockId, model));
 	}
 	
 	/**
@@ -332,14 +224,7 @@ public class TaobaoProductController extends BaseController {
 	@ResponseBody
 	public String deleteTaoBaoStockProduct(HttpServletRequest request,String productId,
 			Integer stockId,ModelMap model){
-		String[] arrProId= productId.split(",");
-		for(int i=0;i<arrProId.length;i++){
-			TaobaoStockProduct tbspBean = new TaobaoStockProduct();
-			tbspBean.setProductId(Integer.valueOf(arrProId[i]));
-			tbspBean.setStockId(stockId);
-			//删除淘宝库存产品关联信息
-			taoBaoStockService.deleteTaoBaoStockProduct(tbspBean);
-		}
+		taoBaoProductFacade.deleteTaoBaoStockProduct(productId, stockId, model);
 		Map<String,Object> map = new HashMap<String,Object>();
 		map.put("success", 1);
 		return JSON.toJSONString(map);
@@ -373,11 +258,7 @@ public class TaobaoProductController extends BaseController {
 	@ResponseBody
 	public String saveTaobbaoStock(HttpServletRequest request, String stockName, 
 			Integer clearDayReset,String brief, Model model) throws ParseException {
-		TaobaoStock tbs = new TaobaoStock();
-		tbs.setStockName(stockName);
-		tbs.setClearDayReset(clearDayReset);
-		tbs.setBrief(brief);
-		int num = taoBaoStockService.insertSelective(tbs);
+		int num = taoBaoProductFacade.saveTaobbaoStock(stockName, clearDayReset, brief, model);
 		Map<String,Object> map = new HashMap<String,Object>();
 		map.put("success", num);
 		return JSON.toJSONString(map);
@@ -394,26 +275,7 @@ public class TaobaoProductController extends BaseController {
 	@ResponseBody
 	public String deleteTaoBaoStockProduct(HttpServletRequest request,
 			Integer id,ModelMap model){
-		Map<String,Object> map = new HashMap<String,Object>();
-		//判断是否存在订单信息
-		TaobaoStockLog count = taoBaoStockService.selectLogNumByOrderId(id);
-		if(count.getId()!=0){
-			map.put("error", "logError");
-		}else{
-			//删除库存信息
-			int num = taoBaoStockService.deleteByPrimaryKey(id);
-			
-			List<TaobaoStockProduct> tbSPList = taoBaoStockService.findStockProductStockId(id);
-			for(TaobaoStockProduct spBean : tbSPList){
-				TaobaoStockProduct tbspBean = new TaobaoStockProduct();
-				tbspBean.setProductId(spBean.getProductId());
-				tbspBean.setStockId(id);
-				//删除库存关联信息
-				taoBaoStockService.deleteTaoBaoStockProduct(tbspBean);
-			}
-			map.put("success", num);
-		}
-		return JSON.toJSONString(map);
+		return JSON.toJSONString(taoBaoProductFacade.deleteTaoBaoStockProduct( id, model));
 	}
 
 }

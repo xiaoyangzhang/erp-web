@@ -134,6 +134,9 @@
 	<dubbo:reference id="sysPlatformOrgFacade"
 					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade" owner="ly" version="1.0.0.test.zxy1"
 					 timeout="8000" />
+	<dubbo:reference id="sysMsgInfoFacade"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysMsgInfoFacade" owner="gxx" version="1.0.0.test.zxy1"
+					 timeout="8000" />
 	<dubbo:reference id="sysPlatformRoleFacade"
 					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatformRoleFacade" owner="ly" version="1.0.0.test.zxy1"
 					 timeout="8000" />
