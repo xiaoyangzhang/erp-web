@@ -1,10 +1,11 @@
 package com.yihg.erp.socket;
 
-import com.yihg.sys.po.UserSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.*;
+
+import com.yimayhd.erpcenter.dal.sys.po.UserSession;
 
 import java.io.IOException;
 import java.util.ArrayList;
