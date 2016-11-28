@@ -51,7 +51,7 @@ public class BillStatisticsController extends BaseController {
 		dto.setProductName(request.getParameter("productName"));
 		dto.setSet(WebUtils.getDataUserIdSet(request));
 		InRecordResult result = billStatisticsFacade.inrecord(dto);
-		
+		model.addAttribute("pageBean", result.getPageBean());
 		model.addAttribute("billTypeList", result.getBillTypeList());
 		model.addAttribute("pageTotal", result.getPageTotal());
 		model.addAttribute("total", result.getTotal());
