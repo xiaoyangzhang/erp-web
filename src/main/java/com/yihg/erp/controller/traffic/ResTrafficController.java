@@ -34,15 +34,16 @@ import com.yimayhd.erpcenter.dal.product.vo.TrafficResVo;
 import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
 import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePay;
 import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePayDetail;
-import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier;
-import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplierDetail;
 import com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.SpecialGroupOrderVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.facade.tj.client.query.BookingSupplierDTO;
 import com.yimayhd.erpcenter.facade.tj.client.query.DetailsStocklogDTO;
 import com.yimayhd.erpcenter.facade.tj.client.query.MakeCollectionsDTO;
+import com.yimayhd.erpcenter.facade.tj.client.query.SaveBookingDTO;
+import com.yimayhd.erpcenter.facade.tj.client.query.ToSaveResNumsSoldDTO;
 import com.yimayhd.erpcenter.facade.tj.client.query.ToSearchListDTO;
 import com.yimayhd.erpcenter.facade.tj.client.query.ToUpdateProductPriceDTO;
 import com.yimayhd.erpcenter.facade.tj.client.query.TrafficChangeDTO;
@@ -53,8 +54,10 @@ import com.yimayhd.erpcenter.facade.tj.client.query.TrafficResProductDTO;
 import com.yimayhd.erpcenter.facade.tj.client.query.TrafficSaveResOrderDTO;
 import com.yimayhd.erpcenter.facade.tj.client.query.TraficchangeResStateDTO;
 import com.yimayhd.erpcenter.facade.tj.client.result.GetProductInfoResult;
+import com.yimayhd.erpcenter.facade.tj.client.result.ToAddSupplierResult;
 import com.yimayhd.erpcenter.facade.tj.client.result.ToSearchListResult;
 import com.yimayhd.erpcenter.facade.tj.client.result.ToTraficEditResult;
+import com.yimayhd.erpcenter.facade.tj.client.result.ToUpdateResNumStockStateResult;
 import com.yimayhd.erpcenter.facade.tj.client.result.TrafficAddResOrderResult;
 import com.yimayhd.erpcenter.facade.tj.client.result.WebResult;
 import com.yimayhd.erpcenter.facade.tj.client.service.ResTrafficFacade;
@@ -630,7 +633,7 @@ public class ResTrafficController extends BaseController{
 		
 		if (bookingId != null) {
 			model.addAttribute("supplier", result.getSupplier());
-			model.addAttribute("bookingDetailList", result.getDetailList);
+			model.addAttribute("bookingDetailList", result.getDetailList());
 			
 			model.addAttribute("bookingId", bookingId);
 			if (null!=result.getSupplier() && result.getSupplier().getSupplierType().equals(Constants.SCENICSPOT)) {
@@ -703,7 +706,15 @@ public class ResTrafficController extends BaseController{
 	public String toSaveResNumsSold(HttpServletRequest request,String productList,String numStock,String numDisable, String id,
 			Integer poorNumStock,Integer poorNumDisable){
 		ToSaveResNumsSoldDTO toSaveResNumsSoldDTO = new ToSaveResNumsSoldDTO();
-		//TODO jiatiaojian
+		toSaveResNumsSoldDTO.setCurUser(WebUtils.getCurUser(request));
+		toSaveResNumsSoldDTO.setId(id);
+		toSaveResNumsSoldDTO.setNumDisable(numDisable);
+		toSaveResNumsSoldDTO.setNumStock(numStock);
+		toSaveResNumsSoldDTO.setProductList(productList);
+		toSaveResNumsSoldDTO.setUserId(WebUtils.getCurUserId(request));
+		toSaveResNumsSoldDTO.setUserName(WebUtils.getCurUser(request).getName());
+		toSaveResNumsSoldDTO.setPoorNumDisable(poorNumDisable);
+		toSaveResNumsSoldDTO.setPoorNumStock(poorNumStock);
 		
 		return resTrafficFacade.toSaveResNumsSold(toSaveResNumsSoldDTO);
 	}
