@@ -169,9 +169,9 @@ var addPrice =function(type,str, rowObj){
 		
 		$("input[name='groupOrderPriceList["+count+"].mode']").val(type);
         var unitPrice =  $("input[name='groupOrderPriceList["+count+"].unitPrice']");
-			if(unitPrice.length > 0){
+	/*		if(unitPrice.length > 0){
 				unitPrice.rules("add",{required : true,number : true});
-			}
+			}*/
 		
 		var numTimes =  $("input[name='groupOrderPriceList["+count+"].numTimes']");
 			if(numTimes.length > 0){

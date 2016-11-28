@@ -34,9 +34,10 @@
 						<th style="width: 3%;">序号<i class="w_table_split"></i></th>
 						<th style="width: 5%">团号<i class="w_table_split"></i></th>
 						<th style="width: 5%">日期<i class="w_table_split"></i></th>
-						<th style="width: 18%">产品行程<i class="w_table_split"></i></th>
-						<th style="width: 14%">商家名称<i class="w_table_split"></i></th>
-						<th style="width: 13%">接站牌<i class="w_table_split"></i></th>
+						<th style="width: 14%">产品行程<i class="w_table_split"></i></th>
+						<th style="width: 10%">商家名称<i class="w_table_split"></i></th>
+						<th style="width: 10%">组团社团号<i class="w_table_split"></i></th>
+						<th style="width: 11%">接站牌<i class="w_table_split"></i></th>
 						<th style="width: 5%">客源地<i class="w_table_split"></i></th>
 						<th style="width: 5%">销售<i class="w_table_split"></i></th>
 						<th style="width: 6%">计调<i class="w_table_split"></i></th>
@@ -55,13 +56,11 @@
 							<td style="text-align: left">${v.departureDate}</td>
 							<td style="text-align: left">【${v.productBrandName}】${v.productName}</td>
 							<td style="text-align: left">${v.supplierName}
-								<c:if test="${v.supplierCode!=null }">
-									<br/>${v.supplierCode}
-								</c:if>
-								<c:if test="${v.contactName!=null }">
+						<%-- 		<c:if test="${v.contactName!=null }">
 									<br/>${v.contactName}
-								</c:if>
+								</c:if> --%>
 							</td>
+							<td style="text-align: left">${v.supplierCode}</td>
 							<td>${v.receiveMode}</td>
 							<td>${v.provinceName}${v.cityName}</td>
 							<td style="text-align: center;">${v.saleOperatorName}</td>
@@ -85,6 +84,7 @@
 				</tbody>
 				<tbody>
 					<tr>
+						<td></td>
 						<td></td>
 						<td></td>
 						<td></td>

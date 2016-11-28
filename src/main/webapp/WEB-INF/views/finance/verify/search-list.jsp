@@ -29,7 +29,7 @@
 <body>
 	<div class="p_container">
 		<ul class="w_tab">
-			<li><a href="searchList.htm?supplierType=1"  <c:if test="${'1' == supplierType}"> class="selected"</c:if>>组团社ff</a></li>
+			<li><a href="searchList.htm?supplierType=1"  <c:if test="${'1' == supplierType}"> class="selected"</c:if>>组团社</a></li>
 			<li><a href="searchList.htm?supplierType=16"  <c:if test="${'16' == supplierType}"> class="selected"</c:if>>地接社</a></li>
 			<li><a href="searchList.htm?supplierType=2"  <c:if test="${'2' == supplierType}"> class="selected"</c:if>>餐厅</a></li>
 			<li><a href="searchList.htm?supplierType=3" <c:if test="${'3' == supplierType}"> class="selected"</c:if>>酒店</a></li>
@@ -59,10 +59,11 @@
 							onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" /></li>
 						<li class="text">团号:</li>
 						<li><input name="group_code" type="text" class="w-200"/></li>
-						<li class="text">接站牌:</li>
-						<li><input name="booking_no" type="text" class="w-200"/></li>
 						<li class="text">产品:</li>
 						<li><input name="product_name" type="text" class="w-200"/></li>
+						<li class="text">接站牌:</li>
+						<li><input name="booking_no" type="text" class="w-120"/></li>
+						
 					</ul>
 					<ul>
 						<c:if test="${'1' == supplierType}">
@@ -74,20 +75,20 @@
 						<c:if test="${'1' != supplierType && '16' != supplierType}">
 							<li class="text">商家名称:</li>
 						</c:if>
-						<li><input name="supplier_name" type="text" style="width:180px;"/></li>
+						<li><input name="supplier_name" type="text" style="width:181px"/></li>
 						<li class="text">部门:</li>
-		    			<li><input type="text" name="orgNames" id="orgNames" stag="orgNames" value="" readonly="readonly" onclick="showOrg()"/></li>
+		    			<li><input type="text" name="orgNames" id="orgNames" stag="orgNames" value="" readonly="readonly" onclick="showOrg()"  class="w-200"/></li>
 							<input name="orgIds" id="orgIds" stag="orgIds" value="" type="hidden" value=""/>	    				
 		    			<li class="text">计调:</li>
-		    			<li><input type="text" name="saleOperatorName" id="saleOperatorName" stag="userNames" value="" readonly="readonly" onclick="showUser()"/></li>
+		    			<li><input type="text" name="saleOperatorName" id="saleOperatorName" stag="userNames" value="" readonly="readonly" onclick="showUser()" class="w-200" /></li>
 						<input name="saleOperatorIds" id="saleOperatorIds" stag="userIds" value="" type="hidden" value=""/>	    	
-						<li class="text" style="width:215px;">状态:</li>
-						<li><select name="status" class="w-100bi">
+						<li class="text" >状态:</li>
+						<li><select name="status" >
 								<option value="">全部</option>
 								<option value="1">已对账</option>
 								<option value="0">未对账</option>
 						</select></li>
-						<li class="text" style="width:178px;"></li>
+						<li class="text" ></li>
 						<li><input type="button" id="btnQuery" onclick="searchBtn()" class="button button-primary button-small" value="查询"></li>
 					</ul>
 				</div>

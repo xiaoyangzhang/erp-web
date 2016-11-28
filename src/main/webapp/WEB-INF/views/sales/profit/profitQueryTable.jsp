@@ -6,12 +6,13 @@
 <table class="w_table" style="margin-left: 0px">
 	<colgroup> 
 		<col width="4%"/>
-		<col width="8%"/>
-		<col width="8%"/>
-		<col width="18%"/>
-		<col width="14%"/>
-		<col width="7%"/>
 		<col width="6%"/>
+		<col width="6%"/>
+		<col width="15%"/>
+		<col width="14%"/>
+		<col width="9%"/>
+		<col width="6%"/>
+		<col width="5%"/>
 		<col width="5%"/>
 		<col width="5%"/>
 		<col width="5%"/>
@@ -26,8 +27,8 @@
 			<th>团号<i class="w_table_split"></i></th>
 			<th>发团日期<i class="w_table_split"></i></th>
 			<th>产品名称<i class="w_table_split"></i></th>
-			<th>组团社<i class="w_table_split"></i></th>
-			<th>接站牌<i class="w_table_split"></i></th>
+			<th>客户<i class="w_table_split"></i></th>
+			<th>客人信息<i class="w_table_split"></i></th>
 			<th>客源地<i class="w_table_split"></i></th>
 			<th>人数<i class="w_table_split"></i></th>
 			<th>销售<i class="w_table_split"></i></th>
@@ -36,6 +37,7 @@
 			<th>预算<i class="w_table_split"></i></th>
 			<th>毛利<i class="w_table_split"></i></th>
 			<th>团状态<i class="w_table_split"></i></th>
+			<th>操作<i class="w_table_split"></i></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -51,10 +53,10 @@
 	              	<a href="javascript:void(0);" class="def" onclick="newWindow('查看散客团信息','<%=staticPath %>/teamGroup/toEditTeamGroupInfo.htm?groupId=${gl.groupId}&operType=0')">${gl.tourGroup.groupCode}</a>
 	              </c:if>
                </td>
-              <td style="text-align: left;"><fmt:formatDate value="${gl.tourGroup.dateStart}" pattern="yyyy-MM-dd"/></td>
+              <td><fmt:formatDate value="${gl.tourGroup.dateStart}" pattern="yyyy-MM-dd"/></td>
               <td style="text-align: left">【${gl.productBrandName}】${gl.productName}</td>
               <td style="text-align: left">${gl.supplierName}</td>
-              <td>${gl.receiveMode}</td>
+              <td style="text-align: left;">${gl.receiveMode}</td>
               <td>${gl.provinceName}${gl.cityName}</td>
               <td>${gl.numAdult}大${gl.numChild}小${gl.numGuide}陪</td>
               <td>${gl.saleOperatorName}</td>
@@ -63,32 +65,39 @@
               	<fmt:formatNumber value="${gl.income}" type="currency" pattern="#.##"/>
               </td>
               <td>
-              	
-<c:if test="${optMap['EDIT'] }">
-    <font color="blue">
-		<span style="cursor:pointer" class="price" onclick="changePrice(this,${gl.id})">
-			<c:if test="${gl.budget == null }">0</c:if>
-			<c:if test="${gl.budget == '' }">0</c:if>
-			<c:if test="${gl.budget != null }">
-				<fmt:formatNumber value="${gl.budget}" type="currency" pattern="#.##"/>	
-			</c:if>
-		</span>
-	</font>
-</c:if>
-<c:if test="${!optMap['EDIT'] }">
-			<fmt:formatNumber value="${gl.budget}" type="currency" pattern="#.##"/>	
-</c:if>
-
+              	<font color="blue">
+					<c:if test="${optMap['EDIT'] }">
+						 <c:if test="${gl.stateFinance ==0 }">
+							<span style="cursor:pointer" class="price" onclick="changePrice(this,${gl.id})">
+								<fmt:formatNumber value="${gl.budget}" type="currency" pattern="#.##"/>	
+							</span>
+						</c:if>
+					</c:if>
+					<c:if test="${gl.stateFinance ==1}">
+						<span style="cursor:pointer" class="price">
+								<fmt:formatNumber value="${gl.budget}" type="currency" pattern="#.##"/>	
+						</span>
+					</c:if>
+				</font>
+				<c:if test="${!optMap['EDIT'] }">
+					<fmt:formatNumber value="${gl.budget}" type="currency" pattern="#.##"/>	
+				</c:if>
               </td>
+              
               <td>
               	<fmt:formatNumber value="${gl.income-gl.budget}" type="currency" pattern="#.##"/>	
               </td>
+              
               <td>
               		<c:if test="${gl.tourGroup.groupState==0 }">未确认</c:if>
 	                <c:if test="${gl.tourGroup.groupState==1 }">已确认</c:if>
 					<c:if test="${gl.tourGroup.groupState==2}">废弃</c:if>
 					<c:if test="${gl.tourGroup.groupState==3}">封存</c:if>
 			  </td>
+			  <td>
+					<c:if test="${gl.tourGroup.groupCode != null}"><a class="def"  onclick="window.open('<%=staticPath%>/finance/auditGroupListPrint.htm?groupId=${gl.tourGroup.id}&isShow=true','结算单打印')" 
+					href="javascript:void(0)" >打印</a></c:if>
+				</td>
          	</tr>
          	<c:set var="sum_adult" value="${sum_adult+gl.numAdult}" />
 			<c:set var="sum_child" value="${sum_child+gl.numChild}" />
@@ -97,8 +106,8 @@
 			<c:set var="sum_budget" value="${sum_budget+gl.budget}" />
        	</c:forEach>
 	</tbody>
-	<tbody>
-		<tr>
+	<tfoot>
+			<tr class="footer1">
 			<td></td>
 			<td></td>
 			<td></td>
@@ -113,8 +122,9 @@
 			<td id="curTotal"><fmt:formatNumber value="${sum_budget}" type="currency" pattern="#.##"/></td>
 			<td><fmt:formatNumber value="${sum_income-sum_budget}" type="currency" pattern="#.##"/></td>
 			<td></td>
+			<td></td>
 		</tr>
-		<tr>
+		<tr class="footer2">
 			<td></td>
 			<td></td>
 			<td></td>
@@ -129,8 +139,9 @@
 			<td id="total"><fmt:formatNumber value="${groupOrder.totalBudget}" type="currency" pattern="#.##"/></td>
 			<td><fmt:formatNumber value="${groupOrder.totalIncome-groupOrder.totalBudget}" type="currency" pattern="#.##"/></td>
 			<td></td>
+			<td></td>
 		</tr>
-	</tbody>
+	</tfoot>
 </table>
 <jsp:include page="/WEB-INF/include/page.jsp">
 	<jsp:param value="${page.page }" name="p" />

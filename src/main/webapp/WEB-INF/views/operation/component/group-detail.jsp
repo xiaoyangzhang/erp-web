@@ -30,7 +30,10 @@
 		</tr>
 		<tr>
 			<td><b>人数：</b></td>
-			<td style="text-align:left;">${group.totalAdult}大${group.totalChild }小${group.totalGuide }陪&nbsp;共${group.totalAdult+group.totalChild +group.totalGuide }人</td>
+			<td style="text-align:left;">
+				<c:if test="${group.totalBaby==null }">${group.totalAdult}大${group.totalChild }小${group.totalGuide }陪&nbsp;共${group.totalAdult+group.totalChild +group.totalGuide }人</c:if>
+				<c:if test="${group.totalBaby!=null }">${group.totalAdult}大${group.totalChild }<span style="color: red;">(${group.totalBaby })</span>小${group.totalGuide }陪&nbsp;共${group.totalAdult+group.totalChild+group.totalBaby +group.totalGuide }人</c:if>
+			</td>
 			<td><b>操作计调：</b></td>
 			<td style="text-align:left;">${group.operatorName }</td>
 		</tr>

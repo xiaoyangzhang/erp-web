@@ -18,7 +18,7 @@ function importRoute(){
 		title : '导入行程',
 		shadeClose : true,
 		shade : 0.5,
-        area : ['680px','480px'],
+        area : ['850px','520px'],
 		content : '../route/list.htm?state=2',
 		btn: ['确定', '取消'],
 		success:function(layero, index){
@@ -164,6 +164,49 @@ function stockOpt(){
 	                });
 	            }
 	        });   
+	    },cancel: function(index){
+	    	layer.close(index);
+	    }
+	});
+}
+
+/**
+ * 选择库存
+ */
+function stockOpt_TaobaoProduct(){
+	var itemDate =$("input[name='groupOrder.departureDate']").val();
+	if(itemDate==''){
+		$.warn("请先选择出发日期!");
+		return ;
+	}
+	var win ;
+	layer.open({ 
+		type : 2,
+		title : '导入行程',
+		shadeClose : true,
+		shade : 0.5,
+        area : ['850px','520px'],
+		content : '../taobaoProect/TaoBaoProductStockDlg.htm?stockDate='+itemDate,
+		btn: ['确定', '取消'],
+		success:function(layero, index){
+			win = window[layero.find('iframe')[0]['name']];
+		},
+		yes: function(index){
+			var body = layer.getChildFrame('body', index);
+			body.find("input[name='stockDateId']").each(function(){
+				if ($(this).attr("checked") || $(this).prop("checked")){
+					//${res['stock_id']}^${res['stockDateId']}^${res['stockBalance']}^${res['outer_id']}
+					var ary = $(this).val().split('^');
+					$("#orderBusiness").val("stock");
+					$("input[name='groupOrder.productBrandId']").val(ary[0]);
+					$("input[name='groupOrder.productId']").val(ary[1]);
+					$("#stockCount").text(ary[2]);
+					$("input[name='groupOrder.productName']").val(ary[3]);
+					limitInput();
+			    }
+			});
+			
+	        layer.close(index);
 	    },cancel: function(index){
 	    	layer.close(index);
 	    }

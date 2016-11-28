@@ -9,7 +9,7 @@
 	.head .msg-title span{font-size:1.1em;color:#d8dee1;line-height: 45px;height:45px;cursor: pointer;}
 	.head .msg-title span .re-icon{background-position: 0px 0px;width:6px;height:8px;margin-top:18px;margin-right:5px;}
 	.head .msg-title span .yellow-icon{background-position: -20px -22px;width:19px;height:19px;margin-top:13px;}
-	.head .msg-title span .num{margin-left:-18px;color:#000;float: left;}
+	.head .msg-title span .num{margin-left:-15px;color:#000;float: left;}
 	.head .msg-title span.name{background: #4c535a;padding: 0px 10px;position: relative;cursor: pointer;}
 	.head .msg-title span .icon-down{background-position: 0px -12px;width:8px;height:7px;margin-top:20px;}
 	.head .msg-title .newDown{display:none;position: absolute;top:45px;left:-10px;text-align: center;z-index: 9999}

@@ -2,15 +2,14 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-<%@ include file="../../../include/top.jsp"%>
 <c:set var="nowDate" value="<%=System.currentTimeMillis()%>"></c:set>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
- <link rel="stylesheet" type="text/css" href="<%=ctx %>/assets/css/operate/operate.css"/>
 <title>散客团列表</title>
-
+<%@ include file="../../../include/top.jsp"%>
+<link rel="stylesheet" type="text/css" href="<%=ctx %>/assets/css/operate/operate.css"/>
 <script type="text/javascript">
 function pushInfo(groupId){
 	layer.open({
@@ -36,45 +35,37 @@ function openMergeAddGroup(id,mode) {
 </script>
 </head>
 <body>
-<%@ include file="/WEB-INF/views/component/org-user/org_user_multi.jsp"%>
-	<div class="p_container">
-		<div class="p_container_sub pl-10 pr-10">
-			<dl class="p_paragraph_content">
-				<form action="toFitGroupList.htm" method="post"
-					id="toFitGroupListForm">
-					<input type="hidden" name="page" id="groupPage"
-						value="${tourGroup.page}"> <input type="hidden"
-						name="pageSize" id="groupPageSize" value="${tourGroup.pageSize}">
+<div class="p_container">
+	<form action="toFitGroupList.htm" method="post" id="toFitGroupListForm">
+	<div class="p_container_sub">
+			<div class="searchRow">
+					<input type="hidden" name="page" id="groupPage" value="${tourGroup.page}"> 
+					<input type="hidden" name="pageSize" id="groupPageSize" value="${tourGroup.pageSize}">
 						
-						
-					<dd class="inl-bl">
-						<div class="dd_left">出团日期:</div>
-						<div class="dd_right grey">
-							<input name="startTime" type="text" id="startTime" value='<fmt:formatDate value="${tourGroup.startTime }" pattern="yyyy-MM-dd"/>' class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />
+					<ul >
+					<li class="text">出团日期:</li>
+					<li ><input name="startTime" type="text" id="startTime" value='<fmt:formatDate value="${tourGroup.startTime }" pattern="yyyy-MM-dd"/>' class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />
 							~
-							<input name="endTime" id="endTime" value='<fmt:formatDate value="${tourGroup.endTime}" pattern="yyyy-MM-dd"/>' type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">团号:</div>
-						<div class="dd_right grey">
-							<input name="groupCode" type="text" value="${tourGroup.groupCode}" />
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">产品名称:</div>
-						<div class="dd_right grey">
-							<input name="productName" type="text" value="${tourGroup.productName}" />
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">团状态:</div>
-						<div class="dd_right grey">
-							<select name="groupState">
-								<option value="-2" selected="selected">全部</option>
+						<input name="endTime" id="endTime" value='<fmt:formatDate value="${tourGroup.endTime}" pattern="yyyy-MM-dd"/>' type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />
+					</li>
+					<li class="text"> 团号:</li>
+					<li><input name="groupCode" type="text" value="${tourGroup.groupCode}" /></li>
+					<li class="text"> 产品:</li>
+					<li><input name="productName" type="text" value="${tourGroup.productName}" /></li>
+					<li class="clear"/>
+					</ul>
+					<ul>
+					
+					<li class="text"> 部门:</li>
+					<li><input type="text" name="orgNames" id="orgNames" stag="orgNames" value="${tourGroup.orgNames }" readonly="readonly" onclick="showOrg()" style="width:185px"/>
+						<input name="orgIds" id="orgIds" stag="orgIds" value="${tourGroup.orgIds }" type="hidden" value=""/>	</li>
+					<li class="text">计调:</li>
+					<li><input type="text" name="operatorName" id="saleOperatorName" value="${tourGroup.operatorName}" stag="userNames" readonly="readonly"  onclick="showUser()"/> 
+						<input name="operatorIds" id="saleOperatorIds" stag="userIds" type="hidden" value="${tourGroup.operatorIds}" />
+					</li>
+					<li class="text"> 状态:</li>
+					<li><select name="groupState">
+								<option value="-2" selected="selected">团状态</option>
 								<option value="0"
 									<c:if test="${tourGroup.groupState==0 }"> selected="selected" </c:if>>未确认</option>
 								<option value="1"
@@ -86,67 +77,44 @@ function openMergeAddGroup(id,mode) {
 								<option value="4"
 									<c:if test="${tourGroup.groupState==4 }"> selected="selected" </c:if>>已封存</option>
 							</select>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">团类型:</div>
-						<div class="dd_right grey">
 							<select name="groupMode">
-								<option value="" selected="selected">全部</option>
+								<option value="" selected="selected">团类型</option>
 								<option value="0"
 									<c:if test="${tourGroup.groupMode==0 }"> selected="selected" </c:if>>散客</option>
 								<option value="-1"
 									<c:if test="${tourGroup.groupMode==-1 }"> selected="selected" </c:if>>一地散</option>
-							</select>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left"></div>
-						<div class="dd_right">
-						部门:
-	    				<input type="text" name="orgNames" id="orgNames" stag="orgNames" value="${tourGroup.orgNames }" readonly="readonly" onclick="showOrg()"/>
-						<input name="orgIds" id="orgIds" stag="orgIds" value="${tourGroup.orgIds }" type="hidden" value=""/>	
-						</div>    		
-						<div class="dd_right">
-						计调:
-							<input type="text" name="operatorName" id="saleOperatorName"
-								value="${tourGroup.operatorName}" stag="userNames" readonly="readonly"  onclick="showUser()"/> <input
-								name="operatorIds" id="saleOperatorIds" stag="userIds" type="hidden"
-								value="${tourGroup.operatorIds}" />
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_right">
-							<button type="button" onclick="searchBtn()" class="button button-primary button-small">查询</button>
-						</div>
-						<div class="clear"></div>
-					</dd>	
-				</form>
-				</dl>
+							</select></li>
+					<li class="text"></li>
+					<li><button type="button" onclick="searchBtn()" class="button button-primary button-small">查询</button>
+					</li>
+					<li class="clear"/>
+					</ul>
+			</div>
+	</div>
+	</form>
+
+				
 			<dl class="p_paragraph_content">
 			<table cellspacing="0" cellpadding="0" class="w_table">
 				<thead>
 					<tr>
-						<th style="width:3%">序号<i class="w_table_split"></i></th>
-						<th style="width:20%">团号<i class="w_table_split"></i></th>
-						<th style="width:8%">团类型<i class="w_table_split"></i></th>
+						<th style="width:4%">序号<i class="w_table_split"></i></th>
+						<th style="width:13%">团号<i class="w_table_split"></i></th>
+						<th style="width:6%">类型<i class="w_table_split"></i></th>
 						<th style="width:8%">日期<i class="w_table_split"></i></th>
 						<th >产品名称<i class="w_table_split"></i></th>
 						<th style="width:8%">导游<i class="w_table_split"></i></th>
 						<th style="width:5%">订单数<i class="w_table_split"></i></th>
-						<th style="width:4%">成人<i class="w_table_split"></i></th>
-						<th style="width:4%">儿童<i class="w_table_split"></i></th>
+						<th style="width:5%">成人<i class="w_table_split"></i></th>
+						<th style="width:5%">儿童<i class="w_table_split"></i></th>
 						<th style="width:5%">计调<i class="w_table_split"></i></th>
-						<th style="width:8%">团状态<i class="w_table_split"></i></th>
+						<th style="width:6%">团状态<i class="w_table_split"></i></th>
 						<th style="width:5%">操作</th>
 					</tr>
 				</thead>
 				<tbody>
 					<c:forEach items="${page.result}" var="tourGroup" varStatus="index">
-						<tr title="创建时间:${tourGroup.createTimeStr},最后修改人:${tourGroup.updateName },最后修改时间:${tourGroup.updateTimeStr}">
+						<tr title="创建时间:${tourGroup.createTimeStr},最后修改人:${tourGroup.updateName },最后修改时间:${tourGroup.updateTimeStr}" style="color:<c:if test="${tourGroup.groupState eq 4}">#ee33ee</c:if><c:if test="${tourGroup.groupState eq 3}">blue</c:if>">
 							<td class="serialnum">
 			       				<div class="serialnum_btn" id="${index.count}" groupId="${tourGroup.id}"></div>
 			       				${index.count}
@@ -160,21 +128,18 @@ function openMergeAddGroup(id,mode) {
 							<td><c:forEach items="${tourGroup.guideList}" var="guide">
 							<a href="javascript:void(0);" onclick="newWindow('导游详情','supplier/guideDetail.htm?id=${guide.guideId}')"> 
 							${guide.guideName}&nbsp;
-							</a></c:forEach> </td>
+							</a></c:forEach> 
+							</td>
 							<td>${tourGroup.orderNum}</td>
 							<td>${tourGroup.totalAdult}</td>
 							<td>${tourGroup.totalChild}</td>
 							<td>${tourGroup.operatorName}</td>
-							<td><c:if test="${tourGroup.groupState==0 }">未确认</c:if> <c:if
-									test="${tourGroup.groupState==1 }">已确认</c:if> <c:if
-									test="${tourGroup.groupState==1 and nowDate-tourGroup.dateStart.time < 0}">(待出团)</c:if>
-								<c:if
-									test="${tourGroup.groupState==1 and  !empty tourGroup.dateEnd and nowDate-tourGroup.dateEnd.time > 0}">(已离开)</c:if>
-								<c:if
-									test="${tourGroup.groupState==1 and !empty tourGroup.dateEnd and nowDate-tourGroup.dateStart.time > 0 and nowDate-tourGroup.dateEnd.time < 0 }">(行程中)</c:if>
-								<c:if test="${tourGroup.groupState==2 }">已废弃</c:if>
-								<c:if test="${tourGroup.groupState==3 }"><span style="color:blue">已审核</span></c:if>
-								<c:if test="${tourGroup.groupState==4 }"><span style="color: #ee33ee">已封存</span></c:if>
+							<td>
+							<c:if test="${tourGroup.groupState==0}"><span class="log_action update">未确认</span></c:if>
+			                <c:if test="${tourGroup.groupState==1}"><span class="log_action normal">已确认</span></c:if>
+							<c:if test="${tourGroup.groupState==2}"><span class="log_action delete">已废弃</span></c:if>
+							<c:if test="${tourGroup.groupState==3}"><span class="log_action insert">已审核</span></c:if>
+							<c:if test="${tourGroup.groupState==4}"><span class="log_action fuchsia">已封存</span></c:if>
 							</td>
 							<td>
 								 <div class="tab-operate">
@@ -190,9 +155,9 @@ function openMergeAddGroup(id,mode) {
 											<c:if test="${optMap['EDIT'] && tourGroup.groupState==2 }">
 											<a href="javascript:void(0);" onclick="delGroup(${tourGroup.id},-1)"  class="def">删除</a>
 											</c:if>
-											<c:if test="${optMap['EDIT'] && tourGroup.groupState==1 }">
+											<%-- <c:if test="${optMap['EDIT'] && tourGroup.groupState==1 }">
 											<a href="javascript:void(0);" onclick="pushInfo(${tourGroup.id})"  class="def">同步App</a>
-											</c:if>
+											</c:if> --%>
 											<c:if test="${optMap['EDIT'] && tourGroup.groupState==4}">
 						              	 	<a href="javascript:void(0);" onclick="newWindow('变更团','tourGroup/toChangeGroup.htm?groupId=${tourGroup.id}')" class="def">变更</a> 
 											 </c:if>
@@ -203,7 +168,9 @@ function openMergeAddGroup(id,mode) {
 							<c:set var="totalAdult" value="${totalAdult+tourGroup.totalAdult }"/>
 							<c:set var="totalChild" value="${totalChild+tourGroup.totalChild }"/>
 					</c:forEach>
-						<tr>
+					</tbody>
+					<tfoot>
+						<tr class="footer1">
 							<td colspan="7" style="text-align: right">本页合计：</td>
 							<td>${totalAdult}</td>
 							<td>${totalChild}</td>
@@ -211,7 +178,7 @@ function openMergeAddGroup(id,mode) {
 							<td></td>
 							<td></td>
 						</tr>
-						<tr>
+						<tr class="footer2">
 							<td colspan="7" style="text-align: right">总合计：</td>
 							<td>${group.totalAdult}</td>
 							<td>${group.totalChild }</td>
@@ -219,7 +186,8 @@ function openMergeAddGroup(id,mode) {
 							<td></td>
 							<td></td>
 						</tr>
-				</tbody>
+					</tfoot>
+				
 			</table>
 			<jsp:include page="/WEB-INF/include/page.jsp">
 				<jsp:param value="${page.page }" name="p" />
@@ -434,6 +402,7 @@ function print(groupId){
 			<a href="" id="skgwmxd2" target="_blank" class="button button-primary button-small">散客购物明细单2</a>
 		</div>		
 	</div>
+<%@ include file="/WEB-INF/views/component/org-user/org_user_multi.jsp"%>	
 </body>
 </html>
 

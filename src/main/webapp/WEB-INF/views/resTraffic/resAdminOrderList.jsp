@@ -44,7 +44,7 @@
 							</div>
 						</dd>
 						<dd class="inl-bl">
-							<div class="dd_left">客人信息：</div>
+							<div class="dd_left">接站牌：</div>
 							<div class="dd_right grey">
 								<input type="text" name="receiveMode" id="receive_mode_id" value="" style="width:100px" />
 							</div>
@@ -70,11 +70,11 @@
 							<div class="dd_left">尾款时限</div>
 							<div class="dd_right grey">
 								<input type="text" name="extHour" id="ext_res_clean_time_id" value=""  style="width:66px"
-									onkeyup="value=value.replace(/[^\d]/g,'')" /><span>小时内</span>
+									onkeyup="value=value.replace(/[^\d]/g,'')" /><span>分钟内</span>
 							</div>
 						</dd>
 						<dd class="inl-bl">
-							<div class="dd_left">下单员：</div>
+							<div class="dd_left">计调：</div>
 							<div class="dd_right grey">
 								<input type="text" name="saleOperatorName" id="sale_operator_name_id" value="" style="width:100px" />
 							</div>

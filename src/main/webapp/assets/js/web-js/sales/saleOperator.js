@@ -69,10 +69,10 @@ function queryList(page,pagesize) {
 $(function() {
 	//setData();
 	var vars={
-  			 dateFrom : $.currentMonthFirstDay(),
-  		 	dateTo : $.currentMonthLastDay()
+  			 dateFrom : $.currentDay(),
+  		 	dateTo : $.currentDay()
   		 	};
-  		 	$("#startTime").val(vars.dateFrom);
-  		 	 $("#endTime").val(vars.dateTo );
+  	$("#startTime").val(vars.dateFrom);
+  	$("#endTime").val(vars.dateTo );
 	queryList();
 });

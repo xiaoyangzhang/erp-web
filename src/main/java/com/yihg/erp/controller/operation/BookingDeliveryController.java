@@ -18,8 +18,25 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.yihg.erp.contant.OpenPlatformConstannt;
+import com.yihg.erp.utils.MD5Util;
+import com.yimayhd.erpcenter.dal.sys.po.PlatAuth;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatAuthFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
@@ -69,6 +86,7 @@ import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 import com.yimayhd.erpresource.dal.constants.Constants;
 import com.yimayhd.erpresource.dal.exception.ClientException;
 
+
 @Controller
 @RequestMapping("/booking")
 public class BookingDeliveryController extends BaseController {
@@ -80,13 +98,15 @@ public class BookingDeliveryController extends BaseController {
     @Autowired
     private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
     @Autowired
+    private SysPlatformOrgFacade sysPlatformOrgFacade;
+    @Autowired
     private BookingDeliveryFacade bookingDeliveryFacade;
     @Autowired
     private SaleCommonFacade saleCommonFacade;
     @Autowired
-    private BookingSupplierFacade bookingSupplierFacade;
-    @Autowired
     private ProductCommonFacade productCommonFacade;
+    @Autowired
+    private SysPlatAuthFacade sysPlatAuthFacade;
     @ModelAttribute
     public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
 //        model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
@@ -262,6 +282,14 @@ public class BookingDeliveryController extends BaseController {
     public String deliveryEdit(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer gid, Integer bid) {
         loadAngencyInfo(request, model, gid, bid);
         return "/operation/delivery/delivery-edit";
+    }
+
+    @RequestMapping("AYDelivery.htm")
+    public String AYDelivery(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer gid, Integer bid, Integer see, Integer orderId) {
+        loadAngencyInfo(request, model, gid, bid);
+        model.addAttribute("orderId", orderId);
+        model.addAttribute("see", see);
+        return "/operation/delivery/ay-delivery-edit";
     }
     
     @RequestMapping("viewDelivery.htm")
@@ -739,7 +767,6 @@ public class BookingDeliveryController extends BaseController {
      *
      * @param request
      * @param userInfo
-     * @param delivery
      * @param priceMapList
      * @param otherMap
      * @param orderMapList
@@ -748,7 +775,6 @@ public class BookingDeliveryController extends BaseController {
      * @param routeMapList
      * @param staffsMap
      * @param groupMap
-     * @param groupInfo
      * @return
      */
     private List<Map<String, String>> getDeliveryDetail(Integer preview,
@@ -771,8 +797,17 @@ public class BookingDeliveryController extends BaseController {
             agencyMap.put("username", userInfo.getName());
             agencyMap.put("usertel", userInfo.getMobile());
             agencyMap.put("userfax", userInfo.getFax());
-            
-            imgPath = bizSettingCommon.getMyBizLogo(request);
+            // 根据order_id判断logo order_id不等于0
+
+            if (delivery.getOrderId() != null) {
+               Integer orgId =  bookingDeliveryFacade.getOrgIdBy(delivery.getOrderId(), WebUtils.getCurBizId(request));
+
+                if (orgId != null && orgId != -1) {
+                    imgPath = bizSettingCommon.getOrgLogo(WebUtils.getCurBizId(request),orgId);
+                }
+            } else {
+                imgPath = bizSettingCommon.getMyBizLogo(request);
+            }
         } else if (type.equals(2)) {//计调-》集团
             PlatformEmployeePo broker = getDeliveryBrokerUserInfo(request);
             if (broker != null) {
@@ -957,7 +992,8 @@ public class BookingDeliveryController extends BaseController {
         List<GroupOrderPrintPo> gopps = result.getOrderPrints();
         // 房量总计
         String total = "";
-        if (groupInfo != null && groupInfo.getGroupMode() < 1) {
+//        if (groupInfo != null && groupInfo.getGroupMode() < 1) {
+        if (groupInfo != null) {
 //            for (GroupOrder order : orderList) {
         	for (GroupOrderPrintPo gopp : gopps) {
 				
@@ -1038,6 +1074,7 @@ public class BookingDeliveryController extends BaseController {
             }
         }
         //如果是定制团
+        String hotelInfo = "", trafficInfo = "";
         if (groupInfo != null && groupInfo.getGroupMode() > 0) {
             orderMapList = new ArrayList<Map<String, String>>();
 //            Map parameters = new HashMap();
@@ -1057,29 +1094,48 @@ public class BookingDeliveryController extends BaseController {
                 map.put("address", guest.getNativePlace() == null ? "" : guest.getNativePlace());
                 map.put("age", guest.getAge() == null ? "0" : (guest.getAge() + ""));
                 map.put("remark", guest.getRemark() == null ? "" : guest.getRemark());
+                if (gopps != null && gopps.size() > 0) {
+                    GroupOrderPrintPo gopp = gopps.get(0);
+                    if ("".equals(hotelInfo))
+                        hotelInfo = gopp.getHotelLevel() + " " + gopp.getHotelNum();
+                    if ("".equals(trafficInfo))
+                        trafficInfo = gopp.getAirPickup() + (!"".equals(gopp.getAirOff()) ? "、" + gopp.getAirOff() : "")
+                                + (!"".equals(gopp.getTrans()) ? "、" + gopp.getTrans() : "");
+
+                    map.put("hotelLevel", gopp.getHotelLevel());
+                    map.put("hotelNum", gopp.getHotelNum());
+                    map.put("up", gopp.getAirPickup());
+                    map.put("off", gopp.getAirOff());
+                    map.put("trans", gopp.getTrans());
+                }
                 orderMapList.add(map);
                 
             }
         }
         //打印页面
+        String gRemark = "", gServiceStandard = "";
+        if (groupInfo.getRemark() != null)
+            gRemark = groupInfo.getRemark();
+        if (groupInfo.getServiceStandard() != null)
+            gServiceStandard = groupInfo.getServiceStandard();
         if (preview == null) {
             remarkMap
                     .put("remark", delivery.getRemark());
             //服务标准
             remarkMap.put("serviceStandard", groupInfo.getServiceStandard());
             //团备注
-            remarkMap.put("groupRemark",
-                    groupInfo.getRemark());
+            remarkMap.put("groupRemark", gRemark);
+
+            remarkMap.put("hotelInfo", hotelInfo);
+            remarkMap.put("traffic", trafficInfo);
         } else {
             //备注
-            remarkMap
-                    .put("remark", delivery.getRemark().replace("\n", "<br/>"));
+            remarkMap.put("remark", delivery.getRemark().replace("\n", "<br/>"));
             //服务标准
-            remarkMap.put("serviceStandard", groupInfo.getServiceStandard()
-                    .replace("\n", "<br/>"));
+            remarkMap.put("serviceStandard", gServiceStandard.replace("\n", "<br/>"));
             //团备注
-            remarkMap.put("groupRemark",
-                    groupInfo.getRemark().replace("\n", "<br/>"));
+//            remarkMap.put("groupRemark",
+//                    groupInfo.getRemark().replace("\n", "<br/>"));
             
         }
         //其他logo、打印时间
@@ -1275,7 +1331,6 @@ public class BookingDeliveryController extends BaseController {
      * 省内交通
      *
      * @param groupOrderTransports
-     * @param flag                 0表示接信息 1表示送信息
      * @return
      */
     public String getSourceType(List<GroupOrderTransport> groupOrderTransports) {
@@ -1303,7 +1358,7 @@ public class BookingDeliveryController extends BaseController {
         SysBizInfo bizInfo = WebUtils.getCurBizInfo(request);
         PlatformEmployeePo userInfo = WebUtils.getCurUser(request);
         BookingDeliveryResult result = bookingDeliveryFacade.getBookingDeliveryInfo(bookingId, bizInfo.getId());
-//        BookingDelivery delivery = deliveryService.getBookingInfoById(bookingId);
+        BookingDelivery delivery = result.getBookingDelivery();
 //        BookingDelivery delivery = result.getBookingDelivery();
         //要打印的订单
         //GroupOrder groupOrder = orderService.selectByPrimaryKey(orderId);
@@ -1319,7 +1374,18 @@ public class BookingDeliveryController extends BaseController {
 //        TourGroup groupInfo = tourGroupService.selectByPrimaryKey(delivery.getGroupId());
         TourGroup groupInfo = result.getTourGroup();
         orderMapList = getDeliveryDetail(preview, request, userInfo, priceMapList, type, otherMap, orderMapList, remarkMap, agencyMap, routeMapList, staffsMap, groupMap,result);
-        String imgPath = bizSettingCommon.getMyBizLogo(request);
+        String imgPath = "";
+
+        // 根据order_id判断logo order_id不等于0
+        if (delivery.getOrderId() != null) {
+            Integer orgId = bookingDeliveryFacade.getOrgIdBy(delivery.getOrderId(),WebUtils.getCurBizId(request));
+
+            if (orgId != null && orgId != -1) {
+                imgPath = bizSettingCommon.getOrgLogo(WebUtils.getCurBizId(request), orgId);
+            }
+        } else {
+            imgPath = bizSettingCommon.getMyBizLogo(request);
+        }
         model.addAttribute("imgPath", imgPath);
         model.addAttribute("priceMapList", priceMapList);
         model.addAttribute("otherMap", otherMap);
@@ -1342,4 +1408,110 @@ public class BookingDeliveryController extends BaseController {
         }
         return null;
     }
+
+
+    @RequestMapping("pushDeliveryList.htm")
+    public String pushList(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
+
+        List<PlatAuth> paList = sysPlatAuthFacade.findByBizIdAndOrgNotZero(WebUtils.getCurBizId(request)).getPlatAuthList();
+
+        model.addAttribute("platAuth", paList);
+
+        return "/operation/delivery/push_delivery_list";
+    }
+
+
+    @RequestMapping("pushDeliveryListTable.do")
+    public String pushListTable(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroupVO group) {
+        PageBean pageBean = new PageBean();
+
+        if (group.getPage() == null) {
+            pageBean.setPage(1);
+        } else {
+            pageBean.setPage(group.getPage());
+        }
+
+        if (group.getPageSize() == null) {
+            pageBean.setPageSize(Constants.PAGESIZE);
+        } else {
+            pageBean.setPageSize(group.getPageSize());
+        }
+
+        group.setBizId(WebUtils.getCurBizId(request));
+        pageBean.setParameter(group);
+
+        pageBean = bookingDeliveryFacade.pushListTable(pageBean, WebUtils.getCurBizId(request)).getValue();
+
+        model.addAttribute("pageBean", pageBean);
+        return "/operation/delivery/push_delivery_list_table";
+    }
+
+    @RequestMapping("pushRemoteSave.do")
+    @ResponseBody
+    public String pushRemoteSave(HttpServletRequest request, Integer groupId, Integer bookingId,
+                                 String fromAppKey, String fromSecretKey, String toAppKey) {
+        WebResult<String> webResult =  bookingDeliveryFacade.pushRemoteSave(groupId, bookingId, WebUtils.getCurBizId(request), fromAppKey, fromSecretKey, toAppKey);
+        String jsonStr;
+
+        if(webResult.isSuccess()){
+            jsonStr = webResult.getValue();
+        }else{
+            return errorJson("推送信息失败,请检查信息是否正确");
+        }
+
+
+
+        String resultString;
+        try {
+            String timeStamp = DateUtil.date2Str(new Date(), "yyyy-MM-dd HH:mm:ss");
+
+            // 签名
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("appKey", fromAppKey);
+            params.put("timestamp", timeStamp);
+            String getSign = MD5Util.getSign_Taobao(fromSecretKey, params);
+
+            // 访问参数
+            List<NameValuePair> nameValuePairList = new ArrayList<NameValuePair>();
+            nameValuePairList.add(new BasicNameValuePair("fromAppKey", fromAppKey));
+            nameValuePairList.add(new BasicNameValuePair("timestamp", timeStamp));
+            nameValuePairList.add(new BasicNameValuePair("sign", getSign));
+            nameValuePairList.add(new BasicNameValuePair("toAppKey", toAppKey));
+            nameValuePairList.add(new BasicNameValuePair("jsonStr", jsonStr));
+
+            HttpPost httpPost = new HttpPost(OpenPlatformConstannt.openAPI_OrderMap.get("Url")
+                    + OpenPlatformConstannt.openAPI_OrderMap.get("pushMethod"));
+
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairList, "utf-8"));
+            // 访问接口
+            CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
+
+            CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpPost);
+
+            try {
+                HttpEntity httpEntity = closeableHttpResponse.getEntity();
+                resultString = EntityUtils.toString(httpEntity);
+                JSONObject jsonObject = JSON.parseObject(resultString);
+
+                if (jsonObject.get("result").equals("success")) {
+                    // 更新状态
+//                    deliveryService.updatePushStatus(bookingId);
+                    WebResult<Boolean> result = bookingDeliveryFacade.updatePushStatus(bookingId);
+                    if(result.isSuccess()){
+                        return successJson();
+                    }else{
+                        return errorJson("推送信息失败,请检查信息是否正确");
+                    }
+
+                } else {
+                    return errorJson("推送信息失败,请检查信息是否正确");
+                }
+            } finally {
+                closeableHttpResponse.close();
+            }
+        } catch (Exception ex) {
+            return errorJson("推送信息失败,请检查信息是否正确");
+        }
+    }
+
 }

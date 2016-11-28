@@ -113,36 +113,19 @@ div{ font-size:10pt !important; }
 				<c:set var="sum_price" value="${sum_price+price.totalprice }" />
 			</c:if>
 		</c:forEach>
-			</tbody>
-			 <tbody>
+
 		<tr>
-			
-			
-			<td colspan="7" >合计：${sum_price }</td>
-			 <%-- <td ><fmt:formatNumber value="${sum_totalNum}" pattern="#.##" type="currency"/></td>
-			<td ><fmt:formatNumber value="${sum_totalNumMinus}" pattern="#.##" type="currency"/></td> 
-			<td ><fmt:formatNumber value="${sum_totalCount}" pattern="#.##" type="currency"/></td> --%>
+			<td style="font-weight: bold;" align="center" ></td>
+					<td style="font-weight: bold;" align="center" ></td>
+	      			<td style="font-weight: bold;" align="center" ></td>
+					<td style="font-weight: bold;" align="center" ></td>
+					<td style="font-weight: bold;" align="center" ></td>
+					<td style="font-weight: bold;" align="center" >合计</td>
+					<td style="font-weight: bold;" align="center" >${sum_price }</td>
 		</tr>
-	</tbody> 
+	</tfoot> 
 		</table>
-		<table style="width: 100%; border-collapse: collapse; margin: 0px"
-			border="1">
-				<tbody>
-					<tr>
-						<td style="font-weight: bold;" align="center">司机</td>
-						<td style="font-weight: bold;" align="center">${staffsMap.driverInfo }</td>
-						
-					</tr>
-					<tr><td style="font-weight: bold;" align="center">导游</td>
-						<td style="font-weight: bold;" align="center">${staffsMap.guideInfo }</td></tr>
-					<tr><td style="font-weight: bold;" align="center">全陪</td>
-						<td style="font-weight: bold;" align="center">${staffsMap.accompanyInfo }</td></tr>
-					<tr><td style="font-weight: bold;" align="center">领队</td>
-						<td style="font-weight: bold;" align="center">${staffsMap.leaderInfo }</td></tr>
-					<tr><td  style="font-weight: bold;" align="center" >接站信息</td>
-						<td style="font-weight: bold;" align="center">${staffsMap.receivemode }</td></tr>
-				</tbody>
-			</table>
+
 		
 		<table style="width: 100%; border-collapse: collapse; margin: 0px"
 			border="1">
@@ -160,8 +143,6 @@ div{ font-size:10pt !important; }
 			<tbody>
 			
 				<c:forEach items="${orderMapList}" var="order" varStatus="vs">
-				
-		
 			<tr height="28px" >
 				<td style="font-weight: bold;" align="center" width="199px">${order.num}</td>
 				<td style="font-weight: bold;" align="center" width="199px">${order.name}</td>
@@ -172,24 +153,38 @@ div{ font-size:10pt !important; }
 				<td style="font-weight: bold;" align="center" width="199px">${order.age }</td>
 				<td style="font-weight: bold;" align="center" width="199px">${order.remark }</td>
 			</tr>
-			<%-- <c:set var="sum_totalCount" value="${sum_totalCount+v.itemTotal}" />
-			 <c:set var="sum_totalNumMinus" value="${sum_totalNumMinus+v.itemNumMinus}" />
-			<c:set var="sum_totalNum" value="${sum_totalNum+v.itemNum }" />
-			 --%>		
-			 
+		
+			 <c:set var="HotelLevel" value="${order.hotelLevel}" />
+			 <c:set var="hotelNum" value="${order.hotelNum}" />
+			 <c:set var="up" value="${order.up}" />
+			 <c:set var="off" value="${order.off}" />
+			 <c:set var="trans" value="${order.trans}" />
 		</c:forEach>
 			</tbody>
-			<%-- <tbody>
-		<tr>
 			
-			
-			<td colspan="11" >合计：</td>
-			 <td ><fmt:formatNumber value="${sum_totalNum}" pattern="#.##" type="currency"/></td>
-			<td ><fmt:formatNumber value="${sum_totalNumMinus}" pattern="#.##" type="currency"/></td> 
-			<td ><fmt:formatNumber value="${sum_totalCount}" pattern="#.##" type="currency"/></td>
-		</tr>
-	</tbody> --%>
 		</table>
+				<table style="width: 100%; border-collapse: collapse; margin: 0px"
+			border="1">
+				<tbody>
+					<tr><td  style="font-weight: bold;" align="left" >客人信息</td>
+						<td style="font-weight: bold;" align="left">${staffsMap.receivemode }</td></tr>
+						
+					<tr>
+						<td style="font-weight: bold;" align="left">司机</td>
+						<td style="font-weight: bold;" align="left">${staffsMap.driverInfo }</td>
+					</tr>
+					<tr><td style="font-weight: bold;" align="left">导游</td>
+						<td style="font-weight: bold;" align="left">${staffsMap.guideInfo }</td></tr>
+					<tr><td style="font-weight: bold;" align="left">全陪</td>
+						<td style="font-weight: bold;" align="left">${staffsMap.accompanyInfo }</td></tr>
+					<tr><td style="font-weight: bold;" align="left">领队</td>
+						<td style="font-weight: bold;" align="left">${staffsMap.leaderInfo }</td></tr>
+					<tr><td  style="font-weight: bold;" align="left" >用房</td>
+						<td style="font-weight: bold;" align="left">${HotelLevel }&nbsp;${hotelNum }</td></tr>
+						<tr><td  style="font-weight: bold;" align="left" >接送信息</td>
+						<td style="font-weight: bold;" align="left">${up }<br/>${off }<br/${trans} }</td></tr>
+				</tbody>
+			</table>
 			<table style="width: 100%; border-collapse: collapse; margin: 0px"
 			border="1">
 				<tbody>

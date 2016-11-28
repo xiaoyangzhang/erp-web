@@ -1,3 +1,4 @@
+
 //begin 日历事件
 function initCalandar() {	
 	$("#divLeft").priceCalandar({
@@ -21,6 +22,9 @@ function initCalandar() {
 }
 
 function processData(container, year, month) {
+	 var curDate = new Date(); 
+     var preDate = new Date(curDate.getTime() - 24*60*60*1000);  //前一天
+   
     if(productId != '0' && groupId!='0'){
         $.ajax({
             type: "post",
@@ -38,14 +42,16 @@ function processData(container, year, month) {
             	if(!data||data.length==0){
             		return;
             	}
-                
-                for (var i = 0; i < data.length; i++) {
+               
+                for (var i = 0; i <data.length; i++) {
                 	var priceStr = "",
                     	stockStr = "";
                 	var cssState = "";
                 	var stockCss="";
                 	
                     var item = data[i];
+                    
+                    
                     
                     var stock=true;//库存
                     var price=true;//价格
@@ -66,44 +72,47 @@ function processData(container, year, month) {
                         yuliu = leave3 ==0? "" : "预" + leave3;
                     }
                     
-
+                    
                     var groupDate = new Date(item.groupDate);
                     if(price){
-                    	//priceStr = "成" + item.priceSuggestAdult + "<br/>童" + item.priceSuggestChild;                    	
-                    	priceStr = "成" + item.priceSettlementAdult + "<br/>童" + item.priceSettlementChild;                    	
+                    	priceStr = "成" + item.priceSuggestAdult + "<br/>童" + item.priceSuggestChild;                    	
                     }
                     if(stock){
                     	stockStr = leave  > 0 ? "余" + leave + yuliu : "已满";
                     	stockCss = leave > 0 ? "state1" : "state2";                    	
                     }
-                    var td = $("#" + container + " #calendar_tab").find("td[date='" + item.groupDate + "']");
-                    $(td).attr("productId", item.productId).attr("groupId", item.groupId).attr("priceId", item.priceId)
-                    	.attr("price1", item.priceSuggestAdult).attr("price2", item.priceSuggestChild)
-                    	.attr("cost1",item.priceCostAdult).attr("cost2",item.priceCostChild)
-                    	.attr("settle1",item.priceSettlementAdult).attr('settle2',item.priceSettlementChild)
-                    	.attr("stock", leave).addClass("on");
-                    $(td).find(".stockState").addClass(stockCss).html(stockStr);
-                    if(stock && price){
-                    	if(leave>0){
-	                        $(td).unbind("click").bind("click", function() {
-	                        	calandarExec(this);                        		
-	                        });
-                    	}else{
-                    		$.warnR('该日期已满');
-                    	}
-                    }else{
-                        $(td).unbind("click").bind("click", function() {
-                        	if(!$(this).attr("stock")){                        		
-                        		$.warnR('请先设置库存');
-                        		return;
-                        	}
-                        	if(!$(this).attr("price1")){
-                        		$.warnR('请先设置价格');
-                        	}
-                        });
+                    
+                   
+                    if (groupDate >= preDate){
+		                    var td = $("#" + container + " #calendar_tab").find("td[date='" + item.groupDate + "']");
+		                    $(td).attr("productId", item.productId).attr("groupId", item.groupId).attr("priceId", item.priceId)
+		                    	.attr("price1", item.priceSuggestAdult).attr("price2", item.priceSuggestChild)
+		                    	.attr("cost1",item.priceCostAdult).attr("cost2",item.priceCostChild)
+		                    	.attr("settle1",item.priceSettlementAdult).attr('settle2',item.priceSettlementChild)
+		                    	.attr("stock", leave).addClass("on");
+		                    $(td).find(".stockState").addClass(stockCss).html(stockStr);
+		                    if(stock && price){
+		                    	if(leave>0){
+			                        $(td).unbind("click").bind("click", function() {
+			                        	calandarExec(this);                        		
+			                        });
+		                    	}else{
+		                    		$.warnR('该日期已满');
+		                    	}
+		                    }else{
+		                        $(td).unbind("click").bind("click", function() {
+		                        	if(!$(this).attr("stock")){                        		
+		                        		$.warnR('请先设置库存');
+		                        		return;
+		                        	}
+		                        	if(!$(this).attr("price1")){
+		                        		$.warnR('请先设置价格');
+		                        	}
+		                        });
+		                    }
+		
+		                    $(td).find(".calendar_price01").html(priceStr);
                     }
-
-                    $(td).find(".calendar_price01").html(priceStr);
                 }
             }
         });

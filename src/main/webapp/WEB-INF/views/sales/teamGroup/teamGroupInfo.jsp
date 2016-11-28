@@ -295,7 +295,7 @@
 								</c:forEach>
 							</select>
 						</td>
-						<td><i class="red">* </i>客源地：</td>
+						<td>客源地：</td>
 						<td>
 							<input type="hidden" name="groupOrder.provinceName" class="IptText300" id="provinceName" value="${teamGroupVO.groupOrder.provinceName }" /> 
 							<select name="groupOrder.provinceId" id="provinceCode">
@@ -545,6 +545,9 @@
 									placeholder="出发日期,出发时间,航班号,出发城市,到达城市"
 									style="width: 600px; height: 250px"></textarea>
 							</div>
+							<span>
+								<i style="color: gray;"> 格式：出发日期,出发时间,航班号,出发城市,到达城市</i>
+							</span>
 							<div style="margin-top: 20px;">
 								<a href="javascript:void(0);"
 									onclick="toSaveSeatInCoach('newTransport')"
@@ -790,16 +793,18 @@
 															<c:if test="${guest.certificateTypeId==v.id }">selected="selected"</c:if>>${v.value}</option>
 													</c:forEach>
 											</select></td>
+											<!-- 身份证号码 -->
 											<td><input type="text"
 												name="groupOrderGuestList[${index.index}].certificateNum"
 												class="certificateNum" value="${guest.certificateNum }" data-rule-required="true"
 												onblur="recCertifNum(${index.index})" style="width: 130px" <c:if test="${!guest.editType }"> readonly="readonly" </c:if>/>
 											</td>
-											<td><input type="text"
-												name="groupOrderGuestList[${index.index}].mobile"
+											<!-- 手机号 -->
+											<td><input type="text" id="mobile_id" onblur="mobile(${index.index})"
+												name="groupOrderGuestList[${index.index}].mobile" class="mobile"
 												value="${guest.mobile }" style="width: 100px" /></td>
 
-											<td><input type="radio"
+											<td><input type="radio" 
 												name="groupOrderGuestList[${index.index}].isSingleRoom"
 												value="1"
 												<c:if test="${guest.isSingleRoom==1 }">checked="checked"</c:if>>是</input>
@@ -844,6 +849,9 @@
 									id="batchInputText" placeholder="[姓名,证件号码,手机号]或者[姓名,证件号码]"
 									style="width: 600px; height: 250px"></textarea>
 							</div>
+							<span>
+								<i style="color: gray;"> 格式：[姓名,证件号码,手机号]或者[姓名,证件号码]</i>
+							</span>
 							<div style="margin-top: 20px;">
 								<a href="javascript:void(0);" onclick="toSubmit('newGuest')"
 									class="button button-primary button-small">导入</a> <span>
@@ -1151,6 +1159,7 @@ function changeType(count){
 		$("select[name='groupOrderGuestList["+count+"].type").val("1");
 	}
 }
+
 </script>
 <div id="exportWord" style="display: none;text-align: center;margin-top: 10px">
 		<div style="margin-top: 10px">

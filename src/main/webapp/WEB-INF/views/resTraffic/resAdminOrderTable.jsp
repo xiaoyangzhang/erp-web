@@ -53,7 +53,7 @@
 			<th>序号</th>
 			<th>订单号</th>
 			<th>产品名称</th>
-			<th>日期</th>
+			<th>出团日期</th>
 			<th>预留</th>
 			<th>组团社</th>
 			<!-- <th>下单员</th> -->
@@ -69,7 +69,7 @@
 			<th>状态</th>
 			<th>占位</th>
 			<th>预留时长</th>
-			<th>销售员</th>
+			<th>计调</th>
 			<!-- <th>业务员</th> -->
 			<th>操作</th>
 		</tr>
@@ -82,6 +82,9 @@
             <td style="text-align: left;">
             	<span>【${resOrder.productBrandName }】</span><br/>
             	${resOrder.productName }
+            	<c:if test="${resOrder.remarkInternal != ''}">
+            		<p style="color:red;">${resOrder.remarkInternal }</p>
+            	</c:if>
             </td>
             <td>${resOrder.departureDate }</td>
             <td>
@@ -108,10 +111,10 @@
             		<span class='log_action insert'>已确认</span>
             	</c:when>
             	<c:when test="${resOrder.extResState  =='2'}">
-            		<span class='log_action delete'>取消</span>
+            		<span class='log_action delete'>已取消</span>
             	</c:when>
             	<c:otherwise>
-            		<span class='log_action delete'>清位</span>
+            		<span class='log_action delete'>已清位</span>
             	</c:otherwise>
             </c:choose>
             </td>
@@ -132,18 +135,15 @@
             </c:choose>
             </td>
             <td style="text-align: left;">
-            	${resOrder.limitTime }
-            	<c:if test="${times>resOrder.limitTime && resOrder.extResState =='0'}">
-		            	<span style='color:red'>超时</span>
-		            </c:if>
-            	<%-- <c:if test="${resOrder.extResCleanTime ne ''}">
-	            	<fmt:parseDate value="${fn:replace(resOrder.extResCleanTime, ':00.0', ':00')}" pattern="yyyy-MM-dd HH:mm:ss" var="date1"></fmt:parseDate>  
+            	<c:if test="${resOrder.extResCleanTime != 0  && resOrder.extResState =='0'}">
+            		<fmt:parseDate value="${resOrder.limitTime}" pattern="yyyy-MM-dd HH:mm:ss" var="date1"></fmt:parseDate>  
 	            	<fmt:formatDate pattern="yyyy-MM-dd" value="${date1}" /><br/>
 	            	<fmt:formatDate pattern="HH:mm:ss" value="${date1}" />
-	            	<c:if test="${times > resOrder.extResCleanTime && resOrder.extResState =='0'}">
+            		<c:if test="${times>resOrder.limitTime }">
 		            	<span style='color:red'>超时</span>
-		            </c:if>
-	            </c:if> --%>
+		        	</c:if>
+		        </c:if>
+		        
             </td>
             <td>${resOrder.saleOperatorName }</td>
            <%--  <td>${resOrder.extResConfirmName }</td> --%>
@@ -152,20 +152,20 @@
 					<a href="####" class="btn-show">操作<span class="caret"></span></a>
 					<div class="btn-hide" id="asd">
 			            <a href="javascript:queryOrder(${resOrder.id });" class="def">查看订单</a>
-				        <a href="javascript:updateOrderState(${resOrder.id });" class="def">修改状态</a>
-			            <c:choose>
-			            	
-			            	<c:when test="${resOrder.extResState  =='0'}">
-			            		<c:if test="${optMap_EDIT}">
-									<a href="javascript:void(0)"onclick="toProductOrderDatil(${resOrder.id})"class="def">修改订单</a>
-								</c:if>
-			            		<c:if test="${optMap_PAY}">
-				                	<a href="javascript:void(0)" class="def" onclick="toReceivables(${resOrder.id})" >收款处理</a>
-				                	<a href="javascript:deleteOrderState(${resOrder.id });" class="def">删除订单</a>
-				                </c:if>
-			            	</c:when>
-			            </c:choose>
-						<a href="javascript:void(0)" class="def" onclick="goPrintOrder(${resOrder.id})" >打印</a>
+			            <c:if test="${resOrder.extResState  !='2' and resOrder.extResState  !='3'}">
+				        	<a href="javascript:updateOrderState(${resOrder.id });" class="def">修改状态</a>
+				        </c:if>
+				        <c:if test="${optMap_EDIT}">
+							<a href="javascript:void(0)"onclick="toProductOrderDatil(${resOrder.id})"class="def">修改订单</a>
+						</c:if>
+	            		<c:if test="${optMap_PAY}">
+		                	<a href="javascript:void(0)" class="def" onclick="toReceivables(${resOrder.id})" >收款处理</a>
+		                </c:if>
+				        <c:if test="${resOrder.extResState  =='2'}">
+			            		<a href="javascript:deleteOrderState(${resOrder.id })" class="def">删除订单</a>
+			            </c:if>        
+
+						<a href="javascript:void(0)" class="def" onclick="printOrder(${resOrder.id})" >打印</a>
 						<%-- <a href="javascript:void(0)" class="def" onclick="outTicketManangement(${resOrder.id})" >出票管理</a> --%>
 			            <a href="javascript:paymentLog(${resOrder.id });" class="def">收款日志</a>
 		                <a href="javascript:void(0)" class="def" onclick="goLogStock(${resOrder.id})" >操作日志</a>
@@ -219,7 +219,21 @@
 	<jsp:param value="${pageBean.pageSize }" name="ps"/>
 	<jsp:param value="${pageBean.totalCount }" name="tn"/>
 </jsp:include>
-
+<div id="exportWord"
+	style="display: none; text-align: center; margin-top: 10px">
+	<div style="margin-top: 10px">
+		<a href="" id="saleOrder" target="_blank"
+			class="button button-primary button-small">确认单</a>
+	</div>
+	<div style="margin-top: 10px">
+		<a href="" id="saleOrderNoRoute" target="_blank"
+			class="button button-primary button-small">确认单-无行程</a>
+	</div>
+	<div style="margin-top: 10px">
+		<a href="" id="noticeTheGroup" target="_blank"
+			class="button button-primary button-small">出团通知书</a>
+	</div>
+</div>
 <script type="text/javascript">
 	/* 订单详情 */
 	function toProductOrderDatil(obj){
@@ -267,9 +281,12 @@
 			data:{id:obj},
 			dataType : "json",
 			success : function(data) {
-				if (data && data.success == '1') {
-					queryList($("#searchPage").val(), $("#searchPageSize").val());
-					
+				if (data.success == '1') {
+					$.success('删除成功！', function(){
+						queryList($("#searchPage").val(), $("#searchPageSize").val());
+						//parent.reloadPage();
+						
+					});
 				}
 			},
 			error : function() {
@@ -313,10 +330,19 @@
 	}
 	
 	/* 打印 */
-	function goPrintOrder(obj){
-		/*alert("id="+obj);*/
-	}
-	
+function printOrder(orderId){
+	$("#saleOrder").attr("href","../tourGroup/toPreview.htm?orderId="+orderId+"&num="+1+"&agency="+1) ; //确认单
+	$("#saleOrderNoRoute").attr("href","../tourGroup/toPreview.htm?orderId="+orderId+"&num="+4+"&agency="+1) ; //确认单-无行程
+	$("#noticeTheGroup").attr("href","../tourGroup/download.htm?orderId="+orderId+"&num="+8) ;
+	layer.open({
+		type : 1,
+		title : '打印订单',
+		shadeClose : true,
+		shade : 0.5,
+		area : [ '350px', '250px' ],
+		content : $('#exportWord')
+	});
+};
 	/* 出票管理 */
 	/* function outTicketManangement(obj){
 		alert("id="+obj);

@@ -215,7 +215,7 @@
 											       value="<fmt:formatNumber value="${detail.itemNum}" pattern="#.##" type="number"/>"/>
 										</td>
 										<td>
-											<input type="text" name="itemPrice" id="itemPrice" readonly="readonly"
+											<input type="text" name="itemPrice" id="itemPrice" <c:if test="${canEditPrice==0}"> readonly="readonly" </c:if> 
 											       value="<fmt:formatNumber value="${detail.itemPrice}" pattern="#.##" type="number"/>"
 											       class="input-w80"/>
 										</td>
@@ -302,7 +302,7 @@
 			<input class='input-w80' type="text" name="itemNum" id="itemNum" value="1"/>
 		</td>
 		<td>
-			<input type="text" name="itemPrice" id="itemPrice" value="0" class="input-w80" readonly="readonly"/>
+			<input type="text" name="itemPrice" id="itemPrice" value="0" class="input-w80" <c:if test="${canEditPrice==0}"> readonly="readonly" </c:if> />
 		</td>
 		<td>
 			<input type="text" id="itemNumMinus" name="itemNumMinus" value="0" class="input-w80"/>
@@ -394,6 +394,7 @@
 					dateFmt: 'yyyy-MM-dd', onpicked: function () {
 						var typeid = typeidObj.val();
 						var date = itemDateObj.val();
+						
 						onPrice(typeid, date, itemPriceObj, itemNumObj, itemNumMinusObj, itemTotalObj, noteObj);
 					}
 				});
@@ -461,12 +462,13 @@
 								$("#sumPrice").html(calcSum());
 							} else {
 								price = null;
-
-								itemPriceObj.val(0);
-								itemNumMinusObj.val(0);
-								itemTotalObj.val(0);
-								noteObj.val('');
-								$("#sumPrice").html(calcSum());
+								<c:if test="${canEditPrice==0}">								
+									itemPriceObj.val(0);
+									itemNumMinusObj.val(0);
+									itemTotalObj.val(0);
+									noteObj.val('');
+									$("#sumPrice").html(calcSum());
+								</c:if>
 							}
 
 						},

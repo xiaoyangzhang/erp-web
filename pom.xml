@@ -37,7 +37,7 @@
 
 	<properties>
 		<!-- Common libs -->
-		<spring.version>3.2.5.RELEASE</spring.version>
+		<spring.version>4.3.1.RELEASE</spring.version>
 		<spring.asm>3.1.4.RELEASE</spring.asm>
 		<javassist.version>3.15.0-GA</javassist.version>
 		<netty.version>3.2.5.Final</netty.version>
@@ -86,13 +86,13 @@
 		<skip_maven_deploy>false</skip_maven_deploy>
 		<updateReleaseInfo>true</updateReleaseInfo>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<facade-product-client.version>0.1.0-SNAPSHOT</facade-product-client.version>
-		<facade-common-client.version>0.1.0-SNAPSHOT</facade-common-client.version>
-		<facade-finance-client.version>0.1.0-SNAPSHOT</facade-finance-client.version>
-		<facade-operation-client.version>0.1.0-SNAPSHOT</facade-operation-client.version>
-		<facade-finance-client.version>0.1.0-SNAPSHOT</facade-finance-client.version>
-		<facade-supplier-client.version>0.1.0-SNAPSHOT</facade-supplier-client.version>
-		<facade-dataAnalysis-client.version>0.1.0-SNAPSHOT</facade-dataAnalysis-client.version>
+		<facade-product-client.version>0.2.0-SNAPSHOT</facade-product-client.version>
+		<facade-common-client.version>0.2.0-SNAPSHOT</facade-common-client.version>
+		<facade-finance-client.version>0.2.0-SNAPSHOT</facade-finance-client.version>
+		<facade-operation-client.version>0.2.0-SNAPSHOT</facade-operation-client.version>
+		<facade-finance-client.version>0.2.0-SNAPSHOT</facade-finance-client.version>
+		<facade-supplier-client.version>0.2.0-SNAPSHOT</facade-supplier-client.version>
+		<facade-dataAnalysis-client.version>0.2.0-SNAPSHOT</facade-dataAnalysis-client.version>
 	</properties>
 
 	<dependencies>
@@ -148,6 +148,11 @@
 			<artifactId>spring-jdbc</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
+		 <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
 
 		<dependency>
 			<groupId>org.javassist</groupId>
@@ -371,7 +376,7 @@
 		<dependency>
 			<groupId>com.yimayhd.erpresource</groupId>
 			  <artifactId>erpresourceDAL-client</artifactId>
-			  <version>0.1.0-SNAPSHOT</version>
+			  <version>0.2.0-SNAPSHOT</version>
 		</dependency>
  		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
@@ -501,23 +506,23 @@
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterDAL-product-client</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-sys-client</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterDAL-sys-client</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpresource</groupId>
 			<artifactId>erpresourceDAL-client</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>0.2.0-SNAPSHOT</version>
 		</dependency>  
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
@@ -527,27 +532,34 @@
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-sales-client</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency> 
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-basic-client</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-tj-client</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-ticket-client</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>  
 		    <groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-dataAnalysis-client</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
+		
+		 <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+		
 	</dependencies>
 </project>

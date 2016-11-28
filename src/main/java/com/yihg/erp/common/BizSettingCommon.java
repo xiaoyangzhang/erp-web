@@ -19,6 +19,13 @@ public class BizSettingCommon {
 	private SysPlatformOrgFacade platformOrgFacade;
 	@Resource
 	private SysConfig config;
+	/*由于某些原因，此处的代码已经迁移到SysPlatformOrgFacadeImpl中去*/
+	/*由于某些原因，此处的代码已经迁移到SysPlatformOrgFacadeImpl中去*/
+	/*由于某些原因，此处的代码已经迁移到SysPlatformOrgFacadeImpl中去*/
+	/*由于某些原因，此处的代码已经迁移到SysPlatformOrgFacadeImpl中去*/
+	/*由于某些原因，此处的代码已经迁移到SysPlatformOrgFacadeImpl中去*/
+	/*由于某些原因，此处的代码已经迁移到SysPlatformOrgFacadeImpl中去*/
+	
 	/**
 	 * 获取当前公司或商家编码
 	 * TODO 设置开关：有的公司取商家编码，有的公司取公司编码
