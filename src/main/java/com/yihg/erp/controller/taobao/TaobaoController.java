@@ -109,6 +109,8 @@ public class TaobaoController extends BaseController {
 		
 		model.addAttribute("orgJsonStr",result.getOrgTreeJsonStr());
 		model.addAttribute("orgUserJsonStr",result.getOrgUserTreeJsonStr());
+		model.addAttribute("curUser", WebUtils.getCurUser(request).getName());
+		model.addAttribute("curUserId", WebUtils.getCurUserId(request));
 		return "sales/taobaoOrder/taobaoOrderList";
 	}
 	
@@ -160,6 +162,9 @@ public class TaobaoController extends BaseController {
 		model.addAttribute("totalChild", go.getNumChild());
 		model.addAttribute("totalGuide", go.getNumGuide());
 		model.addAttribute("total", go.getTotal());
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		String today = formatter.format(new Date());
+		model.addAttribute("today", today);
 		return "sales/taobaoOrder/taobaoOrderList_table";
 	}	
 	
@@ -1083,4 +1088,7 @@ public class TaobaoController extends BaseController {
         list.add(format.format(otherTotalBalance));
         return list;
     }
+
+
+
 }
