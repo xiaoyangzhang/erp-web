@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -37,19 +38,31 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
+import com.yihg.basic.api.DicService;
+import com.yihg.basic.contants.BasicConstants;
+import com.yihg.basic.po.DicInfo;
+import com.yihg.basic.util.NumberUtil;
+import com.yihg.erp.aop.PostHandler;
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.utils.DateUtils;
 import com.yihg.erp.utils.WebUtils;
+import com.yihg.finance.api.FinanceGuideService;
+import com.yihg.images.util.DateUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yimayhd.erpcenter.common.util.NumberUtil;
-import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
-import com.yimayhd.erpcenter.facade.tj.client.query.TjSearchDTO;
-import com.yimayhd.erpcenter.facade.tj.client.result.SelectShopProjectListResult;
-import com.yimayhd.erpcenter.facade.tj.client.result.SelectTJGroupShopListResult;
-import com.yimayhd.erpcenter.facade.tj.client.result.ShopProjectResult;
-import com.yimayhd.erpcenter.facade.tj.client.result.TjSearchResult;
-import com.yimayhd.erpcenter.facade.tj.client.service.TJFacade;
+import com.yihg.sales.api.TourGroupService;
+import com.yihg.sales.po.GroupOrder;
+import com.yihg.sales.vo.TourGroupVO;
+import com.yihg.supplier.api.ContractService;
+import com.yihg.supplier.constants.Constants;
+import com.yihg.supplier.po.SupplierContractPriceDateInfo;
+import com.yihg.sys.api.PlatformEmployeeService;
+import com.yihg.sys.api.PlatformOrgService;
+import com.yihg.tj.api.TJService;
+import com.yihg.tj.po.TJGroupQueryId;
+import com.yihg.tj.po.TJGroupShop;
+import com.yihg.tj.po.TJRecord;
+import com.yihg.tj.po.TJShopProject;
 /**
  * 财务统计
  * @author wj
@@ -58,81 +71,94 @@ import com.yimayhd.erpcenter.facade.tj.client.service.TJFacade;
 @Controller
 @RequestMapping(value = "/tj")
 public class TJController extends BaseController{
+	@Autowired
+	private TJService tjService;
+	@Autowired
+	private PlatformEmployeeService platformEmployeeService;
+	@Autowired
+	private TourGroupService tourGroupService;
 	@Resource
 	private BizSettingCommon bizSettingCommon;
 	@Autowired
-	private TJFacade tjFacade;
+	private PlatformOrgService orgService;
+	@Autowired
+	private ContractService contractService;
+	@Autowired
+	private FinanceGuideService financeGuideService;
+	
+	@Autowired
+	private DicService dicService;
 	
 	DecimalFormat df = new DecimalFormat("0.##");
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
-//	/**
-//	 * 统计购物项目
-//	 * @throws IOException 
-//	 */
-//	@RequestMapping(value = "tjShopProject.do")
-//	@ResponseBody
-//	@PostHandler
-//	public String tjShopProject(HttpServletRequest request,HttpServletResponse reponse, ModelMap model,Integer type) throws IOException {
-//		reponse.setContentType("text/html;charset=utf-8");
-//		PrintWriter out = reponse.getWriter();
-//		out.write("正在归档");
-//		out.flush();
-//		
-//		Long a = System.currentTimeMillis();
-//		if(type==0){
-//			tjService.clearTjShopProject();
-//		}
-//		PageBean pb = new PageBean();
-//		pb.setPageSize(10000);
-//		int currPage = 1;
-//		do{
-//			pb.setPage(currPage);
-//			Date startDate = tjService.selectRecordEndTime(BasicConstants.TJ_SHOP_PROJECT, WebUtils.getCurBizId(request));
-//			String start=null;
-//			//此处把起始时间设为null，全量更新
-//			if(null!=startDate){
-//				start = sdf.format(com.yihg.erp.utils.DateUtils.getDateAgoByHour(startDate, 1));
-//			}
-//			//查询需要统计表的数据
-//			if(type==0){
-//				pb = tjService.tjShopProject(pb,null);
-//			}else{
-//				pb = tjService.tjShopProject(pb,start);
-//			}
-//			List<TJShopProject> list =  pb.getResult();
-//			if(list == null || list.size() == 0){
-//				continue;
-//			}
-//			
-//			int i=0;
-//			for(TJShopProject tjShopProject : list){
-//				tjShopProject.setOperatorCompanyId(this.getCompanyIdByOperatorId(tjShopProject.getOperatorId()));
-//				List<TJShopProject> tj=tjService.selectTJShopProjecectByDetailId(tjShopProject.getGroupId(),tjShopProject.getBookingId(),tjShopProject.getDetailId());
-//				if(tj.size()<=0){
-//					tjService.insertTjShopProject(tjShopProject);
-//				}else{
-//					tjShopProject.setId(tj.get(0).getId());
-//					tjService.updateTjShopProject(tjShopProject);
-//				}
-//				if (i%100==0){
-//					out.write(".");
-//					out.flush();
-//				}
-//				i++;
-//			}
-//			currPage++;
-//		}while(currPage <= pb.getTotalPage());
-//		
-//		//添加归档记录
-//		insertArchiveRecord(request, a, BasicConstants.TJ_SHOP_PROJECT);
-//		
-//		out.write("<br/>归档完成，请刷新页面重新查询！");
-//		out.flush();
-//		out.close();
-//		
-//		return null;
-//	}
+	/**
+	 * 统计购物项目
+	 * @throws IOException 
+	 */
+	@RequestMapping(value = "tjShopProject.do")
+	@ResponseBody
+	@PostHandler
+	public String tjShopProject(HttpServletRequest request,HttpServletResponse reponse, ModelMap model,Integer type) throws IOException {
+		reponse.setContentType("text/html;charset=utf-8");
+		PrintWriter out = reponse.getWriter();
+		out.write("正在归档");
+		out.flush();
+		
+		Long a = System.currentTimeMillis();
+		if(type==0){
+			tjService.clearTjShopProject();
+		}
+		PageBean pb = new PageBean();
+		pb.setPageSize(10000);
+		int currPage = 1;
+		do{
+			pb.setPage(currPage);
+			Date startDate = tjService.selectRecordEndTime(BasicConstants.TJ_SHOP_PROJECT, WebUtils.getCurBizId(request));
+			String start=null;
+			//此处把起始时间设为null，全量更新
+			if(null!=startDate){
+				start = sdf.format(com.yihg.erp.utils.DateUtils.getDateAgoByHour(startDate, 1));
+			}
+			//查询需要统计表的数据
+			if(type==0){
+				pb = tjService.tjShopProject(pb,null);
+			}else{
+				pb = tjService.tjShopProject(pb,start);
+			}
+			List<TJShopProject> list =  pb.getResult();
+			if(list == null || list.size() == 0){
+				continue;
+			}
+			
+			int i=0;
+			for(TJShopProject tjShopProject : list){
+				tjShopProject.setOperatorCompanyId(this.getCompanyIdByOperatorId(tjShopProject.getOperatorId()));
+				List<TJShopProject> tj=tjService.selectTJShopProjecectByDetailId(tjShopProject.getGroupId(),tjShopProject.getBookingId(),tjShopProject.getDetailId());
+				if(tj.size()<=0){
+					tjService.insertTjShopProject(tjShopProject);
+				}else{
+					tjShopProject.setId(tj.get(0).getId());
+					tjService.updateTjShopProject(tjShopProject);
+				}
+				if (i%100==0){
+					out.write(".");
+					out.flush();
+				}
+				i++;
+			}
+			currPage++;
+		}while(currPage <= pb.getTotalPage());
+		
+		//添加归档记录
+		insertArchiveRecord(request, a, BasicConstants.TJ_SHOP_PROJECT);
+		
+		out.write("<br/>归档完成，请刷新页面重新查询！");
+		out.flush();
+		out.close();
+		
+		return null;
+	}
 	
 	/**
 	 * 购物项目统计
@@ -145,13 +171,16 @@ public class TJController extends BaseController{
 	@RequestMapping("toShopProjectList.htm")
 	public String toShopProjectList(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model) {
-		TjSearchResult result = tjFacade.toShopProjectList(WebUtils.getCurBizId(request));
-		//产品品牌下拉选择数据
-		model.addAttribute("pp", result.getPp());
 		
-//		this.setArchiveTime(request, model, BasicConstants.TJ_SHOP_PROJECT);
-		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
-		model.addAttribute("orgUserJsonStr", result.getOrgUserJsonStr());
+		//产品品牌下拉选择数据
+		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
+				WebUtils.getCurBizId(request));
+		model.addAttribute("pp", pp);
+		
+		this.setArchiveTime(request, model, BasicConstants.TJ_SHOP_PROJECT);
+		Integer bizId = WebUtils.getCurBizId(request);
+		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
+		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
 		return "tj/tjShopProjectList";
 	}
@@ -159,110 +188,145 @@ public class TJController extends BaseController{
 	@RequestMapping(value = "/selectShopProjectList.do")
 	public String selectShopProjectList(HttpServletRequest request,
 			ModelMap model, Integer pageSize, Integer page,TourGroupVO group) {
-		TjSearchDTO dto = new TjSearchDTO();
-		dto.setBizId(WebUtils.getCurBizId(request));
-		dto.setPage(page);
-		dto.setPageSize(pageSize);
-		dto.setGroup(group);
-		dto.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
-		dto.setPm(WebUtils.getQueryParamters(request));
-		SelectShopProjectListResult result = tjFacade.selectShopProjectList(dto);
+		PageBean pageBean = new PageBean();
+		if (page == null) {
+			pageBean.setPage(1);
+		} else {
+			pageBean.setPage(page);
+		}
+		if (pageSize == null) {
+			pageBean.setPageSize(Constants.PAGESIZE);
+		} else {
+			pageBean.setPageSize(pageSize);
+		}
+		//如果人员为空并且部门不为空，则取部门下的人id
+		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = group.getOrgIds().split(",");
+			for(String orgIdStr : orgIdArr){
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			String salesOperatorIds="";
+			for(Integer usrId : set){
+				salesOperatorIds+=usrId+",";
+			}
+			if(!salesOperatorIds.equals("")){
+				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+			}
+		}
+		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
+		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
+			pm.put("operator_id", group.getSaleOperatorIds());
+		}
+		pm.put("set", WebUtils.getDataUserIdSet(request));
+		pageBean.setParameter(pm);
+		pageBean = tjService.selectShopProjectListPage(pageBean,
+				WebUtils.getCurBizId(request));
+		model.addAttribute("pageBean", pageBean);
+		Map<String,Object> map = tjService.selectCount(pageBean,WebUtils.getCurBizId(request));
+		Map<String,Object> mapDetail = tjService.selectDetailCount(pageBean,WebUtils.getCurBizId(request));
+		Integer bizId = WebUtils.getCurBizId(request);		
+		List<SupplierContractPriceDateInfo> priceList = contractService.getMultiOperatePriceByParams(bizId, BasicConstants.TJ_PROJECT_SHOP_BOOKING_SUPPLIER_TYPE,null, null,null, null,null, null);
+		model.addAttribute("priceList", priceList);
+		if(null!=map){
+			model.addAttribute("all_total_person", map.get("all_total_person"));
+			model.addAttribute("all_total_face", map.get("all_total_face"));
+		}
+		if(null!=mapDetail){
+			model.addAttribute("all_buy_total", mapDetail.get("all_buy_total"));
+			model.addAttribute("all_repay_total", mapDetail.get("all_repay_total"));
+		}
 		
-		model.addAttribute("pageBean", result.getPageBean());
-		model.addAttribute("priceList", result.getPriceList());
-		model.addAttribute("all_total_person", result.getAllTotalPerson());
-		model.addAttribute("all_total_face", result.getAllTotalFace());
-		model.addAttribute("all_buy_total", result.getAllBuyTotal());
-		model.addAttribute("all_repay_total", result.getAllRepayTotal());
 
 		return "tj/tjShopProjectList-table";
 	}
 	
-//	@RequestMapping("archiveAllGroupShop.do")
-//	public void archiveAllGroupProfit(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws IOException, InterruptedException{
-//		model.addAttribute("archiveType", "All");
-//		this.initGroupShopTable(request, response, model);
-//	}
-//	@RequestMapping("archiveIncrementalGroupShop.do")
-//	public void archiveIncrementalGroupProfit(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws IOException, InterruptedException{
-//		model.addAttribute("archiveType", "Incremental");
-//		this.initGroupShopTable(request, response, model);
-//	}
+	@RequestMapping("archiveAllGroupShop.do")
+	public void archiveAllGroupProfit(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws IOException, InterruptedException{
+		model.addAttribute("archiveType", "All");
+		this.initGroupShopTable(request, response, model);
+	}
+	@RequestMapping("archiveIncrementalGroupShop.do")
+	public void archiveIncrementalGroupProfit(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws IOException, InterruptedException{
+		model.addAttribute("archiveType", "Incremental");
+		this.initGroupShopTable(request, response, model);
+	}
 	
-//	/**
-//	 * 统计单团购物数据
-//	 * @throws IOException 
-//	 */
-//	@RequestMapping(value = "initGroupShopTable.do")
-//	@PostHandler
-//	public void initGroupShopTable(HttpServletRequest request,HttpServletResponse response, ModelMap model) throws IOException {
-//		
-//		response.setContentType("text/html;charset=utf-8");
-//		PrintWriter out = response.getWriter();
-//		out.write("正在归档");
-//		out.flush();
-//		
-//		Long startTime = System.currentTimeMillis();
-//		
-//		List<TJGroupQueryId> groupIdList = new ArrayList<TJGroupQueryId>();
-//		if (model.get("archiveType").equals("Incremental")){
-//			groupIdList = tjService.findUpdatedGroupIdList("tj_group_shop");
-//		}else if (model.get("archiveType").equals("All")){
-//			groupIdList = tjService.findAllGroupIdList();
-//		}
-//		
-//		if (groupIdList.size() > 0){
-//			tjService.clearUpdatedGroupShop(groupIdList);
-//		}
-//		
-//		for(int i=0; i<groupIdList.size(); i++){
-//			Integer groupId = groupIdList.get(i).getGroupId();
-//			List<TJGroupShop> groupShopList = tjService.selectTJGroupShop(groupId);
-//			if(groupShopList == null || groupShopList.size() == 0){
-//				continue;
-//			}
-//			for(TJGroupShop groupShop : groupShopList){
-//				
-//				if (groupShop==null){
-//					continue;
-//				}
-//				if (groupShop.getGroupState()!=null && groupShop.getGroupState()!=1 && groupShop.getGroupState()!=3 && groupShop.getGroupState()!=4){
-//					continue;
-//				}
-//				
-//				BigDecimal sumCommTotal = financeGuideService.selectCommTotalByGroupId(groupShop.getGroupId());
-//				groupShop.setTotalComm(sumCommTotal);
-//				
-//				//取得组团社信息
-//				Set<String> orderSupplierNameList = new HashSet<String>();
-//				List<GroupOrder> orderList = tourGroupService.selectOrderAndGuestInfoByGroupId(groupShop.getGroupId());
-//				if(orderList != null && orderList.size() > 0){
-//					for(GroupOrder order: orderList){
-//						orderSupplierNameList.add(order.getSupplierName());
-//					}
-//				}
-//				
-//				groupShop.setOrderSupplierNames(StringUtils.join(orderSupplierNameList, ","));
-//				
-//				//取得公司ID
-//				groupShop.setOperatorCompanyId(this.getCompanyIdByOperatorId(groupShop.getOperatorId()));
-//				
-//				tjService.insertTJGroupShop(groupShop);
-//			}
-//			
-//			if (i%10==0){
-//				out.write(".");
-//				out.flush();
-//			}
-//		}
-//		
-//		//添加归档记录
-//		insertArchiveRecord(request, startTime, BasicConstants.TJ_GROUP_SHOP);
-//		
-//		out.write("<br/>归档完成!");
-//		out.flush();
-//		out.close();
-//	}
+	/**
+	 * 统计单团购物数据
+	 * @throws IOException 
+	 */
+	@RequestMapping(value = "initGroupShopTable.do")
+	@PostHandler
+	public void initGroupShopTable(HttpServletRequest request,HttpServletResponse response, ModelMap model) throws IOException {
+		
+		response.setContentType("text/html;charset=utf-8");
+		PrintWriter out = response.getWriter();
+		out.write("正在归档");
+		out.flush();
+		
+		Long startTime = System.currentTimeMillis();
+		
+		List<TJGroupQueryId> groupIdList = new ArrayList<TJGroupQueryId>();
+		if (model.get("archiveType").equals("Incremental")){
+			groupIdList = tjService.findUpdatedGroupIdList("tj_group_shop");
+		}else if (model.get("archiveType").equals("All")){
+			groupIdList = tjService.findAllGroupIdList();
+		}
+		
+		if (groupIdList.size() > 0){
+			tjService.clearUpdatedGroupShop(groupIdList);
+		}
+		
+		for(int i=0; i<groupIdList.size(); i++){
+			Integer groupId = groupIdList.get(i).getGroupId();
+			List<TJGroupShop> groupShopList = tjService.selectTJGroupShop(groupId);
+			if(groupShopList == null || groupShopList.size() == 0){
+				continue;
+			}
+			for(TJGroupShop groupShop : groupShopList){
+				
+				if (groupShop==null){
+					continue;
+				}
+				if (groupShop.getGroupState()!=null && groupShop.getGroupState()!=1 && groupShop.getGroupState()!=3 && groupShop.getGroupState()!=4){
+					continue;
+				}
+				
+				BigDecimal sumCommTotal = financeGuideService.selectCommTotalByGroupId(groupShop.getGroupId());
+				groupShop.setTotalComm(sumCommTotal);
+				
+				//取得组团社信息
+				Set<String> orderSupplierNameList = new HashSet<String>();
+				List<GroupOrder> orderList = tourGroupService.selectOrderAndGuestInfoByGroupId(groupShop.getGroupId());
+				if(orderList != null && orderList.size() > 0){
+					for(GroupOrder order: orderList){
+						orderSupplierNameList.add(order.getSupplierName());
+					}
+				}
+				
+				groupShop.setOrderSupplierNames(StringUtils.join(orderSupplierNameList, ","));
+				
+				//取得公司ID
+				groupShop.setOperatorCompanyId(this.getCompanyIdByOperatorId(groupShop.getOperatorId()));
+				
+				tjService.insertTJGroupShop(groupShop);
+			}
+			
+			if (i%10==0){
+				out.write(".");
+				out.flush();
+			}
+		}
+		
+		//添加归档记录
+		insertArchiveRecord(request, startTime, BasicConstants.TJ_GROUP_SHOP);
+		
+		out.write("<br/>归档完成!");
+		out.flush();
+		out.close();
+	}
 	
 	/**
 	 * 单团购物统计
@@ -274,29 +338,74 @@ public class TJController extends BaseController{
 	 */
 	@RequestMapping("toGroupShopList.htm")
 	public String toGroupShopList(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
-		TjSearchResult result = tjFacade.toGroupShopList(WebUtils.getCurBizId(request));
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
-		model.addAttribute("orgJsonStr",result.getOrgJsonStr());
-		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
-//		this.setArchiveTime(request, model, BasicConstants.TJ_GROUP_SHOP);
+		Integer bizId = WebUtils.getCurBizId(request);
+		model.addAttribute("orgJsonStr",
+				orgService.getComponentOrgTreeJsonStr(bizId));
+		model.addAttribute("orgUserJsonStr",
+				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		this.setArchiveTime(request, model, BasicConstants.TJ_GROUP_SHOP);
 		return "tj/tjGroupShopList";
 	}
 	
 	@RequestMapping(value = "/selectTJGroupShopList.do")
 	public String selectTJGroupShopList(HttpServletRequest request, ModelMap model, Integer pageSize, Integer page,TourGroupVO groupVO) {
-		TjSearchDTO tjSearchDTO = new TjSearchDTO();
-		tjSearchDTO.setBizId(WebUtils.getCurBizId(request));
-		tjSearchDTO.setPageSize(pageSize);
-		tjSearchDTO.setPage(page);
-		tjSearchDTO.setGroup(groupVO);
-		tjSearchDTO.setPm(WebUtils.getQueryParamters(request));
-		tjSearchDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
+		PageBean pageBean = new PageBean();
+		if (page == null) {
+			pageBean.setPage(1);
+		} else {
+			pageBean.setPage(page);
+		}
+		if (pageSize == null) {
+			pageBean.setPageSize(Constants.PAGESIZE);
+		} else {
+			pageBean.setPageSize(pageSize);
+		}
+		//如果人员为空并且部门不为空，则取部门下的人id
+		if(StringUtils.isBlank(groupVO.getSaleOperatorIds()) && StringUtils.isNotBlank(groupVO.getOrgIds())){
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = groupVO.getOrgIds().split(",");
+			for(String orgIdStr : orgIdArr){
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			String salesOperatorIds="";
+			for(Integer usrId : set){
+				salesOperatorIds+=usrId+",";
+			}
+			if(!salesOperatorIds.equals("")){
+				groupVO.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+			}
+		}
+		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
+		if(null!=groupVO.getSaleOperatorIds() && !"".equals(groupVO.getSaleOperatorIds())){
+			pm.put("operator_id", groupVO.getSaleOperatorIds());
+		}
+		Set set = WebUtils.getDataUserIdSet(request);
+		pm.put("set", WebUtils.getDataUserIdSet(request));
 		
-		SelectTJGroupShopListResult result = tjFacade.SelectTJGroupShopListResult(tjSearchDTO);
-
-		model.addAttribute("pageBean", result.getPageBean());
-		model.addAttribute("totalMap", result.getTotalMap());
-		model.addAttribute("totalCommMap", result.getTotalCommMap());
+		
+		pageBean.setParameter(pm);
+		pageBean = tjService.selectTJGroupListPage(pageBean);
+		List<Map<String, Object>> groups = pageBean.getResult();
+		if(groups != null){
+			Map<String, Object> group = null;
+			for(int i = 0; i < groups.size(); i++){
+				group = groups.get(i);
+				Integer groupId = group.get("group_id") != null ? Integer.parseInt(group.get("group_id").toString()) : 0;
+				pm.put("groupId", groupId);
+				List<Map<String, Object>> shops = tjService.selectTJShopOfGroup(pm);
+				group.put("shops", shops);
+			}
+		}
+		
+		model.addAttribute("pageBean", pageBean);
+		
+		Map<String, Object> totalMap = tjService.selectTJGroupShopTotal(pageBean);
+		model.addAttribute("totalMap", totalMap);
+		
+		Map<String, Object> totalCommMap = tjService.selectTJGroupShopCommTotal(pageBean);
+		model.addAttribute("totalCommMap", totalCommMap);
 
 		return "tj/tjGroupShopList-table";
 	}
@@ -310,17 +419,46 @@ public class TJController extends BaseController{
 	 */
 	@RequestMapping("toGroupShopListPrint.htm")
 	public String toGroupShopListPrint(HttpServletRequest request, ModelMap model,TourGroupVO groupVO) {
-		TjSearchDTO tjSearchDTO = new TjSearchDTO();
-		tjSearchDTO.setBizId(WebUtils.getCurBizId(request));
-		tjSearchDTO.setGroup(groupVO);
-		tjSearchDTO.setPm(WebUtils.getQueryParamters(request));
-		tjSearchDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
-		
-		PageBean result = tjFacade.toGroupShopListPrint(tjSearchDTO);
-		
+		PageBean pageBean = new PageBean();
+		pageBean.setPage(1);
+		pageBean.setPageSize(1000000);
+		//如果人员为空并且部门不为空，则取部门下的人id
+		if(StringUtils.isBlank(groupVO.getSaleOperatorIds()) && StringUtils.isNotBlank(groupVO.getOrgIds())){
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = groupVO.getOrgIds().split(",");
+			for(String orgIdStr : orgIdArr){
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			String salesOperatorIds="";
+			for(Integer usrId : set){
+				salesOperatorIds+=usrId+",";
+			}
+			if(!salesOperatorIds.equals("")){
+				groupVO.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+			}
+		}
+		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
+		if(null!=groupVO.getSaleOperatorIds() && !"".equals(groupVO.getSaleOperatorIds())){
+			pm.put("operator_id", groupVO.getSaleOperatorIds());
+		}
+		pm.put("set", WebUtils.getDataUserIdSet(request));
+		pageBean.setParameter(pm);
+		pageBean = tjService.selectTJGroupListPage(pageBean);
+		List<Map<String, Object>> groups = pageBean.getResult();
+		if(groups != null){
+			Map<String, Object> group = null;
+			for(int i = 0; i < groups.size(); i++){
+				group = groups.get(i);
+				Integer groupId = group.get("group_id") != null ? Integer.parseInt(group.get("group_id").toString()) : 0;
+				pm.put("groupId", groupId);
+				List<Map<String, Object>> shops = tjService.selectTJShopOfGroup(pm);
+				group.put("shops", shops);
+			}
+		}
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
-		model.addAttribute("pageBean", result);
+		model.addAttribute("pageBean", pageBean);
 		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" <br/>打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		return "tj/tjGroupShopList-print";
 	}
@@ -341,7 +479,7 @@ public class TJController extends BaseController{
 			pageBean.setPageSize(1000000);
 			Map<String,Object> pm  = WebUtils.getQueryParamters(request);
 			pageBean.setParameter(pm);
-			pageBean = tjFacade.selectTJGroupListPage(pageBean);
+			pageBean = tjService.selectTJGroupListPage(pageBean);
 			List<Map<String, Object>> groups = pageBean.getResult();
 			
 			String url = request.getSession().getServletContext().getRealPath("/template/excel/group_shop.xlsx");
@@ -378,7 +516,7 @@ public class TJController extends BaseController{
 					if(group != null){
 						Integer groupId = group.get("group_id") != null ? Integer.parseInt(group.get("group_id").toString()) : 0;
 						pm.put("groupId", groupId);
-						shops = tjFacade.selectTJShopOfGroup(pm);
+						shops = tjService.selectTJShopOfGroup(pm);
 					}
 					
 					int mergeRowCount = shops != null && shops.size() > 0 ? shops.size() - 1 : 0;
@@ -581,30 +719,59 @@ public class TJController extends BaseController{
 	@RequestMapping("toShopList.htm")
 	public String toShopList(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		TjSearchResult result = tjFacade.toShopList(bizId);
-		model.addAttribute("pp", result.getPp());
 		
-		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
-		model.addAttribute("orgUserJsonStr", result.getOrgUserJsonStr());
+		//产品品牌下拉选择数据
+		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP,
+				WebUtils.getCurBizId(request));
+		model.addAttribute("pp", pp);
+		
+		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
+		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
-//		this.setArchiveTime(request, model, BasicConstants.TJ_GROUP_SHOP);
+		this.setArchiveTime(request, model, BasicConstants.TJ_GROUP_SHOP);
 		return "tj/tjShopList";
 	}
 	
 	@RequestMapping(value = "/selectShopList.do")
 	public String selectShopList(HttpServletRequest request, ModelMap model, Integer pageSize, Integer page,TourGroupVO group) {
-		TjSearchDTO tjSearchDTO = new TjSearchDTO();
-		tjSearchDTO.setBizId(WebUtils.getCurBizId(request));
-		tjSearchDTO.setPageSize(pageSize);
-		tjSearchDTO.setPage(page);
-		tjSearchDTO.setGroup(group);
-		tjSearchDTO.setPm(WebUtils.getQueryParamters(request));
-		tjSearchDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
+		PageBean pageBean = new PageBean();
+		if (page == null) {
+			pageBean.setPage(1);
+		} else {
+			pageBean.setPage(page);
+		}
+		if (pageSize == null) {
+			pageBean.setPageSize(Constants.PAGESIZE);
+		} else {
+			pageBean.setPageSize(pageSize);
+		}
+		//如果人员为空并且部门不为空，则取部门下的人id
+		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = group.getOrgIds().split(",");
+			for(String orgIdStr : orgIdArr){
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			String salesOperatorIds="";
+			for(Integer usrId : set){
+				salesOperatorIds+=usrId+",";
+			}
+			if(!salesOperatorIds.equals("")){
+				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+			}
+		}
+		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
+		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
+			pm.put("operator_id", group.getSaleOperatorIds());
+		}
+		pm.put("set", WebUtils.getDataUserIdSet(request));
+		pageBean.setParameter(pm);
+		pageBean = tjService.selectTJShopListPage(pageBean);
+		model.addAttribute("pageBean", pageBean);
 		
-		SelectTJGroupShopListResult result = tjFacade.selectShopList(tjSearchDTO);
-		
-		model.addAttribute("pageBean", result.getPageBean());
-		model.addAttribute("totalMap", result.getTotalMap());
+		Map<String, Object> totalMap = tjService.selectTJShopTotal(pageBean);
+		model.addAttribute("totalMap", totalMap);
 		return "tj/tjShopList-table";
 	}
 	
@@ -617,17 +784,35 @@ public class TJController extends BaseController{
 	 */
 	@RequestMapping("toShopListPrint.htm")
 	public String toShopListPrint(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroupVO group) {
-		TjSearchDTO tjSearchDTO = new TjSearchDTO();
-		tjSearchDTO.setBizId(WebUtils.getCurBizId(request));
-		tjSearchDTO.setGroup(group);
-		tjSearchDTO.setPm(WebUtils.getQueryParamters(request));
-		tjSearchDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
-		
-		PageBean result = tjFacade.toShopListPrint(tjSearchDTO);
-		
+		PageBean pageBean = new PageBean();
+		pageBean.setPage(1);
+		pageBean.setPageSize(1000000);
+		//如果人员为空并且部门不为空，则取部门下的人id
+		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = group.getOrgIds().split(",");
+			for(String orgIdStr : orgIdArr){
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			String salesOperatorIds="";
+			for(Integer usrId : set){
+				salesOperatorIds+=usrId+",";
+			}
+			if(!salesOperatorIds.equals("")){
+				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+			}
+		}
+		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
+		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
+			pm.put("operator_id", group.getSaleOperatorIds());
+		}
+		pm.put("set", WebUtils.getDataUserIdSet(request));
+		pageBean.setParameter(pm);
+		pageBean = tjService.selectTJShopListPage(pageBean);
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
-		model.addAttribute("pageBean", result);
+		model.addAttribute("pageBean", pageBean);
 		
 		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" <br/>打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		return "tj/tjShopList-print";
@@ -653,7 +838,7 @@ public class TJController extends BaseController{
 				for(String orgIdStr : orgIdArr){
 					set.add(Integer.valueOf(orgIdStr));
 				}
-				set = tjFacade.getUserIdListByOrgIdList(set, WebUtils.getCurBizId(request));
+				set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 				String salesOperatorIds="";
 				for(Integer usrId : set){
 					salesOperatorIds+=usrId+",";
@@ -668,7 +853,7 @@ public class TJController extends BaseController{
 			}
 			pm.put("set", WebUtils.getDataUserIdSet(request));
 			pageBean.setParameter(pm);
-			pageBean = tjFacade.selectTJShopListPage(pageBean);
+			pageBean = tjService.selectTJShopListPage(pageBean);
 			List<Map<String, Object>> results = pageBean.getResult();
 		
 			String url = request.getSession().getServletContext().getRealPath("/template/excel/shop.xlsx");
@@ -822,25 +1007,69 @@ public class TJController extends BaseController{
 	@RequestMapping("shopProjectPrint.htm")
 	public String shopProjectPrint(HttpServletRequest request,
 			HttpServletResponse response, ModelMap model,TourGroupVO group) {
-		TjSearchDTO tjSearchDTO = new TjSearchDTO();
-		tjSearchDTO.setBizId(WebUtils.getCurBizId(request));
-		tjSearchDTO.setGroup(group);
-		tjSearchDTO.setPm(WebUtils.getQueryParamters(request));
-		tjSearchDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
+		PageBean pageBean = new PageBean();
+		pageBean.setPage(1);
+		pageBean.setPageSize(1000000);
+		//如果人员为空并且部门不为空，则取部门下的人id
+		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = group.getOrgIds().split(",");
+			for(String orgIdStr : orgIdArr){
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			String salesOperatorIds="";
+			for(Integer usrId : set){
+				salesOperatorIds+=usrId+",";
+			}
+			if(!salesOperatorIds.equals("")){
+				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+			}
+		}
+		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
+		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
+			pm.put("operator_id", group.getSaleOperatorIds());
+		}
+		pm.put("set", WebUtils.getDataUserIdSet(request));
+		pageBean.setParameter(pm);
 		
-		SelectShopProjectListResult result = tjFacade.shopProjectPrint(tjSearchDTO);
+		pageBean = tjService.selectShopProjectListPage(pageBean,WebUtils.getCurBizId(request));
 		
-		model.addAttribute("all_total_person", result.getAllTotalPerson());
-		model.addAttribute("all_total_face", result.getAllTotalFace());
-		model.addAttribute("all_buy_total", result.getAllBuyTotal());
-		model.addAttribute("all_repay_total", result.getAllRepayTotal());
+		Map<String,Object> map = tjService.selectCount(pageBean,WebUtils.getCurBizId(request));
+		Map<String,Object> mapDetail = tjService.selectDetailCount(pageBean,WebUtils.getCurBizId(request));
+		if(null!=map){
+			model.addAttribute("all_total_person", map.get("all_total_person"));
+			model.addAttribute("all_total_face", map.get("all_total_face"));
+		}
+		if(null!=mapDetail){
+			model.addAttribute("all_buy_total", mapDetail.get("all_buy_total"));
+			model.addAttribute("all_repay_total", mapDetail.get("all_repay_total"));
+		}
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 		model.addAttribute("bizId", WebUtils.getCurBizId(request)); // 过滤B商家
-		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("pageBean", pageBean);
 		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" 打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		return "tj/tjShopProjectList-print";
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	private ArrayList<Integer> qyList;
@@ -855,10 +1084,10 @@ public class TJController extends BaseController{
 			 * 昆明逸游旅行社有限公司   1-5- id=5
 			 * 昆明顺行旅行社有限公司   1-6- id=6
 			 */
-			String qy = tjFacade.findByOrgPath("1-3-");
-			String zy = tjFacade.findByOrgPath("1-4-");
-			String yy = tjFacade.findByOrgPath("1-5-");
-			String sx = tjFacade.findByOrgPath("1-6-");
+			String qy = platformEmployeeService.findByOrgPath("1-3-") ;
+			String zy = platformEmployeeService.findByOrgPath("1-4-") ;
+			String yy = platformEmployeeService.findByOrgPath("1-5-") ;
+			String sx = platformEmployeeService.findByOrgPath("1-6-") ;
 			
 			this.qyList = new ArrayList<Integer>();
 			this.zyList = new ArrayList<Integer>();
@@ -890,36 +1119,36 @@ public class TJController extends BaseController{
 		}
 	}
 	
-//	/**
-//	 * 取得最新归档时间，放到Model里
-//	 * @param request
-//	 * @param model
-//	 */
-//	private void setArchiveTime(HttpServletRequest request, ModelMap model, String type){
-//		Date recordEndTime = tjService.selectRecordEndTime(type, WebUtils.getCurBizId(request));
-//		model.addAttribute("recordEndTime", DateUtils.format(recordEndTime, DateUtils.FORMAT_LONG));
-//	}
+	/**
+	 * 取得最新归档时间，放到Model里
+	 * @param request
+	 * @param model
+	 */
+	private void setArchiveTime(HttpServletRequest request, ModelMap model, String type){
+		Date recordEndTime = tjService.selectRecordEndTime(type, WebUtils.getCurBizId(request));
+		model.addAttribute("recordEndTime", DateUtils.format(recordEndTime, DateUtils.FORMAT_LONG));
+	}
 	
-//	/**
-//	 * 添加归档记录
-//	 * @param request
-//	 * @param startTime
-//	 */
-//	private void insertArchiveRecord(HttpServletRequest request, Long startTime, String type){
-//		Long endTime = System.currentTimeMillis();
-//		//根据类型查询此表上一次统计的结束时间作为本次统计的开始时间
-//		Date startDate = tjService.selectRecordEndTime(type, WebUtils.getCurBizId(request));
-//		TJRecord tjRecord = new TJRecord();
-//		tjRecord.setBizId(WebUtils.getCurBizId(request));
-//		tjRecord.setType(type);
-//		tjRecord.setStartTime(startDate);
-//		tjRecord.setEndTime(new Date());
-//		//耗时  秒
-//		Long taketime = (endTime-startTime)/1000;
-//		tjRecord.setTakeTime(taketime.intValue());
-//		//插入记录
-//		tjService.insetTJRecord(tjRecord);
-//	}
+	/**
+	 * 添加归档记录
+	 * @param request
+	 * @param startTime
+	 */
+	private void insertArchiveRecord(HttpServletRequest request, Long startTime, String type){
+		Long endTime = System.currentTimeMillis();
+		//根据类型查询此表上一次统计的结束时间作为本次统计的开始时间
+		Date startDate = tjService.selectRecordEndTime(type, WebUtils.getCurBizId(request));
+		TJRecord tjRecord = new TJRecord();
+		tjRecord.setBizId(WebUtils.getCurBizId(request));
+		tjRecord.setType(type);
+		tjRecord.setStartTime(startDate);
+		tjRecord.setEndTime(new Date());
+		//耗时  秒
+		Long taketime = (endTime-startTime)/1000;
+		tjRecord.setTakeTime(taketime.intValue());
+		//插入记录
+		tjService.insetTJRecord(tjRecord);
+	}
 	
 	
 	
@@ -936,7 +1165,7 @@ public class TJController extends BaseController{
 			for(String orgIdStr : orgIdArr){
 				set.add(Integer.valueOf(orgIdStr));
 			}
-			set = tjFacade.getUserIdListByOrgIdList(set, WebUtils.getCurBizId(request));
+			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
 			String salesOperatorIds="";
 			for(Integer usrId : set){
 				salesOperatorIds+=usrId+",";
@@ -951,11 +1180,10 @@ public class TJController extends BaseController{
 		}
 		pm.put("set", WebUtils.getDataUserIdSet(request));
 		pageBean.setParameter(pm);
-		ShopProjectResult result = tjFacade.selectShopProject(WebUtils.getCurBizId(request),pageBean);
-		pageBean = result.getPageBean();
+		pageBean = tjService.selectShopProjectListPage(pageBean,WebUtils.getCurBizId(request));
 		List list = pageBean.getResult();
-		Map<String,Object> map = result.getMap();
-		Map<String,Object> mapDetail = result.getMapDetail();
+		Map<String,Object> map = tjService.selectCount(pageBean,WebUtils.getCurBizId(request));
+		Map<String,Object> mapDetail = tjService.selectDetailCount(pageBean,WebUtils.getCurBizId(request));
 		String path ="";
 		
 		try {
