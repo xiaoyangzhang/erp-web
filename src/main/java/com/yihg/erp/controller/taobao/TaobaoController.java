@@ -9,17 +9,13 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.facade.result.WebResult;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -27,6 +23,8 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.SheetUtil;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -316,8 +314,6 @@ public class TaobaoController extends BaseController {
 	
 	/**
 	 * 确定
-	 * @param request
-	 * @param model
 	 * @return
 	 */
 /*	@RequestMapping("taobaoOrderInfo.do")
@@ -504,7 +500,6 @@ public class TaobaoController extends BaseController {
      * 
      * @param request
      * @param response
-     * @param modelMap
      * @return
      */
     @RequestMapping("shopSalesStatistics.htm")
@@ -804,8 +799,6 @@ public class TaobaoController extends BaseController {
      * 
      * @param request
      * @param response
-     * @param page
-     * @param pageSize
      * @return
      */
     @RequestMapping(value = "/getOrders.do")
@@ -1089,6 +1082,310 @@ public class TaobaoController extends BaseController {
         return list;
     }
 
+	/**
+	 * 操作单导出Excel
+	 *
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value = "toOrderPreview.htm")
+	public void toOrderPreview(HttpServletRequest request, HttpServletResponse response, String dateType,
+							   String startTime, String endTime, String groupCode, String supplierName, String receiveMode,
+							   String orderMode, String stateFinance,String buyerNick,String guestName, String orderLockState, String orgIds, String operType,
+							   String saleOperatorIds, String productBrandId, String productName, Model model) throws ParseException {
 
+		GroupOrder groupOrder = new GroupOrder();
+		groupOrder.setDateType(dateType == "" ? null : Integer.valueOf(dateType));
+		groupOrder.setStartTime(startTime);
+		groupOrder.setEndTime(endTime);
+		groupOrder.setGroupCode(groupCode);
+		groupOrder.setSupplierName(supplierName);
+		groupOrder.setReceiveMode(receiveMode);
+		groupOrder.setBuyerNick(buyerNick);
+		groupOrder.setGuestName(guestName);
+		groupOrder.setOrderMode(orderMode == "" ? null : Integer.valueOf(orderMode));
+		groupOrder.setStateFinance(stateFinance == "" ? null : Integer.valueOf(stateFinance));
+		groupOrder.setOrderLockState(orderLockState == "" ? null : Integer.valueOf(orderLockState));
+		groupOrder.setOrgIds(orgIds);
+		groupOrder.setOperType(operType == "" ? null : Integer.valueOf(operType));
+		groupOrder.setSaleOperatorIds(saleOperatorIds);
+		groupOrder.setProductBrandId(productBrandId == "" ? null : Integer.valueOf(productBrandId));
+		groupOrder.setProductName(productName);
+
+		if (groupOrder.getDateType() != null && groupOrder.getDateType() == 2) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			if (!"".equals(groupOrder.getStartTime())) {
+				groupOrder.setStartTime(sdf.parse(groupOrder.getStartTime()).getTime() + "");
+			}
+			if (!"".equals(groupOrder.getEndTime())) {
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(sdf.parse(groupOrder.getEndTime()));
+				calendar.add(Calendar.DAY_OF_MONTH, +1);// 让日期加1
+				groupOrder.setEndTime(calendar.getTime().getTime() + "");
+			}
+		}
+		TaobaoOrderListTableDTO taobaoOrderListTableDTO = new TaobaoOrderListTableDTO();
+		taobaoOrderListTableDTO.setBizId(WebUtils.getCurBizId(request));
+		taobaoOrderListTableDTO.setDataUserIdSets(WebUtils.getDataUserIdSet(request));
+		taobaoOrderListTableDTO.setGroupOrder(groupOrder);
+		com.yimayhd.erpcenter.facade.tj.client.result.WebResult<PageBean> webResult = taobaoFacade.toOrderPreview(taobaoOrderListTableDTO);
+		PageBean<GroupOrder> page = new PageBean<GroupOrder>();
+		page = webResult.getValue();
+		List<GroupOrder> orders = page.getResult();
+		for (int i = 0; i < orders.size(); i++) {
+			GroupOrder vo = orders.get(i);
+			List<GroupOrderGuest> guests = new ArrayList<GroupOrderGuest>();
+			if (vo.getGuestNames() != null) {
+				GroupOrderGuest guest = null;
+				List<String> guestsString = vo.getGuestNames();
+				for (String s : guestsString) {
+					if (s.length() > 0) {
+						String[] ss = s.split("@");
+						if (ss.length == 2) {
+							guest = new GroupOrderGuest();
+							guest.setName(ss[0]);
+							guest.setCertificateNum(ss[1]);
+						} else if (ss.length == 3) {
+							guest = new GroupOrderGuest();
+							guest.setName(ss[0]);
+							guest.setCertificateNum(ss[1]);
+							guest.setMobile(ss[2]);
+						}
+						guests.add(guest);
+					}
+				}
+			}
+			vo.setGuests(guests);
+		}
+
+		String path = "";
+		try {
+			String url = request.getSession().getServletContext().getRealPath("/template/excel/operatorOrders.xlsx");
+			FileInputStream input = new FileInputStream(new File(url)); // 读取的文件路径
+			XSSFWorkbook wb = new XSSFWorkbook(new BufferedInputStream(input));
+			CellStyle cellStyle = wb.createCellStyle();
+			cellStyle.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			cellStyle.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			cellStyle.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			cellStyle.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			cellStyle.setAlignment(CellStyle.ALIGN_CENTER); // 居中
+			cellStyle.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			cellStyle.setWrapText(true);
+
+			CellStyle styleLeft = wb.createCellStyle();
+			styleLeft.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleLeft.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleLeft.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleLeft.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleLeft.setAlignment(CellStyle.ALIGN_LEFT); // 居左
+			styleLeft.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			styleLeft.setWrapText(true);
+
+			CellStyle styleRight = wb.createCellStyle();
+			styleRight.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleRight.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleRight.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleRight.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleRight.setAlignment(CellStyle.ALIGN_RIGHT); // 居右
+			styleRight.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			styleRight.setWrapText(true);
+
+			Sheet sheet = wb.getSheetAt(0); // 获取到第一个sheet
+			Row row = null;
+			Cell cc = null;
+			// 遍历集合数据，产生数据行
+			Iterator<GroupOrder> it = page.getResult().iterator();
+			int num = 1;
+			int index = 0;
+			// 合并行填充数据列
+			int createRow = 2;
+			while (it.hasNext()) {
+				GroupOrder sov = it.next();
+				List<GroupOrderGuest> guestList = new ArrayList<GroupOrderGuest>();
+				GroupOrderGuest orderGuest = null;
+				List<String> guests = sov.getGuestNames();
+				if (null != sov.getGuestNames()) {
+					for (String str : guests) {
+
+						// String[] guestInfo = guests.get(i).split("@");
+						orderGuest = new GroupOrderGuest();
+						orderGuest.setName(str);
+                        /*
+                         * orderGuest.setCertificateNum(guestInfo[1].trim()); if
+                         * (guestInfo.length == 3) {
+                         * orderGuest.setMobile(guestInfo[2].trim()); }
+                         */
+
+						guestList.add(orderGuest);
+					}
+
+				}
+
+				if (guestList.size() == 0) {
+					row = sheet.createRow(index + 2);
+
+					cc = row.createCell(0);
+					cc.setCellValue(num);
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(1);
+					cc.setCellValue(sov.getGroupCode());
+					cc.setCellStyle(styleLeft);
+
+					cc = row.createCell(2);
+					cc.setCellValue(sov.getDepartureDate());
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(3);
+					cc.setCellValue("【" + sov.getProductBrandName() + "】" + sov.getProductName());
+					cc.setCellStyle(styleLeft);
+
+					cc = row.createCell(4);
+					cc.setCellValue(sov.getSupplierName());
+					cc.setCellStyle(styleLeft);
+
+					cc = row.createCell(5);
+					cc.setCellValue(sov.getBuyerNick());
+					cc.setCellStyle(styleLeft);
+
+					cc = row.createCell(6);
+					cc.setCellValue(sov.getReceiveMode());
+					cc.setCellStyle(styleLeft);
+
+					cc = row.createCell(7);
+					cc.setCellValue((sov.getNumAdult() == null ? 0 : sov.getNumAdult()) + "+"
+							+ (sov.getNumChild() == null ? 0 : sov.getNumChild()) + "+"
+							+ (sov.getNumGuide() == null ? 0 : sov.getNumGuide()));
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(8);
+					cc.setCellValue(sov.getSaleOperatorName());
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(9);
+					cc.setCellValue("");
+					cc.setCellStyle(styleLeft);
+
+                    /*
+                     * cc = row.createCell(9); cc.setCellValue("");
+                     * cc.setCellStyle(cellStyle);
+                     *
+                     * cc = row.createCell(10); cc.setCellValue("");
+                     * cc.setCellStyle(cellStyle);
+                     */
+
+					index++;
+				} else {
+					for (String guest : guests) {
+						row = sheet.createRow(index + 2);
+						cc = row.createCell(0);
+						cc.setCellValue(num);
+						cc.setCellStyle(cellStyle);
+
+						cc = row.createCell(1);
+						cc.setCellValue(sov.getGroupCode());
+						cc.setCellStyle(styleLeft);
+
+						cc = row.createCell(2);
+						cc.setCellValue(sov.getDepartureDate());
+						cc.setCellStyle(cellStyle);
+
+						cc = row.createCell(3);
+						cc.setCellValue("【" + sov.getProductBrandName() + "】" + sov.getProductName());
+						cc.setCellStyle(styleLeft);
+
+						cc = row.createCell(4);
+						cc.setCellValue(sov.getSupplierName());
+						cc.setCellStyle(styleLeft);
+
+						cc = row.createCell(5);
+						cc.setCellValue(sov.getBuyerNick());
+						cc.setCellStyle(styleLeft);
+
+						cc = row.createCell(6);
+						cc.setCellValue(sov.getReceiveMode());
+						cc.setCellStyle(styleLeft);
+
+						cc = row.createCell(7);
+						cc.setCellValue((sov.getNumAdult() == null ? 0 : sov.getNumAdult()) + "+"
+								+ (sov.getNumChild() == null ? 0 : sov.getNumChild()) + "+"
+								+ (sov.getNumGuide() == null ? 0 : sov.getNumGuide()));
+						cc.setCellStyle(cellStyle);
+
+						cc = row.createCell(8);
+						cc.setCellValue(sov.getSaleOperatorName());
+						cc.setCellStyle(cellStyle);
+
+						String str = guest.replace("@", "，");
+						cc = row.createCell(9);
+						cc.setCellValue(str.substring(0,str.length()-1));
+						cc.setCellStyle(styleLeft);
+
+                        /*
+                         * cc = row.createCell(9);
+                         * cc.setCellValue(guest.getCertificateNum());
+                         * cc.setCellStyle(cellStyle);
+                         *
+                         * cc = row.createCell(10);
+                         * cc.setCellValue(guest.getMobile());
+                         * cc.setCellStyle(cellStyle);
+                         */
+
+						index++;
+					}
+					for (int i = 0; i < 10; i++) {
+						if (i != 9) {
+							CellRangeAddress region = new CellRangeAddress(createRow, createRow + guestList.size() - 1,
+									i, i);
+							sheet.addMergedRegion(region);
+							cc = SheetUtil.getCellWithMerges(sheet, createRow, i);
+							if (1 == i) {
+								cc.setCellStyle(styleLeft);
+							} else if (3 == i) {
+								cc.setCellStyle(styleLeft);
+							} else if (4 == i) {
+								cc.setCellStyle(styleLeft);
+							} else if (5 == i) {
+								cc.setCellStyle(styleLeft);
+							} else if (6 == i) {
+								cc.setCellStyle(styleLeft);
+							} else if (8 == i) {
+								cc.setCellStyle(styleLeft);
+							}else {
+								cc.setCellStyle(cellStyle);
+							}
+
+						}
+					}
+				}
+				if( guestList.size() == 0){
+					createRow = createRow + 1;
+				}else{
+					createRow = createRow + guestList.size();
+
+				}
+				num++;
+			}
+			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
+					+ ".xlsx";
+			FileOutputStream out = new FileOutputStream(path);
+			wb.write(out);
+			out.close();
+			wb.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		String fileName = "";
+		try {
+			fileName = new String("操作单.xlsx".getBytes("UTF-8"), "iso-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		download(path, fileName, request, response);
+
+		// return "sales/taobaoOrder/taobaoOrderPreview";
+
+	}
 
 }

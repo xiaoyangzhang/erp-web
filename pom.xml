@@ -534,7 +534,7 @@
 			<artifactId>erpcenterFacade-sales-client</artifactId>
 			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
-		<dependency> 
+		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-basic-client</artifactId>
 			<version>0.2.0-SNAPSHOT</version>
