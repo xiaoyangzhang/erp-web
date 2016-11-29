@@ -55,7 +55,7 @@ public class BillStatisticsController extends BaseController {
 		model.addAttribute("billTypeList", result.getBillTypeList());
 		model.addAttribute("pageTotal", result.getPageTotal());
 		model.addAttribute("total", result.getTotal());
-		
+		model.addAttribute("pageBean",result.getPageBean());
 		return "finance/bill/billStatistics";
 	}
 	

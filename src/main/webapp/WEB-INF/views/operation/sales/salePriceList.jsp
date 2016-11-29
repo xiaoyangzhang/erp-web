@@ -47,7 +47,7 @@
 								<option value="" selected="selected">全部</option>
 								<option value="1">团队</option>
 								<option value="0">散客</option>
-								<option value="-1">散客</option>
+								<option value="-1">一地散</option>
 						</select></li>
 					</li>
 					<li class="text">价格类型</li>

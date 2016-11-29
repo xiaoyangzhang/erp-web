@@ -24,7 +24,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
+import com.yimayhd.erpresource.dal.constants.BasicConstants;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -46,6 +46,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -164,8 +165,8 @@ public class QueryController extends BaseController {
 	private ProductCommonFacade productCommonFacade;
 	@Autowired
 	private SaleCommonFacade saleCommonFacade;
-	@Autowired
-	private CommonFacade commonFacade;
+//	@Autowired
+//	private CommonFacade commonFacade;
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
 		// model.addAttribute("orgJsonStr",
@@ -318,7 +319,7 @@ public class QueryController extends BaseController {
 	public String toSaleOperatorTable(HttpServletRequest request, Model model, SaleOperatorVo order) {
 
 		 PageBean<SaleOperatorVo> pageBean = new PageBean<SaleOperatorVo>();
-		 pageBean.setPage(order.getPage());
+		 pageBean.setPage(order.getPage() == null ?1:order.getPage());
 		 pageBean.setPageSize(order.getPageSize() == null ? Constants.PAGESIZE : order.getPageSize());
 		 pageBean.setParameter(order);
 		 order.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(order.getSaleOperatorIds(), 
@@ -326,34 +327,37 @@ public class QueryController extends BaseController {
 		
 		 
 		ToSaleOperatorPreviewDTO toSaleOperatorPreviewDTO = new ToSaleOperatorPreviewDTO();
-		toSaleOperatorPreviewDTO.setOrder(order);
+//		toSaleOperatorPreviewDTO.setOrder(order);
 		toSaleOperatorPreviewDTO.setBizId(WebUtils.getCurBizId(request));
 		toSaleOperatorPreviewDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 
 		ToSaleOperatorTableResult result = dataAnalysisFacade.toSaleOperatorTable(pageBean,toSaleOperatorPreviewDTO);
 		List<SaleOperatorVo> orders = result.getPageBean().getResult();
-		for (int i = 0; i < orders.size(); i++) {
-			SaleOperatorVo vo = orders.get(i);
-			List<GroupOrderGuest> guests = new ArrayList<GroupOrderGuest>();
-			if (vo.getGuestNames() != null) {
-				GroupOrderGuest guest = null;
-				String[] guestsString = vo.getGuestNames().split(",");
-				for (String s : guestsString) {
-					String[] ss = s.split("@");
-					if (ss.length == 2) {
-						guest = new GroupOrderGuest();
-						guest.setName(ss[0]);
-						guest.setCertificateNum(ss[1]);
-					} else if (ss.length == 3) {
-						guest = new GroupOrderGuest();
-						guest.setName(ss[0]);
-						guest.setCertificateNum(ss[1]);
-						guest.setMobile(ss[2]);
+		if (!CollectionUtils.isEmpty(orders)) {
+
+			for (int i = 0; i < orders.size(); i++) {
+				SaleOperatorVo vo = orders.get(i);
+				List<GroupOrderGuest> guests = new ArrayList<GroupOrderGuest>();
+				if (vo.getGuestNames() != null) {
+					GroupOrderGuest guest = null;
+					String[] guestsString = vo.getGuestNames().split(",");
+					for (String s : guestsString) {
+						String[] ss = s.split("@");
+						if (ss.length == 2) {
+							guest = new GroupOrderGuest();
+							guest.setName(ss[0]);
+							guest.setCertificateNum(ss[1]);
+						} else if (ss.length == 3) {
+							guest = new GroupOrderGuest();
+							guest.setName(ss[0]);
+							guest.setCertificateNum(ss[1]);
+							guest.setMobile(ss[2]);
+						}
+						guests.add(guest);
 					}
-					guests.add(guest);
 				}
+				vo.setGuests(guests);
 			}
-			vo.setGuests(guests);
 		}
 		model.addAttribute("page", result.getPageBean());
 		model.addAttribute("sumPerson", result.getSumPerson());
@@ -674,9 +678,9 @@ public class QueryController extends BaseController {
 			
 		ToSaleOperatorOrderStaticTableDTO toSaleOperatorOrderStaticTableDTO = new ToSaleOperatorOrderStaticTableDTO();
 		toSaleOperatorOrderStaticTableDTO.setBizId(WebUtils.getCurBizId(request));
-		toSaleOperatorOrderStaticTableDTO.setPage(page);
-		toSaleOperatorOrderStaticTableDTO.setPageSize(pageSize);
-		toSaleOperatorOrderStaticTableDTO.setSoos(soos);
+//		toSaleOperatorOrderStaticTableDTO.setPage(page);
+//		toSaleOperatorOrderStaticTableDTO.setPageSize(pageSize);
+//		toSaleOperatorOrderStaticTableDTO.setSoos(soos);
 		toSaleOperatorOrderStaticTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 
 		ToSaleOperatorOrderStaticTableResult result = dataAnalysisFacade
@@ -706,20 +710,19 @@ public class QueryController extends BaseController {
 	public String toOperatorGroupStaticTable(HttpServletRequest request, OperatorGroupStatic ogs, Integer page,
 			Integer pageSize, ModelMap model) {
 
-		 PageBean<OperatorGroupStatic> pageBean = new
-		 PageBean<OperatorGroupStatic>();
+		 PageBean<OperatorGroupStatic> pageBean = new PageBean<OperatorGroupStatic>();
 		
-		 pageBean.setPage(page);
-		 pageBean.setPageSize(pageSize == null ? 15 : pageSize);
+		 pageBean.setPage(page == null ? 1:page);
+		 pageBean.setPageSize(pageSize == null ? Constants.PAGESIZE : pageSize);
 		 pageBean.setParameter(ogs);
 		 ogs.setOperatorIds(productCommonFacade.setSaleOperatorIds(ogs.getOperatorIds(), 
 				 ogs.getOrgIds(), WebUtils.getCurBizId(request)));
 		
 		ToOperatorGroupStaticTableDTO toOperatorGroupStaticTableDTO = new ToOperatorGroupStaticTableDTO();
 		toOperatorGroupStaticTableDTO.setBizId(WebUtils.getCurBizId(request));
-		toOperatorGroupStaticTableDTO.setOgs(ogs);
-		toOperatorGroupStaticTableDTO.setPage(page);
-		toOperatorGroupStaticTableDTO.setPageSize(pageSize);
+//		toOperatorGroupStaticTableDTO.setOgs(ogs);
+//		toOperatorGroupStaticTableDTO.setPage(page);
+//		toOperatorGroupStaticTableDTO.setPageSize(pageSize);
 		toOperatorGroupStaticTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 
 		ToOperatorGroupStaticTableResult result = dataAnalysisFacade
@@ -3891,7 +3894,6 @@ public class QueryController extends BaseController {
 		getNumAndOrderDTO.setBizId(WebUtils.getCurBizId(request));
 		getNumAndOrderDTO.setPage(page);
 		getNumAndOrderDTO.setPageSize(pageSize);
-		getNumAndOrderDTO.setParamters(WebUtils.getQueryParamters(request));
 		getNumAndOrderDTO.setSl(sl);
 		getNumAndOrderDTO.setSsl(ssl);
 		getNumAndOrderDTO.setSvc(svc);
@@ -3938,8 +3940,10 @@ public class QueryController extends BaseController {
 		getAgeListByProductDTO.setQueryParamters(WebUtils.getQueryParamters(request));
 
 		GetAgeListByProductResult result = dataAnalysisFacade.getAgeListByProduct(getAgeListByProductDTO);
-		model.addAttribute("ageMap", result.getAgeMaps());
+		model.addAttribute("ageMaps", result.getAgeMaps());
+		model.addAttribute("ageMap", result.getAgeMap());
 		model.addAttribute("personMap", result.getPersonMap());
+		model.addAttribute("pageBean", result.getPageBean());
 
 		return rp;
 	}
@@ -3971,9 +3975,10 @@ public class QueryController extends BaseController {
 		getAgeListByProductDTO.setQueryParamters(WebUtils.getQueryParamters(request));
 
 		GetAgeListByProductResult result = dataAnalysisFacade.getAgeListByProduct(getAgeListByProductDTO);
-		model.addAttribute("ageMap", result.getAgeMaps());
+		model.addAttribute("ageMaps", result.getAgeMaps());
+		model.addAttribute("ageMap", result.getAgeMap());
 		model.addAttribute("personMap", result.getPersonMap());
-
+		model.addAttribute("pageBean", result.getPageBean());
 		return rp;
 	}
 
@@ -4004,9 +4009,10 @@ public class QueryController extends BaseController {
 		getAgeListByProductDTO.setQueryParamters(WebUtils.getQueryParamters(request));
 
 		GetAgeListByProductResult result = dataAnalysisFacade.getAgeListByProduct(getAgeListByProductDTO);
-		model.addAttribute("ageMap", result.getAgeMaps());
+		model.addAttribute("ageMaps", result.getAgeMaps());
+		model.addAttribute("ageMap", result.getAgeMap());
 		model.addAttribute("personMap", result.getPersonMap());
-
+		model.addAttribute("pageBean", result.getPageBean());
 		return rp;
 	}
 
@@ -5073,7 +5079,7 @@ public class QueryController extends BaseController {
 
 		HotelDetailPreviewResult result = dataAnalysisFacade.hotelDetailPreview(hotelDetailPreviewDTO);
 		PageBean pb = result.getPb();
-
+		model.addAttribute("pageBean",pb);
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 
@@ -5815,6 +5821,7 @@ public class QueryController extends BaseController {
 		 * buyTotal = detailDeployService .selectBuyTotalByProduct(paramters);
 		 * map.put("buyTotal", buyTotal); } }
 		 */
+		model.addAttribute("pageBean",pb);
 		return rp;
 
 	}
@@ -5870,7 +5877,7 @@ public class QueryController extends BaseController {
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
 		QueryResult queryResult = queryFacade.productProfitList(queryDTO);
-
+		model.addAttribute("pageBean",queryResult.getPageBean());
 		return rp;
 
 	}
@@ -6832,6 +6839,7 @@ public class QueryController extends BaseController {
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
 		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
 		PageBean pb  = queryResult.getPageBean();
+		model.addAttribute("pageBean",pb);
 		return rp;
 
 	}
@@ -8403,8 +8411,8 @@ public class QueryController extends BaseController {
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
 		QueryResult queryResult = queryFacade.getAccountDetail(queryDTO);
-			model.addAttribute("sum", queryResult.getSum());
-
+		model.addAttribute("sum", queryResult.getSum());
+		model.addAttribute("pageBean",queryResult.getPageBean());
 		return rp;
 	}
 

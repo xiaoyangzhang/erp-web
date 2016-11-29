@@ -929,7 +929,7 @@ public class FinanceController extends BaseController {
 	@RequiresPermissions(PermissionConstants.CWGL_JSDSH)
 	public String auditGroup(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer groupId) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAllAttributes(financeFacade.queryAuditViewInfo(groupId, bizId));
+		model.addAllAttributes(financeFacade.queryAuditViewInfo(bizId,groupId ));
 		return "finance/audit-group";
 	}
 	

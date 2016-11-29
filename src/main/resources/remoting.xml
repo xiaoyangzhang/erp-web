@@ -55,7 +55,7 @@
 	<dubbo:reference id="teamGroupFacade"
 					 interface="com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade" version="1.0.0.test.zxy1" />
 	<dubbo:reference id="tourGroupFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade" version="1.0.0.test.zxy1" timeout="10000" />
 	<dubbo:reference id="agencyFitFacade"
 					 interface="com.yimayhd.erpcenter.facade.sales.service.AgencyFitFacade" version="1.0.0.test.zxy1" />
 	<dubbo:reference id="agencyFitGroupFacade"
@@ -170,7 +170,7 @@
 					 timeout="80000" />
 	<dubbo:reference id="queryFacade"
 					 interface="com.yimayhd.erpcenter.facade.dataanalysis.client.service.QueryFacade" owner="ly" version="1.0.0.test.zxy1"
-					 timeout="8000" />
+					 timeout="80000" />
 	<dubbo:reference id="billStatisticsFacade"
 					 interface="org.yimayhd.erpcenter.facade.finance.service.BillStatisticsFacade" owner="ly" version="1.0.0.test.zxy1"
 					 timeout="8000" />
