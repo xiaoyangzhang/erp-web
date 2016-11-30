@@ -66,7 +66,7 @@
 					 interface="com.yimayhd.erpcenter.facade.sales.service.AiYouFacade" version="1.0.0.test" />
 	<dubbo:reference id="b2BFacade"
 					 interface="com.yimayhd.erpcenter.facade.sales.service.B2BFacade" version="1.0.0.test" />
-					 
+
 	<!-- <dubbo:reference id="sysOptLogService"
 		interface="com.yihg.sys.api.SysOptLogService" version="1.0.0" /> -->
 
