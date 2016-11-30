@@ -328,11 +328,6 @@
 								</c:otherwise>
 								</c:choose>
 							</select>
-               <%--  <label for="settlementMethodElement1"><input id="settlementMethodElement1" type="checkbox"
-                                                             name="settlementMethodList" value="1" <c:if test="${supplierContractVo.supplierContract.settlementMethod == 1 or supplierContractVo.supplierContract.settlementMethod == 3}">checked</c:if> />签单</label>
-                <label for="settlementMethodElement2"><input id="settlementMethodElement2" type="checkbox"
-                                                             name="settlementMethodList" value="2" <c:if test="${supplierContractVo.supplierContract.settlementMethod == 2 or supplierContractVo.supplierContract.settlementMethod == 3}">checked</c:if> />现付</label>
-             --%></div>
             <div class="clear"></div>
         </dd>
         <dd>
@@ -478,17 +473,14 @@
                         <input id="priceVoList[${s.index}].supplierContractPrice.itemType3Name" type="text" onblur="$(this).prev().val($(this).val());"
                                name="priceVoList[${s.index}].supplierContractPrice.itemType3Name" style="width: 40px;" value="${priceVo.supplierContractPrice.itemType3Name}" /> 座
                     </td>
-                    <%--<td>--%>
-                        <%--<input id="priceVoList[${s.index}].supplierContractPrice.contractPrice" type="text"--%>
-                               <%--name="priceVoList[${s.index}].supplierContractPrice.contractPrice" style="width: 40px;" value="${priceVo.supplierContractPrice.contractPrice}" /> 元--%>
-                    <%--</td>--%>
                     <td id="secondLevelPrice_${s.index}">
                         <table>
                             <thead>
                             <tr>
                                 <td width="20%">线路品牌</td>
-                                <td width="10%" >价格/元</td>
-                                <td width="10%">操作</td>
+                                <td width="8%" >成本价</td>
+                                <td width="8%" >销售价</td>
+                                <td width="7%">操作</td>
                             </tr>
                             </thead>
                             <tbody id="secondLevelPriceRow_${s.index}" >
@@ -513,6 +505,10 @@
                                                name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.price" value="${priceExtVo.supplierContractPriceExt.price}" /> 元
                                     </td>
                                     <td>
+                                        <input id="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.salePrice" type="text" style="width: 40px;"
+                                               name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.salePrice" value="${priceExtVo.supplierContractPriceExt.salePrice}" /> 元
+                                    </td>
+                                    <td>
                                         <a class="def" href="javascript:void(0)" onclick="deleteSecondLevelPrice(this, '${s.index}');">删除</a>
                                     </td>
                                 </tr>
@@ -530,34 +526,97 @@
             </tbody>
         </table>
     </div>
-
-
-
-        <%--<div id="fleetPrice" style="display: none;">--%>
-            <%--<table class="table table-bordered table-hover definewidth m10">--%>
-                <%--<thead>--%>
-                <%--<tr>--%>
-                    <%--<td colspan="6">价格明细--%>
-                        <%--<button type="button" onclick="addPriceInfoRow('fleetPriceRow', 'fleetPriceData');"--%>
-                                <%--style="float: right">添加--%>
-                        <%--</button>--%>
-                    <%--</td>--%>
-                <%--</tr>--%>
-                <%--<tr>--%>
-                    <%--<td>车型</td>--%>
-                    <%--<td>座位数</td>--%>
-                    <%--<td>协议价</td>--%>
-                    <%--<td>二级协议价</td>--%>
-                    <%--<td>备注</td>--%>
-                    <%--<td>操作</td>--%>
-                <%--</tr>--%>
-                <%--</thead>--%>
-                <%--<tbody id="fleetPriceRow">--%>
-                <%----%>
-                <%--</tbody>--%>
-            <%--</table>--%>
-        <%--</div>--%>
     </c:when>
+    <c:when test="${'temp' == deliveryType}">
+    <div id="DeliveryPrice" style="display: none;">
+    	<button type="button" onclick="addPriceInfoRow('DeliveryPriceRow', 'DeliveryPriceData');" class="button button-primary button-small" >添加</button>
+        <table cellspacing="0" class="w_table">
+        	<colgroup>
+        		<col width="15%" />
+        		<col width="50%" />
+        		<col width="25%" />
+        		<col width="10%" />
+        	</colgroup>
+            <thead>            
+	            <tr>
+	                <th>项目<i class="w_table_split"></i></th>
+	                <th>二级协议价<i class="w_table_split"></i></th>
+	                <th>备注<i class="w_table_split"></i></th>
+	                <th>操作</th>
+	            </tr>
+            </thead>
+            <tbody id="DeliveryPriceRow">
+			<c:forEach items="${supplierContractVo.priceVoList}" var="priceVo" varStatus="s">
+                <tr>
+                    <td>
+                        <input type="hidden" id="priceVoList[${s.index}].supplierContractPrice.id" name="priceVoList[${s.index}].supplierContractPrice.id" value="${priceVo.supplierContractPrice.id}" />
+                        <input type="hidden" id="priceVoList[${s.index}].supplierContractPrice.contractId" name="priceVoList[${s.index}].supplierContractPrice.contractId" value="${priceVo.supplierContractPrice.contractId}" />
+                        <select id="priceVoList[${s.index}].supplierContractPrice.itemType" name="priceVoList[${s.index}].supplierContractPrice.itemType"
+                                onchange="$(this).next('input').val(this.options[this.selectedIndex].text);" >
+                            <option value="">请选择</option>
+                            <c:if test="${supplierContractVo.supplierInfo.supplierType eq 16}">
+                            <c:forEach items="${dictTypeList}" var="type">
+                                <option value="${type.id}" <c:if test="${priceVo.supplierContractPrice.itemType == type.id}">selected</c:if>>${type.value}</option>
+                            </c:forEach></c:if>
+                        </select>
+                        <input id="priceVoList[${s.index}].supplierContractPrice.itemTypeName" type="hidden" name="priceVoList[${s.index}].supplierContractPrice.itemTypeName" value="${priceVo.supplierContractPrice.itemTypeName}"/>
+                    </td>
+                    
+                    <td id="secondLevelPrice_${s.index}">
+                        <table>
+                            <thead>
+                            <tr>
+                                <td width="20%">线路品牌</td>
+                                <td width="8%" >成本价</td>
+                                <td width="8%" >销售价</td>
+                                <td width="7%">操作</td>
+                            </tr>
+                            </thead>
+                            <tbody id="secondLevelPriceRow_${s.index}" >
+                            <c:forEach items="${priceVo.priceExtVoList}" var="priceExtVo" varStatus="s2">
+                                <tr>
+                                    <td>
+                                        <input type="hidden" id="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.id" name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.id" value="${priceExtVo.supplierContractPriceExt.id}" />
+                                        <input type="hidden" id="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.priceId" name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.priceId" value="${priceExtVo.supplierContractPriceExt.priceId}" />
+                                        <select id="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.brandId" name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.brandId"
+                                                onchange="$(this).next('input').val(this.options[this.selectedIndex].text);" >
+                                            <option value="">请选择</option>
+                                            <c:forEach items="${dictSecLevelTypeList}" var="type">
+                                                <option value="${type.id}" <c:if test="${priceExtVo.supplierContractPriceExt.brandId == type.id}">selected</c:if>>${type.value}</option>
+                                            </c:forEach>
+                                        </select>
+                                        <input type="hidden" id="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.brandName"
+                                               name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.brandName"
+                                               value="${priceExtVo.supplierContractPriceExt.brandName}"/>
+                                    </td>
+                                    <td>
+                                        <input id="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.price" type="text" style="width: 40px;"
+                                               name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.price" value="${priceExtVo.supplierContractPriceExt.price}" /> 元
+                                    </td>
+                                    <td>
+                                        <input id="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.salePrice" type="text" style="width: 40px;"
+                                               name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.salePrice" value="${priceExtVo.supplierContractPriceExt.salePrice}" /> 元
+                                    </td>
+                                    <td>
+                                        <a class="def" href="javascript:void(0)" onclick="deleteSecondLevelPrice(this, '${s.index}');">删除</a>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                            </tbody>
+                        </table>
+                        <a href="javascript:void(0);" onclick="addSecLevelPriceInfoRow('${s.index}', 'secondLevelPriceRow_${s.index}', 'secondLevelPriceData');">添加</a>
+                    </td>
+                    <td>
+                        <textarea id="priceVoList[${s.index}].supplierContractPrice.note" class="control-row4 input-large" style="text-align:center;" name="priceVoList[${s.index}].supplierContractPrice.note" >${priceVo.supplierContractPrice.note}</textarea>
+                    </td>
+                    <td><a class="def" href="javascript:void(0)" onclick="deletePrice(this);">删除</a></td>
+                </tr>
+            </c:forEach>
+            </tbody>
+        </table>
+    </div>
+    </c:when>
+    
     <c:when test="${HOTEL == supplierContractVo.supplierInfo.supplierType}">
     <div id="hotelPrice" style="display: none;">
         <button type="button" onclick="addPriceInfoRow('hotelPriceRow', 'hotelPriceData');" class="button button-primary button-small">添加</button>
@@ -566,7 +625,8 @@
                 <col width="15%" />
                 <%--<col width="10%" />--%>
                 <col width="15%" />
-                <col width="40%" />
+                <col width="15%" />
+                <col width="30%" />
                 <col width="20%" />
                 <col width="10%" />
             </colgroup>
@@ -575,6 +635,7 @@
                 <th>类别<i class="w_table_split"></i></th>
                 <%--<th>房型<i class="w_table_split"></i></th>--%>
                 <th>协议价<i class="w_table_split"></i></th>
+                 <th>销售价<i class="w_table_split"></i></th>
                 <th>减免政策<i class="w_table_split"></i></th>
                 <th>备注<i class="w_table_split"></i></th>
                 <th>操作</th>
@@ -597,20 +658,15 @@
                         <input type="hidden" id="priceVoList[${s.index}].supplierContractPrice.itemTypeName" name="priceVoList[${s.index}].supplierContractPrice.itemTypeName"
                                value="${priceVo.supplierContractPrice.itemTypeName}"/>
                     </td>
-                    <%--<td>--%>
-                        <%--<select id="priceVoList[${s.index}].supplierContractPrice.itemType2" name="priceVoList[${s.index}].supplierContractPrice.itemType2"--%>
-                                <%--onchange="$(this).next('input').val(this.options[this.selectedIndex].text);" >--%>
-                            <%--<option value="">请选择</option>--%>
-                            <%--<c:forEach items="${dictType2List}" var="type">--%>
-                                <%--<option value="${type.id}" <c:if test="${priceVo.supplierContractPrice.itemType2 == type.id}">selected</c:if>>${type.value}</option>--%>
-                            <%--</c:forEach>--%>
-                        <%--</select>--%>
-                        <%--<input type="hidden" id="priceVoList[${s.index}].supplierContractPrice.itemType2Name" name="priceVoList[${s.index}].supplierContractPrice.itemType2Name" value="${priceVo.supplierContractPrice.itemType2Name}" />--%>
-                    <%--</td>--%>
                     <td>
                         <input id="priceVoList[${s.index}].supplierContractPrice.contractPrice"  type="text" style="width: 40px;"
                                name="priceVoList[${s.index}].supplierContractPrice.contractPrice"
                                value="${priceVo.supplierContractPrice.contractPrice}"  /> 元
+                    </td>
+                    <td>
+                        <input id="priceVoList[${s.index}].supplierContractPrice.contractSale"  type="text" style="width: 40px;"
+                               name="priceVoList[${s.index}].supplierContractPrice.contractSale"
+                               value="${priceVo.supplierContractPrice.contractSale}"  /> 元
                     </td>
                     <td>
                         满 <input id="priceVoList[${s.index}].supplierContractPrice.derateReach" type="text"
@@ -631,31 +687,6 @@
         </table>
     </div>
 
-
-        <%--<div id="hotelPrice" style="display: none;">--%>
-            <%--<table class="table table-bordered table-hover definewidth m10">--%>
-                <%--<thead>--%>
-                <%--<tr>--%>
-                    <%--<td colspan="6">价格明细--%>
-                        <%--<button type="button" onclick="addPriceInfoRow('hotelPriceRow', 'hotelPriceData');"--%>
-                                <%--style="float: right">添加--%>
-                        <%--</button>--%>
-                    <%--</td>--%>
-                <%--</tr>--%>
-                <%--<tr>--%>
-                    <%--<td>类别</td>--%>
-                    <%--<td>房型</td>--%>
-                    <%--<td>协议价</td>--%>
-                    <%--<td>减免政策</td>--%>
-                    <%--<td>备注</td>--%>
-                    <%--<td>操作</td>--%>
-                <%--</tr>--%>
-                <%--</thead>--%>
-                <%--<tbody id="hotelPriceRow">--%>
-                <%----%>
-                <%--</tbody>--%>
-            <%--</table>--%>
-        <%--</div>--%>
     </c:when>
     <c:otherwise>
     <div id="commonPrice" style="display: none;">
@@ -663,7 +694,8 @@
         <table cellspacing="0" class="w_table">
             <colgroup>
                 <col width="15%" />
-                <col width="20%" />
+                <col width="10%" />
+                 <col width="10%" />
                 <col width="25%" />
                 <col width="30%" />
                 <col width="10%" />
@@ -672,6 +704,7 @@
             <tr>
                 <th>项目<i class="w_table_split"></i></th>
                 <th>协议价<i class="w_table_split"></i></th>
+                <th>销售价<i class="w_table_split"></i></th>
                 <th>减免政策<i class="w_table_split"></i></th>
                 <th>备注<i class="w_table_split"></i></th>
                 <th>操作</th>
@@ -710,9 +743,15 @@
                                value="${priceVo.supplierContractPrice.itemTypeName}"/>
                     </td>
                     <td>
-                        <input id="priceVoList[${s.index}].supplierContractPrice.contractPrice" type="text"
+                        <input id="priceVoList[${s.index}].supplierContractPrice.contractPrice" type="text" style="width: 40px;"
                                name="priceVoList[${s.index}].supplierContractPrice.contractPrice" value="${priceVo.supplierContractPrice.contractPrice}" /> 元
                     </td>
+                    <td>
+                        <input id="priceVoList[${s.index}].supplierContractPrice.contractSale"  type="text" style="width: 40px;"
+                               name="priceVoList[${s.index}].supplierContractPrice.contractSale"
+                               value="${priceVo.supplierContractPrice.contractSale}"  /> 元
+                    </td>
+                    
                     <td>
                         满 <input id="priceVoList[${s.index}].supplierContractPrice.derateReach" type="text" style="width: 40px;"
                                  name="priceVoList[${s.index}].supplierContractPrice.derateReach" value="${priceVo.supplierContractPrice.derateReach}" /> 免
@@ -730,30 +769,6 @@
         </table>
     </div>
 
-
-        <%--<div id="commonPrice" style="display: none;">--%>
-            <%--<table class="table table-bordered table-hover definewidth m10">--%>
-                <%--<thead>--%>
-                <%--<tr>--%>
-                    <%--<td colspan="5">价格明细--%>
-                        <%--<button type="button" onclick="addPriceInfoRow('commonPriceRow', 'commonPriceData');"--%>
-                                <%--style="float: right">添加--%>
-                        <%--</button>--%>
-                    <%--</td>--%>
-                <%--</tr>--%>
-                <%--<tr>--%>
-                    <%--<td>项目</td>--%>
-                    <%--<td>协议价</td>--%>
-                    <%--<td>减免政策</td>--%>
-                    <%--<td>备注</td>--%>
-                    <%--<td>操作</td>--%>
-                <%--</tr>--%>
-                <%--</thead>--%>
-                <%--<tbody id="commonPriceRow">--%>
-                <%----%>
-                <%--</tbody>--%>
-            <%--</table>--%>
-        <%--</div>--%>
     </c:otherwise>
 </c:choose>
 
@@ -792,6 +807,9 @@
                 <input id="priceVoList[$index].supplierContractPrice.contractPrice" style="width: 40px;" type="text" name="priceVoList[$index].supplierContractPrice.contractPrice" value="0" /> 元
             </td>
             <td>
+                <input id="priceVoList[$index].supplierContractPrice.contractSale" style="width: 40px;" type="text" name="priceVoList[$index].supplierContractPrice.contractSale" value="0" /> 元
+            </td>
+            <td>
                 满 <input id="priceVoList[$index].supplierContractPrice.derateReach" style="width: 40px;" type="text" name="priceVoList[$index].supplierContractPrice.derateReach" value="0" /> 免 <input value="0" id="priceVoList[$index].supplierContractPrice.derateReduction" style="width: 40px;" type="text" name="priceVoList[$index].supplierContractPrice.derateReduction" />
             </td>
             <td>
@@ -805,38 +823,6 @@
     </table>
 </div>
 
-
-<!-- <div id="commonPriceData" style="display : none;">
-    <table class="table-style1">
-        <tbody>
-        <tr>
-            <td>
-                <select name="priceVoList[$index].supplierContractPrice.itemType"
-                        onchange="$(this).next('input').val(this.options[this.selectedIndex].text);">
-                    <option value="">请选择</option>
-                </select>
-                <input type="hidden" id="itemTypeName" name="priceVoList[$index].supplierContractPrice.itemTypeName"
-                       value=""/>
-            </td>
-            <td>
-                <input id="priceVoList[$index].supplierContractPrice.contractPrice" type="text" style="width: 40px;"
-                       name="priceVoList[$index].supplierContractPrice.contractPrice"/> 元
-            </td>
-            <td>
-                满 <input id="priceVoList[$index].supplierContractPrice.derateReach" type="text" style="width: 40px;"
-                         name="priceVoList[$index].supplierContractPrice.derateReach"/> 免 <input
-                    id="priceVoList[$index].supplierContractPrice.derateReduction" type="text" style="width: 40px;"
-                    name="priceVoList[$index].supplierContractPrice.derateReduction"/>
-            </td>
-            <td>
-                <textarea id="priceVoList[$index].supplierContractPrice.note" class="control-row4 input-large" style="text-align:center;"
-                          name="priceVoList[$index].supplierContractPrice.note"></textarea>
-            </td>
-            <td><a class="def" href="javascript:void(0)" onclick="deletePrice(this);">删除</a></td>
-        </tr>
-        </tbody>
-    </table>
-</div> -->
 <div id="shopPriceData" style="display : none;">
     <table class="table-style1">
         <tbody>
@@ -898,8 +884,9 @@
                     <thead>
                     <tr>
                         <td width="20%">线路品牌</td>
-                        <td width="10%">价格/元</td>
-                        <td width="10%">操作</td>
+                        <td width="8%">成本价</td>
+                        <td width="8%">销售价</td>
+                        <td width="7%">操作</td>
                     </tr>
                     </thead>
                     <tbody id="secondLevelPriceRow_$index">
@@ -916,6 +903,48 @@
         </tbody>
     </table>
 </div>
+
+<div id="DeliveryPriceData" style="display : none;">
+        <table class="table-style1">
+            <tbody>
+            <tr>
+                <td>
+                    <select id="priceVoList[$index].supplierContractPrice.itemType" name="priceVoList[$index].supplierContractPrice.itemType" onchange="$(this).next('input').val(this.options[this.selectedIndex].text);">
+                        <option  value="">请选择</option>
+                         <c:if test="${supplierContractVo.supplierInfo.supplierType eq 16}">
+                        <c:forEach items="${dictTypeList}" var="type">
+                            <option value="${type.id}">${type.value}</option>
+                        </c:forEach></c:if>
+                    </select>
+                    <input type="hidden" id="priceVoList[$index].supplierContractPrice.itemTypeName" name="priceVoList[$index].supplierContractPrice.itemTypeName" value="" />
+                </td>
+                <td id="secondLevelPrice_$index">
+                    <table>
+                        <thead>
+                            <tr>
+                                <td width="20%">线路品牌</td>
+                                <td width="8%">成本价</td>
+                                <td width="8%">销售价</td>
+                                <td width="7%">操作</td>
+                            </tr>
+                        </thead>
+                        <tbody id="secondLevelPriceRow_$index">
+
+                        </tbody>
+                    </table>
+                    <a href="javascript:void(0);" onclick="addSecLevelPriceInfoRow('$index', 'secondLevelPriceRow_$index', 'secondLevelPriceData');" class="def">添加</a>
+                </td>
+                <td>
+                    <textarea id="priceVoList[$index].supplierContractPrice.note" class="control-row4 input-large"  style="text-align:center;" name="priceVoList[$index].supplierContractPrice.note" ></textarea>
+                </td>
+                <td>
+                    <a class="def" href="javascript:void(0)" onclick="deletePrice(this);">删除</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
 <div id="hotelPriceData" style="display : none;">
     <table class="table-style1">
         <tbody>
@@ -941,6 +970,9 @@
             <%--</td>--%>
             <td>
                 <input id="priceVoList[$index].supplierContractPrice.contractPrice" style="width: 40px;" type="text" name="priceVoList[$index].supplierContractPrice.contractPrice" value="0" /> 元
+            </td>
+            <td>
+                <input id="priceVoList[$index].supplierContractPrice.contractSale" style="width: 40px;" type="text" name="priceVoList[$index].supplierContractPrice.contractSale" value="0" /> 元
             </td>
             <td>
                 满 <input id="priceVoList[$index].supplierContractPrice.derateReach" style="width: 40px;" type="text" name="priceVoList[$index].supplierContractPrice.derateReach" value="0" /> 免 <input id="priceVoList[$index].supplierContractPrice.derateReduction" value="0" style="width: 40px;" type="text" name="priceVoList[$index].supplierContractPrice.derateReduction" />
@@ -973,6 +1005,9 @@
                 <input id="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.price" style="width: 40px;" type="text" name="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.price" value="0" /> 元
             </td>
             <td width="10%">
+                <input id="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.salePrice" style="width: 40px;" type="text" name="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.salePrice" value="0" /> 元
+            </td>
+            <td width="10%">
                 <a class="def" href="javascript:void(0)" onclick="deleteSecondLevelPrice(this, '$index');">删除</a>
             </td>
         </tr>
@@ -980,158 +1015,6 @@
     </table>
 </div>
 
-
-<%--<div id="shopPriceData" style="display : none;">--%>
-    <%--<table class="table-style1">--%>
-        <%--<tbody>--%>
-        <%--<tr>--%>
-            <%--<td>--%>
-                <%--<select name="priceVoList[$index].supplierContractPrice.itemType"--%>
-                        <%--onchange="$(this).next('input').val(this.options[this.selectedIndex].text);">--%>
-                    <%--<option value="">请选择</option>--%>
-                <%--</select>--%>
-                <%--<input type="hidden" name="priceVoList[$index].supplierContractPrice.itemTypeName" value=""/>--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<select name="priceVoList[$index].supplierContractPrice.itemType2"--%>
-                        <%--onchange="$(this).next('input').val(this.options[this.selectedIndex].text);">--%>
-                    <%--<option value="1" selected="selected">正价</option>--%>
-                    <%--<option value="2">特价</option>--%>
-                <%--</select>--%>
-                <%--<input type="hidden" id="itemType2Name" name="priceVoList[$index].supplierContractPrice.itemType2Name"--%>
-                       <%--value="正价"/>--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<input type="radio" name="priceVoList[$index].supplierContractPrice.rebateMethod" value="1"/>按销售金额返款&nbsp;&nbsp;返款&nbsp;<input--%>
-                    <%--id="priceVoList[$index].supplierContractPrice.rebateAmountPercent" type="text"--%>
-                    <%--name="priceVoList[$index].supplierContractPrice.rebateAmountPercent"/> %--%>
-                <%--<br/>--%>
-                <%--<input type="radio" name="priceVoList[$index].supplierContractPrice.rebateMethod" value="2"/>按销售数量返款&nbsp;&nbsp;返款&nbsp;<input--%>
-                    <%--id="priceVoList[$index].supplierContractPrice.rebateAmount" type="text"--%>
-                    <%--name="priceVoList[$index].supplierContractPrice.rebateAmount"/> 元--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<textarea id="priceVoList[$index].supplierContractPrice.note" class="control-row4 input-large"--%>
-                          <%--name="priceVoList[$index].supplierContractPrice.note"></textarea>--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<a href="javascript:void(0)" onclick="deletePrice(this);">删除</a>--%>
-            <%--</td>--%>
-        <%--</tr>--%>
-        <%--</tbody>--%>
-    <%--</table>--%>
-<%--</div>--%>
-
-<%--<div id="fleetPriceData" style="display : none;">--%>
-    <%--<table class="table-style1">--%>
-        <%--<tbody>--%>
-        <%--<tr>--%>
-            <%--<td>--%>
-                <%--<select name="priceVoList[$index].supplierContractPrice.itemType"--%>
-                        <%--onchange="$(this).next('input').val(this.options[this.selectedIndex].text);">--%>
-                    <%--<option value="">请选择</option>--%>
-                <%--</select>--%>
-                <%--<input type="hidden" name="priceVoList[$index].supplierContractPrice.itemTypeName" value=""/>--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<input id="priceVoList[$index].supplierContractPrice.itemType2Name" type="text"--%>
-                       <%--name="priceVoList[$index].supplierContractPrice.itemType2Name"/> 座--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<input id="priceVoList[$index].supplierContractPrice.contractPrice" type="text"--%>
-                       <%--name="priceVoList[$index].supplierContractPrice.contractPrice"/> 元--%>
-            <%--</td>--%>
-            <%--<td id="secondLevelPrice_$index">--%>
-                <%--<table>--%>
-                    <%--<thead>--%>
-                    <%--<tr>--%>
-                        <%--<td>线路品牌</td>--%>
-                        <%--<td>价格/元</td>--%>
-                        <%--<td>操作</td>--%>
-                    <%--</tr>--%>
-                    <%--</thead>--%>
-                    <%--<tbody id="secondLevelPriceRow_$index">--%>
-
-                    <%--</tbody>--%>
-                <%--</table>--%>
-                <%--<a href="javascript:void(0);"--%>
-                   <%--onclick="addSecLevelPriceInfoRow('$index', 'secondLevelPriceRow_$index', 'secondLevelPriceData');">添加</a>--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<textarea id="priceVoList[$index].supplierContractPrice.note" class="control-row4 input-large"--%>
-                          <%--name="priceVoList[$index].supplierContractPrice.note"></textarea>--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<a href="javascript:void(0)" onclick="deletePrice(this);">删除</a>--%>
-            <%--</td>--%>
-        <%--</tr>--%>
-        <%--</tbody>--%>
-    <%--</table>--%>
-<%--</div>--%>
-<%--<div id="hotelPriceData" style="display : none;">--%>
-    <%--<table class="table-style1">--%>
-        <%--<tbody>--%>
-        <%--<tr>--%>
-            <%--<td>--%>
-                <%--<select name="priceVoList[$index].supplierContractPrice.itemType"--%>
-                        <%--onchange="$(this).next('input').val(this.options[this.selectedIndex].text);">--%>
-                    <%--<option value="">请选择</option>--%>
-                <%--</select>--%>
-                <%--<input type="hidden" name="priceVoList[$index].supplierContractPrice.itemTypeName" value=""/>--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<select name="priceVoList[$index].supplierContractPrice.itemType2"--%>
-                        <%--onchange="$(this).next('input').val(this.options[this.selectedIndex].text);">--%>
-                    <%--<option value="">请选择</option>--%>
-                <%--</select>--%>
-                <%--<input type="hidden" name="priceVoList[$index].supplierContractPrice.itemType2Name" value=""/>--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<input id="priceVoList[$index].supplierContractPrice.contractPrice" type="text"--%>
-                       <%--name="priceVoList[$index].supplierContractPrice.contractPrice"/> 元--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--满 <input id="priceVoList[$index].supplierContractPrice.derateReach" type="text"--%>
-                         <%--name="priceVoList[$index].supplierContractPrice.derateReach"/> 免 <input--%>
-                    <%--id="priceVoList[$index].supplierContractPrice.derateReduction" type="text"--%>
-                    <%--name="priceVoList[$index].supplierContractPrice.derateReduction"/>--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<textarea id="priceVoList[$index].supplierContractPrice.note" class="control-row4 input-large"--%>
-                          <%--name="priceVoList[$index].supplierContractPrice.note"></textarea>--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<a href="javascript:void(0)" onclick="deletePrice(this);">删除</a>--%>
-            <%--</td>--%>
-        <%--</tr>--%>
-        <%--</tbody>--%>
-    <%--</table>--%>
-<%--</div>--%>
-
-<%--<div id="secondLevelPriceData" style="display: none;">--%>
-    <%--<table class="table-style1">--%>
-        <%--<tbody>--%>
-        <%--<tr>--%>
-            <%--<td>--%>
-                <%--<select name="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.brandId"--%>
-                        <%--onchange="$(this).next('input').val(this.options[this.selectedIndex].text);">--%>
-                    <%--<option value="">请选择</option>--%>
-                <%--</select>--%>
-                <%--<input type="hidden"--%>
-                       <%--name="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.brandName"--%>
-                       <%--value=""/>--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<input id="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.price" type="text"--%>
-                       <%--name="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.price"/> 元--%>
-            <%--</td>--%>
-            <%--<td>--%>
-                <%--<a href="javascript:void(0)" onclick="deleteSecondLevelPrice(this, '$index');">删除</a>--%>
-            <%--</td>--%>
-        <%--</tr>--%>
-        <%--</tbody>--%>
-    <%--</table>--%>
-<%--</div>--%>
 <script type="text/html" id="imgTemp">
     <span class="ulImg">
         <img src="$src" alt="$name"><i class="icon_del delImg" ></i>
@@ -1149,6 +1032,8 @@
         var $shopPriceTable = $('#shopPrice');
         var $fleetPriceTable = $('#fleetPrice');
         var $hotelPriceTable = $('#hotelPrice');
+        var $deliveryPriceTable = $('#DeliveryPrice');
+        
         var supplierType = $('#supplierType').val();
         if (supplierType == 1) {
             $contractInfo.html($('#agency').html());
@@ -1157,7 +1042,12 @@
             if (supplierType == '${SHOPPING}') {
                 $('#priceTable').html($shopPriceTable.html());
 //                    addPriceInfoRow('shopPriceRow', 'shopPriceData');
-            } else if (supplierType == '${FLEET}') {
+            } else if('temp' == '${deliveryType}'){
+                //console.log($deliveryPriceTable.html());
+                $('#priceTable').html($deliveryPriceTable.html());
+                addPriceInfoRow('DeliveryPriceRow', 'DeliveryPriceData');
+                addSecLevelPriceInfoRow('0', 'secondLevelPriceRow_0', 'secondLevelPriceData');
+            }else if (supplierType == '${FLEET}') {
                 $('#priceTable').html($fleetPriceTable.html());
 //                    addPriceInfoRow('fleetPriceRow', 'fleetPriceData');
 //                    addSecLevelPriceInfoRow('0', 'secondLevelPriceRow_0', 'secondLevelPriceData');

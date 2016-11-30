@@ -73,6 +73,8 @@ public class EmployeeController extends BaseController{
 		p.setBizId(WebUtils.getCurBizId(request));
 		PlatformEmployeePoDTO dto = new PlatformEmployeePoDTO();
 		dto.setPlatformEmployeePo(p);
+		if (null == p.getStatus())
+			p.setStatus(1);
 		PageBean employeeList = sysPlatformEmployeeFacade.getEmployeeList(dto, p.getPage());
 		modelMap.addAttribute("empList", employeeList);
 		modelMap.addAttribute("p",p);

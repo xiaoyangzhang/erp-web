@@ -111,8 +111,10 @@
 									test="${optMap['YDAP_INSURANCE'] && (booking.stateFinance==null || booking.stateFinance==0 ) && booking.stateBooking==0 }">
 									<a class="def" href="javascript:void(0)"
 										onclick="confirm(this,${booking.id })">确认</a>
-								</c:if> <a class="def" href="javascript:void(0)"
-								onclick="printOrder(${booking.id})">打印</a> <c:if
+								</c:if> 
+								<a class="def" href="javascript:void(0)" onclick="printOrder(${booking.id})">打印预订单</a> 
+								<a class="def" href="javascript:void(0)" onclick="printInsure(${booking.groupId})">打印投保单</a> 
+								<c:if
 									test="${optMap['YDAP_INSURANCE'] && (booking.stateFinance==null || booking.stateFinance==0 ) }">
 									<a class="def" href="javascript:void(0)"
 										onclick="newWindow('修改保险订单','<%=staticPath %>/booking/toAddInsurance?groupId=${booking.groupId }&bookingId=${booking.id}')">修改</a>
@@ -179,8 +181,12 @@
 	function printOrder(id){
 		location.href="download.htm?bookingId="+id ; //供应商确认订单
 		
+		
 	}
-	
+	function printInsure(groupId){
+		location.href="<%=ctx%>/tourGroup/downloadInsure.htm?groupId="+groupId ; //供应商确认订单 
+		
+	}
 	function refresh(){
 		window.location.href=window.location.href;
 	}

@@ -176,9 +176,9 @@
 													</select>
 												</td>
 												<td><input type="text" name="itemDate" id="itemDate" class="Wdate" value="<fmt:formatDate value="${detail.itemDate}" pattern="yyyy-MM-dd" />" /></td>
-												<td><input type="text" name="ticketDeparture" class="IptText300" value="${detail.ticketDeparture }" /></td>
-												<td><input type="text" name="ticketArrival"  class="IptText300" value="${detail.ticketArrival }" /></td>
-												<td><input type="text" name="ticketFlight"  class="IptText300" value="${detail.ticketFlight }" /></td>
+												<td><input type="text" name="ticketDeparture" class="IptText60" value="${detail.ticketDeparture }" /></td>
+												<td><input type="text" name="ticketArrival"  class="IptText60" value="${detail.ticketArrival }" /></td>
+												<td><input type="text" name="ticketFlight"  class="IptText60" value="${detail.ticketFlight }" /></td>
 												<td><input class='input-w80' type="text" name="itemNum" id="itemNum" value="<fmt:formatNumber value="${detail.itemNum}" pattern="#.##" type="number"/>" /></td>
 												<td><input type="text" name="itemPrice" id="itemPrice" value="<fmt:formatNumber value="${detail.itemPrice}" pattern="#.##" type="number"/>" class="input-w80" /></td>
 												<td><input type="text" id="itemNumMinus" name="itemNumMinus" value="<fmt:formatNumber value="${detail.itemNumMinus }" pattern="#.##" type="number"/>" class="input-w80" /></td>

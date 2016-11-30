@@ -118,6 +118,8 @@ $(function(){
 var addPriceInfoRow = function(elementId, templateId){
     var html = $('#' + templateId).find('table').find('tbody').html();
     var count = $('#' + elementId).children('tr').length;
+
+
     html = html.replace(/\$index/g, count);
     $('#' + elementId).append(html);
     var itemType = $("#priceVoList\\[" + count + "\\]\\.supplierContractPrice\\.itemType");

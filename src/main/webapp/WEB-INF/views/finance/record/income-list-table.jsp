@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+shopVerifyList.jsp<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%
@@ -54,7 +54,7 @@
 				<td style="text-align: left;" >${item.supplier_name}</td>
 				<td>${item.operator_name}</td>
 				<td>
-					<c:if test="${not empty item.total_adult}">${item.total_adult}大</c:if><c:if test="${not empty item.total_child}">${item.total_child}小</c:if><c:if test="${not empty item.total_guide}">${item.total_guide}陪</c:if>
+					<c:if test="${not empty item.num_adult}">${item.num_adult}大</c:if><c:if test="${not empty item.num_child}">${item.num_child}小</c:if><c:if test="${not empty item.num_guide}">${item.num_guide}陪</c:if>
 				</td>
 				<td><fmt:formatNumber value="${item.total }" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${item.total_cash }" pattern="#.##"/></td>

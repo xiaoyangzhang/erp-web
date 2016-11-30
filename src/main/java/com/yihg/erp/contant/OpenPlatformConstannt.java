@@ -10,8 +10,7 @@ public class OpenPlatformConstannt {
     public static final Map<String, String> openAPI_AssistantMap = new HashMap<String, String>();
     
     static {
-//        openAPI_AssistantMap.put("Url", "http://localhost:9876/yihg-open-api/assistantGroup/");
-                //openAPI_AssistantMap.put("Url", "http://open.lvdao100.com/assistantGroup/");
+        //openAPI_AssistantMap.put("Url", "http://localhost:9876/yihg-open-api/assistantGroup/");
         openAPI_AssistantMap.put("Url", "http://172.16.1.164:8080/assistantGroup/");
         openAPI_AssistantMap.put("appKey", "57253556");
         openAPI_AssistantMap.put("secretKey", "d95tu574dec5d04aece19d76db4b376n");
@@ -24,10 +23,11 @@ public class OpenPlatformConstannt {
     public static final Map<String, String> openAPI_OrderMap = new HashMap<String, String>();
     
     static {
-        openAPI_OrderMap.put("Url", "http://localhost:9876/yihg-open-api/transferOrder/");
-        // openAPI_AssistantMap.put("Url", "http://open.lvdao100.com/transferOrder/");
-        openAPI_OrderMap.put("appKey", "57253556");
-        openAPI_OrderMap.put("secretKey", "d95tu574dec5d04aece19d76db4b376n");
+        //openAPI_OrderMap.put("Url", "http://localhost:9876/yihg-open-api/transferOrder/");
+        openAPI_AssistantMap.put("Url", "http://http://172.16.1.164:8080/transferOrder/");
+//        openAPI_OrderMap.put("appKey", "57253556");
+//        openAPI_OrderMap.put("secretKey", "d95tu574dec5d04aece19d76db4b376n");
+        openAPI_OrderMap.put("pushMethod", "importErp.do");
         openAPI_OrderMap.put("callMethod", "getOrder.do");
     }
     

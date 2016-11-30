@@ -1,11 +1,13 @@
 package com.yihg.erp.controller.sys.security;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -24,10 +26,13 @@ import com.yihg.erp.contant.SysConfigConstant;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.MD5Util;
 import com.yihg.erp.utils.WebUtils;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
 import com.yimayhd.erpcenter.dal.sys.po.LoginLogPo;
+import com.yimayhd.erpcenter.dal.sys.po.MsgInfoDetail;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
 import com.yimayhd.erpcenter.dal.sys.po.UserSession;
+import com.yimayhd.erpcenter.facade.sales.service.GuestFacade;
 import com.yimayhd.erpcenter.facade.sys.query.UserSessionDTO;
 import com.yimayhd.erpcenter.facade.sys.result.PlatformEmployeeResult;
 import com.yimayhd.erpcenter.facade.sys.result.SysBizInfoResult;
@@ -55,6 +60,8 @@ public class LoginController extends BaseController {
 //	private SysBizConfigService sysBizConfigService;
 	@Autowired
 	private SysLoginFacade sysLoginFacade;
+    @Autowired
+    private GuestFacade guestFacade;
 	//@Resource
 	//private IMsgSender msgSender;
 	
@@ -63,9 +70,11 @@ public class LoginController extends BaseController {
 		return "login";
 	}
 	
-	@RequestMapping(value="login.do",method=RequestMethod.POST)
-	public String login(HttpServletRequest request,HttpServletResponse response,String verify,String loginName,String password,String code,RedirectAttributesModelMap attrModel){
-		/*String sessionId = null;
+    @RequestMapping(value = "login.do", method = RequestMethod.POST)
+    public String login(HttpServletRequest request, HttpServletResponse response, String verify,
+            String loginName, String password, String code, RedirectAttributesModelMap attrModel,
+            HttpSession httpSession) {
+    	/*String sessionId = null;
 	    Cookie[] cookies = request.getCookies();
 	    if(null!=cookies){
 	        for(Cookie cookie : cookies){
@@ -170,21 +179,35 @@ public class LoginController extends BaseController {
 				//addLoginLog(request,platformEmployeePo);
 				
 				attrModel.addFlashAttribute("userSession", userSession);
-				return "redirect:index.htm";
-			}
-			else{
-				attrModel.addFlashAttribute("loginName", loginName);
-				attrModel.addFlashAttribute("code", code);
-				attrModel.addFlashAttribute("errMsg", "用户名密码不匹配！");
-				return "redirect:login.htm";
-			}
-		}
-		else{
-			attrModel.addFlashAttribute("loginName", loginName);
-			attrModel.addFlashAttribute("code", code);
-			attrModel.addFlashAttribute("errMsg", "用户名不存在！");
-			return "redirect:login.htm";
-		}
+                // WebSocket session设置
+                httpSession.setAttribute("userSession", userSession);
+
+                // 获取消息
+                MsgInfoDetail msgInfoDetail = sysLoginFacade.findMsgCountByUserId(bizId,
+                        platformEmployeePo.getEmployeeId());
+                if (msgInfoDetail != null){
+                    attrModel.addFlashAttribute("totalCount", msgInfoDetail.getTotalCount());
+                    attrModel.addFlashAttribute("readCount", msgInfoDetail.getReadCount());
+                    attrModel.addFlashAttribute("unreadCount", msgInfoDetail.getUnreadCount());
+                }else{
+                	 attrModel.addFlashAttribute("totalCount", 0);
+                     attrModel.addFlashAttribute("readCount", 0);
+                     attrModel.addFlashAttribute("unreadCount", 0);
+                }
+
+                return "redirect:index.htm";
+            } else {
+                attrModel.addFlashAttribute("loginName", loginName);
+                attrModel.addFlashAttribute("code", code);
+                attrModel.addFlashAttribute("errMsg", "用户名密码不匹配！");
+                return "redirect:login.htm";
+            }
+        } else {
+            attrModel.addFlashAttribute("loginName", loginName);
+            attrModel.addFlashAttribute("code", code);
+            attrModel.addFlashAttribute("errMsg", "用户名不存在！");
+            return "redirect:login.htm";
+        }
 		
 	}
 	
@@ -225,4 +248,74 @@ public class LoginController extends BaseController {
 	    }
 	    return null;
 	}
+	
+	 @RequestMapping(value = "visa")
+	    public String visa(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
+	        return "visa";
+	    }
+	    
+	    @RequestMapping(value = "visa.do", method = RequestMethod.POST)
+	    public String visa(HttpServletRequest request, HttpServletResponse response, String verify,
+	            String loginName, RedirectAttributesModelMap attrModel, HttpSession httpSession) {       
+	         if(StringUtils.isBlank(verify)){
+	        	 attrModel.addFlashAttribute("loginName", loginName);
+	        	 attrModel.addFlashAttribute("errMsg", "验证码不能为空！"); 
+	        	 return  "redirect:visa.htm"; 
+	         } 
+	         String codeInCookie = getVerifyCode(request);
+	          //添加一个万能验证码 
+	          if(!verify.equals("m^9A") && (codeInCookie==null || !codeInCookie.equals(MD5Util.MD5(verify)))){
+		          attrModel.addFlashAttribute("loginName", loginName);
+		          attrModel.addFlashAttribute("errMsg", "验证码有误！"); 
+		          return "redirect:visa.htm";
+	          }
+	         
+	        if (StringUtils.isBlank(verify) || StringUtils.isBlank(loginName)) {
+	            attrModel.addFlashAttribute("loginName", loginName);
+	            attrModel.addFlashAttribute("verify", verify);
+	            attrModel.addFlashAttribute("errMsg", "手机号或验证码不能为空！");
+	            return "redirect:visa.htm";
+	        }
+
+	        //根据手机号获取用户信息
+//	        List<GroupOrderGuest> groupOrderGuestList = guestFacade
+//	                .getEmployeeByMobile(loginName);
+	        List<GroupOrderGuest> groupOrderGuestList=guestFacade.getEmployeeByMobile(loginName).getGroupOrderGuestList();
+	        
+	        if (groupOrderGuestList.size() >0) {
+	        	for(GroupOrderGuest groupOrderGuest : groupOrderGuestList){
+	        		
+	        	
+		        	if(loginName.equals(groupOrderGuest.getMobile())){
+		        	UserSession userSession = new UserSession();
+		        	userSession.setLoginName(groupOrderGuest.getMobile());
+		        	String uuid = UUID.randomUUID().toString();
+		            String sessionId = uuid.substring(0, 8) + uuid.substring(9, 13)
+		                    + uuid.substring(14, 18) + uuid.substring(19, 23) + uuid.substring(24);
+		
+		            Cookie cookie = new Cookie(SecurityConstant.USER_LOGIN_SESSION_KEY, sessionId);
+		            cookie.setPath("/");
+		            response.addCookie(cookie);
+		            UserSessionDTO userSessionDTO=new UserSessionDTO();
+		            userSessionDTO.setUserSession(userSession);
+		            sysLoginFacade.setUserSession(sessionId,
+		                    SysConfigConstant.SESSION_TIMEOUT_SECONDS, userSessionDTO);
+		
+		            attrModel.addFlashAttribute("userSession", userSession);
+		
+		            httpSession.setAttribute("userSession", userSession);
+		            } else {
+		                attrModel.addFlashAttribute("loginName", loginName);
+		                attrModel.addFlashAttribute("errMsg", "手机号不匹配！");
+		                return "redirect:visa.htm";
+		            }
+	        	}
+	        	return "redirect:taobao/visaDetail.do?mobile="+loginName;
+	        } else {
+	            attrModel.addFlashAttribute("loginName", loginName);
+	            attrModel.addFlashAttribute("errMsg", "手机号不存在！");
+	            return "redirect:visa.htm";
+	        }
+	    	
+	    }
 }

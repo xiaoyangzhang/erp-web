@@ -2,25 +2,25 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-
+<%
+	String path = request.getContextPath();
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <%@ include file="../../../include/top.jsp"%>
-  <script type="text/javascript">
-	
+<script type="text/javascript">
 	$(function() {
 		var vars={
-   			 dateFrom : $.currentMonthFirstDay(),
+   			 dateFrom : $.currentMonthFirstDay2(-3),
    		 	dateTo : $.currentMonthLastDay()
    		 	};
 		 $("input[name='startTime']").val(vars.dateFrom);
-		 $("input[name='endTime']").val(vars.dateTo ); 
+		 //$("input[name='endTime']").val(vars.dateTo ); 
 });
-	</script>
-<script type="text/javascript"
-	src="<%=ctx%>/assets/js/web-js/sales/taobaoOrderList.js"></script>
-
+</script>
+<script type="text/javascript" src="<%=ctx%>/assets/js/web-js/sales/taobaoOrderList.js"></script>
 <script type="text/javascript">
 $(function(){
 		  $("#ckAll").live("click",function(){
@@ -30,106 +30,108 @@ $(function(){
 		    var $subs = $("input[name='chkGroupOrder']");
 		    $("#ckAll").prop("checked" , $subs.length == $subs.filter(":checked").length ? true :false);
 		  });
-		
 	});
-
-	
 </script>
-
+<script type="text/javascript">
+<!-- 回车事件 -->
+document.onkeydown = function (e) { 
+	var theEvent = window.event || e; 
+	var code = theEvent.keyCode || theEvent.which; 
+	if (code == 13) { 
+	$("#order_btn_key").click(); 
+	} 
+}
+</script>
 </head>
 <body>
 	<%@ include file="/WEB-INF/views/component/org-user/org_user_multi.jsp"%>
 	<div class="p_container">
-		<div class="p_container_sub pl-10 pr-10">
-			<dl class="p_paragraph_content">
+	<div class="p_container_sub">
+			<div class="searchRow">
 				<form method="post" id="specialGroupListForm">
 					<input type="hidden" name="page" id="orderPage" value="${page.page }">
 					<input type="hidden" name="pageSize" id="orderPageSize" value="${page.pageSize}">
-					
-					<dd class="inl-bl">
-						<div class="dd_left"style="width:100px;">
+					<input type="hidden" name="byType" id="byType" value="1">
+					<ul>
+						<li class="text">
 							<select name="dateType" id="dateType">
 								<option value="1">出团日期</option>
 								<option value="2">输单日期</option>
 							</select>
-						</div>
-						<div class="dd_right ">
+						</li>
+						<li>
 							<input name="startTime" id="startTime" type="text"  class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})"/> 
 							~ 
 							<input name="endTime" id="endTime"  type="text"  class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />
-						&nbsp; &nbsp; 团号：　<input name="groupCode" id="groupCode" type="text" />
-						&nbsp; &nbsp; 客户:　<input name="supplierName" id="supplierName" type="text" />
-						&nbsp; &nbsp; 客人： <input name="receiveMode" id="receiveMode" type="text" />
-						&nbsp; &nbsp; 业务类型：<select name="GroupMode" id="GroupMode">
+						</li>
+						<li class="text">团号:</li><li><input name="groupCode" id="groupCode" type="text" /> </li>
+						<li class="text">客人:</li><li><input name="receiveMode" id="receiveMode" type="text" style="width: 184px;"/> </li>
+						<li class="text">旺旺号:</li><li><input name="buyerNick" id="buyerNick" type="text" /> </li>
+					</ul>
+					<ul>
+						<li class="text">平台来源:</li><li><input name="supplierName" id="supplierName" type="text" style="width: 186px;"/> </li>
+						<li class="text">游客姓名:</li><li><input name="guestName" id="guestName" type="text" /> </li>
+						<li class="text">电话:</li><li><input name="mobile" id="mobile" type="text" style="width: 184px;"/> </li>
+						<li class="text">业务:</li><li>
+						<select name="orderMode" id="orderMode">
 								<option value="">请选择</option>
 							<c:forEach items="${typeList}" var="v" varStatus="vs">
-								<option value="${v.id}"<c:if test='${vo.groupOrder.tourGroup.groupMode==v.id}'>selected='selected'</c:if> >${v.value}</option>
+								<option value="${v.id}">${v.value}</option>
 							</c:forEach>		
 							</select>
-						&nbsp; &nbsp; 审核状态: <select name="stateFinance" id="stateFinance">
-								<option value="">全部</option>
-								<option value="0">未审核</option>
-								<option value="1">已审核</option>
-							</select>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">
-							部门:
-						</div>
-						<div class="dd_right">
-	    				<input type="text" name="orgNames" id="orgNames" stag="orgNames"readonly="readonly" onclick="showOrg()"/>
-						<input name="orgIds" id="orgIds" stag="orgIds" type="hidden" />	
-						<select name="operType">
-								<option value="1">销售计调</option>
-								<option value="2">操作计调</option>
-								<option value="3">输单员</option>
-							</select>
-							<input type="text" name="saleOperatorName" stag="userNames" readonly="readonly"  onclick="showUser()"/> 
-							<input name="saleOperatorIds" id="saleOperatorIds" stag="userIds" type="hidden" />
-						&nbsp; &nbsp; 产品：<select name="productBrandId" id="productBrandId"><option value=""
+						</li>
+					</ul>
+					<ul>
+					<li class="text">部门:</li>
+						<li>
+							<input type="text" name="orgNames" id="orgNames" stag="orgNames"readonly="readonly" onclick="showOrg()"  style="width: 185px;"/>
+							<input name="orgIds" id="orgIds" stag="orgIds" type="hidden" />
+						</li>
+						<li class="text">
+							<select name="operType" id="operType">
+								<option value="1">销售</option>
+								<option value="2">计调</option>
+								<option value="3">输单</option>
+							</select>:
+						</li>
+						<li>
+							<input type="text" name="saleOperatorName" stag="userNames" readonly="readonly" value="${curUser }" onclick="showUser()"/> 
+							<input name="saleOperatorIds" id="saleOperatorIds" stag="userIds" type="hidden" value="${curUserId }" />
+						</li>
+						<li class="text">产品:</li>
+						<li>
+							<select name="productBrandId" id="productBrandId" style="width: 64px;"><option value=""
 									selected="selected">全部</option>
 								<c:forEach items="${pp}" var="pp">
 									<option value="${pp.id}">${pp.value }</option>
 								</c:forEach>
-							</select>　<input name="productName" id="productName" type="text" 　placeholder="请输入产品名称"/>
+							</select><input name="productName" id="productName" type="text" 　placeholder="请输入产品名称" style="width: 121px;"/>
+						</li>
 						
-							&nbsp; &nbsp; 客源地：<select name="provinceId" id="provinceCode">
-								<option value="-1">请选择省</option>
-								<c:forEach items="${allProvince }" var="province">
-									<option value="${province.id }">${province.name}</option>
-								</c:forEach>
-							</select> 
-							<select name="cityId" id="cityCode">
-								<option value="-1">请选择市</option>
-								<c:forEach items="${allCity }" var="city">
-									<option value="${city.id }">${city.name }</option>
-								</c:forEach>
+						<li class="text">状态:</li><li> <select name="stateFinance" id="stateFinance">
+								<option value="">审核状态</option>
+								<option value="0">未审核</option>
+								<option value="1">已审核</option>
+							</select><select name="orderLockState" id="orderLockState">
+								<option value="">流程状态</option>
+								<option value="0">未提交</option>
+								<option value="1">接收中</option>
+								<option value="2">已接收</option>
 							</select>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					
-					
-					
-					
-					
-					<dd class="inl-bl">
-						<div class="dd_right">
-							<button type="button" onclick="searchBtn()" class="button button-primary button-small">查询</button>
+						</li>
+						<li style="padding-left:10px">
+							<button id="order_btn_key" type="button" onclick="searchBtn()" class="button button-primary button-small">查询</button>
 							<button type="button" onclick="addNewSpecialGroup()" class="button button-primary button-small">新增订单</button>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					
+							<a href="javascript:void(0);" id="toOperatorExcelId" target="_blank" onclick="toOperatorExcel()" class="button button-primary button-small">导出到Excel</a>
+						</li>
+						<li class="clear"></li>
+					</ul>
 				</form>
-			</dl>
-			<dl class="p_paragraph_content">
-		
-					<div id="content"></div>
-			</dl>
-	    </div>
+			</div>
+		</div>
+		<dl class="p_paragraph_content">
+			<div id="content"></div>
+		</dl>
 	</div>
 </body>
 <div id="stateModal" style="display: none">
@@ -155,5 +157,43 @@ $(function(){
 function  addNewSpecialGroup(){
 	newWindow('新增订单','taobao/addNewTaobaoOrder.htm');
 }
+
+/* 导出到Excel */
+function toOperatorExcel(){
+	$("#toOperatorExcelId").attr("href","toOrderPreview.htm?startTime="+$("#startTime").val()
+			+"&endTime="+$("#endTime").val()
+			+"&dateType="+$("#dateType").val()
+			+"&groupCode="+$("#groupCode").val()
+			+"&supplierName="+$("#supplierName").val()
+			+"&receiveMode="+$("#receiveMode").val()
+			+"&orderMode="+$("#orderMode").val()
+			+"&stateFinance="+$("#stateFinance").val()
+			+"&buyerNick="+$("#buyerNick").val()
+			+"&guestName="+$("#guestName").val()
+			+"&orderLockState="+$("#orderLockState").val()
+			+"&orgIds="+$("#orgIds").val()
+			+"&operType="+$("#operType").val()
+			+"&saleOperatorIds="+$("#saleOperatorIds").val()
+			+"&productBrandId="+$("#productBrandId").val()
+			+"&productName="+$("#productName").val() 
+			+"&page="+$("#orderPage").val()
+			+"&pageSize="+$("#orderPageSize").val());
+}
+
+
+function goLogStock(orderId){
+    showInfo("订单日志","950px","550px","<%=staticPath%>/basic/singleList.htm?tableName=group_order&tableId=" + orderId);
+}
+
+function showInfo(title,width,height,url){
+    layer.open({ 
+        type : 2,
+        title : title,
+        shadeClose : true,
+        shade : 0.5,        
+        area : [width,height],
+        content : url
+    });
+ }
 </script>
 </html>

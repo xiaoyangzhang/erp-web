@@ -24,6 +24,10 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
+import com.yimayhd.erpcenter.dal.product.po.*;
+import com.yimayhd.erpcenter.facade.result.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.http.HttpEntity;
@@ -52,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -72,11 +77,6 @@ import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
 import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.common.contants.BasicConstants;
-import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
-import com.yimayhd.erpcenter.dal.product.po.ProductGroupSeller;
-import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
-import com.yimayhd.erpcenter.dal.product.po.ProductRemark;
-import com.yimayhd.erpcenter.dal.product.po.ProductRoute;
 import com.yimayhd.erpcenter.dal.product.vo.ProductInfoVo;
 import com.yimayhd.erpcenter.dal.product.vo.ProductRouteVo;
 import com.yimayhd.erpcenter.dal.product.vo.StockStaticCondition;
@@ -85,12 +85,6 @@ import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.facade.query.ProductPriceListDTO;
 import com.yimayhd.erpcenter.facade.query.ProductSaveDTO;
 import com.yimayhd.erpcenter.facade.query.ToSearchListStateDTO;
-import com.yimayhd.erpcenter.facade.result.ProductInfoResult;
-import com.yimayhd.erpcenter.facade.result.ProductPriceListResult;
-import com.yimayhd.erpcenter.facade.result.ResultSupport;
-import com.yimayhd.erpcenter.facade.result.ToProductAddResult;
-import com.yimayhd.erpcenter.facade.result.ToSearchListStateResult;
-import com.yimayhd.erpcenter.facade.result.WebResult;
 import com.yimayhd.erpcenter.facade.service.ProductFacade;
 import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
 
@@ -504,6 +498,70 @@ public class ProductInfoController extends BaseController {
 		model.addAttribute("aiyouProduct_Msg", MsgStr);
 		
 		return "product/productAY_list_table";
+	}
+
+	/**
+	 * 淘宝产品/库存
+	 *
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping("taobaoProducts.htm")
+	public String taobaoProducts(HttpServletRequest request, Model model) {
+		return "product/taobaoProducts";
+	}
+
+
+	/**
+	 * @author : liyong
+	 * @Description: 跳转至淘宝产品管理页面
+	 */
+	@RequestMapping(value = "/taobaoProductList.htm")
+	@RequiresPermissions(PermissionConstants.PRODUCT_LIST_AIYOU)
+	public String taobaoProductList(HttpServletRequest request, ModelMap model) {
+		Integer bizId = WebUtils.getCurBizId(request);
+
+		TaoBaoProductListResult result = productFacade.taobaoProductList(BasicConstants.CPXL_PP, bizId);
+
+		model.addAttribute("orgJsonStr",
+				result.getOrgTreeJsonStr());
+		model.addAttribute("orgUserJsonStr",
+				result.getOrgUserTreeJsonStr());
+		model.addAttribute("brandList", result.getBrandList());
+		return "product/taobaoProductList";
+	}
+
+	@RequestMapping(value = "/taobaoProductList_table.do")
+	public String taobaoProductList_table(HttpServletRequest request, ModelMap model,
+										  TaobaoProduct taobaoProduct, String productName, String name,
+										  Integer page, Integer pageSize) {
+		// 产品名称
+		Integer bizId = WebUtils.getCurBizId(request);
+		if (page == null) {
+			page = 1;
+		}
+		PageBean pageBean = new PageBean();
+		if (pageSize == null) {
+			pageBean.setPageSize(Constants.PAGESIZE);
+		} else {
+			pageBean.setPageSize(pageSize);
+		}
+		pageBean.setParameter(taobaoProduct);
+		pageBean.setPage(page);
+
+		TaoBaoProductListResult result = productFacade.taobaoProductListTable(BasicConstants.CPXL_PP, bizId, pageBean);
+		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
+		model.addAttribute("allProvince", result.getAllProvince());
+		model.addAttribute("brandList", result.getBrandList());
+		model.addAttribute("page", result.getPageBean());
+		model.addAttribute("pageNum", page);
+		model.addAttribute("priceStateMap", priceStateMap);
+		model.addAttribute("priceMode", getPriceMode(request));
+		// model.addAttribute("apiPath", OpenPlatformConstannt.AIYOU_PRODUCT_APIMap.get("Url"));
+		model.addAttribute("userId", WebUtils.getCurUser(request).getEmployeeId());
+
+		return "product/taobaoProductList_table";
 	}
 	
 	@RequestMapping(value = "/updateAYSysId.do")
@@ -2015,7 +2073,8 @@ public class ProductInfoController extends BaseController {
 	 * @param request
 	 * @param response
 	 * @param model
-	 * @param userJson
+	 * @param insertJson
+	 * @param deleteJson
 	 * @return
 	 */
 
@@ -2062,6 +2121,58 @@ public class ProductInfoController extends BaseController {
 			return errorJson("保存失败");
 		}
 		// return ;
-
 	}
+
+	@RequestMapping(value = "/copy.htm", method = RequestMethod.GET)
+	// @RequiresPermissions(PermissionConstants.PRODUCT_LIST)
+	public String copy(HttpServletRequest request, Integer productId,
+					   ModelMap model) {
+
+		ToCopyResult result = productFacade.toCopyHtml(productId, BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
+		model.addAttribute("vo", result.getProductInfoVo());
+		model.addAttribute("productRemark", result.getProductRemark());
+
+		model.addAttribute("brandList", result.getBrandList());
+
+		PlatformEmployeePo curUser = WebUtils.getCurUser(request);
+		model.addAttribute("operatorId", curUser.getEmployeeId());
+		model.addAttribute("operatorName", curUser.getName());
+
+		model.addAttribute("config", config);
+		model.addAttribute("productId", productId);
+		return "product/info/product_copy";
+	}
+
+	/**
+	 * @author : zhoumi
+	 * @date : 2016年9月27日 下午3:24:28
+	 * @Description: 复制
+	 */
+	@RequestMapping(value = "/copyProductInfo.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String copyProductInfo(HttpServletRequest request, ProductInfoVo info, ProductRouteVo productRouteVo) {
+		if (info.getProductInfo().getId() == null) {
+			info.getProductInfo().setCreatorId(WebUtils.getCurUserId(request));
+			info.getProductInfo().setCreatorName(WebUtils.getCurUser(request).getName());
+			info.getProductInfo().setBizId(WebUtils.getCurBizId(request));
+			// 默认把自己单位加上
+			Set<Integer> orgIdSet = new HashSet<Integer>();
+			orgIdSet.add(WebUtils.getCurUser(request).getOrgId());
+			info.setOrgIdSet(orgIdSet);
+		}
+
+		ProductSaveDTO productSaveDTO = new ProductSaveDTO();
+		productSaveDTO.setProductInfoVo(info);
+		productSaveDTO.setProductRouteVo(productRouteVo);
+		WebResult<Integer> webResult =  productFacade.copyProductInfo(productSaveDTO, bizSettingCommon.getMyBizCode(request));
+		if(!webResult.isSuccess()){
+			return errorJson("操作失败！");
+		}
+		int id = webResult.getValue();
+
+
+		return id > 0 ? successJson("id", id + "") : errorJson("操作失败！");
+	}
+
+
 }

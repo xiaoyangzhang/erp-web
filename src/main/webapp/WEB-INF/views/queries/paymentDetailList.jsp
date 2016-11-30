@@ -89,8 +89,8 @@
 					<li>
 						<!-- <input type="hidden" name="type" id="type" value="0"/> -->
 						<select id="type" name="type" >
-								<option value="0" ${reqpm.type==0?'selected':"" }>计调</option>
 								<option value="1" ${reqpm.type==1?'selected':"" }>销售</option>
+								<option value="0" ${reqpm.type==0?'selected':"" }>计调</option>
 						</select></li>
 					<li>	
 					<li>

@@ -28,7 +28,7 @@ String path = request.getContextPath();
 				<dd>
 				<div class="pl-10 pr-10" style="padding-bottom: 1%;">
 					<table class="w_table">
-						<col width="30%" />
+						<col  />
 						<col width="4%" />
 						<col width="4%" />
 						<col width="7%" />
@@ -37,17 +37,16 @@ String path = request.getContextPath();
 						<col width="7%" />
 						<col width="7%" />
 						<col width="7%" />
-						<col width="12%" />
-						<col width="8%" />
+						<col width="7%" />
+						<col width="7%" />
 						<thead>
 							<tr>
 								<th rowspan="2">产品名称<i class="w_table_split"></i></th>
 								<th rowspan="2">库存<i class="w_table_split"></i></th>
 								<th rowspan="2">已售<i class="w_table_split"></i></th>
 								<th colspan="6">价格设置<i class="w_table_split"></i></th>
-								<th rowspan="2">最长预留时长<i class="w_table_split"></i></th>
+								<th rowspan="2">预留时长(分)<i class="w_table_split"></i></th>
 								<th rowspan="2">取消下限<i class="w_table_split"></i></th>
-								
 							</tr>
 							<tr>
 								<th>规格<i class="w_table_split"></i></th>
@@ -59,14 +58,13 @@ String path = request.getContextPath();
 							</tr>
 						</thead>
 						<tbody>
-							<tr>
+								<td rowspan="3">
 									<input type="hidden" id="productId" name="productCode" value="${resProductBean.productCode }"/>
 									<input type="hidden" id="pid" name="id" value="${resProductBean.id}"/>
 									<input type="hidden" id="m_res_id" name="resId" value="${resProductBean.resId}"/>
 									<input type="hidden" name="numSold" value="${resProductBean.numSold}"/>
 									<input type="hidden" name="userId" value="${resProductBean.userId}"/>
 									<input type="hidden" name="userName" value="${resProductBean.userName}"/>
-								<td rowspan="3">
 									<c:choose>
 										<c:when test="${resProductBean.numSold>0 }">
 											<input readonly="readonly" class="input_pn" id="productName_id" type="text" name="productName" value="${resProductBean.productName }"/>
@@ -78,14 +76,8 @@ String path = request.getContextPath();
 									</c:choose>
 								</td>
 								<td rowspan="3">
-									<c:choose>
-										<c:when test="${resProductBean.numSold>0 }">
-											<input class="input_w" readonly="readonly"  type="text" name="numStock" value="${resProductBean.numStock }"/>
-										</c:when>
-										<c:otherwise>
-											<input class="input_w" type="text" name="numStock" value="${resProductBean.numStock }"/>
-										</c:otherwise>
-									</c:choose>
+									<input type="hidden" name="numStock" value="${resProductBean.numStock }"/>
+									${resProductBean.numStock }
 								</td>
 								<td rowspan="3">
 									${resProductBean.numSold }
@@ -104,7 +96,7 @@ String path = request.getContextPath();
 									<input class="input_w" type="text" name="adultProxyPay" value="<fmt:formatNumber value="${resProductBean.adultProxyPay }" type="currency" pattern="#.##"/>"/>
 								</td>
 								<td>
-									<input class="input_w" type="text"  name="adultMinDeposit" value="<fmt:formatNumber value="${resProductBean.adultMinDeposit }" type="currency" pattern="#.##"/>""/>
+									<input class="input_w" type="text"  name="adultMinDeposit" value="<fmt:formatNumber value="${resProductBean.adultMinDeposit }" type="currency" pattern="#.##"/>"/>
 								</td>
 								<td rowspan="3">
 									<input class="input_w" type="text" name="reserveTime" value="${resProductBean.reserveTime }"/>
@@ -116,15 +108,12 @@ String path = request.getContextPath();
 								</td>
 							</tr>
 							<tr>
-								<td>儿童价<br/>(2岁以上)
-								</td>
-								
+								<td>儿童价<br/>(2岁以上)</td>
 								<td><input class="input_w" type="text" name="childCostPrice" value="<fmt:formatNumber value="${resProductBean.childCostPrice }" type="currency" pattern="#.##"/>"/></td>
 								<td><input class="input_w" type="text" name="childSuggestPrice" value="<fmt:formatNumber value="${resProductBean.childSuggestPrice }" type="currency" pattern="#.##"/>"/></td>
 								<td><input class="input_w" type="text" name="childSamePay" value="<fmt:formatNumber value="${resProductBean.childSamePay }" type="currency" pattern="#.##"/>"/></td>
 								<td><input class="input_w" type="text" name="childProxyPay" value="<fmt:formatNumber value="${resProductBean.childProxyPay }" type="currency" pattern="#.##"/>"/></td>
 								<td><input class="input_w" type="text" name="childMinDeposit" value="<fmt:formatNumber value="${resProductBean.childMinDeposit }" type="currency" pattern="#.##"/>"/></td>
-		
 							</tr>
 							<tr>
 								<td>婴儿价<br/>(0~2岁)</td>

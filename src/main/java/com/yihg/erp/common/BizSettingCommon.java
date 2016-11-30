@@ -19,6 +19,7 @@ public class BizSettingCommon {
 	private SysPlatformOrgFacade platformOrgFacade;
 	@Resource
 	private SysConfig config;
+	
 	/**
 	 * 获取当前公司或商家编码
 	 * TODO 设置开关：有的公司取商家编码，有的公司取公司编码
@@ -53,5 +54,23 @@ public class BizSettingCommon {
 			return config.getImgServerUrl()+logo;
 		}
 		return null;
+	}
+	
+	/**
+	 * 根据orgId向上遍历查找 登录者对应的默认组团社信息
+	 * @param orgId
+	 * @return [0]为supplierId, [1]为supplierName
+	 */
+	public String[] getOrgMappingSupplierId(Integer orgId){
+		return platformOrgFacade.getOrgMappingSupplierId(orgId);
+//		String ret[] = new String[]{"0",""};
+//		String SupplierId = orgService.getMappingSupplierIdByOrgId(orgId); 
+//		if(!"0".equals(SupplierId)){
+//			SupplierInfo supInfo = supplierService.selectBySupplierId(Integer.valueOf(SupplierId));
+//			if (supInfo != null)
+//				ret[1] = supInfo.getNameFull();
+//			ret[0] = SupplierId;
+//		}
+//		return ret;
 	}
 }

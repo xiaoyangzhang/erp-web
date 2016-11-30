@@ -1,7 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@taglib uri="http://yihg.com/custom-taglib" prefix="cf" %>
+<%@ taglib uri="http://yihg.com/custom-taglib" prefix="cf" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String path = request.getContextPath();
@@ -13,7 +13,7 @@
     <%@ include file="/WEB-INF/include/top.jsp" %>
     <link rel="stylesheet" type="text/css" href="<%=staticPath%>/assets/css/product/product_detail.css"/>
 </head>
-<body>
+<body class="blank_body_bg">
 <div class="mainbody">
     <div class="bodytop">
     	<input type="hidden" name="productId" id="productId" value="${productInfoVo.productInfo.id }" />
@@ -22,7 +22,7 @@
         <div class="banner">
             <ul id="banner_list">
             	<c:if test="${empty productInfoVo.productAttachments }">
-            		<li><img style="width:360px;height:360px;" src="<%=staticPath%>/assets/img/default_product_cover.jpg"/></li>
+            		<li><img style="width:560px;height:360px;" src="<%=staticPath%>/assets/img/default_product_cover.jpg"/></li>
             	</c:if>
             	<c:if test="${!empty  productInfoVo.productAttachments }">
                 <c:forEach items="${productInfoVo.productAttachments}" var="imgs">
@@ -37,7 +37,11 @@
             </ol>
         </div>
         <div class="jianjie">
-            <p>产品编号<span>${productInfoVo.productInfo.code}</span> <c:if test="${not empty productInfoVo.attachments }"><a style="float: right;" href="javascript:void(0)" onclick="openDownloadLayer()">附件下载</a></c:if></p>
+            <p>产品编号<span>${productInfoVo.productInfo.code}</span> 
+	            <c:if test="${not empty productInfoVo.attachments }">
+	            	<a style="float: right;" href="javascript:void(0)" onclick="openDownloadLayer()">附件下载</a>
+	            </c:if>
+            </p>
 
             <p>旅游天数<span>${productInfoVo.productInfo.travelDays}天</span></p>
 
@@ -55,14 +59,14 @@
 
     <div class="zhong" id="divContent">
         <ul>
-            <li><a class="d_tab selected" jump-to="tabPrice" href="javascript:void(0)" >日期和报价</a></li>
             <li><a class="d_tab" jump-to="tabDay" href="javascript:void(0)" >详细行程</a></li>
             <li><a class="d_tab" jump-to="tabRemark" href="javascript:void(0)" >备注信息</a></li>
+            <li style="display:none"><a class="d_tab selected" jump-to="tabPrice" href="javascript:void(0)" >日期和报价</a></li>
         </ul>
         <div class="clear"></div>
     </div>
 
-    <div class="day d_content" style="display: none;" id="tabDay">
+    <div class="day d_content"  id="tabDay">
 
         <div class="nav_container">
             <ul class="w_remarksNav">
@@ -184,13 +188,7 @@
 
     </div>
 
-    <div class="pri d_content" id="tabPrice">       
-        <div class="rilicontainer" style="margin-top:20px;">
-            <div id="divLeft" style="float:left; "></div>
-            <div id="divRight" style="float: right; "></div>
-            <div class="clear"></div>
-        </div>
-    </div>
+    
 
     <div class="d_content" style="display: none;" id="tabRemark">
         <div class="beizhu">
@@ -236,6 +234,15 @@
             </div>
         </div>
     </div>
+    
+    <div class="pri d_content" style="display: none;" id="tabPrice">       
+        <div class="rilicontainer" style="margin-top:20px;">
+            <div id="divLeft" style="float:left; "></div>
+            <div id="divRight" style="float: right; "></div>
+            <div class="clear"></div>
+        </div>
+    </div>
+    
     <div id="download_layer" style="display: none;">
         <c:if test="${not empty productInfoVo.attachments }">
             <c:forEach items="${productInfoVo.attachments}" var="attachment" varStatus="s">

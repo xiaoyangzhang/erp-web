@@ -293,9 +293,9 @@ function queryList(page,pageSize) {
 	if (!page || page < 1) {
 		page = 1;
 	}
-	
-	$("#searchPage").val(page);
-	$("#size").val(pageSize);
+	$("#orderPage").val(page);
+	$("#orderPageSize").val(pageSize);
+
 	var options = {
 		url:"../teamGroup/findTourGroupLoadModel.do",
     	type:"post",
@@ -311,8 +311,13 @@ function queryList(page,pageSize) {
 }
 
 function searchBtn() {
-	var pageSize=$("#size").val();
+	var pageSize=$("#orderPageSize").val();
 	queryList(1,pageSize);
+}
+function refreshCurrentPage() {
+	var page=$("#orderPage").val();
+	var pageSize=$("#orderPageSize").val();
+	queryList(page,pageSize);
 }
 /**
  * 删除订单
@@ -327,7 +332,7 @@ function deleteGroupOrderById(orderId,groupId){
 				/*$.success('操作成功');
 				window.location = window.location;*/
 				 $.success('操作成功', function(){
-	                 queryList($('input[name="page"]').val(), $('input[name="pageSize"]').val());
+					 refreshCurrentPage();
 	             });
 			}else{
 				$.warn(data.msg);
@@ -415,7 +420,7 @@ function editOrderGroupInfo(){
 		if (data.success) {
 			$.success('操作成功',function(){
 				layer.close(stateIndex);
-				searchBtn();
+				refreshCurrentPage();
 				
 			});
 			

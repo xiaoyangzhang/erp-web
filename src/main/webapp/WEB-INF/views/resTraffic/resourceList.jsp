@@ -91,9 +91,9 @@
 							<li class="text">状态</li>
 						<li>
 							<select name=state id="state" >
-								<option value="">所有</option>
 								<option value="1">上架</option>
 								<option value="0">下架</option>
+								<option value="">所有</option>
 							</select>
 						</li>
 						
@@ -114,7 +114,7 @@
 		<div id="tableDiv"></div>
 	</div>
 	
-<div id="show"style="display: none; margin: 50px 50px;">
+<%-- <div id="show"style="display: none; margin: 50px 50px;">
  		<dd>
 			<div class="dd_left">类别：</div> 
 			<div class="dd_right"  id="a"><input type="radio" name="type" value="numStock" checked="checked"/><label for="numStock"><span>库存</span></label> <input type="radio" name="type" value="numDisable" /> <label for="numDisable"><span>机动位</span></label>
@@ -133,7 +133,7 @@
 			<div class="clear"></div>
 		</dd>
 		<button type="button" onclick="stockChange_submit()"  class="button button-primary button-small" style="margin-left:100px">确定</button>
-</div>
+</div> --%>
 <div id="stateModal" style="display: none">
 		<input type="hidden" name="id" id="modalResId" />
 		<dl class="p_paragraph_content">
@@ -155,15 +155,24 @@
 <input type="hidden" id="modalResId" value="0" />
 <input type="hidden" id="modalResState" value="" />
 <script type="text/javascript">
-function stockChange_show(resId){
-	$("#modalResId").val(resId);
-	layer.open({
+
+function stockChange_show(id){
+	/* $("#modalResId").val(resId); */
+	/* layer.open({
 		type : 1,
 		title : '设置库存/机动位',
 		shadeClose : true,
 		shade : 0.5,
 		area: ['400px', '350px'],	
 		content: $("#show").show()
+	}); */
+	layer.open({
+		type : 2,
+		title : '机位库存状态',
+		shadeClose : true,
+		shade : 0.5,
+		area: ['720px', '460px'],
+		content: '<%=staticPath%>/resTraffic/toUpdateResNumStockChange.htm?id='+id
 	});
 }
 

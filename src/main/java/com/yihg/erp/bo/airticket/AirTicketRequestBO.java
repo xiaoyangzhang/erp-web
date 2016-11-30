@@ -182,13 +182,13 @@ public class AirTicketRequestBO {
     }
 
     public String getOperations(){
-    	String arrange = " <a class='button button-rounded button-tinier' href=\"javascript:doAction('arrange.do', "+this.po.getId()+")\">安排（批准）</a> ";
-    	String reject = " <a class='button button-rounded button-tinier' href=\"javascript:doAction('reject.do', "+this.po.getId()+")\">退回（不批准）</a> ";
-    	String rollback = " <a class='button button-rounded button-tinier' href=\"javascript:doAction('reject.do', "+this.po.getId()+")\">撤销（退回给计调）</a> ";
-    	String edit = " <a class='button button-rounded button-tinier' href=\"javascript:toEdit('"+this.getId()+"', '"+this.getOrderNo()+"')\">修改</a> ";
-    	String confirm = " <a class='button button-rounded button-tinier' href=\"javascript:toConfirm('"+this.getId()+"', '"+this.getOrderNo()+"')\">核对</a> ";
-    	String delete = " <a class='button button-rounded button-tinier' href=\"javascript:doAction('delete.do', "+this.po.getId()+")\">取消申请</a> ";
-    	String issue = " <a class='button button-rounded button-tinier' href=\"javascript:doAction('issue.do', "+this.po.getId()+")\">出票（已确认）</a> ";
+    	String arrange = " <a class='button button-rounded button-tinier' href=\"javascript:doAction('arrange.do', "+this.po.getId()+")\" title='安排（批准）'>安排</a> ";
+    	String reject = " <a class='button button-rounded button-tinier' href=\"javascript:doAction('reject.do', "+this.po.getId()+")\" title='退回（不批准）'>退回</a> ";
+    	String rollback = " <a class='button button-rounded button-tinier' href=\"javascript:doAction('reject.do', "+this.po.getId()+")\" title='撤销（退回给计调）'>撤销</a> ";
+    	String edit = " <a class='button button-rounded button-tinier' href=\"javascript:toEdit('"+this.getId()+"', '"+this.getOrderNo()+"')\" title=''>修改</a> ";
+    	String confirm = " <a class='button button-rounded button-tinier' href=\"javascript:toConfirm('"+this.getId()+"', '"+this.getOrderNo()+"')\" title='核对'>核对</a> ";
+    	String delete = " <a class='button button-rounded button-tinier' href=\"javascript:doAction('delete.do', "+this.po.getId()+")\" title=''>取消申请</a> ";
+    	String issue = " <a class='button button-rounded button-tinier' href=\"javascript:doAction('issue.do', "+this.po.getId()+")\" title='出票（已确认）'>出票</a> ";
     	String pickUp = " <a class='button button-rounded button-tinier' href=\"javascript:toPickUp('"+this.po.getId()+"', '"+this.getOrderNo()+"')\">接送机安排</a> ";
     	if (this.po.getStatus().equals("ARRANGING")){
     		if (this.isArrange){

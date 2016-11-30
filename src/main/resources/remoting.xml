@@ -26,219 +26,240 @@
 		/> </context:component-scan> -->
 	<!-- 采用注册中心方式配置 -->
 	<dubbo:reference id="dicFacade"
-					 interface="com.yimayhd.erpcenter.facade.basic.service.DicFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.basic.service.DicFacade" version="1.0.0.test" />
 	<dubbo:reference id="logFacade"
-					 interface="com.yimayhd.erpcenter.facade.basic.service.LogFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.basic.service.LogFacade" version="1.0.0.test" />
 
 
 	<dubbo:reference id="regionFacade"
-					 interface="com.yimayhd.erpcenter.facade.basic.service.RegionFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.basic.service.RegionFacade" version="1.0.0.test" />
 	<dubbo:reference id="imgFacade"
-					 interface="com.yimayhd.erpcenter.facade.basic.service.ImgFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.basic.service.ImgFacade" version="1.0.0.test" />
 	<dubbo:reference id="saleCommonFacade" interface="org.erpcenterFacade.common.client.service.SaleCommonFacade"
-					 version="1.0.0.test.zxy1" />
+					 version="1.0.0.test" />
 	<dubbo:reference id="commonFacade" interface="org.erpcenterFacade.common.client.service.CommonFacade"
-					 version="1.0.0.test.zxy1" />
+					 version="1.0.0.test" />
 	<dubbo:reference id="componentFacade" interface="org.erpcenterFacade.common.client.service.ComponentFacade"
-					 version="1.0.0.test.zxy1" timeout="10000"/>
+					 version="1.0.0.test" timeout="10000"/>
 	<dubbo:reference id="guestFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.GuestFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.GuestFacade" version="1.0.0.test" />
 	<dubbo:reference id="initGroupFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.InitGroupFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.InitGroupFacade" version="1.0.0.test" />
 	<dubbo:reference id="routeFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.RouteFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.RouteFacade" version="1.0.0.test" />
 	<!--用户管理 -->
 	<dubbo:reference id="seatInCoachFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.SeatInCoachFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.SeatInCoachFacade" version="1.0.0.test" />
 	<dubbo:reference id="specialGroupFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.SpecialGroupFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.SpecialGroupFacade" version="1.0.0.test" />
 	<dubbo:reference id="teamGroupFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade" version="1.0.0.test" />
 	<dubbo:reference id="tourGroupFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade" version="1.0.0.test.zxy1" timeout="10000" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade" version="1.0.0.test" timeout="10000" />
 	<dubbo:reference id="agencyFitFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.AgencyFitFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.AgencyFitFacade" version="1.0.0.test" />
 	<dubbo:reference id="agencyFitGroupFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.AgencyFitGroupFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.AgencyFitGroupFacade" version="1.0.0.test" />
 	<dubbo:reference id="agencyTeamFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.AgencyTeamFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.AgencyTeamFacade" version="1.0.0.test" />
 	<dubbo:reference id="aiYouFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.AiYouFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.AiYouFacade" version="1.0.0.test" />
 	<dubbo:reference id="b2BFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.B2BFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.B2BFacade" version="1.0.0.test" />
+
 	<!-- <dubbo:reference id="sysOptLogService"
 		interface="com.yihg.sys.api.SysOptLogService" version="1.0.0" /> -->
 
 	<!-- 图片空间 -->
 	<dubbo:reference id="budgetItemFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.BudgetItemFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.BudgetItemFacade" version="1.0.0.test" />
 	<dubbo:reference id="costItemFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.CostItemFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.CostItemFacade" version="1.0.0.test" />
 	<dubbo:reference id="fitGroupFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.FitGroupFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.FitGroupFacade" version="1.0.0.test" />
 
 	<!-- 销售管理 -->
 	<dubbo:reference id="fitOrderFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.FitOrderFacade" version="1.0.0.test.zxy1" timeout="8000" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.FitOrderFacade" version="1.0.0.test" timeout="8000" />
 	<dubbo:reference id="groupOrderFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade" version="1.0.0.test.zxy1" timeout="8000"/>
+					 interface="com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade" version="1.0.0.test" timeout="8000"/>
 	<dubbo:reference id="groupOrderAiYouFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade_aiyou" version="1.0.0.test.zxy1" timeout="8000"/>
+					 interface="com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade_aiyou" version="1.0.0.test" timeout="8000"/>
 
 	<dubbo:reference id="groupRequirementFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.GroupRequirementFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.GroupRequirementFacade" version="1.0.0.test" />
 
 	<dubbo:reference id="groupRouteFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.GroupRouteFacade" version="1.0.0.test.zxy1" timeout="8000" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.GroupRouteFacade" version="1.0.0.test" timeout="8000" />
 	<dubbo:reference id="commonSupplierFacade"
-					 interface="com.yimayhd.erpcenter.facade.supplier.service.CommonSupplierFacade" version="1.0.0.test.zxy1" />
+					 interface="com.yimayhd.erpcenter.facade.supplier.service.CommonSupplierFacade" version="1.0.0.test" />
 
 
 
 	<dubbo:reference id="productFacade"
-					 interface="com.yimayhd.erpcenter.facade.service.ProductFacade" owner="wj" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.service.ProductFacade" owner="wj" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="productPricePlusFacade"
-					 interface="com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade" owner="wj" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade" owner="wj" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="productStockFacade"
-					 interface="com.yimayhd.erpcenter.facade.service.ProductStockFacade" owner="wj" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.service.ProductStockFacade" owner="wj" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="productUpAndDownFrameFacade"
-					 interface="com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade" owner="wj" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade" owner="wj" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="productCommonFacade"
-					 interface="org.erpcenterFacade.common.client.service.ProductCommonFacade" owner="wj" version="1.0.0.test.zxy1"
+					 interface="org.erpcenterFacade.common.client.service.ProductCommonFacade" owner="wj" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="sysLoginFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysLoginFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysLoginFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="sysBizBankAccountFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysBizBankAccountFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysBizBankAccountFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="sysBizConfigFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysBizConfigFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysBizConfigFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="sysBizInfoFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysBizInfoFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysBizInfoFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="sysLoginLogFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysLoginLogFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysLoginLogFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="sysPlatformEmployeeFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="sysPlatformMenuFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatformMenuFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatformMenuFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="sysPlatformOrgFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="sysPlatformRoleFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatformRoleFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatformRoleFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="sysPlatformSysFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatformSysFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatformSysFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="sysSettleApplyFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysSettleApplyFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysSettleApplyFacade" owner="ly" version="1.0.0.test"/>
+
+	<dubbo:reference id="trafficResFacade"
+					 interface="com.yimayhd.erpcenter.facade.service.TrafficResFacade" version="1.0.0.test" />
+	 <dubbo:reference id="taobaoProductFacade"
+					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TaobaoProductFacade" version="1.0.0.test" />
+	
+
+
+
+	<dubbo:reference id="sysMsgInfoFacade"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysMsgInfoFacade" owner="gxx" version="1.0.0.test"
 					 timeout="8000" />
+
+					 
+	<dubbo:reference id="sysPlatAuthFacade"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatAuthFacade" owner="ly" version="1.0.0.test"
+					 timeout="8000" />
+					 
 	<dubbo:reference id="bookingShopFacade"
-					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingShopFacade" owner="wj" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingShopFacade" owner="wj" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="consultFacade"
-					 interface="com.yimayhd.erpcenter.facade.supplier.service.ConsultFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.supplier.service.ConsultFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="contractFacade"
-					 interface="com.yimayhd.erpcenter.facade.supplier.service.ContractFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.supplier.service.ContractFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="supplierCarFacade"
-					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierCarFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierCarFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="supplierDriverFacade"
-					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierDriverFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierDriverFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="supplierFacade"
-					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierFacade" owner="ly" version="1.0.0.test.zxy1"
-					 timeout="8000" />
-	<dubbo:reference id="supplierGuestFacade"
-					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierGuestFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 
 	<dubbo:reference id="dataAnalysisFacade"
-					 interface="com.yimayhd.erpcenter.facade.dataanalysis.client.service.DataAnalysisFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.dataanalysis.client.service.DataAnalysisFacade" owner="ly" version="1.0.0.test"
 					 timeout="80000" />
 	<dubbo:reference id="queryFacade"
-					 interface="com.yimayhd.erpcenter.facade.dataanalysis.client.service.QueryFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.dataanalysis.client.service.QueryFacade" owner="ly" version="1.0.0.test"
 					 timeout="80000" />
 	<dubbo:reference id="billStatisticsFacade"
-					 interface="org.yimayhd.erpcenter.facade.finance.service.BillStatisticsFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="org.yimayhd.erpcenter.facade.finance.service.BillStatisticsFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="financeFacade"
-					 interface="org.yimayhd.erpcenter.facade.finance.service.FinanceFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="org.yimayhd.erpcenter.facade.finance.service.FinanceFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="financeGuideFacade"
-					 interface="org.yimayhd.erpcenter.facade.finance.service.FinanceGuideFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="org.yimayhd.erpcenter.facade.finance.service.FinanceGuideFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 
 	<dubbo:reference id="verifyFacade"
-					 interface="org.yimayhd.erpcenter.facade.finance.service.VerifyFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="org.yimayhd.erpcenter.facade.finance.service.VerifyFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="bookingComponentFacade"
-					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingComponentFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingComponentFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="bookingDeliveryFacade"
-					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingDeliveryFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingDeliveryFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="bookingFinanceShopFacade"
-					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingFinanceShopFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingFinanceShopFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="bookingGuestShopFacade"
-					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingGuestShopFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingGuestShopFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="bookingGuideFacade"
-					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingGuideFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingGuideFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="bookingGuideFinanceFacade"
-					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingGuideFinanceFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingGuideFinanceFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 
 	<dubbo:reference id="bookingSupplierFacade"
-					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingSupplierFacade" owner="ly" version="1.0.0.test.zxy1"
-					 timeout="8000" />
+					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingSupplierFacade" owner="ly" version="1.0.0.test" timeout="8000"/>
+
 
 
 
 	<dubbo:reference id="requestFacade"
-					 interface="com.yimayhd.erpcenter.facade.ticket.service.RequestFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.ticket.service.RequestFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 
+
+
+
 	<dubbo:reference id="resourceFacade"
-					 interface="com.yimayhd.erpcenter.facade.ticket.service.ResourceFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.ticket.service.ResourceFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 
 	<dubbo:reference id="resTrafficFacade"
-					 interface="com.yimayhd.erpcenter.facade.tj.client.service.ResTrafficFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.tj.client.service.ResTrafficFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 
 	<dubbo:reference id="resTrafficOrderFacade"
-					 interface="com.yimayhd.erpcenter.facade.tj.client.service.ResTrafficOrderFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.tj.client.service.ResTrafficOrderFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 
 	<dubbo:reference id="taobaoFacade"
-					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TaobaoFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TaobaoFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 
 	<dubbo:reference id="tJFacade"
-					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TJFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TJFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 	<dubbo:reference id="tjGroupFacade"
-					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TjGroupFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TjGroupFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
 
 	<dubbo:reference id="qualityFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.QualityFacade" owner="ly" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sales.service.QualityFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
-
-
+					 
+	<dubbo:reference id="supplierGuestFacade"
+					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierGuestFacade" owner="ly" version="1.0.0.test"
+					 timeout="8000" />				 
+					 
 </beans>

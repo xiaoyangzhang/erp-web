@@ -6,7 +6,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>门票订单统计</title>
+<title>预订明细查询</title>
 <%@ include file="../../../include/top.jsp"%>
 <link href="<%=staticPath%>/assets/css/supplier/supplier.css" rel="stylesheet" />
 <script type="text/javascript" src="<%=ctx%>/assets/js/web-js/bookingCount.js"></script>
@@ -15,7 +15,7 @@
 <body>
 	<div class="p_container">
 		
-		<form id="form" action="<%=ctx%>/query/hotelbooking.htm" method="post">
+		<form id="form" action="<%=ctx%>/placeOrderQuery/hotelbooking.htm" method="post">
 			<input type="hidden" name="page" id="page" />
 			<input type="hidden" name="pageSize" id="pageSize" />
 			<input type="hidden" name="sl" value="booking.selectbookingSupplier2DetailListPage" />
@@ -115,6 +115,9 @@
 	<div id="tableDiv"></div>
 </body>
 <%@ include file="/WEB-INF/views/component/org-user/org_user_multi.jsp" %>
+
+
+
 <script type="text/javascript">
 $(function(){
 	var vars={ dateFrom : $.currentMonthFirstDay(), dateTo : $.currentMonthLastDay() };

@@ -98,7 +98,12 @@
 						<dd class="inl-bl w-400">
 							<div class="dd_left">人数：</div>
 							<div class="dd_right">
-								<c:if test="${not empty group.total_adult}">${group.total_adult}大</c:if><c:if test="${not empty group.total_child}">${group.total_child}小</c:if><c:if test="${not empty group.total_guide}">${group.total_guide}陪</c:if>
+								<c:if test="${not empty group.total_adult}">${group.total_adult}大</c:if>
+								<c:if test="${not empty group.total_child}">${group.total_child}
+									<c:if test="${group.total_baby == null}"></c:if>
+									<c:if test="${group.total_baby != null}"><span style="color: red;">(${group.total_baby})</span></c:if>
+								小</c:if>
+								<c:if test="${not empty group.total_guide}">${group.total_guide}陪</c:if>
 							</div>
 							<div class="clear"></div>
 						</dd>
@@ -277,6 +282,7 @@
 			</dl>
 		</div>
 		<div style="text-align: center;">
+		<button class="button button-primary button-small" onclick="saveMsg();">发送消息</button>
 			<a href="auditGroup.htm?groupId=${reqpm.groupId }" class="button button-primary button-small">刷新</a>
 			<c:if test="${optMap['PRINT']}">
 				<a  onclick="window.open('<%=staticPath%>/finance/auditGroupListPrint.htm?groupId=${group.id}&isShow=true','结算单打印')" 
@@ -303,6 +309,67 @@
 		</div>
 		<div id="operateLogsDiv"></div>
 	</div>
-
+<script type="text/javascript">
+function saveMsg() {
+    var msg_title;
+    var msg_info;
+    var operatorName;
+    var operatorIds;
+    var orderId;
+    layer.open({ 
+        type : 2,
+        title : '发送消息',
+        closeBtn : false,
+        area : [ '450px', '470px' ],
+        shadeClose : true,
+        content : '../msgInfo/showMsg.htm',
+        btn: ['确定', '取消'],
+        success:function(layero, index){
+            win = window[layero.find('iframe')[0]['name']];
+            
+            msg_title = win.$("#msg_title");
+            msg_info = win.$("#msg_info");
+            operatorName = win.$("#operatorName");
+            operatorIds = win.$("#operatorIds");
+            
+            msg_title.val($("#groupOrder_receiveMode").val());
+            orderId = $("#orderId");
+        },
+        yes: function(index){
+            if(msg_title.val() == "") {
+                layer.msg("消息标题不能为空！");
+                return;
+            } else if (msg_info.val() == "") {
+                layer.msg("消息内容不能为空！");
+                return;
+            } else if (operatorName.val() == "") {
+                layer.msg("接收人员不能为空！");
+                return;
+            }
+            
+            $.post(
+                    "../msgInfo/sendMsg.do", 
+                    {
+                        orderId: orderId.val(),
+                        title: msg_title.val(),
+                        info: msg_info.val() ,
+                        ids: operatorIds.val(),
+                        msgType: 1
+                    }, function(data){
+                        if(data.success){
+                            layer.msg("发送成功！");
+                        }else{
+                            layer.msg("发送失败！");
+                        }
+                    },
+            "json");
+            
+            layer.close(index);
+        },cancel: function(index){
+            layer.close(index);
+        }
+    });
+}
+</script>
 </body>
 </html>

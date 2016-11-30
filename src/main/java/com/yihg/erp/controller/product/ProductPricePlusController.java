@@ -372,4 +372,29 @@ public class ProductPricePlusController extends BaseController {
 		model.addAttribute("page", page);
 		return "product/stock/stock-statics-table-plus";
 	}
+	
+	/**
+	 * @author : ouZongYing
+	 * @Description: 交通资源管理（包机）->产品->设置组团社访问权限
+	 */
+	@RequestMapping(value = "/supplier_list2.htm")
+	public String toSupplierList2(ModelMap model,ProductSupplierCondition condition) {
+		
+		model.addAttribute("productId", condition.getProductId());
+		model.addAttribute("groupId", condition.getGroupId());
+		
+		ProductSupplierConditionDTO conditionDTO = new ProductSupplierConditionDTO();
+		conditionDTO.setCondition(condition);
+		conditionDTO.setProductId(condition.getProductId());
+		
+		ToSupplierListResult result = productPricePlusFacade.toSupplierList2(conditionDTO);
+		
+		ProductInfo productInfo = result.getProductInfo();
+		model.addAttribute("productName", "【" +productInfo.getBrandName()+"】"+productInfo.getNameCity());		
+		//model.addAttribute("groupId", groupId);
+		model.addAttribute("groupSuppliers", result.getGroupSuppliers());
+		model.addAttribute("supplierName", condition.getSupplierName());
+		model.addAttribute("city", condition.getCity());
+		return "product/priceplus/newSupplier2";
+	}
 }

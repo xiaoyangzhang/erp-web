@@ -193,17 +193,17 @@
 			<div class="p_container_sub">
 				<div class="searchRow">
 					<ul>
-						<li class="text" style="width:100px;">
+						<li class="text">
 							<select name="dateType">
-								<option value="groupDate">团出发日期</option>
+								<option value="groupDate">团日期</option>
 								<option value="orderDate">订单日期</option>
 							</select>
 						</li>
 						<li>
-							<input name="startMin" id="startMin" type="text" value="${start_min }" style="width:90px;"
+							<input name="startMin" id="startMin" type="text" value="${start_min }"
 							       class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})"/>
 							~
-							<input name="startMax" id="startMax" type="text" value="${start_max }" style="width:90px;"
+							<input name="startMax" id="startMax" type="text" value="${start_max }" 
 							       class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})"/>
 						</li>
 						<li class="text">团号</li>
