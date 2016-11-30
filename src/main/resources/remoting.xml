@@ -223,9 +223,6 @@
 
 	<dubbo:reference id="bookingSupplierFacade"
 					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingSupplierFacade" owner="ly" version="1.0.0.test" timeout="8000"/>
-			<dubbo:reference id="bookingGuideFinanceFacade"
-					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingGuideFinanceFacade" owner="ly" version="1.0.0.test"
-					 timeout="8000" />
 
 
 
