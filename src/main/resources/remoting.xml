@@ -66,10 +66,7 @@
 					 interface="com.yimayhd.erpcenter.facade.sales.service.AiYouFacade" version="1.0.0.test" />
 	<dubbo:reference id="b2BFacade"
 					 interface="com.yimayhd.erpcenter.facade.sales.service.B2BFacade" version="1.0.0.test" />
-					 interface="com.yimayhd.erpcenter.facade.basic.service.DicFacade" version="1.0.0.test" />
-
-
-
+					 
 	<!-- <dubbo:reference id="sysOptLogService"
 		interface="com.yihg.sys.api.SysOptLogService" version="1.0.0" /> -->
 
@@ -156,7 +153,7 @@
 
 
 	<dubbo:reference id="sysMsgInfoFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysMsgInfoFacade" owner="gxx" version="1.0.0.test.zxy1"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysMsgInfoFacade" owner="gxx" version="1.0.0.test"
 					 timeout="8000" />
 
 					 
@@ -260,6 +257,9 @@
 	<dubbo:reference id="qualityFacade"
 					 interface="com.yimayhd.erpcenter.facade.sales.service.QualityFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
-
-
+					 
+	<dubbo:reference id="supplierGuestFacade"
+					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierGuestFacade" owner="ly" version="1.0.0.test"
+					 timeout="8000" />				 
+					 
 </beans>
