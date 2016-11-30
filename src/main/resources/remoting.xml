@@ -92,8 +92,11 @@
 					 interface="com.yimayhd.erpcenter.facade.sales.service.GroupRouteFacade" version="1.0.0.test.ly" timeout="8000" />
 	<dubbo:reference id="commonSupplierFacade"
 					 interface="com.yimayhd.erpcenter.facade.supplier.service.CommonSupplierFacade" version="1.0.0.test.ly" />
-
-
+	<dubbo:reference id="trafficResFacade"
+					 interface="com.yimayhd.erpcenter.facade.service.TrafficResFacade" version="1.0.0.test.ly" />
+	 <dubbo:reference id="taobaoProductFacade"
+					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TaobaoProductFacade" version="1.0.0.test.ly" />
+	
 
 	<dubbo:reference id="productFacade"
 					 interface="com.yimayhd.erpcenter.facade.service.ProductFacade" owner="wj" version="1.0.0.test.ly"
@@ -146,6 +149,11 @@
 	<dubbo:reference id="sysSettleApplyFacade"
 					 interface="com.yimayhd.erpcenter.facade.sys.service.SysSettleApplyFacade" owner="ly" version="1.0.0.test.ly"
 					 timeout="8000" />
+					 
+	<dubbo:reference id="sysPlatAuthFacade"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatAuthFacade" owner="ly" version="1.0.0.test.ly"
+					 timeout="8000" />
+					 
 	<dubbo:reference id="bookingShopFacade"
 					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingShopFacade" owner="wj" version="1.0.0.test.ly"
 					 timeout="8000" />
@@ -167,6 +175,7 @@
 	<dubbo:reference id="supplierGuestFacade"
 					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierGuestFacade" owner="ly" version="1.0.0.test.ly"
 					 timeout="8000" />
+	
 
 	<dubbo:reference id="dataAnalysisFacade"
 					 interface="com.yimayhd.erpcenter.facade.dataanalysis.client.service.DataAnalysisFacade" owner="ly" version="1.0.0.test.ly"
