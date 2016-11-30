@@ -20,7 +20,8 @@
 		}
 	},
 	callback: {
-		onCheck: treeObjOnCheck
+		onCheck: treeObjOnCheck,
+		onClick: OrgNodeOnClick
 	}
 };
 
@@ -39,17 +40,27 @@ var userSetting = {
 		}
 	},
 	callback: {
-		onCheck: treeUserOnCheck
+		onCheck: treeUserOnCheck,
+		onClick: EmpNodeOnClick
 	}
 };
 
 var zOrgNodes =${orgJsonStr}; 
 var zUserNodes = ${orgUserJsonStr};
-
 var treeOrgObj;
 var treeUserObj;
-
 var userTreeNodes ;
+
+//点击节点时，收起来
+function OrgNodeOnClick(e,treeId, treeNode) {
+	var zTree = $.fn.zTree.getZTreeObj("treeOrg");
+	zTree.expandNode(treeNode);
+}
+function EmpNodeOnClick(e,treeId, treeNode) {
+	var zTree = $.fn.zTree.getZTreeObj("treeUser");
+	zTree.expandNode(treeNode);
+}
+
 
 function loadOrgTree(){
 	if(typeof(zOrgNodes)=="string")
@@ -278,8 +289,8 @@ function resetUser(){
 }
  </script>
  <style type="text/css">
- 	ul.ztree {margin-top: 10px;border: 1px solid #617775;background: #f0f6e4;width:220px;height:360px;overflow-y:scroll;overflow-x:auto;}
- 	#divUser{padding-top: 10px;border: 1px solid #617775;background: #f0f6e4;width:220px;height:360px;overflow-y:scroll;overflow-x:auto;}
+ 	ul.ztree {margin-top: 10px;border: 1px solid #617775;background: #f0f6e4;width:250px;height:360px;overflow-y:scroll;overflow-x:auto;}
+ 	#divUser{padding-top: 10px;border: 1px solid #617775;background: #f0f6e4;width:250px;height:360px;overflow-y:scroll;overflow-x:auto;}
  	#treeUser{margin-top: 10px;border:none;background: #f0f6e4;width:auto;height:auto;overflow-y:visible;overflow-x:visible;}
  	.tree-search{padding-left:10px;}
  </style>
@@ -287,7 +298,7 @@ function resetUser(){
 	<ul id="treeOrg" class="ztree" style="margin-top:0; width:160px; height: 300px;"></ul>
 </div>
 <div id="divUser" style="display:none; position: absolute;z-index:999">
-	<div class="tree-search"><input type="text" id="searUsrName" value="" class="w-100"><a href="javascript:;" class="blue" onclick="searchUser()">搜索</a>&nbsp;&nbsp;<a href="javascript:;" class="blue" onclick="resetUser()">重置</a></div>
+	<div class="tree-search"><input type="text" id="searUsrName" value="" class="w-100" onkeyup="searchUser()" ><a href="javascript:;" class="blue" onclick="searchUser()">搜索</a>&nbsp;&nbsp;<a href="javascript:;" class="blue" onclick="resetUser()">重置</a></div>
 	<ul id="treeUser" class="ztree" style="margin-top:0; width:160px; height: 300px;">
 	
 	</ul>

@@ -269,23 +269,27 @@
 				alert('下账金额输入有误，请检查后重新输入！');
 				obj.checked = false;
 			} else {
-				if (amounts > 0) {
+				if (amounts != 0) {
 					tbObj.each(function () { // 循环计算
 						var checkboxObj = $(this).find("input[type='checkbox']"); // 选择框
 						var itemBalance = parseFloat($(this).find("input[name='itemBalance']").val()); // 未收金额
 						var itemAmounts = $(this).find("label[id='itemAmounts']");
-						if (amounts > 0) {
-							if (itemBalance > 0) { // 正数
-								if (amounts > itemBalance) {
-									itemAmounts.html(itemBalance);
-								} else {
-									itemAmounts.html(Math.round(parseFloat(amounts) * 100) / 100);
-								}
-								amounts -= itemBalance;
-							} else { // 负数
-								amounts = amounts - itemBalance;
-								itemAmounts.html(itemBalance);
-							}
+						if (amounts == 0) return;
+						
+						
+						var isAdd = false;
+						if (amounts > 0 && parseFloat(itemBalance) > 0) {
+							itemBalance = amounts > parseFloat(itemBalance) ? itemBalance : amounts;
+							amounts -= itemBalance;
+							isAdd = true;
+						}
+						if (amounts < 0 && parseFloat(itemBalance) < 0) {
+							itemBalance = amounts < parseFloat(itemBalance) ? itemBalance : amounts;
+							amounts -= itemBalance;
+							isAdd = true;
+						}
+						if (isAdd){
+							itemAmounts.html(itemBalance);
 							checkboxObj.attr('checked', true);
 							chk(checkboxObj, checkboxObj.attr('sid'), checkboxObj.attr('groupCode'));
 						}

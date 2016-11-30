@@ -8,40 +8,48 @@
 			<th style="width:2%"><input type="checkbox" id="ckAll"></th>
 			<th style="width:3%">序号<i class="w_table_split"></i></th>
 			<th style="width:10%">团号<i class="w_table_split"></i></th>
-			<th style="width:6%">出发日期<i class="w_table_split"></i></th>
-			<th style="">产品名称<i class="w_table_split"></i></th>
-			<th style="width:14%">组团社<i class="w_table_split"></i></th>
-			<th style="width:5%">接站牌<i class="w_table_split"></i></th>
-			<th style="width:5%">客源地<i class="w_table_split"></i></th>
-			<th style="width:5%">人数<i class="w_table_split"></i></th>
-			<th style="width:4%">团款<i class="w_table_split"></i></th>
-			<th style="width:4%">锁单<i class="w_table_split"></i></th>
-			<th style="width:4%">销售<i class="w_table_split"></i></th>
-			<th style="width:4%">计调<i class="w_table_split"></i></th>
-		    <th style="width:4%">输单员<i class="w_table_split"></i></th>
-			<th style="width:4%">操作<i class="w_table_split"></i></th>
+			<th style="width:5%">出发日期<i class="w_table_split"></i></th>
+			<th style="width: 15%">产品名称<i class="w_table_split"></i></th>
+			<th style="width: 15%">组团社<i class="w_table_split"></i></th>
+			<th style="width: 4%">联系人<i class="w_table_split"></i></th>
+			<th style="width: 6%">接站牌<i class="w_table_split"></i></th>
+			<th style="width: 5%">客源地<i class="w_table_split"></i></th>
+			<th style="width: 5%">人数<i class="w_table_split"></i></th>
+			<th style="width: 5%">金额<i class="w_table_split"></i></th>
+			<th style="width: 5%">销售<i class="w_table_split"></i></th>
+			<th style="width: 5%">计调<i class="w_table_split"></i></th>
+			<th style="width: 5%">输单<i class="w_table_split"></i></th>
+			<th style="width: 5%">状态<i class="w_table_split"></i></th>
+			<th style="width: 5%">操作</th>
 		</tr>
 	</thead>
 	<tbody> 
        	<c:forEach items="${page.result}" var="groupOrder" varStatus="v">
-       		 <tr title="创建时间:${groupOrder.createTimeStr}" 
-       		 style="color: <c:if test="${groupOrder.groupState eq 4}">#ee33ee</c:if>
-       		 		<c:if test="${(groupOrder.orderLockState eq 1 or  groupOrder.stateFinance eq 1) and groupOrder.groupState ne 4}">blue</c:if>" >
+       		 <tr title="创建时间:${groupOrder.createTimeStr}"  style="color: <c:if test="${groupOrder.groupState eq 4}">#ee33ee</c:if>
+       		 		<c:if test="${groupOrder.stateFinance eq 1 and groupOrder.groupState ne 4}">blue</c:if>" >
        		  <td><input type="checkbox" name="chkGroupOrder" value="${groupOrder.id }"  <c:if test="${!empty groupOrder.groupId}">disabled="disabled"  </c:if>/></td>
               <td>${v.count}</td>
               <td style="text-align: left;"><a href="javascript:void(0);" class="def" onclick="lookGroup(${groupOrder.tourGroup.id})">${groupOrder.tourGroup.groupCode}</a></td>
               <td>${groupOrder.departureDate }</td>
               <td style="text-align: left;">【${groupOrder.productBrandName}】${groupOrder.productName}</td>
               <td style="text-align: left;">${groupOrder.supplierName}-${groupOrder.contactName} </td>
+              <td >${groupOrder.contactName} </td>
               <td style="text-align: left;">${groupOrder.receiveMode}</td>
               <td>${groupOrder.provinceName}${groupOrder.cityName}</td>
               <td>${groupOrder.numAdult }+${groupOrder.numChild}+${groupOrder.numGuide} </td>
               <td><fmt:formatNumber value="${groupOrder.total}" type="currency" pattern="#.##" /></td>
-              <td><c:if test="${groupOrder.orderLockState==0 }">未锁单</c:if> 
-              <c:if test="${groupOrder.orderLockState eq 1}">已锁单</c:if></td>
               <td>${groupOrder.saleOperatorName}</td>
 			  <td>${groupOrder.operatorName}</td>
 			  <td>${groupOrder.creatorName}</td>
+			  <td>
+					<c:if test="${groupOrder.groupState!=4}">
+						<c:if test="${groupOrder.stateFinance==1}"><span class="log_action insert" title="已审核">审</span></c:if>
+						<c:if test="${groupOrder.stateFinance!=1}"><span class="log_action normal" title="未审核">未</span></c:if>
+					</c:if>
+					<c:if test="${groupOrder.groupState==4}"><span class="log_action fuchsia" title="已封存">封</span></c:if>
+					<c:if test="${groupOrder.orderLockState==0}"><span class="ico_unlock" title="未锁单"></span></c:if>
+					<c:if test="${groupOrder.orderLockState==1}"><span class="ico_lock" title="已锁单"></span></c:if>
+				</td>
               <td>
               	<div class="tab-operate">
 					<a href="####" class="btn-show">操作<span class="caret"></span></a>
@@ -61,19 +69,21 @@
               </td>
          	</tr>
        	</c:forEach>
-       			<tr>
-					<td colspan="8" style="text-align: right">本页合计:</td>
+       	</tbody>
+       	<tfoot>
+       			<tr class="footer1">
+					<td colspan="9" style="text-align: right">本页合计:</td>
 					<td>${pageTotalAudit }+ ${pageTotalChild }+${pageTotalGuide }  </td>
 					<td><fmt:formatNumber value="${pageTotal}" type="currency" pattern="#.##" /></td>
 					<td colspan="5"></td>
 				</tr>
-				<tr>
-					<td colspan="8" style="text-align: right">总合计:</td>
+				<tr class="footer2">
+					<td colspan="9" style="text-align: right">总合计:</td>
 					<td>${totalAudit }+ ${totalChild }+ ${totalGuide }</td>
 					<td><fmt:formatNumber value="${total}" type="currency" pattern="#.##" /></td>
 					<td colspan="5"></td>
 				</tr>
-	</tbody>
+	</tfoot>
 </table>
 <jsp:include page="/WEB-INF/include/page.jsp">
 	<jsp:param value="${page.page }" name="p" />

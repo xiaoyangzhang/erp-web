@@ -92,13 +92,14 @@ public class ResourceController extends BaseController {
 			depDateTo = request.getParameter("date_to");
 			dateType = request.getParameter("date_type");
 		}
-		String resourceNumber="", lineName="", depCity="", endIssueDateFrom="", endIssueDateTo="", type="";
+		String resourceNumber="", lineName="", depCity="", endIssueDateFrom="", endIssueDateTo="", type="", airCode = "";
 		try {
 			resourceNumber = request.getParameter("resource_number");
 			endIssueDateFrom = request.getParameter("endIssueDateFrom");
 			endIssueDateTo = request.getParameter("endIssueDateTo");
 			depCity = request.getParameter("dep_city");
 			lineName = request.getParameter("line_name");
+			airCode = request.getParameter("airCode");
 			type = request.getParameter("type");
 			resourceNumber = resourceNumber==null?"":resourceNumber;
 			depDateFrom = depDateFrom==null?"":depDateFrom;
@@ -120,6 +121,7 @@ public class ResourceController extends BaseController {
 		dto.setEndIssueDateFrom(endIssueDateFrom);
 		dto.setEndIssueDateTo(endIssueDateTo);
 		dto.setLineName(lineName);
+		dto.setAirCode(airCode);
 		if(page != null){
 			dto.setPage(Integer.parseInt(page));	
 		}

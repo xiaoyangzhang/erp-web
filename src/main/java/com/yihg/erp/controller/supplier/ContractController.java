@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.yimayhd.erpcenter.facade.supplier.result.ContractPagaResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +78,7 @@ public class ContractController extends BaseController{
         model.addAttribute("GOLF", Constants.GOLF);
         model.addAttribute("OTHER", Constants.OTHER);
         model.addAttribute("CONTRACTAGREEMENT", Constants.CONTRACTAGREEMENT);
-
+        model.addAttribute("LOCALTRAVEL", Constants.LOCALTRAVEL);
         model.addAttribute("supplierTypeMap", supplierTypeMap);
         model.addAttribute("supplierStateMap", supplierStateMap);
         model.addAttribute("contractStateMap", contractStateMap);
@@ -149,7 +150,59 @@ public class ContractController extends BaseController{
         model.addAttribute("cashTypes", webResult.getCashTypes());
         return "contract/contract_edit";
     }
+    @RequestMapping(value="/{supplierId}/delivery-add.htm", method = RequestMethod.GET)
+    public String newDeliveryContractPage(HttpServletRequest request, Model model,@PathVariable("supplierId")Integer supplierId){
+        Integer bizId = WebUtils.getCurBizId(request);
+       /* SupplierContractVo supplierContractVo = contractService.findContract(bizId, Integer.valueOf(supplierId), null);
 
+
+        List<DicInfo> dictTypeList = dicService.getListByTypeCode(BasicConstants.XMFY_DJXM,bizId);
+        model.addAttribute("dictTypeList", dictTypeList);
+
+
+        List<DicInfo> dictSecLevelTypeList = dicService.getListByTypeCode(Constants.FLEET_LINE_BRAND_TYPE_CODE,bizId);
+        model.addAttribute("dictSecLevelTypeList", dictSecLevelTypeList);
+
+        model.addAttribute("supplierContractVo", supplierContractVo);
+        model.addAttribute("config", config);
+        model.addAttribute("supplierId", supplierId);
+        model.addAttribute("deliveryType", "temp");
+        List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);*/
+        NewContractPagaResult result = contractFacade.newDeliveryContractPage(bizId,supplierId+"");
+        model.addAttribute("dictTypeList", result.getDicInfoList());
+        model.addAttribute("dictSecLevelTypeList", result.getDictSecLevelTypeList());
+        model.addAttribute("supplierContractVo", result.getSupplierContractVo());
+        model.addAttribute("config", config);
+        model.addAttribute("supplierId", supplierId);
+        model.addAttribute("deliveryType", "temp");
+        model.addAttribute("cashTypes", result.getCashTypes());
+        return "contract/contract_add";
+    }
+    @RequestMapping(value="/{contractId}/delivery-edit.htm", method = RequestMethod.GET)
+    public String editDeliveryContractPage(HttpServletRequest request, Model model, @PathVariable("contractId") String contractId){
+        Integer bizId = WebUtils.getCurBizId(request);
+        /*SupplierContractVo supplierContractVo = contractService.findDelveryContract(bizId, Integer.valueOf(contractId));
+
+        List<DicInfo> dictTypeList = dicService.getListByTypeCode(BasicConstants.XMFY_DJXM,bizId);
+        model.addAttribute("dictTypeList", dictTypeList);
+
+        List<DicInfo> dictSecLevelTypeList = dicService.getListByTypeCode(Constants.FLEET_LINE_BRAND_TYPE_CODE,bizId);
+        model.addAttribute("dictSecLevelTypeList", dictSecLevelTypeList);
+
+        model.addAttribute("supplierContractVo", supplierContractVo);
+        model.addAttribute("config", config);
+        model.addAttribute("deliveryType", "temp");
+        List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);*/
+
+        NewContractPagaResult result = contractFacade.editDeliveryContractPage(bizId, contractId);
+        model.addAttribute("dictTypeList", result.getDicInfoList());
+        model.addAttribute("dictSecLevelTypeList", result.getDictSecLevelTypeList());
+        model.addAttribute("supplierContractVo", result.getSupplierContractVo());
+        model.addAttribute("config", config);
+        model.addAttribute("deliveryType", "temp");
+        model.addAttribute("cashTypes", result.getCashTypes());
+        return "contract/contract_edit";
+    }
     @RequestMapping(value="/{supplierId}/{contractId}/view.htm", method = RequestMethod.GET)
     public String viewContractPage(HttpServletRequest request,@PathVariable("supplierId") String supplierId, Model model, @PathVariable("contractId") String contractId){
         Integer bizId = WebUtils.getCurBizId(request);
@@ -287,10 +340,10 @@ public class ContractController extends BaseController{
         pageBean.setPage(supplierContract.getPage());
         pageBean.setParameter(supplierContract);
         Integer bizId = WebUtils.getCurBizId(request);
-        WebResult<PageBean> webResult = contractFacade.contractList(supplierId, pageBean, bizId);
-        
+        ContractPagaResult webResult = contractFacade.contractList(supplierId, pageBean, bizId);
         model.addAttribute("page", webResult.getValue());
         model.addAttribute("flag", Integer.parseInt(flag));
+        model.addAttribute("supplierInfo", webResult.getSupplierInfo());
         model.addAttribute("supplierId", supplierId);
         return "contract/contract_list";
     }
@@ -322,6 +375,9 @@ public class ContractController extends BaseController{
 						&& price.getRebateMethod().equals(1)) {
 					price.setRebateAmount(price.getRebateAmountPercent());
 				}
+                if (price.getContractSale() == null) {
+                    price.setContractSale(new Float(0));
+                }
 			}
 		}
 		return ;

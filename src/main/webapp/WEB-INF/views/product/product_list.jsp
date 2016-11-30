@@ -89,7 +89,10 @@
 						<input name="orgIds" id="orgIds" stag="orgIds" value="" type="hidden" value=""/>	    				
 	    			</div>
 	    			<div class="dd_right">
-	    				计调:
+	    				<select name="operType" id="operType">
+								<option value="1" <c:if test="${groupOrder.operType==1 }">selected="selected"</c:if>>计调</option>
+								<option value="2" <c:if test="${groupOrder.operType==2 }">selected="selected"</c:if>>操作员</option>
+						</select>
 	    				<input type="text" name="operatorName" id="operatorName" stag="userNames" value="" readonly="readonly" onclick="showUser()"/>
 						<input name="operatorIds" id="operatorIds" stag="userIds" value="" type="hidden" value=""/>	    				
 	    			</div>

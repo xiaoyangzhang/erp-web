@@ -1,13 +1,9 @@
 package com.yihg.erp.controller.sales;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -16,8 +12,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.common.contants.BasicConstants;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
 import com.yimayhd.erpcenter.dal.product.constans.Constants;
 
+import com.yimayhd.erpcenter.dal.product.po.TrafficRes;
+import com.yimayhd.erpcenter.facade.basic.service.RegionFacade;
+import com.yimayhd.erpcenter.facade.sales.result.*;
+import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
+import com.yimayhd.erpcenter.facade.service.TrafficResFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -29,6 +33,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
@@ -82,22 +93,6 @@ import com.yimayhd.erpcenter.facade.sales.query.FindTourGroupByConditionDTO;
 import com.yimayhd.erpcenter.facade.sales.query.ProfitQueryByTourDTO;
 import com.yimayhd.erpcenter.facade.sales.query.ToSKConfirmPreviewDTO;
 import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToOrderLockTableDTO;
-import com.yimayhd.erpcenter.facade.sales.result.BookingProfitTableResult;
-import com.yimayhd.erpcenter.facade.sales.result.FindTourGroupByConditionResult;
-import com.yimayhd.erpcenter.facade.sales.result.GetPushInfoResult;
-import com.yimayhd.erpcenter.facade.sales.result.ProfitQueryByTourResult;
-import com.yimayhd.erpcenter.facade.sales.result.PushWapResult;
-import com.yimayhd.erpcenter.facade.sales.result.ResultSupport;
-import com.yimayhd.erpcenter.facade.sales.result.ToAddTourGroupOrderResult;
-import com.yimayhd.erpcenter.facade.sales.result.ToChangeGroupResult;
-import com.yimayhd.erpcenter.facade.sales.result.ToGroupListResult;
-import com.yimayhd.erpcenter.facade.sales.result.ToOtherInfoResult;
-import com.yimayhd.erpcenter.facade.sales.result.ToPreviewResult;
-import com.yimayhd.erpcenter.facade.sales.result.ToProfitQueryTableResult;
-import com.yimayhd.erpcenter.facade.sales.result.ToSKChargePreviewResult;
-import com.yimayhd.erpcenter.facade.sales.result.ToSKConfirmPreviewResult;
-import com.yimayhd.erpcenter.facade.sales.result.ToSaleChargeResult;
-import com.yimayhd.erpcenter.facade.sales.result.TogroupRequirementResult;
 import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToOrderLockListResult;
 import com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade;
 import com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade;
@@ -120,7 +115,8 @@ public class TourGroupController extends BaseController {
 	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
 	@Autowired
 	private SysPlatformOrgFacade sysPlatformOrgFacade;
-
+	@Autowired
+	TrafficResFacade trafficResFacade;
 //	@Autowired
 //	private GroupProfitFacade  tourGroupProfitFacade;//利润
 //	
@@ -139,7 +135,10 @@ public class TourGroupController extends BaseController {
 	private BizSettingCommon bizSettingCommon;
 	@Autowired
 	private TeamGroupFacade teamGroupFacade;//
-
+	@Autowired
+	private RegionFacade regionFacade;//
+	@Autowired
+	private GroupOrderFacade groupOrderFacade;
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
 		//model.addAttribute("orgJsonStr", SysPlatformOrgFacade.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
@@ -598,7 +597,30 @@ public class TourGroupController extends BaseController {
 			}
 			
 			//TODO 订单行程 暂时先不做 
-			
+			List<GroupRoute> rlist = groupRouteService.selectByOrderId(ord.getId());
+            if (rlist != null && rlist.size() > 0) {
+                for (GroupRoute item : rlist) {
+                    AssistantGroupRoute gRoute = new AssistantGroupRoute();
+                    gRoute.setId(0);
+                    gRoute.setRouteId(item.getId());
+                    gRoute.setOrderId(item.getOrderId());
+                    gRoute.setGroupId(0);
+                    if (tourGroup.getGroupMode()>0){
+                    	//团队情况
+                    	gRoute.setGroupId(tourGroup.getId());
+                    }
+                    gRoute.setDayNum(item.getDayNum());
+                    gRoute.setGroupDate(DateUtils.format(item.getGroupDate()));
+                    gRoute.setBreakfast(item.getBreakfast());
+                    gRoute.setLunch(item.getLunch());
+                    gRoute.setSupper(item.getSupper());
+                    gRoute.setHotelName(item.getHotelName());
+                    gRoute.setRouteDesp(item.getRouteDesp());
+                    gRoute.setRouteTip(item.getRouteTip());
+
+                    routeList.add(gRoute);
+                }
+            }
 		}
 
 		//guideList 司机及导游
@@ -1613,13 +1635,50 @@ public class TourGroupController extends BaseController {
 			path = saleTravelContract(request, orderId);
 		}else if (num == 7) {
 			// 旅游综合保障计划投保书
-			try {
+			/*try {
 				fileName = new String("旅游综合保障计划投保书.doc".getBytes("UTF-8"),
 						"iso-8859-1");
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
-			path = saleInsurance(request, orderId);
+			path = saleInsurance(request, orderId);*/
+		} else if (num == 8) {
+			// 祥泰苏梅直航出团通知书
+			try {
+				fileName = new String("祥泰苏梅直航出团通知书.doc".getBytes("UTF-8"), "iso-8859-1");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			path = noticeTheGroup(request, orderId);
+		}else if (num == 9) {
+			// AY境内旅游合同
+			try {
+				fileName = new String("爱游店旅游合同.doc".getBytes("UTF-8"), "iso-8859-1");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			path = saleTravelContractAY(request, orderId);
+		}else if (num == 10) {
+			// JY境内旅游合同
+			try {
+				fileName = new String("景怡店旅游合同.doc".getBytes("UTF-8"), "iso-8859-1");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			path = saleTravelContractJY(request, orderId);
+		}else if (num == 11) {
+			// YM境内旅游合同
+			try {
+				String title="";
+				if(orderId != null){
+					ToPreviewResult toPreviewResult = tourGroupFacade.createSalesChargeNoRoute(orderId,  WebUtils.getCurBizId(request),WebUtils.getCurUser(request).getOrgId());
+					title=toPreviewResult.getGroupOrder().getReceiveMode();
+				}
+				fileName = new String((title+"合同.doc").getBytes("UTF-8"), "iso-8859-1");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			path = saleTravelContractYM(request, orderId);
 		}
 		
 		response.setCharacterEncoding("utf-8");
@@ -1645,7 +1704,55 @@ public class TourGroupController extends BaseController {
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * 订单保险投保单
+	 *
+	 * @param groupId
+	 * @param request
+	 * @param response
+	 */
+	@RequestMapping("downloadInsure.htm")
+	public void downloadInsureFile(Integer groupId, HttpServletRequest request,
+								   HttpServletResponse response) {
+		try {
+			// 处理中文文件名下载乱码
+			request.setCharacterEncoding("UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+		String path = "";
+		String fileName = "";
 
+		// 旅游综合保障计划投保书
+		try {
+			fileName = new String("旅游综合保障计划投保书.doc".getBytes("UTF-8"), "iso-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		path = saleInsurance(request, groupId);
+
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("application/msword"); // word格式
+		try {
+			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+			File file = new File(path);
+			InputStream inputStream = new FileInputStream(file);
+			OutputStream os = response.getOutputStream();
+			byte[] b = new byte[10240];
+			int length;
+			while ((length = inputStream.read(b)) > 0) {
+				os.write(b, 0, length);
+			}
+			inputStream.close();
+			os.flush();
+			os.close();
+			file.delete();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * ---------------------------------订单打印部分----------------------------------
 	 * ----
@@ -3354,7 +3461,7 @@ public class TourGroupController extends BaseController {
 
 		String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
-		ToPreviewResult toPreviewResult = tourGroupFacade.saleTravelContract(orderId, WebUtils.getCurBizId(request));
+		ToPreviewResult toPreviewResult = tourGroupFacade.saleTravelContract(orderId, null);
 		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
 		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
 		GroupRoute groupRoute=toPreviewResult.getGroupRoute();
@@ -3403,7 +3510,7 @@ public class TourGroupController extends BaseController {
 		map1.put("woman1", genderSum.getWoman()+"");
 		map1.put("maxDay",groupRoute.getMaxDay() );
 		map1.put("numDay",groupRoute.getNumDay()+"");
-		map1.put("numNig",(groupRoute.getNumDay()-1)+"");
+		map1.put("numNig", (groupRoute.getNumDay()==0?0:(groupRoute.getNumDay() - 1)) + "");
 		map1.put("total1", NumberUtil.formatDouble(groupOrder.getTotal())+"");
 		map1.put("totals1", NumberToCN.number2CNMontrayUnit(groupOrder.getTotal()));
 		try {
@@ -3416,7 +3523,234 @@ public class TourGroupController extends BaseController {
 		}
 		return url;
 	}
+	/**
+	 * 打印爱游店旅游合同
+	 *
+	 * @param request
+	 * @param orderId
+	 * @return
+	 */
+	public String saleTravelContractAY(HttpServletRequest request, Integer orderId) {
+		String url = request.getSession().getServletContext().getRealPath("/") + "/download/"
+				+ System.currentTimeMillis() + ".doc";
+		ToPreviewResult toPreviewResult = tourGroupFacade.saleTravelContract(orderId, WebUtils.getCurBizId(request));
+		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
+		GroupRoute groupRoute=toPreviewResult.getGroupRoute();
+		GroupOrderGuest genderSum=toPreviewResult.getGroupOrderGuest();
 
+		String realPath = request.getSession().getServletContext()
+				.getRealPath("/template/travel_contractay.docx");
+		WordReporter export = new WordReporter(realPath);
+		try {
+			export.init();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Map<String, Object> map0 = new HashMap<String, Object>();
+		map0.put("groupCode", groupOrder.getTourGroup().getGroupCode());
+		map0.put("person",
+				(groupOrder.getNumAdult() + groupOrder.getNumChild() + groupOrder.getNumGuide())
+						+ "");
+		map0.put("child", groupOrder.getNumChild() + "");
+		map0.put("man", genderSum.getMan() + "");
+		map0.put("woman", genderSum.getWoman() + "");
+		map0.put("total", NumberUtil.formatDouble(groupOrder.getTotal()) + "");
+		map0.put("totals", NumberToCN.number2CNMontrayUnit(groupOrder.getTotal()));
+
+		/**
+		 * 参团名单
+		 */
+		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
+		for (int x = 0; x < guests.size(); x++) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("guestName", (guests.get(x).getName() == null ? "" : guests.get(x).getName()));
+			map.put("mobile", (guests.get(x).getMobile() == null ? "" : guests.get(x).getMobile()));
+			map.put("gender", guests.get(x).getGender() == 1 ? "男" : "女");
+			map.put("age", (guests.get(x).getAge() == null ? "" : guests.get(x).getAge()) + "");
+			map.put("cerNum", (guests.get(x).getCertificateNum() == null ? ""
+					: guests.get(x).getCertificateNum()));
+			guestList.add(map);
+		}
+
+		Map<String, Object> map1 = new HashMap<String, Object>();
+		map1.put("groupCode1", groupOrder.getTourGroup().getGroupCode());
+		map1.put("person1",
+				(groupOrder.getNumAdult() + groupOrder.getNumChild() + groupOrder.getNumGuide())
+						+ "");
+		map1.put("child1", groupOrder.getNumChild() + "");
+		map1.put("departureDate", groupOrder.getDepartureDate());
+		map1.put("man1", genderSum.getMan() + "");
+		map1.put("woman1", genderSum.getWoman() + "");
+		map1.put("maxDay", groupRoute.getMaxDay());
+		map1.put("numDay", groupRoute.getNumDay() + "");
+		map1.put("numNig", (groupRoute.getNumDay()==0?0:(groupRoute.getNumDay() - 1)) + "");
+		map1.put("total1", NumberUtil.formatDouble(groupOrder.getTotal()) + "");
+		map1.put("totals1", NumberToCN.number2CNMontrayUnit(groupOrder.getTotal()));
+		try {
+			export.export(map0);
+			export.export(guestList, 0);
+			export.export(map1, 1);
+			export.generate(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return url;
+	}
+	/**
+	 * 打印景怡旅游合同
+	 *
+	 * @param request
+	 * @param orderId
+	 * @return
+	 */
+	public String saleTravelContractJY(HttpServletRequest request, Integer orderId) {
+		String url = request.getSession().getServletContext().getRealPath("/") + "/download/"
+				+ System.currentTimeMillis() + ".doc";
+		ToPreviewResult toPreviewResult = tourGroupFacade.saleTravelContract(orderId, WebUtils.getCurBizId(request));
+		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
+		GroupRoute groupRoute=toPreviewResult.getGroupRoute();
+		GroupOrderGuest genderSum=toPreviewResult.getGroupOrderGuest();
+		String realPath = request.getSession().getServletContext()
+				.getRealPath("/template/travel_contract_jy.docx");
+		WordReporter export = new WordReporter(realPath);
+		try {
+			export.init();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Map<String, Object> map0 = new HashMap<String, Object>();
+		map0.put("groupCode", groupOrder.getTourGroup().getGroupCode());
+		map0.put("person",
+				(groupOrder.getNumAdult() + groupOrder.getNumChild() + groupOrder.getNumGuide())
+						+ "");
+		map0.put("child", groupOrder.getNumChild() + "");
+		map0.put("man", genderSum.getMan() + "");
+		map0.put("woman", genderSum.getWoman() + "");
+		map0.put("total", NumberUtil.formatDouble(groupOrder.getTotal()) + "");
+		map0.put("totals", NumberToCN.number2CNMontrayUnit(groupOrder.getTotal()));
+
+		/**
+		 * 参团名单
+		 */
+		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
+		for (int x = 0; x < guests.size(); x++) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("guestName", (guests.get(x).getName() == null ? "" : guests.get(x).getName()));
+			map.put("mobile", (guests.get(x).getMobile() == null ? "" : guests.get(x).getMobile()));
+			map.put("gender", guests.get(x).getGender() == 1 ? "男" : "女");
+			map.put("age", (guests.get(x).getAge() == null ? "" : guests.get(x).getAge()) + "");
+			map.put("cerNum", (guests.get(x).getCertificateNum() == null ? ""
+					: guests.get(x).getCertificateNum()));
+			guestList.add(map);
+		}
+
+		Map<String, Object> map1 = new HashMap<String, Object>();
+		map1.put("groupCode1", groupOrder.getTourGroup().getGroupCode());
+		map1.put("person1",
+				(groupOrder.getNumAdult() + groupOrder.getNumChild() + groupOrder.getNumGuide())
+						+ "");
+		map1.put("child1", groupOrder.getNumChild() + "");
+		map1.put("departureDate", groupOrder.getDepartureDate());
+		map1.put("man1", genderSum.getMan() + "");
+		map1.put("woman1", genderSum.getWoman() + "");
+		map1.put("maxDay", groupRoute.getMaxDay());
+		map1.put("numDay", groupRoute.getNumDay() + "");
+		map1.put("numNig", (groupRoute.getNumDay()==0?0:(groupRoute.getNumDay() - 1)) + "");
+		map1.put("total1", NumberUtil.formatDouble(groupOrder.getTotal()) + "");
+		map1.put("totals1", NumberToCN.number2CNMontrayUnit(groupOrder.getTotal()));
+		try {
+			export.export(map0);
+			export.export(guestList, 0);
+			export.export(map1, 1);
+			export.generate(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return url;
+	}
+	/**
+	 * 打印怡美旅游合同
+	 *
+	 * @param request
+	 * @param orderId
+	 * @return
+	 */
+	public String saleTravelContractYM(HttpServletRequest request, Integer orderId) {
+		String url = request.getSession().getServletContext().getRealPath("/") + "/download/"
+				+ System.currentTimeMillis() + ".doc";
+		ToPreviewResult toPreviewResult = tourGroupFacade.saleTravelContract(orderId, WebUtils.getCurBizId(request));
+		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
+		GroupRoute groupRoute=toPreviewResult.getGroupRoute();
+		GroupOrderGuest genderSum=toPreviewResult.getGroupOrderGuest();
+		String realPath = request.getSession().getServletContext()
+				.getRealPath("/template/travel_contract_ym.docx");
+		WordReporter export = new WordReporter(realPath);
+		try {
+			export.init();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Calendar cal = Calendar.getInstance();
+		Integer year = cal.get(Calendar.YEAR);//获取年份
+		Integer month=cal.get(Calendar.MONTH)+1;//获取月份
+		Integer day=cal.get(Calendar.DATE);//获取日
+		Map<String, Object> map0 = new HashMap<String, Object>();
+		map0.put("groupCode", groupOrder.getTourGroup().getGroupCode());
+		map0.put("receiveMode", groupOrder.getReceiveMode());
+		map0.put("person",
+				(groupOrder.getNumAdult() + groupOrder.getNumChild() + groupOrder.getNumGuide())
+						+ "");
+		map0.put("child", groupOrder.getNumChild() + "");
+		map0.put("man", genderSum.getMan() + "");
+		map0.put("woman", genderSum.getWoman() + "");
+		map0.put("total", NumberUtil.formatDouble(groupOrder.getTotal()) + "");
+		map0.put("totals", NumberToCN.number2CNMontrayUnit(groupOrder.getTotal()));
+		map0.put("year", year + "");
+		map0.put("month", month + "");
+		map0.put("day", day + "");
+
+		/**
+		 * 参团名单
+		 */
+		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
+		for (int x = 0; x < guests.size(); x++) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("guestName", (guests.get(x).getName() == null ? "" : guests.get(x).getName()));
+			map.put("mobile", (guests.get(x).getMobile() == null ? "" : guests.get(x).getMobile()));
+			map.put("gender", guests.get(x).getGender() == 1 ? "男" : "女");
+			map.put("age", (guests.get(x).getAge() == null ? "" : guests.get(x).getAge()) + "");
+			map.put("cerNum", (guests.get(x).getCertificateNum() == null ? ""
+					: guests.get(x).getCertificateNum()));
+			guestList.add(map);
+		}
+
+		Map<String, Object> map1 = new HashMap<String, Object>();
+		map1.put("receiveMode1", groupOrder.getReceiveMode());
+		map1.put("person1",
+				(groupOrder.getNumAdult() + groupOrder.getNumChild() + groupOrder.getNumGuide())
+						+ "");
+		map1.put("child1", groupOrder.getNumChild() + "");
+		map1.put("departureDate", groupOrder.getDepartureDate());
+		map1.put("man1", genderSum.getMan() + "");
+		map1.put("woman1", genderSum.getWoman() + "");
+		map1.put("maxDay", groupRoute.getMaxDay());
+		map1.put("numDay", groupRoute.getNumDay() + "");
+		map1.put("numNig", (groupRoute.getNumDay()==0?0:(groupRoute.getNumDay() - 1)) + "");
+		map1.put("total1", NumberUtil.formatDouble(groupOrder.getTotal()) + "");
+		map1.put("totals1", NumberToCN.number2CNMontrayUnit(groupOrder.getTotal()));
+		try {
+			export.export(map0);
+			export.export(guestList, 0);
+			export.export(map1, 1);
+			export.generate(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return url;
+	}
 	/**
 	 * 旅游综合保障计划投保书
 	 * 
@@ -3508,17 +3842,43 @@ public class TourGroupController extends BaseController {
 		map0.put("guide", groupOrder.getNumGuide()+ "");
 
 		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
-		for (int x = 0; x < guests.size(); x++) {
-			Map<String, String> map = new HashMap<String, String>();
-			map.put("number", x+1+"");
-			map.put("guestName", (guests.get(x).getName() == null ? "" : guests
-					.get(x).getName()));
-			map.put("cerNum", (guests.get(x).getCertificateNum() == null ? ""
-					: guests.get(x).getCertificateNum()));
-			map.put("nativePlace", (guests.get(x).getNativePlace() == null ? "" : guests
-					.get(x).getNativePlace()));
-			map.put("gender", guests.get(x).getGender() == 1 ? "男" : "女");
-			guestList.add(map);
+		Map<String, String> guestMap = null;
+		int index = 0;
+		if(guests != null && guests.size()>0){
+			int firstSum = guests.size()/2;
+			for(int x=0;x<firstSum;x++){
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				guestMap = new HashMap<String, String>();
+				guestMap.put("number", x + 1 + "");
+				guestMap.put("guestName", (guests.get(x).getName() == null ? "" : guests.get(x).getName()));
+				guestMap.put("cerNum", (guests.get(x).getCertificateNum() == null ? ""
+						: guests.get(x).getCertificateNum()));
+				guestMap.put("snumber", "");
+				guestMap.put("sguestName", "");
+				guestMap.put("scerNum", "");
+				guestList.add(guestMap);
+				index++;
+			}
+
+			for(int i=firstSum;i<guests.size();i++){
+				guestMap = isAddNewRow(guestList);
+				if (guestMap == null){
+					guestMap = new HashMap<String, String>();
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+					guestMap.put("number", i + 1 + "");
+					guestMap.put("guestName", (guests.get(i).getName() == null ? "" : guests.get(i).getName()));
+					guestMap.put("cerNum", (guests.get(i).getCertificateNum() == null ? ""
+							: guests.get(i).getCertificateNum()));
+					guestList.add(guestMap);
+				}else{
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+					guestMap.put("snumber", index + 1 + "");
+					guestMap.put("sguestName", (guests.get(i).getName() == null ? "" : guests.get(i).getName()));
+					guestMap.put("scerNum",(guests.get(i).getCertificateNum() == null ? ""
+							: guests.get(i).getCertificateNum()));
+				}
+				index++;
+			}
 		}
 		try {
 			export.export(map0,0);
@@ -3529,7 +3889,67 @@ public class TourGroupController extends BaseController {
 		}
 		return url;
 	}
-	
+	private Map<String, String> isAddNewRow(List<Map<String, String>> guestList){
+		Map<String, String> ret = null;
+		for(Map<String, String> item : guestList){
+			if ("".equals(item.get("snumber"))){
+				ret = item;
+				break;
+			}
+		}
+		return ret;
+
+	}
+
+	/**
+	 * 祥泰苏梅直航出团通知书
+	 *
+	 * @param request
+	 * @param orderId
+	 * @return
+	 */
+	public String noticeTheGroup(HttpServletRequest request, Integer orderId) {
+		String url = request.getSession().getServletContext().getRealPath("/") + "/download/"
+				+ System.currentTimeMillis() + ".doc";
+		ToPreviewResult toPreviewResult = tourGroupFacade.saleTravelContract(orderId, WebUtils.getCurBizId(request));
+		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		String realPath = request.getSession().getServletContext()
+				.getRealPath("/template/noticeTheGroup.docx");
+		WordReporter export = new WordReporter(realPath);
+		try {
+			export.init();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Map<String, Object> params1 = new HashMap<String, Object>();
+		params1.put("productName", groupOrder.getProductName());
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("productName1", groupOrder.getProductName());
+		if (null == groupOrder.getTourGroup()) {
+			map.put("groupCode", "");
+		} else {
+			map.put("groupCode", groupOrder.getTourGroup().getGroupCode());
+		}
+		map.put("operatorName", groupOrder.getOperatorName());
+		map.put("operatorMobile",
+				sysPlatformEmployeeFacade.findByEmployeeId(groupOrder.getOperatorId()).getPlatformEmployeePo().getMobile());
+		if (groupOrder.getExtResId() != null && groupOrder.getExtResId() > 0) {
+			TrafficRes trafficRes = trafficResFacade
+					.selectTrafficResAndLineInfoById1(groupOrder.getExtResId());
+			map.put("lineInfo", trafficRes.getLineInfo());
+		} else {
+			map.put("lineInfo", "");
+		}
+		try {
+			export.export(params1);
+			export.export(map, 0);
+			export.generate(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return url;
+	}
 	/**
 	 * 多个旅客信息拼成一个字符串
 	 * 
@@ -3589,6 +4009,179 @@ public class TourGroupController extends BaseController {
 	@RequestMapping(value = "/toProfitList.htm")
 	public String toProfitList(HttpServletRequest request, Model model) {
 		return "sales/profit/profitList";
+	}
+
+	/**
+	 *  内部结算（销售） ---进入页面,加审核功能
+	 * @date 20161028
+	 * @author TengDong
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value = "/toProfitEverifyList.htm")
+	public String toProfitEverifyList(HttpServletRequest request, HttpServletResponse reponse,
+									  ModelMap model) {
+		ToGroupListResult toGroupListResult = tourGroupFacade.findTourGroupByCondition("", null, WebUtils.getCurBizId(request));
+		Integer bizId = WebUtils.getCurBizId(request);
+
+		model.addAttribute("pp", toGroupListResult.getPpList());
+		model.addAttribute("allProvince", toGroupListResult.getAllProvince());
+		model.addAttribute("typeList", toGroupListResult.getTypeList());
+		model.addAttribute("sourceTypeList", toGroupListResult.getSourceTypeList());
+
+		model.addAttribute("orgJsonStr", toGroupListResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", toGroupListResult.getOrgUserJsonStr());
+		model.addAttribute("curUser",WebUtils.getCurUser(request).getName());
+		model.addAttribute("curUserId",WebUtils.getCurUserId(request));
+		model.addAttribute("bizId", bizId);
+		return "sales/profit_everify/profitQuery";
+	}
+
+
+	/**
+	 * 内部结算（销售） ---显示报表页,加审核功能
+	 * @date 20161031
+	 * @author TengDong
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value = "/toProfitEverifyTable.do")
+	@RequiresPermissions(PermissionConstants.SALE_TEAM_PROFIT)
+	public String toProfitEverifyTable(HttpServletRequest request, Model model,
+									   GroupOrder groupOrder,Integer page, Integer pageSize)
+			throws ParseException {
+		/*PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+		if(page==null){
+			pageBean.setPage(1);
+		}else{
+			pageBean.setPage(page);
+		}
+		if(pageSize==null){
+			pageBean.setPageSize(Constants.PAGESIZE);
+		}else{
+			pageBean.setPageSize(pageSize);
+		}
+
+		if (groupOrder.getDateType() != null && groupOrder.getDateType() == 2) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			if (!"".equals(groupOrder.getStartTime())) {
+				groupOrder.setStartTime(sdf.parse(groupOrder.getStartTime()).getTime() + "");
+			}
+			if (!"".equals(groupOrder.getEndTime())) {
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(sdf.parse(groupOrder.getEndTime()));
+				calendar.add(Calendar.DAY_OF_MONTH, +1);// 让日期加1
+				groupOrder.setEndTime(calendar.getTime().getTime() + "");
+			}
+
+		}
+
+		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds()) && StringUtils.isNotBlank(groupOrder.getOrgIds())) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = groupOrder.getOrgIds().split(",");
+			for (String orgIdStr : orgIdArr) {
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			String salesOperatorIds = "";
+			for (Integer usrId : set) {
+				salesOperatorIds += usrId + ",";
+			}
+			if (!salesOperatorIds.equals("")) {
+				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
+			}
+		}
+
+		pageBean.setPage(page);
+		pageBean.setParameter(groupOrder);
+		//查询内部结算信息
+		pageBean = groupOrderService.selectProfitEverifyListPage(pageBean, WebUtils.getCurBizId(request),
+				WebUtils.getDataUserIdSet(request), 1);
+
+		List<GroupOrder> list = pageBean.getResult();
+		Integer pageTotalAudit = 0;
+		Integer pageTotalChild = 0;
+		Integer pageTotalGuide = 0;
+		//收入
+		BigDecimal sum_total = new BigDecimal(0);
+		//其它收入
+		BigDecimal sum_qdtotal = new BigDecimal(0);
+		//成本
+		BigDecimal sum_budget = new BigDecimal(0);
+		//毛利
+		BigDecimal sum_g_profit = new BigDecimal(0);
+
+		if (pageBean.getResult() != null && pageBean.getResult().size() > 0) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			for (GroupOrder groupOrder2 : list) {
+				pageTotalAudit += groupOrder2.getNumAdult() == null ? 0 : groupOrder2.getNumAdult();
+				pageTotalChild += groupOrder2.getNumChild() == null ? 0 : groupOrder2.getNumChild();
+				pageTotalGuide += groupOrder2.getNumGuide() == null ? 0 : groupOrder2.getNumGuide();
+				sum_total=sum_total.add(groupOrder2.getTotal()==null?new BigDecimal(0): groupOrder2.getTotal());
+				sum_qdtotal=sum_qdtotal.add(groupOrder2.getQdtotal()==null?new BigDecimal(0):groupOrder2.getQdtotal());
+				sum_budget=sum_budget.add(groupOrder2.getBudget()==null?new BigDecimal(0):groupOrder2.getBudget());
+				sum_g_profit=sum_g_profit.add(groupOrder2.getG_profit()==null?new BigDecimal(0):groupOrder2.getG_profit());
+
+				Long createTime = groupOrder2.getCreateTime();
+				String dateStr = sdf.format(createTime);
+				groupOrder2.setCreateTimeStr(dateStr);
+			}
+		}
+
+		List<DicInfo> typeList = dicService.getListByTypeCode(BasicConstants.SALES_TEAM_TYPE,
+				WebUtils.getCurBizId(request));
+		model.addAttribute("typeList", typeList);
+		//合计人数、收入、成本、毛利
+		model.addAttribute("pageTotalAudit", pageTotalAudit);
+		model.addAttribute("pageTotalChild", pageTotalChild);
+		model.addAttribute("pageTotalGuide", pageTotalGuide);
+		model.addAttribute("sum_total", sum_total);
+		model.addAttribute("sum_qdtotal", sum_qdtotal);
+		model.addAttribute("sum_budget", sum_budget);
+		model.addAttribute("sum_g_profit", sum_g_profit);
+
+		model.addAttribute("page", pageBean);
+		model.addAttribute("groupList", pageBean.getResult());
+
+		//查询内部结算信息
+		GroupOrder groupOrderTatol=groupOrderService.selectProfitEverifyByCon(groupOrder, WebUtils.getCurBizId(request),
+				WebUtils.getDataUserIdSet(request), 1);
+		if(groupOrderTatol==null)  return "sales/profit_everify/profitQueryTable";
+		//人数
+		String numberPeople=groupOrderTatol.getNumAdult()+"+"+groupOrderTatol.getNumChild()+"+"+groupOrderTatol.getNumGuide();
+		//收入
+		BigDecimal z_sum_total = (BigDecimal) (groupOrderTatol.getSumTotal()==null?(new BigDecimal(0)):groupOrderTatol.getSumTotal());
+		//其它收入
+		BigDecimal z_sum_qdtotal = (BigDecimal) (groupOrderTatol.getSumQdtotal()==null?(new BigDecimal(0)):groupOrderTatol.getSumQdtotal());
+		//成本
+		BigDecimal z_sum_budget = (BigDecimal) (groupOrderTatol.getSumBudget()==null?(new BigDecimal(0)):groupOrderTatol.getSumBudget());
+		//毛利
+		BigDecimal z_sum_profit =(BigDecimal) (groupOrderTatol.getSumProfit()==null?(new BigDecimal(0)):groupOrderTatol.getSumProfit());*/
+		ProfitEverifyTableResult result = tourGroupFacade.toProfitEverifyTable(groupOrder,page,pageSize,WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+		//合计人数、收入、成本、毛利
+		model.addAttribute("pageTotalAudit", result.getPageTotalAudit());
+		model.addAttribute("pageTotalChild", result.getPageTotalChild());
+		model.addAttribute("pageTotalGuide", result.getPageTotalGuide());
+		model.addAttribute("sum_total", result.getSum_total());
+		model.addAttribute("sum_qdtotal", result.getSum_qdtotal());
+		model.addAttribute("sum_budget", result.getSum_budget());
+		model.addAttribute("sum_g_profit", result.getSum_g_profit());
+
+		model.addAttribute("page", result.getPageBean());
+		model.addAttribute("groupList",result.getPageBean().getResult());
+		model.addAttribute("numberPeople", result.getNumberPeople());
+
+		model.addAttribute("z_sum_total", result.getZ_sum_total());
+
+		model.addAttribute("z_sum_qdtotal", result.getZ_sum_qdtotal());
+
+		model.addAttribute("z_sum_budget", result.getZ_sum_budget());
+
+		model.addAttribute("z_sum_profit", result.getZ_sum_profit());
+
+		return "sales/profit_everify/profitQueryTable";
 	}
 
 	/**
@@ -3857,7 +4450,99 @@ public class TourGroupController extends BaseController {
 		
 		return "sales/profit/profitQueryTableByTour";
 	}
+	/**
+	 * XTSM：销售利润统计
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value = "/toSaleProfitListByTour.htm")
+	public String toSaleProfitListByTour(HttpServletRequest request, Model model) {
+		BookingProfitTableResult result = tourGroupFacade.toSaleProfitListByTour(WebUtils.getCurBizId(request));
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
+		return "sales/profit/saleProfitList";
+	}
 
+	/**
+	 * XTSM：销售利润统计
+	 * @param request
+	 * @param model
+	 * @param tour
+	 * @param page
+	 * @param pageSize
+	 * @return
+	 */
+	@RequestMapping(value = "/toSaleProfitTableByTour.do")
+	public String toSaleProfitTableByTour(HttpServletRequest request, Model model, TourGroup tour,
+										  Integer page, Integer pageSize) {
+	/*	PageBean<TourGroup> pageBean = new PageBean<TourGroup>();
+		pageBean.setPage(page);
+		if (pageSize == null) {
+			pageSize = Constants.PAGESIZE;
+		}
+		pageBean.setPageSize(pageSize);
+		pageBean.setParameter(tour);
+		// 如果人员为空并且部门不为空，则取部门下的人id
+		if (StringUtils.isBlank(tour.getSaleOperatorIds())
+				&& StringUtils.isNotBlank(tour.getOrgIds())) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = tour.getOrgIds().split(",");
+			for (String orgIdStr : orgIdArr) {
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request),
+					set);
+			String salesOperatorIds = "";
+			for (Integer usrId : set) {
+				salesOperatorIds += usrId + ",";
+			}
+			if (!salesOperatorIds.equals("")) {
+				tour.setSaleOperatorIds(
+						salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
+			}
+		}
+		pageBean = tourGroupService.selectSaleProfitByTourListPage(pageBean,
+				WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
+		// 统计成人、小孩、全陪
+		PageBean<TourGroup> pb = tourGroupService.selectSaleProfitByTourCon(pageBean,
+				WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
+
+		// 总成本、总收入
+		TourGroup group = tourGroupService.selectSaleProfitByTourConAndMode(pageBean,
+				WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
+
+		TourGroup groupCost = tourGroupService.selectSumCostProfit(tour,
+				WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
+
+		if (group == null) {
+			group = new TourGroup();
+			group.setIncome(new BigDecimal(0));
+			group.setTotalBudget(new BigDecimal(0));
+		}
+		if (groupCost == null) {
+			groupCost = new TourGroup();
+			groupCost.setSumTotalIncome(new BigDecimal(0));
+			groupCost.setSumTotalCost(new BigDecimal(0));
+		}*/
+		ProfitQueryByTourDTO profitQueryByTourDTO=new ProfitQueryByTourDTO();
+		profitQueryByTourDTO.setBizId(WebUtils.getCurBizId(request));
+		profitQueryByTourDTO.setTour(tour);
+		profitQueryByTourDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		profitQueryByTourDTO.setPage(page);
+		profitQueryByTourDTO.setPageSize(pageSize);
+		ProfitQueryByTourResult result = tourGroupFacade.toSaleProfitTableByTour( profitQueryByTourDTO);
+
+
+		model.addAttribute("page", result.getPageBean());
+		model.addAttribute("groupList", result.getPageBean().getResult());
+		model.addAttribute("pb", result.getPb().getResult());
+		model.addAttribute("totalBudget", result.getGroup().getTotalBudget());
+		model.addAttribute("totalIncome", result.getGroup().getIncome());
+		model.addAttribute("sumTotalIncome", result.getGroupCost().getSumTotalIncome());
+		model.addAttribute("sumTotalCost", result.getGroupCost().getSumTotalCost());
+		return "sales/profit/saleProfitTable";
+	}
 	/**
 	 * 返回客人信息(不包含电话号码)
 	 * 
@@ -5440,5 +6125,585 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("page", bookingProfitTableResult.getPageBean());
 		return "/sales/bookingProfit/bookingProfitTable";
 		
+	}
+
+
+	/**
+	 * 导出内部结算（计调）Excel
+	 * @param request
+	 * @param response
+	 * @param startTime
+	 * @param endTime
+	 * @param groupCode
+	 * @param productName
+	 * @param orgIds
+	 * @param saleOperatorIds
+	 * @param model
+	 * @throws ParseException
+	 */
+	@RequestMapping(value = "toProfitOperatorExcel.do")
+	public void operatorSummaryTable(HttpServletRequest request, HttpServletResponse response,
+									 String startTime, String endTime, String groupCode,
+									 String productName, String orgIds, String saleOperatorIds,Model model) throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		TourGroup tgBean = new TourGroup();
+		tgBean.setStartTime(startTime == ""?null:sdf.parse(startTime));
+		tgBean.setEndTime(endTime == ""?null:sdf.parse(endTime));
+		tgBean.setGroupCode(groupCode);
+		tgBean.setProductName(productName);
+		tgBean.setOrgIds(orgIds);
+		tgBean.setSaleOperatorIds(saleOperatorIds);
+
+		/*PageBean pageBean = new PageBean();
+		pageBean.setPage(1);
+		pageBean.setPageSize(10000);
+		if (StringUtils.isBlank(tgBean.getSaleOperatorIds())
+				&& StringUtils.isNotBlank(tgBean.getOrgIds())) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = tgBean.getOrgIds().split(",");
+			for (String orgIdStr : orgIdArr) {
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request),set);
+			String operatorIds = "";
+			for (Integer usrId : set) {
+				operatorIds += usrId + ",";
+			}
+			if (!operatorIds.equals("")) {
+				tgBean.setSaleOperatorIds(operatorIds.substring(0, operatorIds.length() - 1));
+			}
+		}
+		pageBean.setParameter(tgBean);
+		Map<String,Object> map = groupOrderFacade.selectBookingProfitTotal(pageBean,
+				WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
+		pageBean = groupOrderFacade.selectBookingProfitList(pageBean, WebUtils.getCurBizId(request),
+				WebUtils.getDataUserIdSet(request));
+		List result = pageBean.getResult();
+		if (result != null && result.size() > 0) {
+			for (Object obj : result) {
+				TourGroup tGroup = (TourGroup) obj;
+				if (tGroup.getGroupMode() < 1) {
+					tGroup.setSupplierName("散客团");
+				}
+			}
+		}*/
+		BookingProfitTableResult bookingProfitTableResult = tourGroupFacade.operatorSummaryTable(tgBean,WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+		PageBean pageBean = bookingProfitTableResult.getPageBean();
+		Map<String,Object> map = bookingProfitTableResult.getSum();
+
+		String path = "";
+		try {
+			String url = request.getSession().getServletContext().getRealPath("/template/excel/profitOperatorTable.xlsx");
+			FileInputStream input = new FileInputStream(new File(url)); // 读取的文件路径
+			XSSFWorkbook wb = new XSSFWorkbook(new BufferedInputStream(input));
+			CellStyle cellStyle = wb.createCellStyle();
+			cellStyle.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			cellStyle.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			cellStyle.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			cellStyle.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			cellStyle.setAlignment(CellStyle.ALIGN_CENTER); // 居中
+			cellStyle.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			cellStyle.setWrapText(true);
+
+			CellStyle styleLeft = wb.createCellStyle();
+			styleLeft.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleLeft.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleLeft.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleLeft.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleLeft.setAlignment(CellStyle.ALIGN_LEFT); // 居左
+			styleLeft.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			styleLeft.setWrapText(true);
+
+			CellStyle styleRight = wb.createCellStyle();
+			styleRight.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleRight.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleRight.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleRight.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleRight.setAlignment(CellStyle.ALIGN_RIGHT); // 居右
+			styleRight.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			styleRight.setWrapText(true);
+
+			Sheet sheet = wb.getSheetAt(0); // 获取到第一个sheet
+			Row row = null;
+			Cell cc = null;
+			// 遍历集合数据，产生数据行
+			Iterator<TourGroup> it = pageBean.getResult().iterator();
+			int index = 0;
+			DecimalFormat df = new DecimalFormat("0.##");
+			while (it.hasNext()) {
+				TourGroup tg = it.next();
+
+				row = sheet.createRow(index + 2);
+				cc = row.createCell(0);
+				cc.setCellValue(index + 1);
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(1);
+				cc.setCellValue(tg.getGroupCode());//团号
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(2);
+				cc.setCellValue(sdf.format(tg.getDateStart()));//发团日期dateStart
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(3);
+				cc.setCellValue("【"+tg.getProductBrandName()+"】"+tg.getProductName());//产品名称
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(4);
+				cc.setCellValue(tg.getSupplierName());//组团社
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(5);
+				cc.setCellValue(tg.getTotalAdult()+"+"+tg.getTotalChild()+"+"+tg.getTotalGuide());//人数
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(6);
+				cc.setCellValue(tg.getOperatorName());//计调
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(7);
+				cc.setCellValue(df.format(tg.getTotalBudget()));//结算
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(8);
+				cc.setCellValue(df.format(tg.getTotalCost()));//成本
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(9);
+				cc.setCellValue(df.format(tg.getTotalBudget().subtract(tg.getTotalCost())));//毛利
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(10);//团状态
+				if(tg.getGroupState() == 0){
+					cc.setCellValue("未确认");
+				}else if(tg.getGroupState() == 1){
+					cc.setCellValue("已确认");
+				}else if(tg.getGroupState() == 2){
+					cc.setCellValue("作废");
+				}else if(tg.getGroupState() == 3){
+					cc.setCellValue("审核");
+				}else {
+					cc.setCellValue("封存");
+				}
+				cc.setCellStyle(cellStyle);
+
+				index++;
+			}
+
+			BigDecimal allTotalCost=new BigDecimal(0);
+			BigDecimal allTotalBudget=new BigDecimal(0);
+			BigDecimal allTotalAdult=new BigDecimal(0);
+			BigDecimal allTotalChild=new BigDecimal(0);
+			BigDecimal allTotalGuide=new BigDecimal(0);
+			if(null!=map){
+				if(null!=map.get("totalCost")){
+					allTotalCost = new BigDecimal(map.get("totalCost").toString());
+				}
+				if(null!=map.get("totalBudget")){
+					allTotalBudget = new BigDecimal(map.get("totalBudget").toString());
+				}
+				if(null!=map.get("totalAdult")){
+					allTotalAdult = new BigDecimal(map.get("totalAdult").toString());
+				}
+				if(null!=map.get("totalChild")){
+					allTotalChild = new BigDecimal(map.get("totalChild").toString());
+				}
+				if(null!=map.get("totalGuide")){
+					allTotalGuide = new BigDecimal(map.get("totalGuide").toString());
+				}
+			}
+
+			row = sheet.createRow(index+2); //加合计行
+			cc = row.createCell(0);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(1);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(2);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(3);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(4);
+			cc.setCellValue("总合计：");
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(5);
+			cc.setCellValue(allTotalAdult.toString()+"+"+allTotalChild.toString()+"+"+allTotalGuide.toString());
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(6);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(7);
+			cc.setCellValue(df.format(allTotalBudget));
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(8);
+			cc.setCellValue(df.format(allTotalCost));
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(9);
+			cc.setCellValue(df.format(allTotalBudget.subtract(allTotalCost)));
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(10);
+			cc.setCellStyle(styleRight);
+
+			CellRangeAddress region = new CellRangeAddress(pageBean.getResult().size() + 5,
+					pageBean.getResult().size() + 5, 0, 10);
+			sheet.addMergedRegion(region);
+
+			row = sheet.createRow(pageBean.getResult().size() + 5);
+			cc = row.createCell(0);
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
+					+ " 打印时间："
+					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
+					+ ".xlsx";
+			FileOutputStream out = new FileOutputStream(path);
+			wb.write(out);
+			out.close();
+			wb.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		String fileName = "";
+		try {
+			fileName = new String("内部结算(计调).xlsx".getBytes("UTF-8"), "iso-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		download(path, fileName, request, response);
+
+	}
+
+	/**
+	 * 导出内部结算（销售）Excel
+	 */
+	@RequestMapping(value = "toProfitSaleExcel.do")
+	public void toProfitSaleExcel(HttpServletRequest request, HttpServletResponse response,
+								  String startTime, String endTime, String groupCode, String dateType,
+								  String receiveMode,String orgIds,String operType,
+								  String saleOperatorIds,String productName,String productBrandId,String supplierName,
+								  String orderMode,String stateFinance,String orderLockState,
+								  Model model) throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		GroupOrder groupOrder = new GroupOrder();
+		groupOrder.setDateType(dateType == "" ? null : Integer.valueOf(dateType));
+		groupOrder.setStartTime(startTime);
+		groupOrder.setEndTime(endTime);
+		groupOrder.setGroupCode(groupCode);
+		groupOrder.setSupplierName(supplierName);
+		groupOrder.setReceiveMode(receiveMode);
+		groupOrder.setOrderMode(orderMode == "" ? null : Integer.valueOf(orderMode));
+		groupOrder.setStateFinance(stateFinance == "" ? null : Integer.valueOf(stateFinance));
+		groupOrder.setOrderLockState(orderLockState == "" ? null : Integer.valueOf(orderLockState));
+		groupOrder.setOrgIds(orgIds);
+		groupOrder.setOperType(operType == "" ? null : Integer.valueOf(operType));
+		groupOrder.setSaleOperatorIds(saleOperatorIds);
+		groupOrder.setProductBrandId(productBrandId == "" ? null : Integer.valueOf(productBrandId));
+		groupOrder.setProductName(productName);
+
+		if (groupOrder.getDateType() != null && groupOrder.getDateType() == 2) {
+			if (!"".equals(groupOrder.getStartTime())) {
+				groupOrder.setStartTime(sdf.parse(groupOrder.getStartTime()).getTime() + "");
+			}
+			if (!"".equals(groupOrder.getEndTime())) {
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(sdf.parse(groupOrder.getEndTime()));
+				calendar.add(Calendar.DAY_OF_MONTH, +1);// 让日期加1
+				groupOrder.setEndTime(calendar.getTime().getTime() + "");
+			}
+		}
+
+		/*if (StringUtils.isBlank(groupOrder.getSaleOperatorIds()) && StringUtils.isNotBlank(groupOrder.getOrgIds())) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = groupOrder.getOrgIds().split(",");
+			for (String orgIdStr : orgIdArr) {
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			String salesOperatorIds = "";
+			for (Integer usrId : set) {
+				salesOperatorIds += usrId + ",";
+			}
+			if (!salesOperatorIds.equals("")) {
+				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
+			}
+		}
+		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+		pageBean.setPage(1);
+		pageBean.setPageSize(10000);
+		pageBean.setParameter(groupOrder);
+		pageBean = groupOrderService.selectProfitEverifyListPage(pageBean, WebUtils.getCurBizId(request),
+				WebUtils.getDataUserIdSet(request), 1);
+
+		Map<String,Object> map = groupOrderService.selectProfitEverifyByTotal(pageBean, WebUtils.getCurBizId(request),
+				WebUtils.getDataUserIdSet(request), 1);
+*/
+		BookingProfitTableResult bookingProfitTableResult = tourGroupFacade.toProfitSaleExcel(groupOrder,WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+		PageBean pageBean = bookingProfitTableResult.getPageBean();
+		Map<String,Object> map = bookingProfitTableResult.getSum();
+		String path = "";
+		try {
+			String url = request.getSession().getServletContext().getRealPath("/template/excel/profitSaleTable.xlsx");
+			FileInputStream input = new FileInputStream(new File(url)); // 读取的文件路径
+			XSSFWorkbook wb = new XSSFWorkbook(new BufferedInputStream(input));
+			CellStyle cellStyle = wb.createCellStyle();
+			cellStyle.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			cellStyle.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			cellStyle.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			cellStyle.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			cellStyle.setAlignment(CellStyle.ALIGN_CENTER); // 居中
+			cellStyle.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			cellStyle.setWrapText(true);
+
+			CellStyle styleLeft = wb.createCellStyle();
+			styleLeft.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleLeft.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleLeft.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleLeft.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleLeft.setAlignment(CellStyle.ALIGN_LEFT); // 居左
+			styleLeft.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			styleLeft.setWrapText(true);
+
+			CellStyle styleRight = wb.createCellStyle();
+			styleRight.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleRight.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleRight.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleRight.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleRight.setAlignment(CellStyle.ALIGN_RIGHT); // 居右
+			styleRight.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			styleRight.setWrapText(true);
+
+			Sheet sheet = wb.getSheetAt(0); // 获取到第一个sheet
+			Row row = null;
+			Cell cc = null;
+			// 遍历集合数据，产生数据行
+			Iterator<GroupOrder> it = pageBean.getResult().iterator();
+			int index = 0;
+			DecimalFormat df = new DecimalFormat("0.##");
+			while (it.hasNext()) {
+				GroupOrder orderBean = it.next();
+
+				row = sheet.createRow(index + 2);
+				cc = row.createCell(0);
+				cc.setCellValue(index + 1);
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(1);
+				cc.setCellValue(orderBean.getGroupCode());//团号
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(2);
+				cc.setCellValue(orderBean.getDateStart());//发团日期dateStart
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(3);
+				cc.setCellValue("【"+orderBean.getProductBrandName()+"】"+orderBean.getProductName());//产品名称
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(4);
+				cc.setCellValue(orderBean.getSupplierName());//客户
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(5);
+				cc.setCellValue(orderBean.getReceiveMode());//客人信息
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(6);
+				cc.setCellValue(orderBean.getProvinceName());//客源地
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(7);
+				cc.setCellValue(orderBean.getNumAdult()+"+"+orderBean.getNumChild()+"+"+orderBean.getNumGuide());//人数
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(8);
+				cc.setCellValue(orderBean.getSaleOperatorName());//销售
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(9);
+				cc.setCellValue(orderBean.getOperatorName());//计调
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(10);
+				cc.setCellValue(df.format(orderBean.getTotal()));//收入
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(11);
+				cc.setCellValue(df.format(orderBean.getQdtotal()));//其它收入
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(12);
+				cc.setCellValue(df.format(orderBean.getBudget()));//成本
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(13);
+				cc.setCellValue(df.format(orderBean.getG_profit()));//毛利
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(14);//团状态
+				if(orderBean.getGroupState() == 0){
+					cc.setCellValue("未确认");
+				}else if(orderBean.getGroupState() == 1){
+					cc.setCellValue("已确认");
+				}else if(orderBean.getGroupState() == 2){
+					cc.setCellValue("作废");
+				}else if(orderBean.getGroupState() == 3){
+					cc.setCellValue("审核");
+				}else {
+					cc.setCellValue("封存");
+				}
+				cc.setCellStyle(cellStyle);
+
+				index++;
+			}
+
+			BigDecimal allNumAdult=new BigDecimal(0);
+			BigDecimal allNumChild=new BigDecimal(0);
+			BigDecimal allNumGuide=new BigDecimal(0);
+			BigDecimal allSumTotal=new BigDecimal(0);
+			BigDecimal allSumGdtotal=new BigDecimal(0);
+			BigDecimal allSumBudget=new BigDecimal(0);
+			BigDecimal allSumProfit=new BigDecimal(0);
+			if(null!=map){
+				if(null!=map.get("num_adult")){
+					allNumAdult = new BigDecimal(map.get("num_adult").toString());
+				}
+				if(null!=map.get("num_child")){
+					allNumChild = new BigDecimal(map.get("num_child").toString());
+				}
+				if(null!=map.get("num_guide")){
+					allNumGuide = new BigDecimal(map.get("num_guide").toString());
+				}
+				if(null!=map.get("sum_total")){
+					allSumTotal = new BigDecimal(map.get("sum_total").toString());
+				}
+				if(null!=map.get("sum_qdtotal")){
+					allSumGdtotal = new BigDecimal(map.get("sum_qdtotal").toString());
+				}
+				if(null!=map.get("sum_budget")){
+					allSumBudget = new BigDecimal(map.get("sum_budget").toString());
+				}
+				if(null!=map.get("sum_profit")){
+					allSumProfit = new BigDecimal(map.get("sum_profit").toString());
+				}
+			}
+
+			row = sheet.createRow(index+2); //加合计行
+			cc = row.createCell(0);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(1);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(2);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(3);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(4);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(5);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(6);
+			cc.setCellValue("总合计：");
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(7);
+			cc.setCellValue(allNumAdult.toString()+"+"+allNumChild.toString()+"+"+allNumGuide.toString());
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(8);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(9);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(10);
+			cc.setCellValue(df.format(allSumTotal));
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(11);
+			cc.setCellValue(df.format(allSumGdtotal));
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(12);
+			cc.setCellValue(df.format(allSumBudget));
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(13);
+			cc.setCellValue(df.format(allSumProfit));
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(14);
+			cc.setCellStyle(styleRight);
+
+			CellRangeAddress region = new CellRangeAddress(pageBean.getResult().size() + 5,
+					pageBean.getResult().size() + 5, 0, 10);
+			sheet.addMergedRegion(region);
+
+			row = sheet.createRow(pageBean.getResult().size() + 5);
+			cc = row.createCell(0);
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
+					+ " 打印时间："
+					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
+					+ ".xlsx";
+			FileOutputStream out = new FileOutputStream(path);
+			wb.write(out);
+			out.close();
+			wb.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		String fileName = "";
+		try {
+			fileName = new String("内部结算(销售).xlsx".getBytes("UTF-8"), "iso-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		download(path, fileName, request, response);
+	}
+
+	private void download(String path, String fileName, HttpServletRequest request, HttpServletResponse response) {
+		try {
+			// path是指欲下载的文件的路径。
+			File file = new File(path);
+			// 以流的形式下载文件。
+			InputStream fis = new BufferedInputStream(new FileInputStream(path));
+			byte[] buffer = new byte[fis.available()];
+			fis.read(buffer);
+			fis.close();
+			// 清空response
+			response.reset();
+
+            /*
+             * //解决IE浏览器下下载文件名乱码问题 if
+             * (request.getHeader("USER-AGENT").indexOf("msie") > -1){ fileName
+             * = new URLEncoder().encode(fileName) ; }
+             */
+			// 设置response的Header
+			response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+			response.addHeader("Content-Length", "" + file.length());
+			OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+			response.setContentType("application/vnd.ms-excel;charset=gb2312");
+			toClient.write(buffer);
+			toClient.flush();
+			toClient.close();
+			file.delete();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
 	}
 }

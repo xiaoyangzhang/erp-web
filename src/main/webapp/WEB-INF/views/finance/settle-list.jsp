@@ -28,7 +28,7 @@
 
 			<input type="hidden" name="page" id="page" />
 			<input type="hidden" name="pageSize" id="pageSize" />
-			<input type="hidden" name="sl" value="fin.selectSettleListPage" />
+			<input type="hidden" name="sl" value="fin.selectSettleTourGroupOrGroupOrderListPage" />
 			<input type="hidden" name="rp" value="finance/settle-list-table" />
 			<div class="p_container_sub" >
 			<div class="searchRow">
@@ -50,7 +50,14 @@
 						<input name="orgIds" id="orgIds" stag="orgIds" value="" type="hidden" value=""/>	    				
 	    			<li class="text">计调:</li>
 	    			<li><input type="text" name="saleOperatorName" id="saleOperatorName" stag="userNames" value="" readonly="readonly" onclick="showUser()"/></li>
-						<input name="saleOperatorIds" id="saleOperatorIds" stag="userIds" value="" type="hidden" value=""/>	    				
+						<input name="saleOperatorIds" id="saleOperatorIds" stag="userIds" value="" type="hidden" value=""/>	    
+				
+					<li class="text">客户:</li>
+						<li><input type="text" name="supplier_name" id="supplier_name" value="" />	</li>
+					<li class="text">客人:</li>
+						<li><input type="text" name="receive_mode" id="receive_mode" value="" />	</li>		
+						
+									
 					<li class="text">团状态:</li>
 					<li><select name="group_state" id="group_state">
 							<option value="" selected="selected">全部</option>
