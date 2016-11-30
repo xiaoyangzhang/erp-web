@@ -181,13 +181,8 @@
 					 interface="com.yimayhd.erpcenter.facade.dataanalysis.client.service.DataAnalysisFacade" owner="ly" version="1.0.0.test.ly"
 					 timeout="80000" />
 	<dubbo:reference id="queryFacade"
-<<<<<<< HEAD
-					 interface="com.yimayhd.erpcenter.facade.dataanalysis.client.service.QueryFacade" owner="ly" version="1.0.0.test.zxy1"
-					 timeout="80000" />
-=======
 					 interface="com.yimayhd.erpcenter.facade.dataanalysis.client.service.QueryFacade" owner="ly" version="1.0.0.test.ly"
 					 timeout="8000" />
->>>>>>> refs/remotes/origin/v_0_1_1_20161123
 	<dubbo:reference id="billStatisticsFacade"
 					 interface="org.yimayhd.erpcenter.facade.finance.service.BillStatisticsFacade" owner="ly" version="1.0.0.test.ly"
 					 timeout="8000" />
