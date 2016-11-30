@@ -31,6 +31,180 @@
 				</div>
 			</div>
 			
+			<!-- 标签属性 start -->
+		<div class="brandsearch mt-25">
+		<!-- <p class="">标签属性</p>	 -->
+        <form id="product_sale_tag" class="form-horizontal" onsubmit="return false;" action="" method="post">
+            <div class="w_biaoqianBox">
+                <table id="table_tag_id" cellspacing="0" cellpadding="0" class="w_tableLabel">
+                    <col width="140px"/>
+                    <tbody>
+                    <tr>
+                        <td><b>线路主题</b></td>
+                        <td>
+                            <div class="w_lableBox">
+                                <c:forEach items="${lineThemeList}" var="element">
+
+                                <span>
+                                    <input type="hidden" name="tagType" value="${element.typeCode}"/>
+                                    <label><input id="c_${element.id}" name="tagId" type="checkbox"
+                                                  value="${element.id}"
+                                                  <c:if test="${element.selected}">checked</c:if> /><label
+                                            for="c_${element.id}">${element.value}</label></label>
+                                </span>
+                                </c:forEach>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>线路等级</b></td>
+                        <td>
+                            <div class="w_lableBox">
+                                <c:forEach items="${lineLevelList}" var="element">
+
+                                <span>
+                                    <input type="hidden" name="tagType" value="${element.typeCode}"/>
+                                    <label><input id="c_${element.id}" name="tagId" type="checkbox"
+                                                  value="${element.id}"
+                                                  <c:if test="${element.selected}">checked</c:if> /><label
+                                            for="c_${element.id}">${element.value}</label></label>
+                                </span>
+                                </c:forEach>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>参团方式</b></td>
+                        <td>
+                            <div class="w_lableBox">
+                                <c:forEach items="${attendMethodList}" var="element">
+
+                                <span>
+                                    <input type="hidden" name="tagType" value="${element.typeCode}"/>
+                                    <label><input id="c_${element.id}" name="tagId" type="checkbox"
+                                                  value="${element.id}"
+                                                  <c:if test="${element.selected}">checked</c:if> /><label
+                                            for="c_${element.id}">${element.value}</label></label>
+                                </span>
+                                </c:forEach>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>酒店星级</b></td>
+                        <td>
+                            <div class="w_lableBox">
+                                <c:forEach items="${hotelLevelList}" var="element">
+
+                                <span>
+                                    <input type="hidden" name="tagType" value="${element.typeCode}"/>
+                                    <label><input id="c_${element.id}" name="tagId" type="checkbox"
+                                                  value="${element.id}"
+                                                  <c:if test="${element.selected}">checked</c:if> /><label
+                                            for="c_${element.id}">${element.value}</label></label>
+                                </span>
+                                </c:forEach>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>天数</b></td>
+                        <td>
+                            <div class="w_lableBox">
+                                <c:forEach items="${daysPeriodList}" var="element">
+
+                                <span>
+                                    <input type="hidden" name="tagType" value="${element.typeCode}"/>
+                                    <label><input id="c_${element.id}" name="tagId" type="checkbox"
+                                                  value="${element.id}"
+                                                  <c:if test="${element.selected}">checked</c:if> />
+                                        <label for="c_${element.id}">${element.value}</label></label>
+                                </span>
+                                </c:forEach>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>价格区间</b></td>
+                        <td>
+                            <div class="w_lableBox">
+                                <c:forEach items="${priceRangeList}" var="element">
+
+                                <span>
+                                    <input type="hidden" name="tagType" value="${element.typeCode}"/>
+                                    <label><input id="c_${element.id}" name="tagId" type="checkbox"
+                                                  value="${element.id}"
+                                                  <c:if test="${element.selected}">checked</c:if> />
+                                        <label for="c_${element.id}">${element.value}</label></label>
+                                </span>
+                                </c:forEach>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>出境目的地</b></td>
+                        <td>
+                            <div class="w_lableBox">
+                                <c:forEach items="${exitDestinationList}" var="element">
+
+                                <span>
+                                    <input type="hidden" name="tagType" value="${element.typeCode}"/>
+                                    <label><input id="c_${element.id}" name="tagId" type="checkbox"
+                                                  value="${element.id}"
+                                                  <c:if test="${element.selected}">checked</c:if> />
+                                        <label for="c_${element.id}">${element.value}</label></label>
+                                </span>
+                                </c:forEach>
+                            </div>
+                        </td>
+                    </tr>
+                     <tr>
+                        <td><b>国内目的地</b></td>
+                        <td>
+                            <div class="w_lableBox">
+                                <c:forEach items="${domesticDestinationList}" var="element">
+
+                                <span>
+                                    <input type="hidden" name="tagType" value="${element.typeCode}"/>
+                                    <label><input id="c_${element.id}" name="tagId" type="checkbox"
+                                                  value="${element.id}"
+                                                  <c:if test="${element.selected}">checked</c:if> />
+                                        <label for="c_${element.id}">${element.value}</label></label>
+                                </span>
+                                </c:forEach>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>类别</b></td>
+                        <td>
+                            <div class="w_lableBox">
+                                <c:forEach items="${typeList}" var="element">
+
+                                <span>
+                                    <input type="hidden" name="tagType" value="${element.typeCode}"/>
+                                    <label><input id="c_${element.id}" name="tagId" type="checkbox"
+                                                  value="${element.id}"
+                                                  <c:if test="${element.selected}">checked</c:if> />
+                                        <label for="c_${element.id}">${element.value}</label></label>
+                                </span>
+                                </c:forEach>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                    	<td colspan="2">
+                    		<p class="tagMmore fr mt-5 mr-10"><a href="javascript:void(0)" class="blue pr-20 zhankai"><b>更多标签</b></a></p>
+                    	</td>
+                    </tr>
+                    </tbody>
+                    
+                </table>
+            </div>
+        </form>
+        </div>
+			<!--  标签属性 end -->
+			
 			<div class="routesearch mt-25">
 			<form id="searchProductForm">
 				<input type="hidden" id="searchPage" name="page"  value=""/><input type="hidden" id="searchPageSize" name="pageSize"  value=""/>
@@ -74,10 +248,38 @@ $(document).ready(function(){
 		
 		queryList();
 	});
+	
+	var tablLength=$("#table_tag_id tr").length-1;
+	//alert(tablLength);
+	if(tablLength>2){
+		$.each($("#table_tag_id tr"), function(i){   
+			if(i > 2 && i<=8){    
+			      this.style.display = 'none';  
+			   }  
+		});
+		$(".tagMmore").click(function(){
+			if($("#table_tag_id tr td p a").text()=="收起标签"){
+				$("#table_tag_id tr td p a").text("更多标签");
+				$.each($("#table_tag_id tr"), function(i){   
+					if(i > 2 && i<=8){    
+					      this.style.display = 'none';  
+					   }  
+				});
+			}else{
+				$("#table_tag_id tr td p a").text("收起标签");
+				$.each($("#table_tag_id tr"), function(i){   
+					if(i > 2 && i<=8){    
+						$("#table_tag_id tr").removeAttr("style");
+					}  
+				});
+			}
+		})
+	}
+	
 	queryList();
 });
 
- function queryList(page,pageSize) {
+ function queryList(page,pageSize,dataAttr) {
 	if (!page || page < 1) {
 		page = 1;
 	}
@@ -87,6 +289,7 @@ $(document).ready(function(){
 	var options = {
 		url:"productSalesList.do",
     	type:"post",
+    	data: {productTagVo: JSON.stringify({productTags: dataAttr})},
     	dataType:"html",
     	success:function(data){
     		$("#productSalesDiv").html(data);
@@ -109,9 +312,19 @@ $(document).ready(function(){
  
  
 function searchBtn() {
+	var tagForm = $('#product_sale_tag');
+	var checks = tagForm.find('input:checkbox:checked');
+	var dataAttr = [];
+	checks.each(function (e) {
+         var select = this.value;
+         var span = $(this).parent().children('label').text();
+         var type = $(this).parent().prev().val();
+         dataAttr.push({"tagType": type, "tagId": select, "tagName": span});
+     });
+	
 	var page = $("#page").val();
 	var pageSize = $("#searchPageSize").val();
-	queryList(page,pageSize);
+	queryList(page,pageSize,dataAttr);
 }
 
 function goOrder(pid){

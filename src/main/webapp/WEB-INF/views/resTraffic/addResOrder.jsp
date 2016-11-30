@@ -303,7 +303,7 @@ table.gridtable td {
 
 </head>
 <body>
-	<%@ include file="/WEB-INF/views/sales/template/orderTemplate.jsp"%>
+	<%@ include file="/WEB-INF/views/sales/template/resOrderTemplate.jsp"%>
 	<%@ include file="/WEB-INF/views/sales/template/groupRouteTemplate.jsp"%>
 	<div class="p_container">
 		<div class="p_container_sub" id="tab1">
@@ -434,8 +434,9 @@ table.gridtable td {
 							</tr>
 					<tr>
 						<td>购买方式：</td>
-						<td><div class="dd_right"  id="a"><input type="radio" name="groupOrder.type" value="0" /><label for="0"><span>定金预留</span></label>
-	    																	   <input type="radio" name="groupOrder.type" value="1" checked="checked"/> <label for="1"><span>全款购买</span></label>
+						<td><div class="dd_right"  id="a">
+							<label ><input type="radio" name="groupOrder.type" value="0" <c:if test="${vo.groupOrder.type == 0 }"> checked="checked" </c:if> /><span>定金预留</span></label>
+	    					<label ><input type="radio" name="groupOrder.type" value="1" <c:if test="${vo.groupOrder.type != '0'}"> checked="checked" </c:if> /><span>全款购买</span></label>
 	    			</div>
 	    			<div class="clear"></td>
 	    			<td>团类型：</td>
@@ -466,28 +467,20 @@ table.gridtable td {
 							<table cellspacing="0" cellpadding="0" class="w_table">
 								<thead>
 									<tr>
-										<th width="17%">星级<i class="w_table_split"></i></th>
-										<th width="17%">单人间<i class="w_table_split"></i></th>
-										<th width="17%">标间<i class="w_table_split"></i></th>
-										<th width="17%">三人间<i class="w_table_split"></i></th>
-										<th width="17%">陪房<i class="w_table_split"></i></th>
-										<th width="17%">加床<i class="w_table_split"></i></th>
+										<th width="16%">单人间<i class="w_table_split"></i></th>
+										<th width="16%">标间<i class="w_table_split"></i></th>
+										<th width="16%">三人间<i class="w_table_split"></i></th>
+										<th width="16%">陪房<i class="w_table_split"></i></th>
+										<th width="16%">加床<i class="w_table_split"></i></th>
+										<th>备注<i class="w_table_split"></i></th>
 									</tr>
 								</thead>
 								<tbody>
 									<tr>
-										<td><input name="hotelInfo.id" type="hidden"
-											value="${vo.hotelInfo.id}" /> <input
-											name="hotelInfo.supplierType" type="hidden" value="3" /> <input
-											name="hotelInfo.orderId" type="hidden"
-											value="${vo.groupOrder.id}" /> <select
-											name="hotelInfo.hotelLevel">
-												<c:forEach items="${jdxjList}" var="jdxj">
-													<option value="${jdxj.id }"
-														<c:if test="${jdxj.id==vo.hotelInfo.hotelLevel }"> selected="selected" </c:if>>${jdxj.value }</option>
-												</c:forEach>
-										</select></td>
-										<td><input name="hotelInfo.countSingleRoom" type="text"
+										<td><input name="hotelInfo.id" type="hidden" value="${vo.hotelInfo.id}" /> 
+										<input name="hotelInfo.supplierType" type="hidden" value="3" /> 
+										<input name="hotelInfo.orderId" type="hidden" value="${vo.groupOrder.id}" />
+										<input name="hotelInfo.countSingleRoom" type="text"
 											style="width: 100px;"
 											value="${(empty vo.hotelInfo.countSingleRoom)?0:vo.hotelInfo.countSingleRoom }" />
 										</td>
@@ -507,7 +500,10 @@ table.gridtable td {
 											style="width: 100px;"
 											value="${ (empty vo.hotelInfo.extraBed)?0:vo.hotelInfo.extraBed}" />
 										</td>
-
+										<td><input name="hotelInfo.remark" type="text" placeholder="备注" 
+											style="width: 100px;"
+											value="${ vo.hotelInfo.remark==""?"":vo.hotelInfo.remark}" />
+										</td>
 									</tr>
 
 								</tbody>
@@ -529,16 +525,12 @@ table.gridtable td {
 							<table cellspacing="0" cellpadding="0" class="w_table">
 								<thead>
 									<tr>
-										<th width="5%">序号<i class="w_table_split"></i></th>
-										<th width="10%">线路类型<i class="w_table_split"></i></th>
-										<th width="10%">接送方式<i class="w_table_split"></i></th>
-										<th width="10%">交通方式<i class="w_table_split"></i></th>
-										<th width="10%">出发城市<i class="w_table_split"></i></th>
-										<th width="10%">到达城市<i class="w_table_split"></i></th>
-										<th width="10%">班次/车次<i class="w_table_split"></i></th>
-										<th width="10%">出发日期<i class="w_table_split"></i></th>
-										<th width="10%">出发时间<i class="w_table_split"></i></th>
-										<th width="10%">备注<i class="w_table_split"></i></th>
+										<th width="15%">出发城市<i class="w_table_split"></i></th>
+										<th width="15%">到达城市<i class="w_table_split"></i></th>
+										<th width="15%">班次/车次<i class="w_table_split"></i></th>
+										<th width="15%">出发日期<i class="w_table_split"></i></th>
+										<th width="15%">出发时间<i class="w_table_split"></i></th>
+										<th width="15%">备注<i class="w_table_split"></i></th>
 										<th width="5%"><a href="javascript:;"
 											onclick="addTran('newTransport');" class="def">增加</a></th>
 									</tr>
@@ -547,36 +539,9 @@ table.gridtable td {
 									<c:forEach items="${vo.groupOrderTransportList }" var="trans"
 										varStatus="index">
 										<tr>
-											<td>${index.count} <input type="hidden"
-												name="groupOrderTransportList[${index.index}].id"
-												value="${trans.id}">
-											</td>
-											<td><select
-												name="groupOrderTransportList[${index.index}].sourceType"
-												style="width: 100px">
-													<option value="1"
-														<c:if test="${trans.sourceType==1 }">selected="selected"</c:if>>省外交通</option>
-													<option value="0"
-														<c:if test="${trans.sourceType==0 }">selected="selected"</c:if>>省内交通</option>
-											</select></td>
-											<td><input type="radio"
-												name="groupOrderTransportList[${index.index}].type"
-												value="0"
-												<c:if test="${trans.type==0 }">checked="checked"</c:if>>接</input>
-												<input type="radio"
-												name="groupOrderTransportList[${index.index}].type"
-												value="1"
-												<c:if test="${trans.type==1 }">checked="checked"</c:if>>送</input>
-											</td>
-											<td><select
-												name="groupOrderTransportList[${index.index}].method"
-												id="transportMethod" style="width: 100px;">
-													<c:forEach items="${jtfsList}" var="jtfs">
-														<option value="${jtfs.id}"
-															<c:if test="${trans.method==jtfs.id}">selected="selected"</c:if>>${jtfs.value }</option>
-													</c:forEach>
-											</select></td>
-											<td><input style="width: 80px" type="text"
+											<td><input type="hidden" name="groupOrderTransportList[${index.index}].type" value="0">
+											<input type="hidden" name="groupOrderTransportList[${index.index}].id" value="${trans.id}">
+											<input style="width: 80px" type="text"
 												name="groupOrderTransportList[${index.index}].departureCity"
 												placeholder="出发城市" value="${trans.departureCity }" /></td>
 											<td><input style="width: 80px" type="text"
@@ -614,6 +579,9 @@ table.gridtable td {
 									placeholder="出发日期,出发时间,航班号,出发城市,到达城市"
 									style="width: 600px; height: 250px"></textarea>
 							</div>
+							<span>
+								<i style="color: gray;"> 格式：出发日期,出发时间,航班号,出发城市,到达城市</i>
+							</span>
 							<div style="margin-top: 20px;">
 								<a href="javascript:void(0);"
 									onclick="toSaveSeatInCoach('newTransport')"
@@ -643,8 +611,8 @@ table.gridtable td {
 										<th width="8%">人数<i class="w_table_split"></i></th>
 										<th width="8%">次数<i class="w_table_split"></i></th>
 										<th width="8%">金额<i class="w_table_split"></i></th>
-										<th width="5%"><a href="javascript:;"
-											onclick="addPrice(0,'newPrice');" class="def">增加</a></th>
+										<th width="5%"><c:if test="${vo.groupOrder.id != null}"><a href="javascript:;"
+											onclick="addPrice(0,'newPrice');" class="def">增加</a></c:if></th>
 									</tr>
 								</thead> 
 								<tbody id="newPriceData">
@@ -834,6 +802,9 @@ table.gridtable td {
 									id="batchInputText" placeholder="姓名,证件号码,手机号或者姓名,证件号码"
 									style="width: 600px; height: 250px"></textarea>
 							</div>
+							<span>
+								<i style="color: gray;"> 格式：姓名,证件号码,手机号或者姓名,证件号码</i>
+							</span>
 							<div style="margin-top: 20px;">
 								<a href="javascript:void(0);" onclick="toSubmit('newGuest')"
 									class="button button-primary button-small">导入</a> <span>

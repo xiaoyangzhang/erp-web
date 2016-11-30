@@ -27,8 +27,8 @@
 
     /*列表页面 查询表头，表尾，表格，分页*/
     .searchRow{ padding:10px 5px;}
-    .searchRow ul{ margin-bottom:5px;overflow: hidden;}
-    .searchRow li{ float:left; height:30px; line-height:30px;margin-bottom: 10px;}
+    .searchRow ul{ overflow: hidden;}
+    .searchRow li{ float:left; height:30px; line-height:30px;margin-bottom: 5px;}
     .searchRow li.clear{ clear: both;border:none; margin-right: 0px; background: none;float: none; display: inline-block; }
     .searchRow li.text {width:80px;  text-align:right; margin-right:10px;}
 
@@ -328,7 +328,7 @@
 .log_action.delete{border: 1px solid #d43f3a; background: #d9534f;}
 .log_action.update{border: 1px solid #d58512; background: #ec971f;}
 .log_action.normal{border: 1px solid #269abc; background: #31b0d5;}
-.log_action.fuchsia{border: 1px solid ##cc02cc; background: fuchsia;}
+.log_action.fuchsia{border: 1px solid #cc02cc; background: fuchsia;}
 
 .log_box .chgBeforeBg{background: #ccc;color:#666; margin:0 3px;}
 .log_box .chgAfterBg{background: #ccc; color:#666; margin:0 3px;}
@@ -340,7 +340,7 @@
 
 .ico_lock{ width: 16px; height: 16px;background-image: url(../img/lock.png); display: inline-block;}
 .ico_unlock{ width: 16px; height: 16px;background-image: url(../img/lock_unlock.png);display: inline-block;}
-
+.ico_down{ width: 24px; height: 24px;background-image: url(../img/download.png);display: inline-block;}
 /*/!* Landscape phone to portrait tablet *!/*/
 /*@media (max-width: 767px) {*/
 

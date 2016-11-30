@@ -25,6 +25,7 @@
 					<div >
 							<button type="button" onclick="selectAllChkBtn();" class="button button-primary button-rounded button-small">全选</button>
 							<button type="button" onclick="adjustPriceBtn();" class="button button-primary button-rounded button-small">批量调整价格</button>
+							<button type="button" onclick="stockChange_show();" class="button button-primary button-rounded button-small">库存调整</button>
 					</div>
 					<div class="clear"></div>
 				</dd>
@@ -56,9 +57,9 @@
 								<col width="7%" />
 								<col width="7%" />
 								
-								<col width="8%" />
 								<col width="6%" />
-
+								<col width="6%" />
+								<col width="6%" />
 								<col width="5%" />
 
 								<thead>
@@ -70,8 +71,9 @@
 										
 										<th colspan="6">价格设置<i class="w_table_split"></i></th>
 
-										<th rowspan="2">最长预留<br/>时长<i class="w_table_split"></i></th>
-										<th rowspan="2">取消库存<br/>下限<i class="w_table_split"></i></th>
+										<th rowspan="2">预留到期<br/>时长<i class="w_table_split"></i></th>
+										<th rowspan="2">预留库存<br/>下限<i class="w_table_split"></i></th>
+										<th rowspan="2">下单权限<i class="w_table_split"></i></th>
 										<th rowspan="2">操作<i class="w_table_split"></i></th>
 									</tr>
 									<tr>
@@ -110,6 +112,13 @@
 							            	<fmt:formatDate pattern="HH:mm:ss" value="${date1}" /> --%>
 										</td>
 										<td rowspan="3">${res.reserveStockLimit }</td>
+										<td rowspan="3">
+											<p>
+											<c:if test="${res.userId==1}"><span class="log_action update">限定</span></c:if>
+											<c:if test="${res.userId==0}"><span class="log_action insert">开放</span></c:if>
+											</p>
+											<a href="javascript:void(0)" onclick="settingZTS(${res.productCode });">设置</a>
+										</td>
 										<td rowspan="3">
 											<div class="tab-operate">
 											<a href="####" class="btn-show">操作<span class="caret"></span></a>
@@ -157,7 +166,6 @@
 					</c:forEach>
 					<div class="pl-10 pr-10" style="padding-bottom: 1%; text-align: center;">
 						<button type="button" onclick="addProductBindingBtn();"  class="button button-primary button-rounded button-small">增加一个产品</button>
-						
 						<button type="button" onclick="resProLogBtn(${resId},'traffic_res_product', 'res');"  class="button button-primary button-rounded button-small">日志</button>
 						<button type="button" onclick="javascript:location.reload()"  class="button button-primary button-rounded button-small">刷新</button>
 						<button type="button" onclick="javascript:closeWindow()"  class="button button-primary button-rounded button-small">关闭</button>
@@ -225,6 +233,14 @@ function addProductBindingBtn() {
 
 }
 
+function reloadPage(){
+	$.success('操作成功',function(){
+		layer.closeAll();
+		
+	});
+	
+}
+
 /* 修改 */
 function resProModifyBtn(pid) {
 	newWindow('修改产品信息','<%=path%>/resTraffic/toUpdateResProduct.do?resId='+pid)
@@ -267,5 +283,21 @@ function showInfo(title,width,height,url){
  		content : url
  	});
  }
+ 
+function settingZTS(productId){
+	newWindow("销售商权限设置","product/price/supplier_list2.htm?productId="+productId+"&groupId="+${resId});
+}
+
+function stockChange_show(){
+	var res_id = $("#res_id").val();
+	layer.open({
+		type : 2,
+		title : '机位库存状态',
+		shadeClose : true,
+		shade : 0.5,
+		area: ['720px', '460px'],
+		content: '<%=path%>/resTraffic/toUpdateResNumStockChange.htm?id='+res_id
+	});
+}
 </script>
 </html>

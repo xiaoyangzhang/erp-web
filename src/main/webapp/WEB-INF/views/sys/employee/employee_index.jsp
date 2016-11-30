@@ -20,26 +20,18 @@
 				<div class="searchRow">
 					<ul>
 						<li class="text">用户名</li>
-						<li><input id="Text1" name="loginName" type="text"
-							value="${p.loginName }" /></li>						
+						<li><input id="Text1" name="loginName" type="text" value="${p.loginName }" /></li>						
 						<li class="text">姓名</li>
-						<li><input id="name" name="name" type="text"
-							value="${p.name }" /></li>						
+						<li><input id="name" name="name" type="text" value="${p.name }" /></li>						
 						<li class="text">手机号</li>
-						<li><input id="mobile" name="mobile" type="text"
-							value="${p.mobile }" /></li>						
+						<li><input id="mobile" name="mobile" type="text" value="${p.mobile }" /></li>						
 						<li class="text">状态</li>
 						<li><select name="status" id="status" class="select160">
-							
-								
 								<option value="1" <c:if test="${p.status == 1 }">selected</c:if>>正常</option>
 								<option value="0" <c:if test="${p.status == 0 }">selected</c:if>>停用</option>
 						</select></li>
-						<li><button
-								class="button button-primary button-small"
-								onclick="search();" title="检索">查询</button> 
-							<a class="button button-primary button-small"
-							href="editEmployee?orgId=${p.orgId }">新增</a></li>
+						<li>&nbsp;<button class="button button-primary button-small" onclick="search();" title="检索">查询</button> 
+							<button class="button button-primary button-small" onclick="newWindow('新增用户信息','<%=ctx %>/employee/editEmployee?orgId=${p.orgId }')">新增</button></li>
 						<li class="clear" />
 					</ul>
 				</div>
@@ -50,37 +42,28 @@
 
 			<table cellspacing="0" cellpadding="0" class="w_table">
 				<colgroup>
-					<col width="3%" />
-					<col width="8%" />
-					<col width="8%" />
-					<col width="8%" />
-					<col width="3%" />
-					<col width="8%" />
-					
-					<col width="8%" />
-					<%-- <col width="8%" />--%>
-					
-					<col width="8%" /> 
-					<col width="12%" />
-					
+					<col width="4%" />
+					<col width="4%" />
+					<col  />
+					<col width="10%" />
+					<col width="10%" />
+					<col width="6%" />
+					<col width="10%" />
+					<col width="20%" />
+					<col width="6%" /> 
+					<col width="15%" />
 				</colgroup>
 				<thead>
 					<tr>
-						<!-- <th class="center"><label><input type="checkbox"
-											id="zcheckbox" /><span class="lbl"></span></label></th> -->
 						<th>序号<i class="w_table_split"></i></th>
+						<th>用户ID<i class="w_table_split"></i></th>
 						<th>部门<i class="w_table_split"></i></th>
-						
 						<th>用户名<i class="w_table_split"></i></th>
 						<th>姓名<i class="w_table_split"></i></th>
 						<th>性别<i class="w_table_split"></i></th>
 						<th>手机号<i class="w_table_split"></i></th>
-						
 						<th>角色<i class="w_table_split"></i></th>
-						<!-- <th>是否启用<i class="w_table_split"></i></th>
-						<th>用户类型<i class="w_table_split"></i></th> -->
 						<th>状态<i class="w_table_split"></i></th>
-						
 						<th>操作</th>
 					</tr>
 				</thead>
@@ -91,31 +74,27 @@
 					<c:choose>
 						<c:when test="${not empty empList.result}">
 							<c:forEach items="${empList.result}" var="emp" varStatus="vs">
-
 								<tr>
-									
 									<td class='center' style="width: 30px;">${vs.index+1}</td>
+									<td>${emp.employeeId}</td>
 									<td>${emp.orgName}</td>
 									<td>${emp.loginName}</td>
 									<td>${emp.name}</td>
 									<td><c:if test="${emp.gender == 1 }">男</c:if> <c:if
 											test="${emp.gender == 0 }">女</c:if></td>
 									<td>${emp.mobile}</td>
-									
 									<td>${emp.roleName}</td>
-
-									 <td class="center"><c:if test="${emp.status == 1 }">正常</c:if>
-										<c:if test="${emp.status == 0 }"><font color="red">停用</font></c:if></td>
+									<td class="center">
+									 	<c:if test="${emp.status == 1 }"><span class="log_action insert">有效</span></c:if>
+										<c:if test="${emp.status == 0 }"><span class="log_action delete">停用</span></c:if>
+									</td>
 								<%--	<td class="center"><c:if test="${emp.isSuper == 0}">普通用户</c:if>
 										<c:if test="${emp.isSuper == 1}">管理员</c:if></td> --%>
 									<td class="center">
 										<div class='hidden-phone visible-desktop btn-group'>
-											<a class="def" title="数据查看" href="#"
-												onclick="viewUser('${emp.employeeId}')">数据查看</a>
-											<a class="def" title="修改密码" href="#"
-												onclick="editPass('${emp.employeeId}','${emp.name}')">修改密码</a>
-											<a class="def" title="编辑" href="javascript:void(0)" 
-											onclick="newWindow('编辑用户信息','<%=staticPath %>/employee/editEmployee?employeeId=${emp.employeeId }')">编辑</a> 
+											<a class="def" title="编辑" href="javascript:void(0)"  onclick="newWindow('编辑用户信息','<%=staticPath %>/employee/editEmployee?employeeId=${emp.employeeId }')">编辑</a> 
+											<a class="def" title="数据权限" href="#" onclick="viewUser('${emp.employeeId}')">数据权限</a>
+											<a class="def" title="修改密码" href="#" onclick="editPass('${emp.employeeId}','${emp.name}')">改密码</a>
 											<c:if test="${emp.isSuper != 1 }">
 												<a class="def" title="删除" href="#"
 													onclick="delEmp('${emp.employeeId}','${emp.name }');">删除</a>										
@@ -240,9 +219,10 @@
     			yes: function(index){    				
     				var userArr = win.getUserList();
     				if(userArr.length==0){
-    					alert("请选择人员");
+    					$.info("请选择人员");
     					return false;
     				}
+    				//console.log(userArr);
     				submitOrgUser(userArr,employeeId);
     				 //一般设定yes回调，必须进行手工关闭
     		        layer.close(index); 
@@ -262,14 +242,14 @@
 					},
 					success:function(data){
 						if(data.success){
-							alert("操作成功");
+							$.info("操作成功");
 						}
 						else{
-							alert("操作失败");
+							$.info("操作失败");
 						}
 					},
 					error:function(){
-						alert("服务器忙，请稍候再试");
+						$.info("服务器忙，请稍候再试");
 					}
 			});
 		//	$("#mainForm").ajaxSubmit(options);

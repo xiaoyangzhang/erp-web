@@ -171,7 +171,7 @@ function delGroupOrder(id) {
 		$.getJSON("../fitOrder/delGroupOrder.do?id=" + id, function(data) {
 			if (data.success) {
 				$.success('操作成功',function(){
-					searchBtn();
+					refreshCurrentPage();
 				});
 			}else {
 				$.warn(data.msg);
@@ -220,7 +220,7 @@ function insertGroupByList(state){
 							$.post("../fitOrder/insertGroupMany.do", { ids: chk_value.toString(), code: code }, function(data){
 								  if(data.success){
 									  $.success('操作成功',function(){
-										searchBtn();
+										 refreshCurrentPage();
 										layer.close(index); 
 										})
 								  }else{
@@ -262,7 +262,7 @@ function insertGroup(tid){
 			$.post("../fitOrder/insertGroup.do", { id: tid, code: code }, function(data){
 				  if(data.success){
 					  $.success('操作成功',function(){
-						  	searchBtn();
+						  refreshCurrentPage();
 						  	layer.close(index); 
 						});
 				  }else{
@@ -335,6 +335,11 @@ function queryList(page,pageSize) {
 function searchBtn() {
 	var pageSize=$("#orderPageSize").val();
 	queryList(1,pageSize);
+}
+function refreshCurrentPage() {
+	var page=$("#orderPage").val();
+	var pageSize=$("#orderPageSize").val();
+	queryList(page,pageSize);
 }
 /**
  * 查看团信息

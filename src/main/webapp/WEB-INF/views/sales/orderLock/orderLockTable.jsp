@@ -95,7 +95,7 @@
 			<td></td>
 			<td></td>
 		</tr>
-		<tr>
+		<%-- <tr>
 			<td></td>
 			<td></td>
 			<td></td>
@@ -109,7 +109,7 @@
 			<td></td>
 			<td></td>
 			<td></td>
-		</tr>
+		</tr> --%>
 </table>
 <jsp:include page="/WEB-INF/include/page.jsp">
 	<jsp:param value="${page.page }" name="p" />

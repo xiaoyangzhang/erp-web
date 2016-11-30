@@ -15,6 +15,10 @@
     <script type="text/javascript" src="<%=ctx %>/assets/js/json2.js"></script>
     <script type="text/javascript">
     var setting = {
+    		view: {
+				dblClickExpand: false
+			},
+
     		check: {
     			enable: true,   			
     			chkStyle: "checkbox",
@@ -29,10 +33,12 @@
     			}
     		},
     		callback: {
-    			onCheck: treeNodeOnCheck
+    			onCheck: treeNodeOnCheck,
+    			onClick: treeNodeOnClick
     		}
     	};
     	 
+
     	var zNodes =${orgUserJsonStr}; 
     	var treeObj;
     	$(document).ready(function() {
@@ -55,21 +61,37 @@
     	
     	function treeNodeOnCheck(event, treeId, treeNode){
     		if(treeNode.type=='user'){
-    			var parent = treeNode.getParentNode();
-    			if(parent){
-    				parent.checked=false;
-    			}
+    			setParentNode_uncheck(treeNode);
     		}else{
-    			var subs = treeNode.children;
-    			if(subs.length>0){
-    				for(var i=0,len=subs.length;i<len;i++){
-    					subs[i].checked=false;
-    				}
-    			}
+    			setChildNode_uncheck(treeNode);
     		}
     		treeObj.refresh();
     	}
+    	function setParentNode_uncheck(curNode){
+    		var parent = curNode.getParentNode();
+			if(parent){
+				parent.checked=false;
+				setParentNode_uncheck(parent);
+			}
+    	}
+    	function setChildNode_uncheck(curNode){
+    		var subs = curNode.children;
+    		if (subs){
+	    		for(var i=0,len=subs.length; i<len; i++){
+	    			if(subs[i].type=='user'){
+	    				subs[i].checked=false;
+	    			}else{
+	    				setChildNode_uncheck(subs[i]);
+	    			}
+	    		}
+    		}
+    	}
     	
+    	//点击节点时，收起来
+    	function treeNodeOnClick(e,treeId, treeNode) {
+			var zTree = $.fn.zTree.getZTreeObj("treeArea");
+			zTree.expandNode(treeNode);
+    	}
     </script>
 </head>
 <body>

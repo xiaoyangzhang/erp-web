@@ -59,6 +59,7 @@ import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
 import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.common.contants.BasicConstants;
 import com.yimayhd.erpcenter.common.exception.ClientException;
 import com.yimayhd.erpcenter.common.util.NumberUtil;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
@@ -76,6 +77,9 @@ import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupRouteVO;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
 import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
+import com.yimayhd.erpcenter.facade.basic.service.DicFacade;
+import com.yimayhd.erpcenter.facade.operation.query.AYToAddSightQueryDTO;
+import com.yimayhd.erpcenter.facade.operation.result.AYToAddSightResult;
 import com.yimayhd.erpcenter.facade.operation.result.BookingSupplierResult;
 import com.yimayhd.erpcenter.facade.operation.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.operation.result.WebResult;
@@ -108,6 +112,9 @@ public class BookingSupplierController extends BaseController {
 	private SaleCommonFacade saleCommonFacade;
 	@Autowired
 	private SysPlatformOrgFacade sysPlatformOrgFacade;
+	@Autowired
+	private DicFacade dicFacade;
+	
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
 //		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
@@ -1048,6 +1055,9 @@ public class BookingSupplierController extends BaseController {
 		model.addAttribute("hotelType1", hotelType1);
 		model.addAttribute("editType", editType);
 		
+		//根据参数判断价格是否可以编辑
+		String canEditPrice = WebUtils.getBizConfigValue(request, "BOOKING_HOTEL_EDITPRICE");
+		model.addAttribute("canEditPrice", canEditPrice);
 		
 		return "operation/supplier/hotel/hotel-add";
 	}
@@ -3093,4 +3103,112 @@ public class BookingSupplierController extends BaseController {
 		
 		return successJson("");
 	}
+	
+	
+		//有销售价格
+		@RequestMapping("newGroupHotelBookingInfo.htm")
+		public String newGroupHotelBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+			bookingInfo(model, groupId, Constants.HOTEL);
+			// 酒店星级
+			List<DicInfo> jdxjList = dicFacade.getListByTypeCode(BasicConstants.GYXX_JDXJ);
+			model.addAttribute("jdxjList", jdxjList);
+			model.addAttribute("groupId", groupId);
+			model.addAttribute("supplierType", Constants.HOTEL);   // 10-25 干到这里
+			return "operation/supplier/hotel/new-group-hotel-list-booking";
+		}
+		
+		// 有销售价格
+		@RequestMapping("newGroupEatBookingInfo.htm")
+		public String newGroupEatBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+			bookingInfo(model, groupId, Constants.RESTAURANT);
+			model.addAttribute("supplierType", Constants.RESTAURANT);
+			return "operation/supplier/eat/new-group-eat-list-booking";
+		}
+		
+		// 有销售价格
+		@RequestMapping("newGroupSightBookingInfo.htm")
+		public String newGroupSightBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+			bookingInfo(model, groupId, Constants.SCENICSPOT);
+			model.addAttribute("supplierType", Constants.SCENICSPOT);
+			return "operation/supplier/sight/new-group-sight-list-booking";
+		}
+		
+		// 有销售价格
+		@RequestMapping("newGroupCarBookingInfo.htm")
+		public String newGroupCarBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+			bookingInfo2(model, groupId, Constants.FLEET);
+			// 车辆型号
+			List<DicInfo> ftcList = dicFacade
+					.getListByTypeCode(Constants.FLEET_TYPE_CODE);
+			model.addAttribute("ftcList", ftcList);
+			model.addAttribute("supplierType", Constants.FLEET);
+			return "operation/supplier/car/new-group-car-list-booking";
+		}
+		
+		
+		// 爱游
+		@RequestMapping("AYToAddSight")
+		public String AYToAddSight(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId, Integer bookingId,Integer editType,Integer orderId,Integer see) {
+			Integer bizId = WebUtils.getCurBizId(request);
+			toAddSupplier(model, groupId, bookingId, bizId);
+			
+			AYToAddSightQueryDTO queryDTO = new AYToAddSightQueryDTO();
+			queryDTO.setGroupId(groupId);
+			
+			AYToAddSightResult result = bookingSupplierFacade.getAYToAddSight(queryDTO);
+			
+			TourGroup tg = result.getTourGroup();
+			Integer defaultPerson = tg==null?0: tg.getTotalAdult()+tg.getTotalChild();
+			model.addAttribute("defaultPerson", defaultPerson);
+			
+			//酒店类型
+			List<DicInfo> hotelType1 = result.getHotelType1();
+			model.addAttribute("hotelType1", hotelType1);
+			model.addAttribute("editType", editType);
+			//餐厅
+			List<DicInfo> resTypes = result.getResTypes();
+			model.addAttribute("resTypes", resTypes);
+			//车型
+			List<DicInfo> CarTypes = result.getCarTypes();
+			model.addAttribute("carTypes", CarTypes);
+			model.addAttribute("orderId", orderId);
+			model.addAttribute("see", see);
+			return "operation/supplier/AY-supplier-add";
+		}
+		
+		// 有销售价格
+		@RequestMapping("newToAddSight")
+		public String newToAddSight(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId, Integer bookingId,Integer supplierType,Integer editType) {
+			if(supplierType==5){
+			Integer bizId = WebUtils.getCurBizId(request);
+			toAddSupplier(model, groupId, bookingId, bizId);
+			model.addAttribute("supplierType", Constants.SCENICSPOT);
+			}
+			if(supplierType==3){
+			Integer bizId = WebUtils.getCurBizId(request);
+			toAddSupplier(model, groupId, bookingId, bizId);
+			model.addAttribute("supplierType", Constants.HOTEL);
+			//酒店类型
+			List<DicInfo> hotelType1 = dicFacade.getListByTypeCode(Constants.HOTEL_TYPE_CODE_1);
+			model.addAttribute("hotelType1", hotelType1);
+			model.addAttribute("editType", editType);
+			}
+			if(supplierType==2){
+			Integer bizId = WebUtils.getCurBizId(request);
+			toAddSupplier(model, groupId, bookingId, bizId);
+			model.addAttribute("supplierType", Constants.RESTAURANT);
+			//餐厅
+			List<DicInfo> resTypes = dicFacade.getListByTypeCode(Constants.RESTAURANT_TYPE_CODE);
+			model.addAttribute("resTypes", resTypes);
+			}
+			if(supplierType==4){
+			Integer bizId = WebUtils.getCurBizId(request);
+			toAddSupplier(model, groupId, bookingId, bizId);
+			model.addAttribute("supplierType", Constants.FLEET);
+			//车型
+			List<DicInfo> CarTypes = dicFacade.getListByTypeCode(Constants.FLEET_TYPE_CODE);
+			model.addAttribute("carTypes", CarTypes);
+			}
+			return "operation/supplier/sight/new-sight-add";
+		}
 }

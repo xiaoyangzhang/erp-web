@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%
 	String staticPath = request.getContextPath();
 %>
@@ -36,7 +37,7 @@
 				<td style="text-align:left;">${orders.skuPropertiesName}</td>
 				<td><fmt:formatDate value="${orders.created}" pattern="yyyy-MM-dd" /><br/><fmt:formatDate value="${orders.created}" pattern="HH:mm:ss" /></td>
 				<td>${orders.payment}</td>
-				<td style="text-align:left;">${orders.sellerMemo}</td>
+				<td style="text-align:left;">${fn:escapeXml(orders.sellerMemo)}</td>
 				<td><c:if test="${orders.myState=='NEW'}"><font color="green">未组单</c:if> 
 						<c:if test="${orders.myState=='CONFIRM'}">已组单</c:if> 
 						<c:if test="${orders.myState=='CANCEL'}"><font color="red">废弃</c:if> </td>

@@ -126,6 +126,9 @@
 						<textarea class="l_textarea" name="batchInputText" value=""
 							id="batchInputText" placeholder="姓名,证件号码,手机号或者姓名,证件号码" style="width: 600px;height: 250px"></textarea>
 					</div>
+					<span>
+						<i style="color: gray;"> 格式：姓名,证件号码,手机号或者姓名,证件号码</i>
+					</span>
 					<div style="margin-top: 20px;">
 						<a href="javascript:void(0);" onclick="toSubmit('newGuest')"
 							class="button button-primary button-small">保存</a>

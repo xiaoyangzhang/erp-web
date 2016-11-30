@@ -11,20 +11,21 @@
 			<th style="width: 5%">出发日期<i class="w_table_split"></i></th>
 			<th style="width: 15%">产品名称<i class="w_table_split"></i></th>
 			<th style="width: 15%">组团社<i class="w_table_split"></i></th>
-			<th style="width: 5%">接站牌<i class="w_table_split"></i></th>
+			<th style="width: 4%">联系人<i class="w_table_split"></i></th>
+			<th style="width: 6%">接站牌<i class="w_table_split"></i></th>
 			<th style="width: 5%">客源地<i class="w_table_split"></i></th>
-			<th style="width: 5%">联系人<i class="w_table_split"></i></th>
 			<th style="width: 5%">人数<i class="w_table_split"></i></th>
 			<th style="width: 5%">金额<i class="w_table_split"></i></th>
 			<th style="width: 5%">销售<i class="w_table_split"></i></th>
 			<th style="width: 5%">计调<i class="w_table_split"></i></th>
-			<th style="width: 5%">输单员<i class="w_table_split"></i></th>
+			<th style="width: 5%">输单<i class="w_table_split"></i></th>
+			<th style="width: 5%">状态<i class="w_table_split"></i></th>
 			<th style="width: 5%">操作</th>
 		</tr>
 	</thead>
 	<tbody>
 		<c:forEach items="${page.result}" var="groupOrder" varStatus="v">
-			<tr title="创建时间:${groupOrder.createTimeStr}">
+			<tr title="创建时间:${groupOrder.createTimeStr}" style="color:<c:if test="${groupOrder.groupMode eq 4}">#ee33ee</c:if><c:if test="${groupOrder.stateFinance eq 1 and groupOrder.groupMode ne 4}">darkgreen</c:if>" >
 				<td><input type="checkbox" name="chkFitOrder" value="${groupOrder.id }" vars="${groupOrder.orderLockState}"  <c:if test="${!empty groupOrder.groupId}">disabled="disabled"  </c:if>/>
 				</td>
 				<td>${v.count}</td>
@@ -32,32 +33,31 @@
 				<td>${groupOrder.departureDate}</td>
 				<td style="text-align: left;">【${groupOrder.productBrandName}】${groupOrder.productName}</td>
 				<td style="text-align: left;">${groupOrder.supplierName}</td>
-				<td>${groupOrder.receiveMode}</td>
-				<td>${groupOrder.provinceName }${groupOrder.cityName }</td>
 				<td>${groupOrder.contactName}</td>
+				<td style="text-align: left;">${groupOrder.receiveMode}</td>
+				<td>${groupOrder.provinceName }${groupOrder.cityName }</td>
 				<td>${groupOrder.numAdult }大${groupOrder.numChild}小</td>
 				<td><fmt:formatNumber value="${groupOrder.total}" type="currency" pattern="#.##" /></td>
 				<td>${groupOrder.saleOperatorName}</td>
 				<td>${groupOrder.operatorName}</td>
 				<td>${groupOrder.creatorName}</td>
 				<td>
+					<c:if test="${groupOrder.groupMode!=4}">
+						<c:if test="${groupOrder.stateFinance==1}"><span class="log_action insert" title="已审核">审</span></c:if>
+						<c:if test="${groupOrder.stateFinance!=1}"><span class="log_action normal" title="未审核">未</span></c:if>
+					</c:if>
+					<c:if test="${groupOrder.groupMode==4}"><span class="log_action fuchsia" title="已封存">封</span></c:if>
+					<c:if test="${groupOrder.orderLockState==0}"><span class="ico_unlock" title="未锁单"></span></c:if>
+					<c:if test="${groupOrder.orderLockState==1}"><span class="ico_lock" title="已锁单"></span></c:if>
+				</td>
+				<td>
 				    <div class="tab-operate">
 						 <a href="####" class="btn-show">操作<span class="caret"></span></a>
 						 <div class="btn-hide" id="asd">
-						 	<c:if test="${empty groupOrder.priceId }">
 						   		<a href="javascript:void(0);" class="def" onclick="newWindow('查看订单','fitOrder/toEditFirOrder.htm?orderId=${groupOrder.id}&operType=0')">查看</a>
-						   		</c:if>
-						   		<c:if test="${!empty groupOrder.priceId }">
-						   		<a href="javascript:void(0);" class="def" onclick="newWindow('查看订单','groupOrder/toLookGroupOrder.htm?id=${groupOrder.id}')">查看</a>
-						   		</c:if>
 								<c:if test="${groupOrder.stateFinance!=1 && optMap['EDIT'] }">
 									<c:if test="${groupOrder.orderLockState eq 0}">
-										<c:if test="${empty groupOrder.priceId }">
 										<a href="javascript:void(0);" class="def" onclick="newWindow('编辑订单','fitOrder/toEditFirOrder.htm?orderId=${groupOrder.id}&operType=1')">编辑</a>
-										</c:if>
-										<c:if test="${!empty groupOrder.priceId }">
-										<a href="javascript:void(0);" class="def" onclick="newWindow('编辑订单','groupOrder/toEditGroupOrder.htm?id=${groupOrder.id}')">编辑</a>
-										</c:if>
 									</c:if>
 								<c:if test="${empty groupOrder.groupId }">
 									<c:if test="${groupOrder.orderLockState eq 0}">
@@ -82,7 +82,9 @@
 				<c:set var="pageTotal" value="${pageTotal+groupOrder.total }"/>
 				
 		</c:forEach>
-			<tr>
+		</tbody>
+		<tfoot>
+			<tr class="footer1">
 				<td colspan="9" style="text-align: right">本页合计:</td>
 				<td>${pageTotalAdult}大${pageTotalChild}小</td>
 				<td><fmt:formatNumber value="${pageTotal}" type="currency" pattern="#.##" /></td>
@@ -90,8 +92,9 @@
 				<td></td>
 				<td></td>
 				<td></td>
+				<td></td>
 			</tr>
-			<tr>
+			<tr class="footer2">
 				<td colspan="9" style="text-align: right">总合计:</td>
 				<td>${totalOrder.numAdult}大${totalOrder.numChild}小</td>
 				<td><fmt:formatNumber value="${totalOrder.total}" type="currency" pattern="#.##" /></td>
@@ -99,8 +102,9 @@
 				<td></td>
 				<td></td>
 				<td></td>
+				<td></td>
 			</tr>
-		</tbody>
+		</tfoot>
 </table>
 <jsp:include page="/WEB-INF/include/page.jsp">
 		<jsp:param value="${page.page }" name="p" />

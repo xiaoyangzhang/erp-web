@@ -46,59 +46,63 @@
 <body>
 <%@ include file="/WEB-INF/views/component/org-user/org_user_multi.jsp"%>
 	<div class="p_container">
-		<div class="p_container_sub pl-10 pr-10">
-			<dl class="p_paragraph_content">
+		<div class="p_container_sub">
+			<div class="searchRow">
 				<form method="post" id="form">
 					<input type="hidden" name="page" id="page" value="${page.page }" />
 					<input type="hidden" name="pageSize" id="pageSize" value="${page.pageSize }" />
-					<dd class="inl-bl">
-						<div class="dd_left">出团日期:</div>
-						<div class="dd_right grey">
+					<ul>
+						<li class="text">出团日期:</li>
+						<li>
 							<input type="text" id="tourGroupStartTime" name="startTime" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" value='<fmt:formatDate value="${groupOrder.tourGroup.startTime}" pattern="yyyy-MM-dd"/>'/> 
-							—
+							~
 							<input type="text" id="tourGroupEndTime" name="endTime" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" value='<fmt:formatDate value="${groupOrder.tourGroup.endTime}" pattern="yyyy-MM-dd"/>'/>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">团号:</div>
-						<div class="dd_right grey">
+						</li>
+					
+						<li class="text">团号:</li>
+						<li>
 							<input type="text" name="groupCode" id="groupCode"/>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_left">产品:</div>
-						<div class="dd_right grey">
+						</li>
+					
+						<li class="text">产品:</li>
+						<li>
 							<input type="text" name="productName" id="productName"/>
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-					<div class="dd_right">
-						部门:
-	    				<input type="text" name="orgNames" id="orgNames" stag="orgNames" value="${groupOrder.orgNames }" readonly="readonly" onclick="showOrg()"/>
-						<input name="orgIds" id="orgIds" stag="orgIds" value="${groupOrder.orgIds }" type="hidden" value=""/>	
-						</div>    		
-						<div class="dd_right">
-						计调:
+						</li>
+						<li class="text">部门:</li>
+						<li>
+	    					<input type="text" name="orgNames" id="orgNames" stag="orgNames" value="${groupOrder.orgNames }" readonly="readonly" onclick="showOrg()"/>
+							<input name="orgIds" id="orgIds" stag="orgIds" value="${groupOrder.orgIds }" type="hidden" value=""/>	
+						</li>    		
+						<li>计调:</li>
+						<li>
 							<input type="text" name="operatorName" id="operatorName" stag="userNames" readonly="readonly" onclick="showUser()"/>
 							<input name="saleOperatorIds" id="saleOperatorIds" stag="userIds" type="hidden" />
-						</div>
-						<div class="clear"></div>
-					</dd>
-					<dd class="inl-bl">
-						<div class="dd_right">
+						</li>
+					
+						<li>
 							<button type="button" onclick="searchBtn();" class="button button-primary button-small" style="margin-left: 35px;">查询</button> 
-						</div>
-						<div class="clear"></div>
-					</dd>
+							<a href="javascript:void(0);" id="toProfitOperatorNameExcelId" target="_blank" onclick="toProfitOperatorNameExcel()" class="button button-primary button-small">导出到Excel</a>
+						</li>
+					</ul>
 				</form>
-				</dl>
-		<dl class="p_paragraph_content">
-		<div id="content"></div>
-		</dl>
+			</div>
 		</div>
+		<dl class="p_paragraph_content">
+			<div id="content"></div>
+		</dl>
 	</div>
 </body>
+<script type="text/javascript">
+/* 内部结算（计调）导出到Excel */
+function toProfitOperatorNameExcel(){
+	$("#toProfitOperatorNameExcelId").attr("href","toProfitOperatorExcel.do?startTime="+$("#tourGroupStartTime").val()
+			+"&endTime="+$("#tourGroupEndTime").val()
+			+"&groupCode="+$("#groupCode").val()
+			+"&productName="+$("#productName").val()
+			+"&orgIds="+$("#orgIds").val()
+			+"&saleOperatorIds="+$("#saleOperatorIds").val()
+			+"&page="+$("#page").val()
+			+"&pageSize="+$("#pageSize").val());
+}
+</script>
 </html>

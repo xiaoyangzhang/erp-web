@@ -66,8 +66,9 @@
               <td>
               		<c:if test="${tg.groupState==0 }">未确认</c:if>
 	                <c:if test="${tg.groupState==1 }">已确认</c:if>
-					<c:if test="${tg.groupState==4}">审核</c:if>
-					<c:if test="${tg.groupState==3}">封存</c:if>
+	                <c:if test="${tg.groupState==2 }">作废</c:if>
+					<c:if test="${tg.groupState==3 }">审核</c:if>
+					<c:if test="${tg.groupState==4 }">封存</c:if>
 			  </td>
          	</tr>
          	<c:set var="sum_adult" value="${sum_adult+tg.totalAdult}" />

@@ -30,39 +30,33 @@
 							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="0">待确认 </label>&nbsp;&nbsp;&nbsp;
 							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="1">已确认</label>&nbsp;&nbsp;&nbsp;
 							<label class="radio" ><input  id="extResState_id" type="radio" name="extResState" value="2">取消订单</label>&nbsp;&nbsp;&nbsp;
-							<label class="radio" ><input  id="extResState_id" type="radio" name="extResState" value="3">清位订单</label>&nbsp;&nbsp;&nbsp;
 						</c:when>
 						<c:when test="${extResPrepay > totalCash &&  extResState=='2'}">
 							<label class="radio" ><input id="extResState_id" type="radio" name="extResState" value="0">待确认 </label>&nbsp;&nbsp;&nbsp;
 							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="1">已确认</label>&nbsp;&nbsp;&nbsp;
 							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="2">取消订单</label>&nbsp;&nbsp;&nbsp;
-							<label class="radio" ><input  id="extResState_id" type="radio" name="extResState" value="3">清位订单</label>&nbsp;&nbsp;&nbsp;
 						</c:when>
 						<c:when test="${extResPrepay > totalCash &&  extResState=='3'}">
 							<label class="radio" ><input  id="extResState_id" type="radio" name="extResState" value="0">待确认 </label>&nbsp;&nbsp;&nbsp;
 							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="1">已确认</label>&nbsp;&nbsp;&nbsp;
 							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="2">取消订单</label>&nbsp;&nbsp;&nbsp;
-							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="3">清位订单</label>&nbsp;&nbsp;&nbsp;
 						</c:when>
 						
 						<c:when test="${extResPrepay <= totalCash &&  extResState=='0'}">
 							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="0">待确认 </label>&nbsp;&nbsp;&nbsp;
 							<label class="radio" ><input  id="extResState_id" type="radio" name="extResState" value="1">已确认</label>&nbsp;&nbsp;&nbsp;
 							<label class="radio" ><input  id="extResState_id" type="radio" name="extResState" value="2">取消订单</label>&nbsp;&nbsp;&nbsp;
-							<label class="radio" ><input  id="extResState_id" type="radio" name="extResState" value="3">清位订单</label>&nbsp;&nbsp;&nbsp;
 							
 						</c:when>
 						<c:when test="${extResPrepay <= totalCash && extResState=='2'}">
 							<label class="radio" ><input  id="extResState_id" type="radio" name="extResState" value="0">待确认 </label>&nbsp;&nbsp;&nbsp;
 							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="1">已确认</label>&nbsp;&nbsp;&nbsp;
 							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="2">取消订单</label>&nbsp;&nbsp;&nbsp;
-							<label class="radio" ><input  id="extResState_id" type="radio" name="extResState" value="3">清位订单</label>&nbsp;&nbsp;&nbsp;
 						</c:when>
 						<c:when test="${extResPrepay <= totalCash &&  extResState=='3'}">
 							<label class="radio" ><input  id="extResState_id" type="radio" name="extResState" value="0">待确认 </label>&nbsp;&nbsp;&nbsp;
 							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="1">已确认</label>&nbsp;&nbsp;&nbsp;
 							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="2">取消订单</label>&nbsp;&nbsp;&nbsp;
-							<label class="radio" ><input  disabled="disabled" id="extResState_id" type="radio" name="extResState" value="3">清位订单</label>&nbsp;&nbsp;&nbsp;
 						</c:when>
 						<c:otherwise>
 							<span>该订单已确认！</span>
