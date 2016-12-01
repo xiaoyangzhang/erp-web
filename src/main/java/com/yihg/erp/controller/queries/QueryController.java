@@ -13,18 +13,14 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yihg.erp.contant.BizConfigConstant;
 import com.yimayhd.erpresource.dal.constants.BasicConstants;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -8096,6 +8092,37 @@ public class QueryController extends BaseController {
 
 		return "queries/departmentOrder/departmentOrderTable";
 	}
+
+	/**
+	 *
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param condition
+	 * @return
+	 * @throws ParseException
+	 */
+	@RequestMapping("departmentOrderListPage.do")
+	public String departmentOrderListPage(HttpServletRequest request,
+										  HttpServletResponse response, ModelMap model,
+										  DeparentmentOrderCondition condition) throws ParseException {
+		Integer bizId = WebUtils.getCurBizId(request);
+		String staticsOrgIds = WebUtils.getBizConfigValue(request,
+				BizConfigConstant.DEPT_ORDER_STATICS);
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setBizId(bizId);
+		queryDTO.setStaticsOrgIds(staticsOrgIds);
+		QueryResult queryResult = queryFacade.departmentOrderListPage(queryDTO);
+		model.addAttribute("secLevelOrgList", queryResult.getSecLevelOrgList());//获取机构信息
+		model.addAttribute("subLevelOrgList", queryResult.getSubLevelOrgList());//获取部门信息
+		model.addAttribute("orgDepMap", queryResult.getOrgDepMap());
+		model.addAttribute("empMap", queryResult.getEmpMap());
+		model.addAttribute("orderMap", queryResult.getOrderMap());
+		model.addAttribute("gOrdersList", queryResult.getgOrdersList());
+		return "queries/departmentOrder/departmentOrderTable";
+	}
+
+
 
 	/**
 	 * 接待人数统计
