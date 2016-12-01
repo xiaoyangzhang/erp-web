@@ -347,7 +347,7 @@ public class FinanceGuideController extends BaseController {
 	@RequestMapping(value = "/addCommissionDeduction.htm")
 	public String addCommissionDeduction(HttpServletRequest request,HttpServletResponse reponse,ModelMap model, Integer groupId) {
 		
-		ToAddCommissionResult result = financeGuideFacade.addCommission(WebUtils.getCurBizId(request), groupId, BasicConstants.YJ_KKXM);
+		ToAddCommissionResult result = financeGuideFacade.addCommissionDeduction(WebUtils.getCurBizId(request), groupId, BasicConstants.YJ_KKXM);
 		
 		model.addAttribute("guideList", result.getGuideList());
 		model.addAttribute("comList", result.getComList());

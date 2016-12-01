@@ -13,18 +13,14 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yihg.erp.contant.BizConfigConstant;
 import com.yimayhd.erpresource.dal.constants.BasicConstants;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -141,6 +137,7 @@ import com.yimayhd.erpcenter.facade.operation.service.BookingShopFacade;
 import com.yimayhd.erpresource.dal.constants.Constants;
 import com.yimayhd.erpresource.dal.constants.SupplierConstant;
 import com.yimayhd.erpresource.dal.po.SupplierInfo;
+import org.yimayhd.erpcenter.facade.finance.service.FinanceFacade;
 
 @Controller
 @RequestMapping("/query")
@@ -165,6 +162,10 @@ public class QueryController extends BaseController {
 	private ProductCommonFacade productCommonFacade;
 	@Autowired
 	private SaleCommonFacade saleCommonFacade;
+
+	@Autowired
+	private FinanceFacade financeFacade;
+
 //	@Autowired
 //	private CommonFacade commonFacade;
 	@ModelAttribute
@@ -456,6 +457,7 @@ public class QueryController extends BaseController {
 				if (null != sov.getGuestNames()) {
 					String[] guests = sov.getGuestNames().split(",");
 					for (String guestString : guests) {
+						if(guestString.length() > 0){
 						String[] guestInfo = guestString.split("@");
 						orderGuest = new GroupOrderGuest();
 						orderGuest.setName(guestInfo[0]);
@@ -465,6 +467,7 @@ public class QueryController extends BaseController {
 						}
 
 						guestList.add(orderGuest);
+					}
 					}
 				}
 
@@ -890,7 +893,8 @@ public class QueryController extends BaseController {
 		String path = "";
 
 		try {
-			String url = request.getSession().getServletContext().getRealPath("/template/excel/paymentDetail.xlsx");
+			String url = request.getSession().getServletContext()
+					.getRealPath("/template/excel/paymentDetail.xlsx");
 			FileInputStream input = new FileInputStream(new File(url)); // 读取的文件路径
 			XSSFWorkbook wb = new XSSFWorkbook(new BufferedInputStream(input));
 			XSSFFont createFont = wb.createFont();
@@ -923,7 +927,8 @@ public class QueryController extends BaseController {
 			styleFontTable.setBorderTop(CellStyle.BORDER_THIN);// 上边框
 			styleFontTable.setBorderRight(CellStyle.BORDER_THIN);// 右边框
 			styleFontTable.setAlignment(CellStyle.ALIGN_CENTER); // 居中
-			styleFontTable.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+			styleFontTable.setFillForegroundColor(IndexedColors.GREY_25_PERCENT
+					.getIndex());
 			styleFontTable.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
 			CellStyle styleLeft = wb.createCellStyle();
@@ -958,45 +963,61 @@ public class QueryController extends BaseController {
 				cc.setCellValue(order.getDepartureDate());
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(3);
-				cc.setCellValue("【" + order.getProductBrandName() + "】" + order.getProductName());
+				cc.setCellValue("【" + order.getProductBrandName() + "】"
+						+ order.getProductName());
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(4);
-				cc.setCellValue(
-						order.getSupplierName() + "\n" + order.getSupplierCode() + "\n" + order.getContactName());
+				cc.setCellValue(order.getSupplierName());
+				/*cc.setCellValue(order.getSupplierName() + "\n"
+						+ order.getSupplierCode() + "\n"
+						+ order.getContactName());*/
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(5);
-				cc.setCellValue(order.getContactName());
+				cc.setCellValue(order.getSupplierCode());
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(6);
-				cc.setCellValue(order.getReceiveMode());
+				cc.setCellValue(order.getContactName());
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(7);
-				cc.setCellValue((order.getProvinceName() == null ? "" : order.getProvinceName())
-						+ (order.getCityName() == null ? "" : order.getCityName()));
+				cc.setCellValue(order.getReceiveMode());
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(8);
-				cc.setCellValue((order.getNumAdult() == null ? 0 : order.getNumAdult()) + "+"
-						+ (order.getNumChild() == null ? 0 : order.getNumChild()) + "+"
-						+ (order.getNumGuide() == null ? 0 : order.getNumGuide()));
+				cc.setCellValue((order.getProvinceName() == null ? "" : order
+						.getProvinceName())
+						+ (order.getCityName() == null ? "" : order
+								.getCityName()));
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(9);
-				cc.setCellValue(order.getSaleOperatorName());
+				cc.setCellValue((order.getNumAdult() == null ? 0 : order
+						.getNumAdult())
+						+ "+"
+						+ (order.getNumChild() == null ? 0 : order
+								.getNumChild())
+						+ "+"
+						+ (order.getNumGuide() == null ? 0 : order
+								.getNumGuide()));
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(10);
-				cc.setCellValue(order.getOperatorName());
+				cc.setCellValue(order.getSaleOperatorName());
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(11);
+				cc.setCellValue(order.getOperatorName());
+				cc.setCellStyle(cellStyle);
+				cc = row.createCell(12);
 				cc.setCellValue(order.getPrices().replace(",", "\n"));
 				cc.setCellStyle(styleLeft);
-				cc = row.createCell(12);
-				cc.setCellValue(order.getTotal() == null ? 0 : order.getTotal().doubleValue()); // 团款
-				cc.setCellStyle(cellStyle);
 				cc = row.createCell(13);
-				cc.setCellValue(order.getTotalCash().doubleValue());// 已收
+				cc.setCellValue(order.getTotal() == null ? 0 : order.getTotal()
+						.doubleValue()); // 团款
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(14);
-				cc.setCellValue((order.getTotal() == null ? 0 : order.getTotal().doubleValue())
-						- (order.getTotalCash() == null ? 0 : order.getTotalCash().doubleValue()));// 未收
+				cc.setCellValue(order.getTotalCash().doubleValue());// 已收
+				cc.setCellStyle(cellStyle);
+				cc = row.createCell(15);
+				cc.setCellValue((order.getTotal() == null ? 0 : order
+						.getTotal().doubleValue())
+						- (order.getTotalCash() == null ? 0 : order
+								.getTotalCash().doubleValue()));// 未收
 				cc.setCellStyle(cellStyle);
 				index++;
 
@@ -1018,34 +1039,38 @@ public class QueryController extends BaseController {
 			cc = row.createCell(6);
 			cc.setCellStyle(styleRight);
 			cc = row.createCell(7);
-			cc.setCellValue("合计：");
 			cc.setCellStyle(styleRight);
 			cc = row.createCell(8);
+			cc.setCellValue("合计：");
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(9);
 			cc.setCellValue(list.get(0) + "+" + list.get(1) + "+" + list.get(2));
 			cc.setCellStyle(cellStyle);
-			cc = row.createCell(9);
-			cc.setCellStyle(styleRight);
 			cc = row.createCell(10);
 			cc.setCellStyle(styleRight);
 			cc = row.createCell(11);
 			cc.setCellStyle(styleRight);
 			cc = row.createCell(12);
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(13);
 			cc.setCellValue(list.get(3)); // 团款
 			cc.setCellStyle(cellStyle);
-			cc = row.createCell(13);
+			cc = row.createCell(14);
 			cc.setCellValue(list.get(4));// 已收
 			cc.setCellStyle(cellStyle);
-			cc = row.createCell(14);
+			cc = row.createCell(15);
 			cc.setCellValue(list.get(5));// 未收
 			cc.setCellStyle(cellStyle);
-			CellRangeAddress region = new CellRangeAddress(orders.size() + 3, orders.size() + 4, 0, 14);
+			CellRangeAddress region = new CellRangeAddress(orders.size() + 3,
+					orders.size() + 4, 0, 15);
 			sheet.addMergedRegion(region);
 			row = sheet.createRow(orders.size() + 3);
 			cc = row.createCell(0);
-			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName() + " 打印时间："
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
+					+ " 打印时间："
 					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
-					+ ".xlsx";
+			path = request.getSession().getServletContext().getRealPath("/")
+					+ "/download/" + System.currentTimeMillis() + ".xlsx";
 			FileOutputStream out = new FileOutputStream(path);
 			wb.write(out);
 			out.close();
@@ -1178,11 +1203,13 @@ public class QueryController extends BaseController {
 				cc.setCellValue(order.getDepartureDate());
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(3);
-				cc.setCellValue("【" + order.getProductBrandName() + "】" + order.getProductName());
+				cc.setCellValue("【" + order.getProductBrandName() + "】"
+						+ order.getProductName());
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(4);
-				cc.setCellValue(
-						order.getSupplierName() + "\n" + order.getSupplierCode() + "\n" + order.getContactName());
+				cc.setCellValue(order.getSupplierName() + "\n"
+						+ order.getSupplierCode() + "\n"
+						+ order.getContactName());
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(5);
 				cc.setCellValue(order.getContactName());
@@ -1191,13 +1218,20 @@ public class QueryController extends BaseController {
 				cc.setCellValue(order.getReceiveMode());
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(7);
-				cc.setCellValue((order.getProvinceName() == null ? "" : order.getProvinceName())
-						+ (order.getCityName() == null ? "" : order.getCityName()));
+				cc.setCellValue((order.getProvinceName() == null ? "" : order
+						.getProvinceName())
+						+ (order.getCityName() == null ? "" : order
+								.getCityName()));
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(8);
-				cc.setCellValue((order.getNumAdult() == null ? 0 : order.getNumAdult()) + "+"
-						+ (order.getNumChild() == null ? 0 : order.getNumChild()) + "+"
-						+ (order.getNumGuide() == null ? 0 : order.getNumGuide()));
+				cc.setCellValue((order.getNumAdult() == null ? 0 : order
+						.getNumAdult())
+						+ "+"
+						+ (order.getNumChild() == null ? 0 : order
+								.getNumChild())
+						+ "+"
+						+ (order.getNumGuide() == null ? 0 : order
+								.getNumGuide()));
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(9);
 				cc.setCellValue(order.getSaleOperatorName());
@@ -1209,14 +1243,17 @@ public class QueryController extends BaseController {
 				cc.setCellValue(order.getPrices().replace(",", "\n"));
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(12);
-				cc.setCellValue(order.getTotal() == null ? 0 : order.getTotal().doubleValue()); // 团款
+				cc.setCellValue(order.getTotal() == null ? 0 : order.getTotal()
+						.doubleValue()); // 团款
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(13);
 				cc.setCellValue(order.getTotalCash().doubleValue());// 已收
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(14);
-				cc.setCellValue((order.getTotal() == null ? 0 : order.getTotal().doubleValue())
-						- (order.getTotalCash() == null ? 0 : order.getTotalCash().doubleValue()));// 未收
+				cc.setCellValue((order.getTotal() == null ? 0 : order
+						.getTotal().doubleValue())
+						- (order.getTotalCash() == null ? 0 : order
+								.getTotalCash().doubleValue()));// 未收
 				cc.setCellStyle(cellStyle);
 				index++;
 
@@ -1357,14 +1394,17 @@ public class QueryController extends BaseController {
 			 * row.createCell(0); cc.setCellValue("合计："+totalCash) ;
 			 */
 
-			CellRangeAddress region2 = new CellRangeAddress(orders.size() + payDetailList.size() + 8,
-					orders.size() + payDetailList.size() + 9, 0, 1);
+			CellRangeAddress region2 = new CellRangeAddress(orders.size()
+					+ payDetailList.size() + 8, orders.size()
+					+ payDetailList.size() + 9, 0, 1);
 			sheet.addMergedRegion(region2);
-			CellRangeAddress region3 = new CellRangeAddress(orders.size() + payDetailList.size() + 8,
-					orders.size() + payDetailList.size() + 8, 2, 3);
+			CellRangeAddress region3 = new CellRangeAddress(orders.size()
+					+ payDetailList.size() + 8, orders.size()
+					+ payDetailList.size() + 8, 2, 3);
 			sheet.addMergedRegion(region3);
-			CellRangeAddress region4 = new CellRangeAddress(orders.size() + payDetailList.size() + 8,
-					orders.size() + payDetailList.size() + 9, 4, 5);
+			CellRangeAddress region4 = new CellRangeAddress(orders.size()
+					+ payDetailList.size() + 8, orders.size()
+					+ payDetailList.size() + 9, 4, 5);
 			sheet.addMergedRegion(region4);
 
 			row = sheet.createRow(orders.size() + payDetailList.size() + 8);
@@ -1390,8 +1430,9 @@ public class QueryController extends BaseController {
 			cc.setCellStyle(styleLeft);
 			cc.setCellValue(new XSSFRichTextString("已收"));
 
-			CellRangeAddress region22 = new CellRangeAddress(orders.size() + payDetailList.size() + 10,
-					orders.size() + payDetailList.size() + 10, 0, 1);
+			CellRangeAddress region22 = new CellRangeAddress(orders.size()
+					+ payDetailList.size() + 10, orders.size()
+					+ payDetailList.size() + 10, 0, 1);
 			sheet.addMergedRegion(region22);
 
 			// // 本期发生的应收已收
@@ -1417,29 +1458,36 @@ public class QueryController extends BaseController {
 				orderMiddle.setTotal(new BigDecimal(0));
 				orderMiddle.setTotalCash(new BigDecimal(0));
 			}
-			CellRangeAddress region44 = new CellRangeAddress(orders.size() + payDetailList.size() + 10,
-					orders.size() + payDetailList.size() + 10, 4, 5);
+			CellRangeAddress region44 = new CellRangeAddress(orders.size()
+					+ payDetailList.size() + 10, orders.size()
+					+ payDetailList.size() + 10, 4, 5);
 			sheet.addMergedRegion(region44);
 			row = sheet.createRow(orders.size() + payDetailList.size() + 10);
 			setRowStyle(row, cellStyle);
 			cc = row.createCell(0);
 			cc.setCellStyle(styleLeft);
 			cc.setCellValue(new XSSFRichTextString(NumberUtil
-					.formatDouble((orderPre.getTotal().doubleValue() - orderPre.getTotalCash().doubleValue()))));
+					.formatDouble((orderPre.getTotal().doubleValue() - orderPre
+							.getTotalCash().doubleValue()))));
 			cc = row.createCell(2);
 			cc.setCellStyle(styleLeft);
-			cc.setCellValue(new XSSFRichTextString(NumberUtil.formatDouble(orderMiddle.getTotal())));
+			cc.setCellValue(new XSSFRichTextString(NumberUtil
+					.formatDouble(orderMiddle.getTotal())));
 			cc = row.createCell(3);
 			cc.setCellStyle(styleLeft);
-			cc.setCellValue(new XSSFRichTextString(NumberUtil.formatDouble(orderMiddle.getTotalCash())));
+			cc.setCellValue(new XSSFRichTextString(NumberUtil
+					.formatDouble(orderMiddle.getTotalCash())));
 			cc = row.createCell(4);
 			cc.setCellStyle(styleLeft);
-			cc.setCellValue(new XSSFRichTextString(
-					NumberUtil.formatDouble(orderPre.getTotal().doubleValue() - orderPre.getTotalCash().doubleValue()
-							+ orderMiddle.getTotal().doubleValue() - orderMiddle.getTotalCash().doubleValue())));
+			cc.setCellValue(new XSSFRichTextString(NumberUtil
+					.formatDouble(orderPre.getTotal().doubleValue()
+							- orderPre.getTotalCash().doubleValue()
+							+ orderMiddle.getTotal().doubleValue()
+							- orderMiddle.getTotalCash().doubleValue())));
 
-			CellRangeAddress region5 = new CellRangeAddress(orders.size() + payDetailList.size() + 11,
-					orders.size() + payDetailList.size() + 19, 0, 4);
+			CellRangeAddress region5 = new CellRangeAddress(orders.size()
+					+ payDetailList.size() + 11, orders.size()
+					+ payDetailList.size() + 19, 0, 4);
 			sheet.addMergedRegion(region5);
 			row = sheet.createRow(orders.size() + payDetailList.size() + 11);
 			cc = row.createCell(0);
@@ -1448,16 +1496,23 @@ public class QueryController extends BaseController {
 			StringBuilder sb = new StringBuilder();
 			StringBuilder sb1 = new StringBuilder();
 			for (SysBizBankAccount sysBizBankAccount : sysBizBankAccountList) {
-				sb.append("类别:" + (sysBizBankAccount.getAccountType() == 1 ? "个人账户" : "对公账户") + " 银行名称："
-						+ sysBizBankAccount.getBankName() + sysBizBankAccount.getBankAccount() + " 开户全称："
-						+ sysBizBankAccount.getAccountName() + " 公司账号：" + sysBizBankAccount.getAccountNo() + "\r\n");
+				sb.append("类别:"
+						+ (sysBizBankAccount.getAccountType() == 1 ? "个人账户"
+								: "对公账户") + " 银行名称："
+						+ sysBizBankAccount.getBankName()
+						+ sysBizBankAccount.getBankAccount() + " 开户全称："
+						+ sysBizBankAccount.getAccountName() + " 公司账号："
+						+ sysBizBankAccount.getAccountNo() + "\r\n");
 				sb1.append("\r\n");
 			}
-			sb.append("\r\n" + "地接社盖章：" + "\r\n" + "签字：_________" + "\r\n" + "日期：_________" + "\r\n");
-			sb1.append("\r\n" + "组团社盖章：" + "\r\n" + "签字：_________" + "\r\n" + "日期：_________" + "\r\n");
+			sb.append("\r\n" + "地接社盖章：" + "\r\n" + "签字：_________" + "\r\n"
+					+ "日期：_________" + "\r\n");
+			sb1.append("\r\n" + "组团社盖章：" + "\r\n" + "签字：_________" + "\r\n"
+					+ "日期：_________" + "\r\n");
 			cc.setCellValue(new XSSFRichTextString(sb.toString()));
-			CellRangeAddress region6 = new CellRangeAddress(orders.size() + payDetailList.size() + 11,
-					orders.size() + payDetailList.size() + 19, 5, 6);
+			CellRangeAddress region6 = new CellRangeAddress(orders.size()
+					+ payDetailList.size() + 11, orders.size()
+					+ payDetailList.size() + 19, 5, 6);
 			sheet.addMergedRegion(region6);
 			row = sheet.getRow(orders.size() + payDetailList.size() + 11);
 			cc = row.createCell(5);
@@ -1465,15 +1520,17 @@ public class QueryController extends BaseController {
 			cc.setCellStyle(styleTop);
 			cc.setCellValue(new XSSFRichTextString(sb1.toString()));
 
-			CellRangeAddress region7 = new CellRangeAddress(orders.size() + payDetailList.size() + 20,
-					orders.size() + payDetailList.size() + 21, 0, 6);
+			CellRangeAddress region7 = new CellRangeAddress(orders.size()
+					+ payDetailList.size() + 20, orders.size()
+					+ payDetailList.size() + 21, 0, 6);
 			sheet.addMergedRegion(region7);
 			row = sheet.createRow(orders.size() + payDetailList.size() + 19);
 			cc = row.createCell(0);
-			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName() + " 打印时间："
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
+					+ " 打印时间："
 					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
-					+ ".xlsx";
+			path = request.getSession().getServletContext().getRealPath("/")
+					+ "/download/" + System.currentTimeMillis() + ".xlsx";
 			FileOutputStream out = new FileOutputStream(path);
 			wb.write(out);
 			out.close();
@@ -1515,7 +1572,8 @@ public class QueryController extends BaseController {
 		cc.setCellStyle(cellStyle);
 	}
 
-	private void download(String path, String fileName, HttpServletRequest request, HttpServletResponse response) {
+	private void download(String path, String fileName,
+			HttpServletRequest request, HttpServletResponse response) {
 		try {
 			// path是指欲下载的文件的路径。
 			File file = new File(path);
@@ -1533,9 +1591,11 @@ public class QueryController extends BaseController {
 			 * = new URLEncoder().encode(fileName) ; }
 			 */
 			// 设置response的Header
-			response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+			response.addHeader("Content-Disposition", "attachment;filename="
+					+ fileName);
 			response.addHeader("Content-Length", "" + file.length());
-			OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+			OutputStream toClient = new BufferedOutputStream(
+					response.getOutputStream());
 			response.setContentType("application/vnd.ms-excel;charset=gb2312");
 			toClient.write(buffer);
 			toClient.flush();
@@ -1559,10 +1619,14 @@ public class QueryController extends BaseController {
 			numAdult += order.getNumAdult() == null ? 0 : order.getNumAdult();
 			numChild += order.getNumChild() == null ? 0 : order.getNumChild();
 			numGuide += order.getNumGuide() == null ? 0 : order.getNumGuide();
-			total += (order.getTotal() == null ? 0 : order.getTotal().doubleValue());
-			totalCash += (order.getTotalCash() == null ? 0 : order.getTotalCash().doubleValue());
-			notCash += (order.getTotal() == null ? 0 : order.getTotal().doubleValue())
-					- (order.getTotalCash() == null ? 0 : order.getTotalCash().doubleValue());
+			total += (order.getTotal() == null ? 0 : order.getTotal()
+					.doubleValue());
+			totalCash += (order.getTotalCash() == null ? 0 : order
+					.getTotalCash().doubleValue());
+			notCash += (order.getTotal() == null ? 0 : order.getTotal()
+					.doubleValue())
+					- (order.getTotalCash() == null ? 0 : order.getTotalCash()
+							.doubleValue());
 		}
 		list.add(format.format(numAdult));
 		list.add(format.format(numChild));
@@ -1739,30 +1803,30 @@ public class QueryController extends BaseController {
 		return "queries/shop/shopSelect-listView";
 	}
 
-	// private void fillData(List<BookingGroup> bookingGroupList) {
-	// if (bookingGroupList != null && bookingGroupList.size() > 0) {
-	// for (BookingGroup group : bookingGroupList) {
-	// if (group.getProductBrandName() != null) {
-	// group.setProductName("【" + group.getProductBrandName()
-	// + "】" + group.getProductName());
-	// }
-	// // 填充定制团的组团社名称
-	// if (group.getSupplierId() != null) {
-	// SupplierInfo supplierInfo = supplierSerivce
-	// .selectBySupplierId(group.getSupplierId());
-	// if (supplierInfo != null) {
-	// group.setSupplierName(supplierInfo.getNameFull());
-	// }
-	// }
-	// // 购物查询
-	// BookingShopSelect b = bookingShopService.getShopSelect(group
-	// .getGroupId());
-	// group.setBookingShopSelect(b);
-	//
-	// }
-	// }
-	// }
+	/*private void fillData(List<BookingGroup> bookingGroupList) {
+		if (bookingGroupList != null && bookingGroupList.size() > 0) {
+			for (BookingGroup group : bookingGroupList) {
+				if (group.getProductBrandName() != null) {
+					group.setProductName("【" + group.getProductBrandName()
+							+ "】" + group.getProductName());
+				}
+				// 填充定制团的组团社名称
+				if (group.getSupplierId() != null) {
+					SupplierInfo supplierInfo = supplierSerivce
+							.selectBySupplierId(group.getSupplierId());
+					if (supplierInfo != null) {
+						group.setSupplierName(supplierInfo.getNameFull());
+					}
+				}
+				// 购物查询
+				BookingShopSelect b = bookingShopService.getShopSelect(group
+						.getGroupId());
+				group.setBookingShopSelect(b);
 
+			}
+		}
+	}
+*/
 	@RequestMapping(value = "/getEmployeeIds.htm", method = RequestMethod.POST)
 	@ResponseBody
 	public String getEmployeeIds(HttpServletRequest request, String orgIds, Model model) {
@@ -1900,7 +1964,8 @@ public class QueryController extends BaseController {
 		String path = "";
 
 		try {
-			String url = request.getSession().getServletContext().getRealPath("/template/excel/paymentStatic.xlsx");
+			String url = request.getSession().getServletContext()
+					.getRealPath("/template/excel/paymentStatic.xlsx");
 			FileInputStream input = new FileInputStream(new File(url)); // 读取的文件路径
 			XSSFWorkbook wb = new XSSFWorkbook(new BufferedInputStream(input));
 			XSSFFont createFont = wb.createFont();
@@ -1933,7 +1998,8 @@ public class QueryController extends BaseController {
 			styleFontTable.setBorderTop(CellStyle.BORDER_THIN);// 上边框
 			styleFontTable.setBorderRight(CellStyle.BORDER_THIN);// 右边框
 			styleFontTable.setAlignment(CellStyle.ALIGN_CENTER); // 居中
-			styleFontTable.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+			styleFontTable.setFillForegroundColor(IndexedColors.GREY_25_PERCENT
+					.getIndex());
 			styleFontTable.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
 			CellStyle styleLeft = wb.createCellStyle();
@@ -1980,7 +2046,8 @@ public class QueryController extends BaseController {
 				cc.setCellValue(order.getOrderCount() + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(4);
-				cc.setCellValue(order.getNumAdult() + "+" + order.getNumChild() + "+" + order.getNumGuide() + "");
+				cc.setCellValue(order.getNumAdult() + "+" + order.getNumChild()
+						+ "+" + order.getNumGuide() + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(5);
 				cc.setCellValue(NumberUtil.formatDouble(order.getTotal()));
@@ -1990,13 +2057,16 @@ public class QueryController extends BaseController {
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(7);
-				Double tb = new Double(NumberUtil.formatDouble(order.getTotalBalance()));
+				Double tb = new Double(NumberUtil.formatDouble(order
+						.getTotalBalance()));
 				cc.setCellValue(NumberUtil.formatDouble(tb));
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(8);
-				Double bd = new Double(NumberUtil.formatDouble(order.getTotalBalance()))
-						+ new Double(NumberUtil.formatDouble(order.getPreTotal()));
+				Double bd = new Double(NumberUtil.formatDouble(order
+						.getTotalBalance()))
+						+ new Double(NumberUtil.formatDouble(order
+								.getPreTotal()));
 				cc.setCellValue(NumberUtil.formatDouble(bd));
 				cc.setCellStyle(cellStyle);
 				index++;
@@ -2030,14 +2100,16 @@ public class QueryController extends BaseController {
 			cc = row.createCell(8);
 			cc.setCellValue(map.get("groupBlance"));
 			cc.setCellStyle(cellStyle);
-			CellRangeAddress region = new CellRangeAddress(orders.size() + 3, orders.size() + 3, 0, 8);
+			CellRangeAddress region = new CellRangeAddress(orders.size() + 3,
+					orders.size() + 3, 0, 8);
 			sheet.addMergedRegion(region);
 			row = sheet.createRow(orders.size() + 3);
 			cc = row.createCell(0);
-			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName() + " 打印时间："
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
+					+ " 打印时间："
 					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
-					+ ".xlsx";
+			path = request.getSession().getServletContext().getRealPath("/")
+					+ "/download/" + System.currentTimeMillis() + ".xlsx";
 			FileOutputStream out = new FileOutputStream(path);
 			wb.write(out);
 			out.close();
@@ -2071,15 +2143,18 @@ public class QueryController extends BaseController {
 			totalChild += order.getNumChild();
 			totalGuide += order.getNumGuide();
 			groupTotal += new Double(NumberUtil.formatDouble(order.getTotal()));
-			groupTotalCash += new Double(NumberUtil.formatDouble(order.getTotalCash()));
-			groupBlance += new Double(NumberUtil.formatDouble(order.getTotalBalance()))
+			groupTotalCash += new Double(NumberUtil.formatDouble(order
+					.getTotalCash()));
+			groupBlance += new Double(NumberUtil.formatDouble(order
+					.getTotalBalance()))
 					+ new Double(NumberUtil.formatDouble(order.getPreTotal()));
 			groupBlance1 += groupBlance - preTotal;
 		}
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("preTotal", NumberUtil.formatDouble(preTotal));
 		map.put("orderCountTotal", orderCountTotal + "");
-		map.put("persons", totalAdult + "大" + totalChild + "小" + totalGuide + "陪");
+		map.put("persons", totalAdult + "大" + totalChild + "小" + totalGuide
+				+ "陪");
 		map.put("groupTotal", NumberUtil.formatDouble(groupTotal));
 		map.put("groupTotalCash", NumberUtil.formatDouble(groupTotalCash));
 		map.put("groupBlance", NumberUtil.formatDouble(groupBlance));
@@ -5165,8 +5240,9 @@ public class QueryController extends BaseController {
 				cc.setCellValue(map.get("groupCode") + "");
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(2);
-				cc.setCellValue(
-						map.get("totalAdult") + "大" + map.get("totalChild") + "小" + map.get("totalGuide") + "陪");
+				cc.setCellValue(map.get("totalAdult") + "大"
+						+ map.get("totalChild") + "小" + map.get("totalGuide")
+						+ "陪");
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(3);
 				cc.setCellValue(map.get("supplierName") + "");
@@ -5184,7 +5260,8 @@ public class QueryController extends BaseController {
 				cc.setCellValue(map.get("type1Name") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(8);
-				cc.setCellValue(map.get("itemBrief") == null ? "" : map.get("itemBrief") + "");
+				cc.setCellValue(map.get("itemBrief") == null ? "" : map
+						.get("itemBrief") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(9);
 				BigDecimal itemNum = new BigDecimal(0);
@@ -5198,11 +5275,13 @@ public class QueryController extends BaseController {
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(11);
 				BigDecimal itemNumMinus = new BigDecimal(0);
-				itemNumMinus = itemNumMinus.add((BigDecimal) map.get("itemNumMinus"));
+				itemNumMinus = itemNumMinus.add((BigDecimal) map
+						.get("itemNumMinus"));
 				cc.setCellValue(itemNumMinus.doubleValue()); // 团款
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(12);
-				cc.setCellValue(map.get("cashType") == null ? "" : map.get("cashType") + "");// 已收
+				cc.setCellValue(map.get("cashType") == null ? "" : map
+						.get("cashType") + "");// 已收
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(13);
 				BigDecimal itemTotal = new BigDecimal(0);
@@ -5212,7 +5291,8 @@ public class QueryController extends BaseController {
 				index++;
 				total = total.add((BigDecimal) map.get("itemTotal"));
 				totalNum = totalNum.add((BigDecimal) map.get("itemNum"));
-				totalNumMinus = totalNumMinus.add((BigDecimal) map.get("itemNumMinus"));
+				totalNumMinus = totalNumMinus.add((BigDecimal) map
+						.get("itemNumMinus"));
 			}
 
 			row = sheet.createRow(pb.getResult().size() + 2); // 加合计行
@@ -5418,8 +5498,9 @@ public class QueryController extends BaseController {
 				cc.setCellValue(map.get("groupCode") + "");
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(2);
-				cc.setCellValue(
-						map.get("totalAdult") + "大" + map.get("totalChild") + "小" + map.get("totalGuide") + "陪");
+				cc.setCellValue(map.get("totalAdult") + "大"
+						+ map.get("totalChild") + "小" + map.get("totalGuide")
+						+ "陪");
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(3);
 				cc.setCellValue(map.get("supplierName") + "");
@@ -5432,10 +5513,12 @@ public class QueryController extends BaseController {
 				cc.setCellValue(map.get("itemDate") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(6);
-				cc.setCellValue(map.get("type1Name") == null ? "" : map.get("type1Name") + "");
+				cc.setCellValue(map.get("type1Name") == null ? "" : map
+						.get("type1Name") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(7);
-				cc.setCellValue(map.get("itemBrief") == null ? "" : map.get("itemBrief") + "");
+				cc.setCellValue(map.get("itemBrief") == null ? "" : map
+						.get("itemBrief") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(8);
 				BigDecimal itemNum = new BigDecimal(0);
@@ -5632,8 +5715,9 @@ public class QueryController extends BaseController {
 				cc.setCellValue(map.get("groupCode") + "");
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(2);
-				cc.setCellValue(
-						map.get("totalAdult") + "大" + map.get("totalChild") + "小" + map.get("totalGuide") + "陪");
+				cc.setCellValue(map.get("totalAdult") + "大"
+						+ map.get("totalChild") + "小" + map.get("totalGuide")
+						+ "陪");
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(3);
 				cc.setCellValue(map.get("supplierName") + "");
@@ -5649,7 +5733,8 @@ public class QueryController extends BaseController {
 				cc.setCellValue(map.get("ticketFligh") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(7);
-				cc.setCellValue(map.get("type1Name") == null ? "" : map.get("type1Name") + "");
+				cc.setCellValue(map.get("type1Name") == null ? "" : map
+						.get("type1Name") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(8);
 				cc.setCellValue(map.get("ticketDeparture") + "");
@@ -5955,14 +6040,23 @@ public class QueryController extends BaseController {
 		BigDecimal totalNum = new BigDecimal(0);
 		try {
 			String url = "";
-			if (Constants.OTHERINCOME.toString().equals(WebUtils.getQueryParamters(request).get("supplierType"))) {
+			if (Constants.OTHERINCOME.toString().equals(
+					WebUtils.getQueryParamters(request).get("supplierType"))) {
 
-				url = request.getSession().getServletContext().getRealPath("/template/excel/incomeBusinessDetail.xlsx");
+				url = request
+						.getSession()
+						.getServletContext()
+						.getRealPath(
+								"/template/excel/incomeBusinessDetail.xlsx");
 			}
-			if (Constants.OTHEROUTCOME.toString().equals(WebUtils.getQueryParamters(request).get("supplierType"))) {
+			if (Constants.OTHEROUTCOME.toString().equals(
+					WebUtils.getQueryParamters(request).get("supplierType"))) {
 
-				url = request.getSession().getServletContext()
-						.getRealPath("/template/excel/outcomeBusinessDetail.xlsx");
+				url = request
+						.getSession()
+						.getServletContext()
+						.getRealPath(
+								"/template/excel/outcomeBusinessDetail.xlsx");
 			}
 
 			FileInputStream input = new FileInputStream(new File(url)); // 读取的文件路径
@@ -6004,20 +6098,23 @@ public class QueryController extends BaseController {
 				cc.setCellValue(map.get("groupCode") + "");
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(2);
-				cc.setCellValue(map.get("productBrandName") + "-" + map.get("productName"));
+				cc.setCellValue(map.get("productBrandName") + "-"
+						+ map.get("productName"));
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(3);
 				cc.setCellValue(map.get("supplierName") + "");
 				cc.setCellStyle(styleLeft);
 
 				cc = row.createCell(4);
-				cc.setCellValue(map.get("cashType") == null ? "" : map.get("cashType") + "");
+				cc.setCellValue(map.get("cashType") == null ? "" : map
+						.get("cashType") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(5);
 				cc.setCellValue(map.get("item_date") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(6);
-				cc.setCellValue(map.get("type1_name") == null ? "" : map.get("type1_name") + "");
+				cc.setCellValue(map.get("type1_name") == null ? "" : map
+						.get("type1_name") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(7);
 				BigDecimal itemPrice = new BigDecimal(0);
@@ -6087,15 +6184,17 @@ public class QueryController extends BaseController {
 			cc.setCellValue(totalBalance2.doubleValue());
 			cc.setCellStyle(cellStyle);
 
-			CellRangeAddress region = new CellRangeAddress(pb.getResult().size() + 3, pb.getResult().size() + 4, 0, 12);
+			CellRangeAddress region = new CellRangeAddress(pb.getResult()
+					.size() + 3, pb.getResult().size() + 4, 0, 12);
 			sheet.addMergedRegion(region);
 			// row = sheet.getRow(orders.size()+3); //打印信息
 			row = sheet.createRow(pb.getResult().size() + 3);
 			cc = row.createCell(0);
-			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName() + " 打印时间："
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
+					+ " 打印时间："
 					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
-					+ ".xlsx";
+			path = request.getSession().getServletContext().getRealPath("/")
+					+ "/download/" + System.currentTimeMillis() + ".xlsx";
 			FileOutputStream out = new FileOutputStream(path);
 			wb.write(out);
 			out.close();
@@ -6223,29 +6322,36 @@ public class QueryController extends BaseController {
 				cc.setCellValue(map.get("operatorName") + "");
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(3);
-				cc.setCellValue(map.get("productBrandName") + "-" + map.get("productName"));
+				cc.setCellValue(map.get("productBrandName") + "-"
+						+ map.get("productName"));
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(4);
-				cc.setCellValue(map.get("totalAdult") + "大" + map.get("totalChild") + "小");
+				cc.setCellValue(map.get("totalAdult") + "大"
+						+ map.get("totalChild") + "小");
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(5);
 				cc.setCellValue(map.get("supplierName") + "");
 				cc.setCellStyle(styleLeft);
 
 				cc = row.createCell(6);
-				cc.setCellValue(map.get("type1Name") == null ? "" : map.get("type1Name") + "");
+				cc.setCellValue(map.get("type1Name") == null ? "" : map
+						.get("type1Name") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(7);
-				cc.setCellValue(map.get("type2Name") == null ? "" : map.get("type2Name") + "");
+				cc.setCellValue(map.get("type2Name") == null ? "" : map
+						.get("type2Name") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(8);
-				cc.setCellValue(map.get("driverName") == null ? "" : map.get("driverName") + "");
+				cc.setCellValue(map.get("driverName") == null ? "" : map
+						.get("driverName") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(9);
-				cc.setCellValue(map.get("carLisence") == null ? "" : map.get("carLisence") + "");
+				cc.setCellValue(map.get("carLisence") == null ? "" : map
+						.get("carLisence") + "");
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(10);
-				cc.setCellValue(map.get("itemDate") + "~" + map.get("itemDateTo"));
+				cc.setCellValue(map.get("itemDate") + "~"
+						+ map.get("itemDateTo"));
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(11);
@@ -6265,7 +6371,8 @@ public class QueryController extends BaseController {
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(14);
-				cc.setCellValue(map.get("remark") == null ? "" : map.get("remark") + "");
+				cc.setCellValue(map.get("remark") == null ? "" : map
+						.get("remark") + "");
 				cc.setCellStyle(cellStyle);
 
 				index++;
@@ -6312,15 +6419,17 @@ public class QueryController extends BaseController {
 			cc = row.createCell(14);
 			cc.setCellStyle(cellStyle);
 
-			CellRangeAddress region = new CellRangeAddress(pb.getResult().size() + 3, pb.getResult().size() + 4, 0, 15);
+			CellRangeAddress region = new CellRangeAddress(pb.getResult()
+					.size() + 3, pb.getResult().size() + 4, 0, 15);
 			sheet.addMergedRegion(region);
 			// row = sheet.getRow(orders.size()+3); //打印信息
 			row = sheet.createRow(pb.getResult().size() + 3);
 			cc = row.createCell(0);
-			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName() + " 打印时间："
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
+					+ " 打印时间："
 					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
-					+ ".xlsx";
+			path = request.getSession().getServletContext().getRealPath("/")
+					+ "/download/" + System.currentTimeMillis() + ".xlsx";
 			FileOutputStream out = new FileOutputStream(path);
 			wb.write(out);
 			out.close();
@@ -6585,16 +6694,18 @@ public class QueryController extends BaseController {
 			cc.setCellValue(orderCount.intValue());
 			cc.setCellStyle(styleRight);
 
-			CellRangeAddress region = new CellRangeAddress(productGuestStatics.size() + 3,
+			CellRangeAddress region = new CellRangeAddress(
+					productGuestStatics.size() + 3,
 					productGuestStatics.size() + 4, 0, 4);
 			sheet.addMergedRegion(region);
 			// row = sheet.getRow(orders.size()+3); //打印信息
 			row = sheet.createRow(productGuestStatics.size() + 3);
 			cc = row.createCell(0);
-			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName() + " 打印时间："
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
+					+ " 打印时间："
 					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
-					+ ".xlsx";
+			path = request.getSession().getServletContext().getRealPath("/")
+					+ "/download/" + System.currentTimeMillis() + ".xlsx";
 			FileOutputStream out = new FileOutputStream(path);
 			wb.write(out);
 			out.close();
@@ -7869,7 +7980,8 @@ public class QueryController extends BaseController {
 			cc.setCellValue("合计：");
 			cc.setCellStyle(styleRight);
 			cc = row.createCell(3);
-			cc.setCellValue(adultCount + "大" + childCount + "小" + guideCount + "陪");
+			cc.setCellValue(adultCount + "大" + childCount + "小" + guideCount
+					+ "陪");
 			cc.setCellStyle(styleRight);
 			cc = row.createCell(4);
 			cc.setCellStyle(styleRight);
@@ -7891,15 +8003,17 @@ public class QueryController extends BaseController {
 			cc.setCellValue(profitTotal.doubleValue());
 			cc.setCellStyle(styleRight);
 
-			CellRangeAddress region = new CellRangeAddress(pb.getResult().size() + 2, pb.getResult().size() + 2, 0, 11);
+			CellRangeAddress region = new CellRangeAddress(pb.getResult()
+					.size() + 2, pb.getResult().size() + 2, 0, 11);
 			sheet.addMergedRegion(region);
 			// row = sheet.getRow(orders.size()+3); //打印信息
 			row = sheet.createRow(pb.getResult().size() + 2);
 			cc = row.createCell(0);
-			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName() + " 打印时间："
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
+					+ " 打印时间："
 					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
-					+ ".xlsx";
+			path = request.getSession().getServletContext().getRealPath("/")
+					+ "/download/" + System.currentTimeMillis() + ".xlsx";
 			FileOutputStream out = new FileOutputStream(path);
 			wb.write(out);
 			out.close();
@@ -8096,6 +8210,39 @@ public class QueryController extends BaseController {
 
 		return "queries/departmentOrder/departmentOrderTable";
 	}
+
+	/**
+	 *
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param condition
+	 * @return
+	 * @throws ParseException
+	 */
+	@RequestMapping("departmentOrderListPage.do")
+	public String departmentOrderListPage(HttpServletRequest request,
+										  HttpServletResponse response, ModelMap model,
+										  DeparentmentOrderCondition condition) throws ParseException {
+		Integer bizId = WebUtils.getCurBizId(request);
+		String staticsOrgIds = WebUtils.getBizConfigValue(request,
+				BizConfigConstant.DEPT_ORDER_STATICS);
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setBizId(bizId);
+		queryDTO.setStaticsOrgIds(staticsOrgIds);
+		queryDTO.setCondition(condition);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		QueryResult queryResult = queryFacade.departmentOrderListPage(queryDTO);
+		model.addAttribute("secLevelOrgList", queryResult.getSecLevelOrgList());//获取机构信息
+		model.addAttribute("subLevelOrgList", queryResult.getSubLevelOrgList());//获取部门信息
+		model.addAttribute("orgDepMap", queryResult.getOrgDepMap());
+		model.addAttribute("empMap", queryResult.getEmpMap());
+		model.addAttribute("orderMap", queryResult.getOrderMap());
+		model.addAttribute("gOrdersList", queryResult.getgOrdersList());
+		return "queries/departmentOrder/departmentOrderTable";
+	}
+
+
 
 	/**
 	 * 接待人数统计
