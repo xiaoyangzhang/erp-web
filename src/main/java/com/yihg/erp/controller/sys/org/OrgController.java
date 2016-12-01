@@ -201,5 +201,18 @@ public class OrgController extends BaseController{
 			return ResultWebUtils.errorJson("角色名已存在！");
 		}
 	}
-	
+	/**
+	 * 组织机构对组团社的授权
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping("/orgSupplierAuth.htm")
+	public String orgSupplierAuth(HttpServletRequest request,HttpServletResponse response,ModelMap model)
+	{
+		Map<String,Object> requestParam = WebUtils.getQueryParamters(request);
+
+		return getSystemOrgPrefixPath("org_supplier_auth");
+	}
 }

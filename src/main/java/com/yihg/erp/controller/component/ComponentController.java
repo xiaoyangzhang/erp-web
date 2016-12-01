@@ -193,14 +193,16 @@ public class ComponentController extends BaseController {
 	
 	@RequestMapping("supplierList.htm")
 	public String supplierList(HttpServletRequest request,HttpServletResponse reponse, ModelMap model,SupplierInfo supplierInfo,String type){
-				
+
+		String canEditPrice = WebUtils.getBizConfigValue(request, "SUPPLIER_CHOOSE");
+		Integer orgId =  WebUtils.getCurUser(request).getOrgId();
+		componentFacade.setSupplierIds(supplierInfo,canEditPrice,orgId);
 		RegionResult provinceResult = productCommonFacade.queryProvinces();
 		List<com.yimayhd.erpcenter.dal.basic.po.RegionInfo> allProvince = provinceResult.getRegionList();
-		
 		model.addAttribute("allProvince", allProvince);
 		// 根据供应商类型查询当前登录商家所属的供应商
-		model.addAttribute("supplierInfo", supplierInfo);
 		PageBean pageBean = componentFacade.supplierList(WebUtils.getCurBizId(request), supplierInfo);
+		model.addAttribute("supplierInfo", supplierInfo);
 		model.addAttribute("page", pageBean);
 		Map<Integer,String> typeMap = null;
 		//过滤显示供应商类型

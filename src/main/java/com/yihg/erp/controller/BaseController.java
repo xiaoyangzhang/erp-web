@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import com.yihg.erp.contant.PathPrefixConstant;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -68,5 +69,9 @@ public class BaseController {
 		json.put("success", false);
 		json.put("msg", msg);
 		return json.toString();
+	}
+	protected String getSystemOrgPrefixPath(String path)
+	{
+		return PathPrefixConstant.SYSTEM_ORG_PREFIX+path;
 	}
 }

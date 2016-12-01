@@ -29,11 +29,10 @@
 					
 							<th style="width: 3%;">车<i class="w_table_split"></i></th>
 						
-							<th style="width: 3%;">飞<i class="w_table_split"></i></th>
+							<th style="width: 4%;">飞<i class="w_table_split"></i></th>
 							
-							<th style="width: 3%;">火<i class="w_table_split"></i></th>
-							<th style="width: 3%;">险<i class="w_table_split"></i></th>
-							<th style="width: 3%;">店<i class="w_table_split"></i></th>
+							<th style="width: 4%;">火<i class="w_table_split"></i></th>
+							<th style="width: 4%;">险<i class="w_table_split"></i></th>
 						
 							<th style="width: 6%;">导游<i class="w_table_split"></i></th>
 							<th style="width: 3%;">其他收入<i class="w_table_split"></i></th>
@@ -118,12 +117,6 @@
 										<c:if test="${groupInfo.insuranceCnt==0 }">×</c:if>
 									</a>
 								</td>
-								<td>
-									<a href="javascript:void(0)" class="db" onclick="showShopBooking('${groupInfo.groupId}')">
-										<c:if test="${groupInfo.shopCnt>0 }">√</c:if>
-										<c:if test="${groupInfo.shopCnt==0 }">×</c:if>
-									</a>
-								</td>
 							<!--  -->
 								<td>
 									<c:choose>
@@ -188,10 +181,9 @@
 						
 							<td style="width: 3%;"></td>
 						
-							<td style="width: 3%;"></td>
-							<td style="width: 3%;"></td>
-							<td style="width: 3%;"></td>
-							<td style="width: 3%;"></td>
+							<td style="width: 4%;"></td>
+							<td style="width: 4%;"></td>
+							<td style="width: 4%;"></td>
 						
 							<td style="width: 6%;"></td>
 							<td style="width: 3%;"></td>
@@ -218,10 +210,9 @@
 						
 							<td style="width: 3%;"></td>
 						
-							<td style="width: 3%;"></td>
-							<td style="width: 3%;"></td>
-							<td style="width: 3%;"></td>
-							<td style="width: 3%;"></td>
+							<td style="width: 4%;"></td>
+							<td style="width: 4%;"></td>
+							<td style="width: 4%;"></td>
 						
 							<td style="width: 6%;"></td>
 							<td style="width: 3%;"></td>

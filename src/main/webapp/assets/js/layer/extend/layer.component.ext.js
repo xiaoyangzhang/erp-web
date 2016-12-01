@@ -71,4 +71,33 @@ if(layer){
 
         }
     };
+    
+    layer.openOrgSupplierAuthLayer = function(config){
+        var win;
+        var defaultConfig =$.extend({
+            type : 2,
+            title : '选择供应商',
+            area : [{minHeight : '768px', areas : ['900px', '610px']}, {maxHeight : '768px', areas : ['600px', '450px']}],
+            shadeClose : false,
+            content : getContextPath() + '/org/orgSupplierAuth.htm',//参数：操作类型（type:单选(single)、多选(multi)）供应商类型supplierType=1
+            btn: ['确定', '取消'],
+            success:function(layero, index){
+                win = window[layero.find('iframe')[0]['name']];
+            },
+            yes: function(index){
+//                var arr = win.getChkedSupplier();
+//                config.callback(arr);
+                layer.close(index);
+            },
+            cancel : function(index){
+                layer.close(index);
+            }
+        },config);
+        
+        console.info(defaultConfig);
+       layer.open(defaultConfig);
+
+    };
+    
+    
 }

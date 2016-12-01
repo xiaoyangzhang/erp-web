@@ -182,8 +182,11 @@
 					<div class="dd_left"></div>
 					<div class="dd_right">
 	    			<input type="submit" class="button button-primary button-small" value="提交"  />&nbsp;&nbsp;&nbsp;&nbsp;
-	    			
-					<input class="button button-primary button-small" type="reset"  value="重置表单" />
+
+						<input class="button button-primary button-small" type="reset"  value="重置表单" />&nbsp;&nbsp;&nbsp;&nbsp;
+						<c:if test="${org.orgId!=null}">
+							<input type="button" class="button button-primary button-small" value="组团社权限"  onclick="OrgSupplierAuth('${org.orgId}')" />
+						</c:if>
 					</div>
 					<div class="clear"></div>
 	    			</dd> 
@@ -214,7 +217,23 @@
 					})
 				};
 				imgDelete();
-			})
+			});
+			function OrgSupplierAuth(orgid){
+				alert(orgid+"--<%=ctx %>");
+				layer.openOrgSupplierAuthLayer({
+					title : '选择组团社',
+					content :'<%=ctx %>/org/orgSupplierAuth.htm?supplierType=1&type=multi',//参数：操作类型（type:单选(single)、多选(multi)）供应商类型supplierType=1
+					callback: function(arr){
+						if(arr.length==0){
+							$.warn("请选组团社");
+							return false;
+						}
+						//$("#supplierName").val(arr[0].name);
+						//$("#supplierName_t").val(arr[0].name);
+						//$("#supplierId").val(arr[0].id);
+					}
+				});
+			}
 			</script>
 </body>
 </html>
