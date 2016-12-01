@@ -36,7 +36,7 @@
 					<li class="text">团号</li>
 					<li><input id="groupCode"  name="groupCode" type="text"/></li>
 					<li class="text">商家：</li>
-					<li><select name="detailLevel" style="width: 100px; text-align: right;">
+					<li><select name="level" style="width: 100px; text-align: right;">
 						<option value="">请选择</option>
 						<c:forEach items="${levelList}" var="level">
 							<option value="${level.id }"
