@@ -148,7 +148,7 @@
 					 interface="com.yimayhd.erpcenter.facade.service.TrafficResFacade" version="1.0.0.test" />
 	 <dubbo:reference id="taobaoProductFacade"
 					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TaobaoProductFacade" version="1.0.0.test" />
-	
+
 
 
 
@@ -156,11 +156,11 @@
 					 interface="com.yimayhd.erpcenter.facade.sys.service.SysMsgInfoFacade" owner="gxx" version="1.0.0.test"
 					 timeout="8000" />
 
-					 
+
 	<dubbo:reference id="sysPlatAuthFacade"
 					 interface="com.yimayhd.erpcenter.facade.sys.service.SysPlatAuthFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
-					 
+
 	<dubbo:reference id="bookingShopFacade"
 					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingShopFacade" owner="wj" version="1.0.0.test"
 					 timeout="8000" />
@@ -257,7 +257,7 @@
 	<dubbo:reference id="qualityFacade"
 					 interface="com.yimayhd.erpcenter.facade.sales.service.QualityFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
-					 
+
 	<dubbo:reference id="supplierGuestFacade"
 					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierGuestFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />				 
