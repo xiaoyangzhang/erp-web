@@ -50,10 +50,10 @@ public class PlaceOrderQueryController extends BaseController {
 		model.addAttribute("orgUserJsonStr", queryResult.getOrgUserJsonStr());
 	}
 	/**
-	 * »ñÈ¡²éÑ¯·şÎñ
+	 * è·å–æŸ¥è¯¢æœåŠ¡
 	 *
 	 * @author Jing.Zhuo
-	 * @create 2015Äê8ÔÂ18ÈÕ ÉÏÎç9:34:25
+	 * @create 2015å¹´8æœˆ18æ—¥ ä¸Šåˆ9:34:25
 	 * @param svc
 	 * @return
 	 */
@@ -64,7 +64,7 @@ public class PlaceOrderQueryController extends BaseController {
 		return appContext.getBean(svc, CommonService.class);
 	}*/
 
-	// ÒµÎñ²éÑ¯¹«¹²·½·¨
+	// ä¸šåŠ¡æŸ¥è¯¢å…¬å…±æ–¹æ³•
 	/*private PageBean commonQuery(HttpServletRequest request, ModelMap model,
 				String sl, Integer page, Integer pageSize, String svc) {
 			PageBean pb = new PageBean();
@@ -86,7 +86,7 @@ public class PlaceOrderQueryController extends BaseController {
 			// paramters.put("supplierDetailLevel",
 			// request.getAttribute("supplierDetailLevel"));
 
-			// Èç¹ûÈËÔ±Îª¿Õ²¢ÇÒ²¿ÃÅ²»Îª¿Õ£¬ÔòÈ¡²¿ÃÅÏÂµÄÈËid
+			// å¦‚æœäººå‘˜ä¸ºç©ºå¹¶ä¸”éƒ¨é—¨ä¸ä¸ºç©ºï¼Œåˆ™å–éƒ¨é—¨ä¸‹çš„äººid
 			if (StringUtils.isBlank((String) paramters.get("saleOperatorIds"))
 					&& StringUtils.isNotBlank((String) paramters.get("orgIds"))) {
 				Set<Integer> set = new HashSet<Integer>();
@@ -112,7 +112,7 @@ public class PlaceOrderQueryController extends BaseController {
 			return pb;
 		}*/
 
-	/*Ô¤¶©Ã÷Ï¸Í³¼Æ²éÑ¯*/
+	/*é¢„è®¢æ˜ç»†ç»Ÿè®¡æŸ¥è¯¢*/
 	@SuppressWarnings("unchecked")
 	@RequestMapping("getSupplierStatisticsDetail")
 	public String getSupplierDetails(HttpServletRequest request,
@@ -136,7 +136,7 @@ public class PlaceOrderQueryController extends BaseController {
 	}
 
 	/**
-	 * ³õÊ¹»¯Ô¤¶©Ã÷Ï¸Í³¼Æ²éÑ¯²ÎÊı
+	 * åˆä½¿åŒ–é¢„è®¢æ˜ç»†ç»Ÿè®¡æŸ¥è¯¢å‚æ•°
 	 *
 	 * @param request
 	 * @param response
@@ -147,7 +147,7 @@ public class PlaceOrderQueryController extends BaseController {
 	public String sightList(HttpServletRequest request,
 			HttpServletResponse response, ModelMap modelMap,
 			SupplierInfo supplierInfo) {
-		//¾Æµê¡¢²Í£¬¾°£¬³µ
+		//é…’åº—ã€é¤ï¼Œæ™¯ï¼Œè½¦
 		modelMap.addAttribute("supplierType", Constants.RESTAURANT+","+Constants.HOTEL+","+Constants.FLEET+","+Constants.SCENICSPOT);
 		modelMap.addAttribute("supplierInfo", supplierInfo);
 		Integer bizId = WebUtils.getCurBizId(request);
@@ -155,18 +155,18 @@ public class PlaceOrderQueryController extends BaseController {
 		placeOrderQueryDTO.setBizId(bizId);
 		PlaceOrderQueryResult placeOrderQueryResult = placeOrderQueryFacade.sightList(placeOrderQueryDTO);
 
-	/*	// ¾°ÇøÀàĞÍ
+	/*	// æ™¯åŒºç±»å‹
 		List<DicInfo> Type1 = dicService
 				.getListByTypeCode(Constants.SCENICSPOT_TYPE_CODE);
 		modelMap.addAttribute("Type1", Type1);*/
 
-		//Ê¡·İ
+		//çœä»½
 		modelMap.addAttribute("allProvince", placeOrderQueryResult.getAllProvince());
 
-		//½áËã·½Ê½
+		//ç»“ç®—æ–¹å¼
 		modelMap.addAttribute("cashType", placeOrderQueryResult.getCashTypes());
 
-		/*// »ñÈ¡¾Æµê¡¢²Í£¬¾°£¬³µÀà±ğ
+		/*// è·å–é…’åº—ã€é¤ï¼Œæ™¯ï¼Œè½¦ç±»åˆ«
 		List<DicInfo> levelList = dicService
 				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT+","+BasicConstants.SUPPLIER_LEVEL_FLEET+","+BasicConstants.SUPPLIER_LEVEL_SCENICSPOT);
 		
