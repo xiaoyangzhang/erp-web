@@ -4606,7 +4606,7 @@ public class TourGroupController extends BaseController {
 	public String getAirInfo(List<GroupOrderTransport> groupOrderTransports,
 			Integer flag) {
 		if(null == groupOrderTransports || groupOrderTransports.size() <= 0){
-			return null;
+			return "";
 		}
 		StringBuilder sb = new StringBuilder();
 		if (flag == 0) {
@@ -4666,7 +4666,7 @@ public class TourGroupController extends BaseController {
 	 */
 	public String getSourceType(List<GroupOrderTransport> groupOrderTransports) {
 		if(null == groupOrderTransports || groupOrderTransports.size() <=0 ){
-			return null;
+			return "";
 		}
 		StringBuilder sb = new StringBuilder();
 		for (GroupOrderTransport transport : groupOrderTransports) {

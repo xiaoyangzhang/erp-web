@@ -58,6 +58,7 @@
 							<td>${groupInfo.groupStatus}</td>
 							<td>${groupInfo.receiveMode}</td>
 							<td style="text-align: left">【${groupInfo.productBrandName}】${groupInfo.productName}</td>
+							<td></td>
 							<td>
 								<a href="javascript:void(0)" class="db" onclick="showSightBooking('${groupInfo.groupId}')">
 									<c:if test="${groupInfo.sightCnt>0 }">√</c:if>
