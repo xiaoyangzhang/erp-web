@@ -1113,6 +1113,7 @@ public class QueryController extends BaseController {
 		// .getListByBizId(WebUtils.getCurBizId(request));
 		//
 		 PageBean<PaymentExportVO> pageBean = new PageBean<PaymentExportVO>();
+		pageBean.setParameter(vo);
 		// List<GroupOrder> orders = groupOrderService.selectPaymentDetailList(
 		// pageBean, WebUtils.getCurBizId(request),
 		// WebUtils.getDataUserIdSet(request));
