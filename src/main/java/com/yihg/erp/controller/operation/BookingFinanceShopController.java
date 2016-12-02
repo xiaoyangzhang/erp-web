@@ -3,16 +3,23 @@ package com.yihg.erp.controller.operation;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yihg.erp.utils.DateUtils;
+import com.yihg.erp.utils.WordReporter;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop;
+import com.yimayhd.erpcenter.dal.sales.client.operation.vo.BookingGuidesVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
+import com.yimayhd.erpcenter.facade.operation.result.WebResult;
+import com.yimayhd.erpresource.dal.po.SupplierContractPriceDateInfo;
+import com.yimayhd.erpresource.dal.po.SupplierItem;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -131,10 +138,12 @@ public class BookingFinanceShopController extends BaseController {
 	public String toSaveExcelData(File file,Integer supplierId,String supplierName,Integer bizId,HttpServletRequest request) throws InvalidFormatException, IOException{
 		StringBuffer str =new StringBuffer();
 		//根据购物店id获取购物项目
-//		List<SupplierItem> supplierItems = itemService.findSupplierItemBySupplierId(supplierId);
+		BookingShopResult result = bookingFinanceShopFacade.findSupplierItemBySupplierId(supplierId);
+		List<SupplierItem> supplierItems = result.getSupplierItems();
+
+		Map<String,Object> map = new HashMap<String, Object>();
 		Workbook wb = new XSSFWorkbook(file) ;
 		Sheet sheet = wb.getSheetAt(0) ;
-		Map<String,Object> map = new HashMap<String, Object>();
 		//前四列固定为团号、导游、进店人数和进店日期，从第五列开始记录购物项目，key为第几列，value为项目名称
 		Row row0 = sheet.getRow(0);
 		Cell cl = null ;
@@ -144,136 +153,138 @@ public class BookingFinanceShopController extends BaseController {
 				map.put(cl.getStringCellValue().trim(),i);
 			}
 		}
-//		//比较表中购物项目，去掉不存在的购物项目
-//		String imp = null;
-//		//筛选后，保留下来的购物项目集合
-//		List<SupplierItem> supplierItemList = new ArrayList<SupplierItem>();
-//		Iterator<Map.Entry<String,Object>> it = map.entrySet().iterator();  
-//        while(it.hasNext()){  
-//            Map.Entry<String,Object> entry=it.next();  
-//            for (SupplierItem supplierItem : supplierItems) {
-//				if(supplierItem.getItemName().trim().equals(entry.getKey())){
-//					imp = "HAVE";
-//					supplierItem.setExclId((Integer)entry.getValue());
-//					supplierItemList.add(supplierItem);
-//				}
-//			}
-//            if(null==imp){
-//            	str.append(supplierName+"没有"+entry.getKey()+"\r\n");
-//            	it.remove();  
-//			}
-//			imp =null;
-//        }  
-		
-        BookingFinanceShopQueryDTO queryDTO = new BookingFinanceShopQueryDTO();
-        queryDTO.setBizCode(bizSettingCommon.getMyBizCode(request));
-        queryDTO.setBizId(WebUtils.getCurBizId(request));
-        queryDTO.setUserName(WebUtils.getCurUser(request).getName());
-        queryDTO.setUserId(WebUtils.getCurUserId(request));
-        queryDTO.setSheet(sheet);
-        queryDTO.setSupplierId(supplierId);
-        String result = bookingFinanceShopFacade.toSaveExcelData(queryDTO);
-//		Row row = null ;
-//		Cell cell = null ;
-//		TourGroup tour = null;
-//		 for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-//			row = sheet.getRow(rowIndex) ;
-//			//团号
-//			String groupCode="";
-//			cell = row.getCell(0) ;
-//			if(null!=cell){
-//				cell.setCellType(1) ;
-//				str.append(cell.getStringCellValue()+",");
-//				groupCode = cell.getStringCellValue().trim();
-//			}
-//			//导游姓名
-//			String guideName="";
-//			Integer guideId = null;
-//			cell = row.getCell(1) ;
-//			if(null!=cell){
-//				cell.setCellType(1) ;
-//				str.append(cell.getStringCellValue()+":");
-//				tour = tourGroupService.selectByGroupCode(groupCode);
-//				if(null==tour){
-//					str.append("找不到该团！\r\n");
-//					continue;
-//				}
-//				List<BookingGuidesVO> guide = bookingGuideService.selectBookingGuideVoByGroupId(tour.getId());
-//				for (BookingGuidesVO bookingGuidesVO : guide) {
-//					if(bookingGuidesVO.getGuide().getGuideName().equals(cell.getStringCellValue().trim())){
-//						guideName = cell.getStringCellValue().trim();
-//						guideId = bookingGuidesVO.getGuide().getGuideId();
-//					}
-//				}
-//				if(StringUtils.isBlank(guideName)){
-//					str.append("该团找不到此导游！\r\n");
-//					continue;
-//				}
-//			}
-//			
-//			//进店人数
-//			String personNum = null;
-//			cell = row.getCell(2) ;
-//			if(null!=cell){
-//				cell.setCellType(1) ;
-//				personNum = cell.getStringCellValue().trim();
-//				if(!WordReporter.isNumeric(personNum)){
-//					str.append("该团进店人数不是数字！\r\n");
-//					continue;
-//				}
-//			}
-//			
-//			//进店日期
-//			Date date = null;
-//			cell = row.getCell(3) ;
-//			if(null!=cell){
-//				cell.setCellType(Cell.CELL_TYPE_NUMERIC) ;
-//				date = cell.getDateCellValue();
-//			}
-//			
-//			//购物店信息
-//			BookingShop shop =new BookingShop();
-//			shop.setGroupId(tour.getId());
-//			shop.setGuideId(guideId);
-//			shop.setGuideName(guideName);
-//			shop.setPersonNum(personNum==null?0:Integer.parseInt(personNum));
-//			shop.setShopDate(date == null ? "" : DateUtils.format(date));
-//			shop.setSupplierId(supplierId);
-//			shop.setSupplierName(supplierName);
-//			
-//			
-//			List<BookingShopDetail> bShopDetails= new ArrayList<BookingShopDetail>();
-//			BookingShopDetail bookingShopDetail = null;
-//			
-//			for (SupplierItem supplierItem : supplierItemList) {
-//				bookingShopDetail = new BookingShopDetail();
-//				bookingShopDetail.setGoodsId(supplierItem.getId());
-//				bookingShopDetail.setGoodsName(supplierItem.getItemName());
-//				cell = row.getCell(supplierItem.getExclId()) ;
-//				if(null!=cell){
-//					bookingShopDetail.setBuyTotal(new BigDecimal(cell.getNumericCellValue()));
-//				}
-//				//返款协议
-//				List<Date> dateList = new ArrayList<Date>();
-//				dateList.add(tour.getDateStart());
-//				List<SupplierContractPriceDateInfo> priceList = contractService.getContractPriceByPramas(bizId, supplierId,supplierItem.getId(), dateList);
-//				if(null!=priceList && priceList.size()>0){
-//					bookingShopDetail.setRepayVal(new BigDecimal(priceList.get(priceList.size()-1).getRebateAmount()));
-//				}else{
-//					str.append(supplierItem.getItemName()+"没有返款比例！");
-//					continue;
-//				}
-//				bookingShopDetail.setRepayTotal(bookingShopDetail.getBuyTotal().multiply(bookingShopDetail.getRepayVal().divide(new BigDecimal("100"))));
-//				bShopDetails.add(bookingShopDetail);
-//			}
-//			//保存
-//			bookingShopService.saveShopAndDetail(bizSettingCommon.getMyBizCode(request),WebUtils.getCurUserId(request),WebUtils.getCurUser(request).getName(),bShopDetails,shop);
-//			
-//		 }
-//		 str.append("导入成功！\r\n");
-		 wb.close();
-		 System.out.println(str.toString());
-		 return result ;
+		//比较表中购物项目，去掉不存在的购物项目
+		String imp = null;
+		//筛选后，保留下来的购物项目集合
+		List<SupplierItem> supplierItemList = new ArrayList<SupplierItem>();
+		Iterator<Map.Entry<String,Object>> it = map.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<String,Object> entry=it.next();
+			for (SupplierItem supplierItem : supplierItems) {
+				if(supplierItem.getItemName().trim().equals(entry.getKey())){
+					imp = "HAVE";
+					supplierItem.setExclId((Integer)entry.getValue());
+					supplierItemList.add(supplierItem);
+				}
+			}
+			if(null==imp){
+				str.append(supplierName+"没有"+entry.getKey()+"\r\n");
+				it.remove();
+			}
+			imp =null;
+		}
+
+		Row row = null ;
+		Cell cell = null ;
+		TourGroup tour = null;
+		for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+			row = sheet.getRow(rowIndex) ;
+			//团号
+			String groupCode="";
+			cell = row.getCell(0) ;
+			if(null!=cell){
+				cell.setCellType(1) ;
+				str.append(cell.getStringCellValue()+",");
+				groupCode = cell.getStringCellValue().trim();
+			}
+			//导游姓名
+			String guideName="";
+			Integer guideId = null;
+			cell = row.getCell(1) ;
+			if(null!=cell){
+				cell.setCellType(1) ;
+				str.append(cell.getStringCellValue()+":");
+				tour = bookingFinanceShopFacade.selectByGroupCode(groupCode).getTourGroup();
+				if(null==tour){
+					str.append("找不到该团！\r\n");
+					continue;
+				}
+				List<BookingGuidesVO> guide = bookingFinanceShopFacade.selectBookingGuideVoByGroupId(tour.getId()).getValue();
+				for (BookingGuidesVO bookingGuidesVO : guide) {
+					if(bookingGuidesVO.getGuide().getGuideName().equals(cell.getStringCellValue().trim())){
+						guideName = cell.getStringCellValue().trim();
+						guideId = bookingGuidesVO.getGuide().getGuideId();
+					}
+				}
+				if(StringUtils.isBlank(guideName)){
+					str.append("该团找不到此导游！\r\n");
+					continue;
+				}
+			}
+
+			//进店人数
+			String personNum = null;
+			cell = row.getCell(2) ;
+			if(null!=cell){
+				cell.setCellType(1) ;
+				personNum = cell.getStringCellValue().trim();
+				if(!WordReporter.isNumeric(personNum)){
+					str.append("该团进店人数不是数字！\r\n");
+					continue;
+				}
+			}
+
+			//进店日期
+			Date date = null;
+			cell = row.getCell(3) ;
+			if(null!=cell){
+				cell.setCellType(Cell.CELL_TYPE_NUMERIC) ;
+				date = cell.getDateCellValue();
+			}
+
+			//购物店信息
+			BookingShop shop =new BookingShop();
+			shop.setGroupId(tour.getId());
+			shop.setGuideId(guideId);
+			shop.setGuideName(guideName);
+			shop.setPersonNum(personNum==null?0:Integer.parseInt(personNum));
+			shop.setShopDate(date == null ? "" : DateUtils.format(date));
+			shop.setSupplierId(supplierId);
+			shop.setSupplierName(supplierName);
+
+
+			List<BookingShopDetail> bShopDetails= new ArrayList<BookingShopDetail>();
+			BookingShopDetail bookingShopDetail = null;
+
+			for (SupplierItem supplierItem : supplierItemList) {
+				bookingShopDetail = new BookingShopDetail();
+				bookingShopDetail.setGoodsId(supplierItem.getId());
+				bookingShopDetail.setGoodsName(supplierItem.getItemName());
+				cell = row.getCell(supplierItem.getExclId()) ;
+				if(null!=cell){
+					bookingShopDetail.setBuyTotal(new BigDecimal(cell.getNumericCellValue()));
+				}
+				//返款协议
+				List<Date> dateList = new ArrayList<Date>();
+				dateList.add(tour.getDateStart());
+				List<SupplierContractPriceDateInfo> priceList = bookingFinanceShopFacade.getContractPriceByPramas(bizId, supplierId,supplierItem.getId(), dateList).getValue();
+				if(null!=priceList && priceList.size()>0){
+					bookingShopDetail.setRepayVal(new BigDecimal(priceList.get(priceList.size()-1).getRebateAmount()));
+				}else{
+					str.append(supplierItem.getItemName()+"没有返款比例！");
+					continue;
+				}
+				bookingShopDetail.setRepayTotal(bookingShopDetail.getBuyTotal().multiply(bookingShopDetail.getRepayVal().divide(new BigDecimal("100"))));
+				bShopDetails.add(bookingShopDetail);
+			}
+			//保存
+			BookingFinanceShopQueryDTO queryDTO = new BookingFinanceShopQueryDTO();
+			queryDTO.setBizCode(bizSettingCommon.getMyBizCode(request));
+			queryDTO.setUserId(WebUtils.getCurUserId(request));
+			queryDTO.setUserName(WebUtils.getCurUser(request).getName());
+			queryDTO.setShop(shop);
+			queryDTO.setbShopDetails(bShopDetails);
+//			bookingShopService.saveShopAndDetail(bizSettingCommon.getMyBizCode(request), WebUtils.getCurUserId(request), WebUtils.getCurUser(request).getName(),bShopDetails,shop);
+			WebResult<Boolean> webResult =bookingFinanceShopFacade.saveShopAndDetail(queryDTO);
+			if(webResult.isSuccess()){
+				str.append("导入成功！\r\n");
+			}else{
+				throw  new RuntimeException(webResult.getResultMsg());
+			}
+		}
+		wb.close();
+		System.out.println(str.toString());
+		return str.toString() ;
 	}
 	
 	@RequestMapping(value = "/bookingShopList.do")

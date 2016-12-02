@@ -390,8 +390,12 @@ public class ContractController extends BaseController{
     	SupplierContractVoDTO supplierContractVoDTO = new SupplierContractVoDTO();
     	supplierContractVoDTO.setSupplierContractVo(supplierContractVo);
     	WebResult<SupplierContractVo> webResult = contractFacade.newContract(supplierContractVoDTO);
-        supplierContractVo = webResult.getValue();
-        return successJson("contractId", String.valueOf(supplierContractVo.getSupplierContract().getId()));
+    	if(webResult.isSuccess()){
+    		supplierContractVo = webResult.getValue();
+            return successJson("contractId", String.valueOf(supplierContractVo.getSupplierContract().getId()));
+	   	}else{
+	   		return errorJson(webResult.getResultMsg());
+	   	}
     }
 
     @RequestMapping(value = "/edit.do", method = RequestMethod.POST)
