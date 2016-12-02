@@ -758,7 +758,7 @@ public class QueryController extends BaseController {
 	public String toOrdersPreview(HttpServletRequest request, HttpServletResponse response, PaymentExportVO vo,
 			ModelMap model) {
 
-		 PageBean<PaymentExportVO> pageBean = new PageBean<PaymentExportVO>();
+/*		 PageBean<PaymentExportVO> pageBean = new PageBean<PaymentExportVO>();
 		 Map parameters = WebUtils.getQueryParamters(request);
 		 String salesOperatorIds = productCommonFacade.setSaleOperatorIds(vo.getOperatorIds(), vo.getOrgIds(), WebUtils.getCurBizId(request));
 		 vo.setSaleOperatorIds(salesOperatorIds);
@@ -773,8 +773,15 @@ public class QueryController extends BaseController {
 		ToOrdersPreviewResult result = dataAnalysisFacade.toOrdersPreview(pageBean,toOrdersPreviewDTO);
 
 		model.addAttribute("orders", result.getOrders());
-		model.addAttribute("parameter",parameters);
-
+		model.addAttribute("parameter",parameters);*/
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setVo(vo);
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		QueryResult queryResult = queryFacade.toOrdersPreview(queryDTO);
+		model.addAttribute("orders", queryResult.getGroupOrders());
+		model.addAttribute("parameter", queryResult.getParameters());
 		return "queries/paymentDetailPreview";
 	}
 
@@ -1106,6 +1113,7 @@ public class QueryController extends BaseController {
 		// .getListByBizId(WebUtils.getCurBizId(request));
 		//
 		 PageBean<PaymentExportVO> pageBean = new PageBean<PaymentExportVO>();
+		pageBean.setParameter(vo);
 		// List<GroupOrder> orders = groupOrderService.selectPaymentDetailList(
 		// pageBean, WebUtils.getCurBizId(request),
 		// WebUtils.getDataUserIdSet(request));
@@ -8314,9 +8322,9 @@ public class QueryController extends BaseController {
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
 		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		model.addAttribute("pageBean", queryResult.getPageBean());
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
-
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
 
 		return "/queries/deliveryDetailPreview";
