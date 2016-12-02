@@ -207,7 +207,7 @@ public class ProductInfoController extends BaseController {
 		parameters.put("productName", productName);
 		parameters.put("orgId", WebUtils.getCurUser(request).getOrgId());
 		parameters.put("set", WebUtils.getDataUserIdSet(request));
-		WebResult<PageBean<com.yimayhd.erpcenter.dal.product.po.ProductInfo>> webResult = productFacade.selectProductList(pageBean, parameters);
+		WebResult<PageBean<ProductInfo>> webResult = productFacade.selectProductList(pageBean, parameters);
 
 		Map<Integer, String> priceStateMap = new HashMap<Integer, String>();
 		/*

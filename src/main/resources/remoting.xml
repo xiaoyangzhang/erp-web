@@ -55,7 +55,7 @@
 	<dubbo:reference id="teamGroupFacade"
 					 interface="com.yimayhd.erpcenter.facade.sales.service.TeamGroupFacade" version="1.0.0.test" />
 	<dubbo:reference id="tourGroupFacade"
-					 interface="com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade" version="1.0.0.test" timeout="10000" />
+					 interface="com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade" version="1.0.0.test" timeout="50000" />
 	<dubbo:reference id="agencyFitFacade"
 					 interface="com.yimayhd.erpcenter.facade.sales.service.AgencyFitFacade" version="1.0.0.test" />
 	<dubbo:reference id="agencyFitGroupFacade"

@@ -73,7 +73,7 @@
 							<td>${groupInfo.receiveMode}</td>
 							<td style="text-align: left">【${groupInfo.productBrandName}】${groupInfo.productName}</td>
 							<!--  -->
-							<c:if test="${gbMap_SIGHT }">
+							<c:if test="${optMap['YDAP_SIGHT'] }">
 								<td>
 									<a href="javascript:void(0)" class="db" onclick="showSightBooking('${groupInfo.groupId}')">
 										<c:if test="${groupInfo.sightCnt>0 }">√</c:if>

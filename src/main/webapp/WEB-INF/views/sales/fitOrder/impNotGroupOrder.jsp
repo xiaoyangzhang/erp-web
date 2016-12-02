@@ -41,8 +41,13 @@ function mergeGroup(ids) {
 
 }
 
-function reset() {
-	$("#toImpNotGroupListForm").clearForm();
+function resetMyForm() {
+	$("select option:first").prop("selected","selected");
+	$("input[name='productName']").val("");
+    var vars={ dateFrom : $.currentMonthFirstDay(), dateTo : $.currentMonthLastDay() };
+	$("input[name='departureDate']").val(vars.dateFrom);
+	$("input[name='endTime']").val(vars.dateTo);
+
 }
 
 
@@ -81,7 +86,7 @@ function reset() {
 						<li class="text"></li>
 						<li><button type="submit"
 								class="button button-primary button-small">查询</button>
-							<button type="reset" onclick="reset()"
+							<button type="button" onclick="resetMyForm()"
 								class="button button-primary button-small">重置</button>
 							<button type="button"
 								class="button button-primary button-small" onclick="mergeGroup('${idLists}')">确定</button>

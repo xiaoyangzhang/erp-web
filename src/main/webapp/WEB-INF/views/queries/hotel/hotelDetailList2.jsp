@@ -9,6 +9,8 @@
 <%@ include file="../../../include/top.jsp"%>
 <link href="<%=staticPath%>/assets/css/supplier/supplier.css" rel="stylesheet" />
 <script type="text/javascript" src="<%=ctx%>/assets/js/web-js/bookingCount.js"></script>
+	<script type="text/javascript" src="<%=ctx%>/assets/js/web-js/sales/regional.js"></script>
+
 </head>
 <body>
 	<div class="p_container">
