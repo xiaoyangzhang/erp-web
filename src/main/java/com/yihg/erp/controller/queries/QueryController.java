@@ -758,7 +758,7 @@ public class QueryController extends BaseController {
 	public String toOrdersPreview(HttpServletRequest request, HttpServletResponse response, PaymentExportVO vo,
 			ModelMap model) {
 
-		 PageBean<PaymentExportVO> pageBean = new PageBean<PaymentExportVO>();
+/*		 PageBean<PaymentExportVO> pageBean = new PageBean<PaymentExportVO>();
 		 Map parameters = WebUtils.getQueryParamters(request);
 		 String salesOperatorIds = productCommonFacade.setSaleOperatorIds(vo.getOperatorIds(), vo.getOrgIds(), WebUtils.getCurBizId(request));
 		 vo.setSaleOperatorIds(salesOperatorIds);
@@ -773,8 +773,15 @@ public class QueryController extends BaseController {
 		ToOrdersPreviewResult result = dataAnalysisFacade.toOrdersPreview(pageBean,toOrdersPreviewDTO);
 
 		model.addAttribute("orders", result.getOrders());
-		model.addAttribute("parameter",parameters);
-
+		model.addAttribute("parameter",parameters);*/
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setVo(vo);
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		QueryResult queryResult = queryFacade.toOrdersPreview(queryDTO);
+		model.addAttribute("orders", queryResult.getGroupOrders());
+		model.addAttribute("parameter", queryResult.getParameters());
 		return "queries/paymentDetailPreview";
 	}
 
