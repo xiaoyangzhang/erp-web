@@ -8322,9 +8322,9 @@ public class QueryController extends BaseController {
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
 		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		model.addAttribute("pageBean", queryResult.getPageBean());
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
-
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
 
 		return "/queries/deliveryDetailPreview";
