@@ -40,7 +40,9 @@
 //                        BUI.Message.Alert('请求失败', 'error');
                     }
                 });
-            },'question');
+            },function(){
+                $.info('取消操作');
+            });
         };
         //复制合同
         var copyContract = function(supplierId, contractId, contractName){
@@ -98,7 +100,9 @@
 //                        BUI.Message.Alert('请求失败', 'error');
                     }
                 });
-            },'question');
+            },function(){
+                $.info('取消操作');
+            });
         };
 
 

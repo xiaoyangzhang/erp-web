@@ -1117,8 +1117,8 @@ public class FinanceController extends BaseController {
 		AuditDTO dto = new AuditDTO();
 		dto.setGroupId(groupId);
 		dto.setFeeType(feeType);
-		dto.setCheckedIds(priceUnCheckedIds);
-		dto.setUnCheckedIds(priceUnCheckedIds);
+		dto.setCheckedIds(checkedIds);
+		dto.setUnCheckedIds(unCheckedIds);
 		dto.setComCheckedIds(comCheckedIds);
 		dto.setComUnCheckedIds(comUnCheckedIds);
 		dto.setFinanceGuides(financeGuides);
