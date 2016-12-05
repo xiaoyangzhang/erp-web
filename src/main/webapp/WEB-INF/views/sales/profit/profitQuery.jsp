@@ -83,13 +83,14 @@
 								</c:forEach>
 							</select>
 						</li>
-					</ul>
-					<ul>
+						</ul>
+						<ul>
 						<li class="text"> 业务类型:</li>
 						<li >
-							<input type="text" id="dicNames" readonly="readonly"  onclick="commonDicDlg()"/>
+							<input type="text" id="dicNames" readonly="readonly"  onclick="commonDicDlg()"/> 
 							<input type="hidden" name="orderNo" id="dicIds"  />
 						</li>
+						
 						<li style="padding-left:10px">
 							<button type="button" onclick="searchBtn();" class="button button-primary button-small" style="margin-left: 35px;">查询</button> 
 						</li>
@@ -105,8 +106,8 @@
 	</div>
 </body>
 <script type="text/javascript">
-	function commonDicDlg() {
-		$.dicItemDlg('SALES_TEAM_TYPE','dicNames','dicIds');
-	}
+function commonDicDlg() {
+	$.dicItemDlg('SALES_TEAM_TYPE','dicNames','dicIds');
+}
 </script>
 </html>

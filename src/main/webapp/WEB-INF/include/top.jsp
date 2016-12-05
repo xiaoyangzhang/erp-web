@@ -72,6 +72,7 @@
 		})
 
     </script>
+       
 <script type="text/javascript">
 window.onload=function(){
 	//js防止重复提交表单
@@ -191,6 +192,12 @@ window.onload=function(){
       hm.src = "//hm.baidu.com/hm.js?049f7397b8a8519aee23e94f0f816d2e";
       var s = document.getElementsByTagName("script")[0]; 
       s.parentNode.insertBefore(hm, s);
-    })();    
+    })();
 </script>
+<script type="text/html" id="YihgErpWebLinkSelectProvince">
+    <option value="">{{defaultLabel}}</option>
+    {{each regions as region i }}
+        <option value="{{region.id}}">{{region.name}}</option>
+    {{/each}}
+ </script> 
 

@@ -8,6 +8,10 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yihg.erp.utils.ObjectUtils;
+import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.common.contants.BasicConstants;
+import com.yimayhd.erpcenter.facade.sys.result.PlatformOrgSupplierAuthResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -211,8 +215,70 @@ public class OrgController extends BaseController{
 	@RequestMapping("/orgSupplierAuth.htm")
 	public String orgSupplierAuth(HttpServletRequest request,HttpServletResponse response,ModelMap model)
 	{
-		Map<String,Object> requestParam = WebUtils.getQueryParamters(request);
+		Map<String, Object> requestParam = WebUtils.getQueryParamters(request);
+		model.put("requestParam", requestParam);
+		Integer orgId = Integer.parseInt(requestParam.get("orgid").toString());
+		Integer bizId = WebUtils.getCurBizId(request);
+		PlatformOrgSupplierAuthResult result = sysPlatformOrgFacade.getOrgSupplierAuth(orgId,bizId);
+		model.put("orgOwnSupplierIds", result.getOrgOwnSupplierIds());
+		model.put("supplierIds", result.getSupplierIds());
 
 		return getSystemOrgPrefixPath("org_supplier_auth");
 	}
+
+	/**
+	 * 获取旅行社列表
+	 *
+	 * @author daixiaoman
+	 * @date 2016年11月29日 下午8:51:04
+	 */
+	@RequestMapping("/orgSupplierAuthTable.do")
+	public String orgSupplierAuthTable(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
+		/*Map<String, Object> requestParam = WebUtils.getQueryParamters(request);
+		requestParam.put("bizId", WebUtils.getCurBizId(request));
+		PageBean page = new PageBean();
+		page.setPage(ObjectUtils.parseInteger(requestParam.get("page"), BasicConstants.DEFAULT_PAGE));
+		page.setPageSize(ObjectUtils.parseInteger(requestParam.get("pageSize"), BasicConstants.DEFAULT_PAGE_SIZE));
+		List<Integer> supplierids = null;
+
+		if(!"0".equals(ObjectUtils.identityToString(requestParam.get("authStatus")))){
+			supplierids = sysDataRightSupplierService.selectAllOrgAuthSupplierIds(ObjectUtils.parseInteger(requestParam.get("orgid")),WebUtils.getCurBizId(request));
+			if(supplierids == null){
+				supplierids = new ArrayList<Integer>();
+			}
+			supplierids.add(-1);
+			requestParam.put("supplierIds",StringUtils.join(supplierids,","));
+		}
+		//sysDataRightSupplierService.saveOrgAuthSuppliers(orgId, bizId, supplierIds, delSupplierIds);
+		model.put("requestParam", requestParam);
+		page.setParameter(requestParam);
+		page = supplierService.selectOrgSupplierAuthListPage(page);*/
+
+		Map<String, Object> requestParam = WebUtils.getQueryParamters(request);
+		requestParam.put("bizId", WebUtils.getCurBizId(request));
+		Integer orgId = ObjectUtils.parseInteger(requestParam.get("orgid"));
+		Integer bizId = WebUtils.getCurBizId(request);
+		Integer page = ObjectUtils.parseInteger(requestParam.get("page"), BasicConstants.DEFAULT_PAGE);
+		Integer pageSize = ObjectUtils.parseInteger(requestParam.get("pageSize"), BasicConstants.DEFAULT_PAGE_SIZE);
+		String authStatus = ObjectUtils.toString(requestParam.get("authStatus"));
+
+		PageBean pageBean = sysPlatformOrgFacade.orgSupplierAuthTable(orgId, bizId,page,pageSize,
+				authStatus,requestParam );
+		model.put("requestParam", pageBean.getParameter());
+		model.put("page", pageBean);
+		return getSystemOrgPrefixPath("org_supplier_auth_table");
+	}
+
+
+	@ResponseBody
+	@RequestMapping("/saveOrgAuthSuppliers.do")
+	public String saveOrgAuthSuppliers(HttpServletRequest request,HttpServletResponse response){
+		Map<String,Object> requestParams = parseJsonParams(request);
+		List addSupplierIds = (List)requestParams.get("addSupplierIds");
+		List delSupplierIds = (List)requestParams.get("delSupplierIds");
+		Object orgid = requestParams.get("orgid");
+		sysPlatformOrgFacade.saveOrgAuthSuppliers(ObjectUtils.parseInteger(orgid, 0),WebUtils.getCurBizId(request), addSupplierIds, delSupplierIds);
+		return "";
+	}
+
 }

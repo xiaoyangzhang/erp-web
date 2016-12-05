@@ -69,7 +69,11 @@
 					+"&supplierName="+$("#supplierName").val()
 					+"&orgIds="+$("#orgIds").val()
 					+"&operatorIds="+$("#operatorIds").val()
-					+"&orderMode="+$("#orderMode").val();
+					+"&operType="+$("#operType").val()
+					+"&orderNo="+$("#dicIds").val();
+		}
+		function commonDicDlg() {
+			$.dicItemDlg('SALES_TEAM_TYPE','dicNames','dicIds');
 		}
 
 </SCRIPT>
@@ -98,19 +102,20 @@
 							<li class="text" >平台来源</li>
 						<li><input type="text" name="supplierName" id="supplierName"/></li>
 						
-						<li class="text">业务:</li><li>
-						<select name="orderMode" id="orderMode">
-								<option value="">请选择</option>
-							<c:forEach items="${typeList}" var="v" varStatus="vs">
-								<option value="${v.id}">${v.value}</option>
-							</c:forEach>		
-							</select>
+						<li class="text"> 业务类型:</li>
+						<li >
+							<input type="text" id="dicNames" readonly="readonly"  onclick="commonDicDlg()"/> 
+							<input type="hidden" name="orderNo" id="dicIds"  />
 						</li>
 						
 						<li class="text">部门:</li>
 						<li><input type="text" name="orgNames" id="orgNames" stag="orgNames" value="" readonly="readonly" onclick="showOrg()" style="width: 205px;"/>
 						<input name="orgIds" id="orgIds" stag="orgIds" value="" type="hidden" value=""/>	</li>    				
-						<li class="text">计调</li>
+						<li class="text">
+							<select name="operType" id="operType">
+							<option value="2" <c:if test="${groupOrder.operType==2 }">selected="selected"</c:if>>客服</option>
+								<option value="1" <c:if test="${groupOrder.operType==1 }">selected="selected"</c:if>>计调</option>
+						</select></li>
 						<li >
 	    				<input type="text" name="operatorName" id="operatorName" stag="userNames" value="" readonly="readonly" onclick="showUser()"/>
 						<input name="operatorIds" id="operatorIds" stag="userIds" value="" type="hidden" value=""/>	    				

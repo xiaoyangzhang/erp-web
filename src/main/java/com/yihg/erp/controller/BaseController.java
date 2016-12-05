@@ -1,15 +1,22 @@
 package com.yihg.erp.controller;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSON;
 import com.yihg.erp.contant.PathPrefixConstant;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
-
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.io.IOUtils;
+import javax.servlet.http.HttpServletRequest;
 
 public class BaseController {
 	@InitBinder  
@@ -73,5 +80,22 @@ public class BaseController {
 	protected String getSystemOrgPrefixPath(String path)
 	{
 		return PathPrefixConstant.SYSTEM_ORG_PREFIX+path;
+	}
+	/**
+	 * 解析 json提交的参数
+	 * @author daixiaoman
+	 * @date 2016年11月30日 下午9:56:47
+	 */
+	protected Map<String,Object> parseJsonParams(HttpServletRequest request){
+		try {
+			InputStream is = request.getInputStream();
+			String params = IOUtils.toString(is,"utf-8");
+			if(StringUtils.isNoneBlank(params)){
+				return JSON.parseObject(params, Map.class);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return new HashMap<String,Object>();
 	}
 }

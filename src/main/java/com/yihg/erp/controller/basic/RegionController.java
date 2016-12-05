@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -110,5 +111,15 @@ public class RegionController extends BaseController {
 		}
 		 return i== 0 ?successJson() :errorJson("不允许删除,存在子节点");
 	}
-	
+	/**
+	 * 获取所有的省 份
+	 * @author daixiaoman
+	 * @date 2016年11月30日 上午11:31:54
+	 */
+	@RequestMapping("/getAllProvince.do")
+	@ResponseBody
+	public String getAllProvince(HttpServletRequest request){
+		List<RegionInfo> allProvince = regionFacade.getAllProvince();
+		return JSON.toJSONString(allProvince);
+	}
 }

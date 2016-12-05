@@ -26,14 +26,14 @@
 				<td><c:forEach items="${typeList}" var="v" varStatus="vs">
 					<c:if test='${orders.orderMode==v.id}'>${v.value}</c:if> 
 							</c:forEach></td>
-				<td><c:if test='${orders.supplierName=="" or orders.supplierName==null}'>散客团</c:if>${orders.supplierName}</td>
+				<td>${orders.supplierName}</td>
 				<td>${orders.productName}</td>
 				<td>${orders.numAdult}</td>
 				<td>${orders.numChild}</td>
 				<td><fmt:formatNumber value="${orders.totalIncome}" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${orders.otherTotal}" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${orders.totalCost}" pattern="#.##"/></td>
-				<td><fmt:formatNumber value="${orders.totalIncome - orders.totalCost}" pattern="#.##"/></td>
+				<td><fmt:formatNumber value="${orders.totalIncome +orders.otherTotal- orders.totalCost}" pattern="#.##"/></td>
 				</tr>
 				 <c:set var="sumAdult" value="${sumAdult + orders.numAdult }"/>
 				<c:set var="sumChild" value="${sumChild+ orders.numChild }"/>
@@ -49,7 +49,7 @@
 				<td><fmt:formatNumber value="${sumTotalIncome}" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${sumTotherTotal}" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${sumTotalCost}" pattern="#.##"/></td>
-				<td><fmt:formatNumber value="${sumTotalIncome-sumTotalCost}" pattern="#.##"/></td>
+				<td><fmt:formatNumber value="${sumTotalIncome+sumTotherTotal-sumTotalCost}" pattern="#.##"/></td>
 			</tr>
 		</tfooter>
 </table>

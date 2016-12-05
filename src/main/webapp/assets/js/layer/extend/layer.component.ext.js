@@ -85,16 +85,15 @@ if(layer){
                 win = window[layero.find('iframe')[0]['name']];
             },
             yes: function(index){
-//                var arr = win.getChkedSupplier();
-//                config.callback(arr);
-                layer.close(index);
+            	var attr = win.getOrgAuthSuppliers()
+            	config.callback(attr,win.getTableTemplate);
+                //layer.close(index);
             },
             cancel : function(index){
                 layer.close(index);
             }
         },config);
         
-        console.info(defaultConfig);
        layer.open(defaultConfig);
 
     };

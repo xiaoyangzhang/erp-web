@@ -89,6 +89,7 @@
 						  </c:if>
 						</c:if>
 						<a href="javascript:void(0);" class="def" onclick="printOrder(${groupOrder.id})" >打印</a>
+						<a href="javascript:void(0)" class="def" onclick="goLogStock(${groupOrder.id})" >操作日志</a>
 					</div>
 				</div>
               </td>
