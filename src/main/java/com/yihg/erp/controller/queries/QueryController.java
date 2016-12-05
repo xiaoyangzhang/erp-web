@@ -5634,13 +5634,14 @@ public class QueryController extends BaseController {
 		queryDTO.setSl(sl);
 		queryDTO.setSvc(svc);
 		queryDTO.setPage(page);
-		queryDTO.setPageSize(pageSize);
+		queryDTO.setPageSize(10000);
 		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
 		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
 
 		PageBean pb  = queryResult.getPageBean();
+		model.addAttribute("pageBean", pb);
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 
