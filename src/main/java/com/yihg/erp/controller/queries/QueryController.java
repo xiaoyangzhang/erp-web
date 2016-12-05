@@ -8258,39 +8258,42 @@ public class QueryController extends BaseController {
 				cc.setCellValue(map.get("supplier_name") + "");
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(4);
-				cc.setCellValue((Integer) map.get("group_mode") > 0 ? "团队" : "散客");
+				cc.setCellValue(map.get("receive_mode") + "");
 				cc.setCellStyle(styleLeft);
 				cc = row.createCell(5);
+				cc.setCellValue((Integer) map.get("group_mode") > 0 ? "团队" : "散客");
+				cc.setCellStyle(styleLeft);
+				cc = row.createCell(6);
 				cc.setCellValue(
 						map.get("total_adult") + "大" + map.get("total_adult") + "小" + map.get("total_adult") + "陪");
 				cc.setCellStyle(styleLeft);
-				cc = row.createCell(6);
+				cc = row.createCell(7);
 				cc.setCellValue("【" + map.get("product_brand_name") + "】" + map.get("product_name"));
 				cc.setCellStyle(styleLeft);
 
-				cc = row.createCell(7);
+				cc = row.createCell(8);
 				cc.setCellValue(
 						map.get("detailInfo") == null ? "" : map.get("detailInfo").toString().replace(";", "\n"));
 				cc.setCellStyle(styleLeft);
-				cc = row.createCell(8);
+				cc = row.createCell(9);
 				BigDecimal total2 = new BigDecimal(0);
 				total2 = total2.add((BigDecimal) map.get("total"));
 				cc.setCellValue(total2.doubleValue());
 				// cc.setCellValue(map.get("total") + "");
 				cc.setCellStyle(cellStyle);
-				cc = row.createCell(9);
+				cc = row.createCell(10);
 				BigDecimal totalCash2 = new BigDecimal(0);
 				totalCash2 = totalCash2.add((BigDecimal) map.get("totalCash"));
 				cc.setCellValue(totalCash2.doubleValue());
 				// cc.setCellValue(map.get("totalCash") + "");
 				cc.setCellStyle(cellStyle);
-				cc = row.createCell(10);
+				cc = row.createCell(11);
 				// BigDecimal itemPrice = new BigDecimal(0);
 				// itemPrice = itemPrice.add((BigDecimal)
 				// map.get("item_price"));
 				cc.setCellValue(total2.subtract(totalCash2).doubleValue());
 				cc.setCellStyle(cellStyle);
-				cc = row.createCell(11);
+				cc = row.createCell(12);
 				// BigDecimal itemNum = new BigDecimal(0);
 				// itemNum = itemNum.add((BigDecimal) map.get("item_num"));
 				cc.setCellValue(map.get("operator_name") + "");
@@ -8314,28 +8317,30 @@ public class QueryController extends BaseController {
 			cc = row.createCell(3);
 			cc.setCellStyle(styleRight);
 			cc = row.createCell(4);
-			cc.setCellValue("合计：");
 			cc.setCellStyle(styleRight);
 			cc = row.createCell(5);
+			cc.setCellValue("合计：");
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(6);
 			cc.setCellValue(String.valueOf(totalAdult) + "大" + String.valueOf(totalChild) + "小"
 					+ String.valueOf(totalGuide) + "陪");
 			cc.setCellStyle(styleRight);
-			cc = row.createCell(6);
-			cc.setCellStyle(styleRight);
 			cc = row.createCell(7);
-			// cc.setCellValue("合计：");
 			cc.setCellStyle(styleRight);
 			cc = row.createCell(8);
+			// cc.setCellValue("合计：");
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(9);
 			cc.setCellValue(total.doubleValue());
 			cc.setCellStyle(cellStyle);
-			cc = row.createCell(9);
+			cc = row.createCell(10);
 			cc.setCellValue(totalCash.doubleValue());
 			cc.setCellStyle(styleRight);
-			cc = row.createCell(10);
+			cc = row.createCell(11);
 			cc.setCellValue(totalBalance.doubleValue());
 			// cc.setCellValue(totalCash2.intValue());
 			cc.setCellStyle(styleRight);
-			cc = row.createCell(11);
+			cc = row.createCell(12);
 			// cc.setCellValue(totalBalance2.doubleValue());
 			cc.setCellStyle(cellStyle);
 
