@@ -1633,7 +1633,12 @@ public class SupplierController extends BaseController {
 		
 		WebResult<Boolean> webResult = supplierFacade.checkSupplier(checkedSupplierIds);
 		if(webResult.isSuccess()){
-			return successJson();
+			if(webResult.getValue()){
+				return successJson();
+			}else{
+				return errorJson("供应商审核失败");
+			}
+
 		}else{
 			log.error(webResult.getResultMsg());
 			return errorJson("供应商审核失败");

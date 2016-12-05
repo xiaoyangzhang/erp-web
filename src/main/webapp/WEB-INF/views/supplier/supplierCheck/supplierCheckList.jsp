@@ -186,7 +186,7 @@ function checkSuppliers(){
 	var pm={};
 	 pm.checkedSupplierIds ='['+checkedArr.join()+']';
 	//pm.unCheckedIds = '['+ unCheckedArr.join() +']';
-	if(pm.checkedSupplierIds==null || pm.checkedSupplierIds==''){
+	if(pm.checkedSupplierIds==null || pm.checkedSupplierIds==''||pm.checkedSupplierIds.length<=0||pm.checkedSupplierIds=='[]'){
 		$.warn("请选择要审核的供应商");
 		return false;
 	}
