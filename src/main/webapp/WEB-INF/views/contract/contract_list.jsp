@@ -271,7 +271,8 @@
                             <a class="def" onclick="newWindow('查看协议', '<%=path%>/contract/${contract.id}/fleet-view.htm')" href="javascript:void(0);">查看</a>&nbsp;
                             <a class="def" onclick="newWindow('修改协议', '<%=path%>/contract/${contract.id}/fleet-edit.htm')" href="javascript:void(0);">修改</a>&nbsp;
                             <a class="def" onclick="deleteFleetContract('${contract.id}', '${contract.contractName}');" href="javascript:void(0);">删除</a>
-                            <a class="def" onclick="copyFleetContract('${contract.id}', '${contract.contractName}');" href="javascript:void(0);">复制</a>
+                            <a class="def" onclick="copyContract('-1', '${contract.id}', '${contract.contractName}');" href="javascript:void(0);">复制</a>
+                            <%--<a class="def" onclick="copyFleetContract('${contract.id}', '${contract.contractName}');" href="javascript:void(0);">复制</a>--%>
                         </c:when>
                         <c:otherwise>
                             <a class="def" onclick="newWindow('查看协议', '<%=path%>/contract/${supplierId}/${contract.id}/view.htm')" href="javascript:void(0);">查看</a>&nbsp;
