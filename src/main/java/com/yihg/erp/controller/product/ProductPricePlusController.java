@@ -390,7 +390,10 @@ public class ProductPricePlusController extends BaseController {
 		ToSupplierListResult result = productPricePlusFacade.toSupplierList2(conditionDTO);
 		
 		ProductInfo productInfo = result.getProductInfo();
-		model.addAttribute("productName", "【" +productInfo.getBrandName()+"】"+productInfo.getNameCity());		
+		if (productInfo != null) {
+
+			model.addAttribute("productName", "【" +productInfo.getBrandName()+"】"+productInfo.getNameCity());
+		}
 		//model.addAttribute("groupId", groupId);
 		model.addAttribute("groupSuppliers", result.getGroupSuppliers());
 		model.addAttribute("supplierName", condition.getSupplierName());

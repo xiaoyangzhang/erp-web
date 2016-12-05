@@ -259,10 +259,9 @@
 					 timeout="8000" />
 
 	<dubbo:reference id="supplierGuestFacade"
-					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierGuestFacade" owner="ly" version="1.0.0.test"
-					 timeout="8000" />
-
-	<dubbo:reference id="placeOrderQueryFacade"
+					 interface="com.yimayhd.erpcenter.facade.supplier.service.SupplierGuestFacade" owner="ly" version="1.0.0.test" timeout="8000"/>
+		<dubbo:reference id="placeOrderQueryFacade"
 					 interface="com.yimayhd.erpcenter.facade.dataanalysis.client.service.PlaceOrderQueryFacade" owner="ly" version="1.0.0.test"
 					 timeout="8000" />
+
 </beans>

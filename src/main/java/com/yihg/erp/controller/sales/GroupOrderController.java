@@ -1283,7 +1283,7 @@ public class GroupOrderController extends BaseController {
 //		return successJson();
 		
 		BaseStateResult result=groupOrderFacade.judgeMergeGroup(ids);
-		if(result.isSuccess()){
+		if(!result.isSuccess()){
 			return errorJson(result.getError());
 		}else{
 			return successJson();

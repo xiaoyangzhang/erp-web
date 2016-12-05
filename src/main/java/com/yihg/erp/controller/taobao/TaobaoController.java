@@ -2243,6 +2243,7 @@ public class TaobaoController extends BaseController {
 		TaobaoOrderListByOpDTO taobaoOrderListByOpDTO = new TaobaoOrderListByOpDTO();
 		taobaoOrderListByOpDTO.setBizId(WebUtils.getCurBizId(request));
 		taobaoOrderListByOpDTO.setDataUserIdSets(WebUtils.getDataUserIdSet(request));
+		taobaoOrderListByOpDTO.setGroupOrder(groupOrder);
 		TaobaoOrderListByOpDTO result = taobaoFacade.loadGroupOrderGuestList(taobaoOrderListByOpDTO);
 
 

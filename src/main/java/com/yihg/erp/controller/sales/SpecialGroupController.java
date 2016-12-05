@@ -470,7 +470,7 @@ public class SpecialGroupController extends BaseController {
 
 		ToAddSpecialGroupResult toAddSpecialGroupResult = specialGroupFacade.toImpNotGroupList( groupOrder,  idLists,  WebUtils.getCurBizId(request), WebUtils.getDataUserIdSet(request));
 		model.addAttribute("pp", toAddSpecialGroupResult.getDicInfoList());
-		model.addAttribute("groupOrder", groupOrder);
+		model.addAttribute("groupOrder", toAddSpecialGroupResult.getGroupOrder());
 		model.addAttribute("page", toAddSpecialGroupResult.getPage());
 		return "sales/specialGroup/impNotGroupOrder";
 	}

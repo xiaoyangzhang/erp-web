@@ -52,7 +52,7 @@
 			shadeClose : true,
 			shade : 0.5,
 			area : [ '70%', '80%' ],
-			content : '../fitOrder/toImpNotGroupList.htm?idLists=' + ids
+			content : '../fitOrder/toImpNotGroupList.htm?idLists=' + ids+"&orderLockState=1"
 		});
 	}
 	

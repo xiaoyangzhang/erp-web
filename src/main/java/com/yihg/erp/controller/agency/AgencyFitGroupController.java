@@ -352,7 +352,7 @@ public class AgencyFitGroupController extends BaseController {
 		queryDTO.setTourGroup(tourGroup);
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
 		queryDTO.setSet(WebUtils.getDataUserIdSet(request));
-		
+		queryDTO.setPageBean(pageBean);
 		AgencyOrderResult result = agencyFitGroupFacade.toFitGroupList(queryDTO);
 		model.addAttribute("group", result.getTourGroup());
 		model.addAttribute("page", result.getPageBean());
