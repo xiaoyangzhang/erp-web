@@ -11,6 +11,7 @@ import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSON;
 import com.yihg.erp.utils.*;
 import com.yimayhd.erpcenter.dal.basic.po.LogOperator;
 import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
@@ -51,8 +52,10 @@ import com.yimayhd.erpcenter.dal.sales.client.sales.vo.SpecialGroupOrderVO;
 import com.yimayhd.erpcenter.dal.sales.client.taobao.po.PlatTaobaoTrade;
 import com.yimayhd.erpcenter.dal.sys.po.UserSession;
 import com.yimayhd.erpcenter.facade.basic.service.DicFacade;
+import com.yimayhd.erpcenter.facade.basic.service.LogFacade;
 import com.yimayhd.erpcenter.facade.sales.query.ReportStatisticsQueryDTO;
 import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
+import com.yimayhd.erpcenter.facade.sales.service.SpecialGroupFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
 import com.yimayhd.erpcenter.facade.tj.client.result.AddNewTaobaoOrderResult;
@@ -85,7 +88,8 @@ public class TaobaoController extends BaseController {
 	private GroupOrderFacade groupOrderFacade;
 	@Autowired
 	private SysMsgInfoFacade sysMsgInfoFacade;
-	
+	@Autowired
+	private LogFacade logFacade;
 	/**
 	 * 操作单
 	 * 
@@ -1155,56 +1159,59 @@ public class TaobaoController extends BaseController {
     }
 
     private List<String> getTotal(List<GroupOrder> orders) {
-        DecimalFormat format = new DecimalFormat("#.##");
-        List<String> list = new ArrayList<String>();
-        double numAdult = 0;
-        double numChild = 0;
-        double numGuide = 0;
-        double total = 0;
-        double totalCash = 0;
-        double totalBalance = 0;
-        double cost = 0;
-        double costCash = 0;
-        double costBalance = 0;
-        double groupCost = 0;
-        double otherTotal = 0;
-        double otherTotalCash = 0;
-        double otherTotalBalance = 0;
-        double totalIncome = 0;
-        double profit = 0;
-        for (GroupOrder order : orders) {
-            numAdult += order.getNumAdult() == null ? 0 : order.getNumAdult();
-            numChild += order.getNumChild() == null ? 0 : order.getNumChild();
-            numGuide += order.getNumGuide() == null ? 0 : order.getNumGuide();
-            total += (order.getTotal() == null ? 0 : order.getTotal().doubleValue());
-            totalCash += (order.getTotalCash() == null ? 0 : order.getTotalCash().doubleValue());
-            totalBalance += (order.getTotalBalance() == null ? 0 : order.getTotalBalance().doubleValue());
-            cost += (order.getCost() == null ? 0 : order.getCost().doubleValue());
-            costCash += (order.getCostCash() == null ? 0 : order.getCostCash().doubleValue());
-            costBalance += (order.getCostBalance() == null ? 0 : order.getCostBalance().doubleValue());
-            groupCost += (order.getGroupCost() == null ? 0 : order.getGroupCost().doubleValue());
-            otherTotal += (order.getOtherTotal() == null ? 0 : order.getOtherTotal().doubleValue());
-            otherTotalCash += (order.getOtherTotalCash() == null ? 0 : order.getOtherTotalCash().doubleValue());
-            otherTotalBalance += (order.getOtherTotalBalance() == null ? 0 : order.getOtherTotalBalance().doubleValue());
-            totalIncome += (order.getTotalIncome() == null ? 0 : order.getTotalIncome().doubleValue());
-            profit = totalIncome-totalCash;
-        }
-        list.add(format.format(numAdult));
-        list.add(format.format(numChild));
-        list.add(format.format(numGuide));
-        list.add(format.format(total));
-        list.add(format.format(totalCash));
-        list.add(format.format(totalBalance));
-        list.add(format.format(cost));
-        list.add(format.format(costCash));
-        list.add(format.format(costBalance));
-        list.add(format.format(groupCost));
-        list.add(format.format(otherTotal));
-        list.add(format.format(otherTotalCash));
-        list.add(format.format(otherTotalBalance));
-        list.add(format.format(totalIncome));
-        list.add(format.format(profit));
-        return list;
+    	 DecimalFormat format = new DecimalFormat("#.##");
+         List<String> list = new ArrayList<String>();
+         double numAdult = 0;
+         double numChild = 0;
+         double numGuide = 0;
+         double total = 0;
+         double totalCash = 0;
+         double totalBalance = 0;
+         double cost = 0;
+         double costCash = 0;
+         double costBalance = 0;
+         double groupCost = 0;
+         double otherTotal = 0;
+         double otherTotalCash = 0;
+         double otherTotalBalance = 0;
+         double totalIncome = 0;
+         double totalCost = 0;
+         double profit = 0;
+         for (GroupOrder order : orders) {
+             numAdult += order.getNumAdult() == null ? 0 : order.getNumAdult();
+             numChild += order.getNumChild() == null ? 0 : order.getNumChild();
+             numGuide += order.getNumGuide() == null ? 0 : order.getNumGuide();
+             total += (order.getTotal() == null ? 0 : order.getTotal().doubleValue());
+             totalCash += (order.getTotalCash() == null ? 0 : order.getTotalCash().doubleValue());
+             totalBalance += (order.getTotalBalance() == null ? 0 : order.getTotalBalance().doubleValue());
+             cost += (order.getCost() == null ? 0 : order.getCost().doubleValue());
+             costCash += (order.getCostCash() == null ? 0 : order.getCostCash().doubleValue());
+             costBalance += (order.getCostBalance() == null ? 0 : order.getCostBalance().doubleValue());
+             groupCost += (order.getGroupCost() == null ? 0 : order.getGroupCost().doubleValue());
+             otherTotal += (order.getOtherTotal() == null ? 0 : order.getOtherTotal().doubleValue());
+             otherTotalCash += (order.getOtherTotalCash() == null ? 0 : order.getOtherTotalCash().doubleValue());
+             otherTotalBalance += (order.getOtherTotalBalance() == null ? 0 : order.getOtherTotalBalance().doubleValue());
+             totalIncome += (order.getTotalIncome() == null ? 0 : order.getTotalIncome().doubleValue());
+             totalCost += (order.getTotalCost() == null ? 0 : order.getTotalCost().doubleValue());
+             profit = totalIncome+otherTotal-totalCost;
+         }
+         list.add(format.format(numAdult));
+         list.add(format.format(numChild));
+         list.add(format.format(numGuide));
+         list.add(format.format(total));
+         list.add(format.format(totalCash));
+         list.add(format.format(totalBalance));
+         list.add(format.format(cost));
+         list.add(format.format(costCash));
+         list.add(format.format(costBalance));
+         list.add(format.format(groupCost));
+         list.add(format.format(otherTotal));
+         list.add(format.format(otherTotalCash));
+         list.add(format.format(otherTotalBalance));
+         list.add(format.format(totalIncome));
+         list.add(format.format(totalCost));
+         list.add(format.format(profit));
+         return list;
     }
 
 	/**
@@ -2086,16 +2093,52 @@ public class TaobaoController extends BaseController {
 
 	@RequestMapping("changeorderLockStateByOp.do")
 	@ResponseBody()
-	public String changeorderLockStateByOp(Integer orderId) {
+	public String changeorderLockStateByOp(HttpServletRequest request,Integer orderId) {
 		taobaoFacade.changeorderLockStateByOp(orderId);
-		return successJson();
+		
+		 // 接收操作日志
+        GroupOrder go;
+
+        go = groupOrderFacade.findOrderById(WebUtils.getCurBizId(request), orderId);
+
+        groupOrderFacade.changeorderLockStateByOp(orderId);
+
+        // 日志保存
+        List<LogOperator> logList = new ArrayList<LogOperator>();
+        logList.addAll(LogUtils.LogRow_GroupOrder(request, go,
+        		groupOrderFacade.findOrderById(WebUtils.getCurBizId(request), orderId)));
+
+        // 日志OrderId赋值
+        LogUtils.LogRow_SetValue(logList, "group_order", orderId, null);
+
+        // 插入到日志
+        logFacade.insert(logList);
+        
+        return successJson();
 	}
 
 	@RequestMapping("goBackOrderLockStateByOp.do")
 	@ResponseBody()
-	public String goBackOrderLockStateByOp(Integer orderId) {
-		taobaoFacade.goBackOrderLockStateByOp(orderId);
-		return successJson();
+	public String goBackOrderLockStateByOp(HttpServletRequest request,Integer orderId) {
+        // 接收操作日志
+        GroupOrder go;
+
+        go = groupOrderFacade.findOrderById(WebUtils.getCurBizId(request), orderId);
+
+        groupOrderFacade.goBackOrderLockStateByOp(orderId);
+
+        // 日志保存
+        List<LogOperator> logList = new ArrayList<LogOperator>();
+        logList.addAll(LogUtils.LogRow_GroupOrder(request, go,
+        		groupOrderFacade.findOrderById(WebUtils.getCurBizId(request), orderId)));
+
+        // 日志OrderId赋值
+        LogUtils.LogRow_SetValue(logList, "group_order", orderId, null);
+
+        // 插入到日志
+        logFacade.insert(logList);
+        
+        return successJson();
 	}
 
 	@RequestMapping("updateLockStateToFinance.do")
@@ -2258,7 +2301,46 @@ public class TaobaoController extends BaseController {
 		return "sales/teamGroup/groupOrderGuestTable";
 	}
 
+    /**
+     * JqGrid 查询
+     * @param request
+     * @param model
+     * @param groupOrder
+     * @param rows
+     * @param pageSize
+     * @param page
+     * @param userRightType
+     * @return
+     */
+    @RequestMapping(value = "/groupOrderGuestDataList.do")
+    @ResponseBody
+    public String groupOrderGuestDataList(HttpServletRequest request, ModelMap model, GroupOrder groupOrder,
+                                          Integer rows,Integer pageSize, Integer page,Integer userRightType){
+    	
+    	GroupOrderGuestDataListDTO groupOrderGuestDataListDTO=new GroupOrderGuestDataListDTO();
+    	
+        String sidx = request.getParameter("sidx");//来获得排序的列名，
+        String sord = request.getParameter("sord");//来获得排序方式
+        
+        groupOrderGuestDataListDTO.setSidx(sidx);
+        groupOrderGuestDataListDTO.setSord(sord);
+        groupOrderGuestDataListDTO.setGroupOrder(groupOrder);
+        groupOrderGuestDataListDTO.setRows(rows);
+        groupOrderGuestDataListDTO.setPageSize(pageSize);
+        groupOrderGuestDataListDTO.setPage(page);
+        groupOrderGuestDataListDTO.setUserRightType(userRightType);
+        groupOrderGuestDataListDTO.setBizId(WebUtils.getCurBizId(request));
+        groupOrderGuestDataListDTO.setDataUserIdSets(WebUtils.getDataUserIdSet(request));
+        
+        groupOrderGuestDataListDTO=taobaoFacade.groupOrderGuestDataList(groupOrderGuestDataListDTO);
 
+        model.addAttribute("pageBean", groupOrderGuestDataListDTO.getPageBean());
+        model.addAttribute("typeList", groupOrderGuestDataListDTO.getTypeList());
+
+        return JSON.toJSONString(groupOrderGuestDataListDTO.getPageBean());
+    }
+	
+	
 	@RequestMapping(value = "/toSaleGuestListExcel.do")
 	public void toSaleGuestListExcel(HttpServletRequest request, HttpServletResponse response,
 									 String startTime,String endTime,String receiveMode,String groupCode,String supplierName,
@@ -2950,7 +3032,23 @@ public class TaobaoController extends BaseController {
 	@RequestMapping(value = "savePrice.do")
 	@ResponseBody()
 	public String savePrice(HttpServletRequest request, Model model, Integer orderId, GroupOrderPriceVO vo) {
-		List<GroupOrderPrice> groupOrderPrices = vo.getGroupOrderPriceList();
+//		List<GroupOrderPrice> groupOrderPrices = vo.getGroupOrderPriceList();
+//		ChangePriceDTO changePriceDTO = new ChangePriceDTO();
+//		changePriceDTO.setBizId(WebUtils.getCurBizId(request));
+//		changePriceDTO.setOrderId(orderId);
+//		changePriceDTO.setGroupOrderPrices(groupOrderPrices);
+//		changePriceDTO.setUserName(WebUtils.getCurrentUserSession(request).getName());
+//		changePriceDTO.setUserId(WebUtils.getCurUserId(request));
+//		taobaoFacade.savePrice(changePriceDTO);
+		
+        List<GroupOrderPrice> groupOrderPrices = vo.getGroupOrderPriceList();
+
+        List<GroupOrderPrice> incomeList;
+        incomeList = groupOrderFacade.selectByOrder(orderId);
+        
+//        taobaoFacade.savePrice(groupOrderPrices, orderId, WebUtils.getCurUserId(request),
+//                WebUtils.getCurrentUserSession(request).getName(), WebUtils.getCurBizId(request));
+
 		ChangePriceDTO changePriceDTO = new ChangePriceDTO();
 		changePriceDTO.setBizId(WebUtils.getCurBizId(request));
 		changePriceDTO.setOrderId(orderId);
@@ -2958,8 +3056,19 @@ public class TaobaoController extends BaseController {
 		changePriceDTO.setUserName(WebUtils.getCurrentUserSession(request).getName());
 		changePriceDTO.setUserId(WebUtils.getCurUserId(request));
 		taobaoFacade.savePrice(changePriceDTO);
+        
+     // 日志保存
+        List<LogOperator> logList = new ArrayList<LogOperator>();
+        // groupOrderPrice
+        logList.addAll(LogUtils.LogRow_GroupOrderPrice(request, orderId, vo.getGroupOrderPriceList(), incomeList));
 
-		return successJson();
+        // 日志OrderId赋值
+        LogUtils.LogRow_SetValue(logList, "group_order_price", null, orderId);
+
+        // 插入到日志
+        logFacade.insert(logList);
+        
+        return successJson();
 	}
 
 	 /**
@@ -3037,8 +3146,8 @@ public class TaobaoController extends BaseController {
 
     @RequestMapping(value = "/excelProductProfit.do")
     @ResponseBody
-    public void excelProductProfit(HttpServletRequest request, HttpServletResponse response, String startMin,String startMax,String productName,String supplierName,
-    		Integer orderMode,String operatorIds,String orgIds) {
+    public void excelProductProfit(HttpServletRequest request, HttpServletResponse response, String startMin,String startMax,String productName,String supplierName,Integer operType,
+    		String orderNo,String operatorIds,String orgIds) {
         List<DicInfo> typeList = dicFacade.getListByTypeCode(BasicConstants.SALES_TEAM_TYPE,
                 WebUtils.getCurBizId(request));
         PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
@@ -3047,8 +3156,10 @@ public class TaobaoController extends BaseController {
         pm.put("startMax", startMax);
         pm.put("productName", productName);
         pm.put("supplierName", supplierName);
-        pm.put("orderMode", orderMode);
+        pm.put("orderNo", orderNo);
         pm.put("operatorIds", operatorIds);
+        pm.put("operType", operType);
+        pm.put("set", WebUtils.getDataUserIdSet(request));
         if (orgIds != null && StringUtils.isNotBlank(orgIds.toString())) {
             Set<Integer> set = new HashSet<Integer>();
             String[] orgIdArr = orgIds.toString().split(",");
@@ -3166,10 +3277,10 @@ public class TaobaoController extends BaseController {
                 cc.setCellValue(order.getOtherTotal() == null ? 0 : order.getOtherTotal().doubleValue());
                 cc.setCellStyle(cellStyle);
                 cc = row.createCell(8);
-                cc.setCellValue(order.getTotalCash() == null ? 0 : order.getTotalCash().doubleValue());
+                cc.setCellValue(order.getTotalCost() == null ? 0 : order.getTotalCost().doubleValue());
                 cc.setCellStyle(cellStyle);
                 cc = row.createCell(9);
-                cc.setCellValue("0");
+                cc.setCellValue(((order.getTotalIncome().add(order.getOtherTotal())).subtract(order.getTotalCost())).doubleValue());
                 cc.setCellStyle(cellStyle);
                 index++;
 
