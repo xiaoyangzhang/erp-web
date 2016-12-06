@@ -7,4 +7,6 @@
 %>
 <script type="text/javascript">
 	var ctx = "<%=ctx %>";
+	// author: daixiaoman time:2016-11-30   防止全局命名被覆盖掉 默认赋值  "/yihg-erp-web"  路径配置
+	var yihg_erp_web_config = {"ctxPath":ctx || "/yihg-erp-web"};
 </script>

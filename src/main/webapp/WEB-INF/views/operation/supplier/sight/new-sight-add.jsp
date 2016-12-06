@@ -46,6 +46,7 @@
 								<c:if test="${supplierType==3 }"> <a href="javascript:void(0)" class="button button-primary button-small" onclick="selectHotel()" id="hotel"/>选择</a></c:if>
 								<c:if test="${supplierType==2 }"><a href="javascript:void(0)" onclick="selectRestraunt()" id="restraunt" class="button button-primary button-small"/>选择</a></c:if>
 								<c:if test="${supplierType==4 }"><a href="javascript:void(0)" onclick="selectCars()" id="cars" class="button button-primary button-small" >选择</a></c:if>
+								<c:if test="${supplierType==16 }"><a href="javascript:void(0)" onclick="selectDelivery()" id="cars" class="button button-primary button-small" >选择</a></c:if>
 						</div>
 						<div class="clear"></div>
 					</dd>
@@ -175,18 +176,29 @@
 															</c:forEach>
 														</c:if>
 													</select></c:if>
-													<c:if test="${supplierType==3 }">	<select id="type1Id" name="type1Id" class="select-w80" ${disabled }>
-												<c:forEach items="${hotelType1}" var="t1" varStatus="vs">
-													<option value="${t1.id }"
+													<c:if test="${supplierType==3 }">	
+														<select id="type1Id" name="type1Id" class="select-w80" ${disabled }>
+															<c:forEach items="${hotelType1}" var="t1" varStatus="vs">
+																<option value="${t1.id }"
 													        <c:if test="${t1.id==detail.type1Id }">selected</c:if> >${t1.value }</option>
-												</c:forEach>
-											</select></c:if>
+															</c:forEach>
+														</select>
+													</c:if>
 											<c:if test="${supplierType==2 }">	
 											<select id="type1Id" name="type1Id" class="select-w80"> 
 														<c:forEach items="${resTypes}" var="t1" varStatus="vs">
 															<option value="${t1.id }" <c:if test="${t1.id==detail.type1Id }">selected</c:if> >${t1.value }</option>
 														</c:forEach>
 													</select></c:if>
+													
+													<c:if test="${supplierType==16 }">	
+														<select id="type1Id" name="type1Id" class="select-w80"> 
+															<c:forEach items="${deTypes}" var="t1" varStatus="vs">
+																<option value="${t1.id }" <c:if test="${t1.id==detail.type1Id }">selected</c:if> >${t1.value }</option>
+															</c:forEach>
+														</select>
+													</c:if>
+													
 														<c:if test="${supplierType==4 }">	<select id="type1Id" name="type1Id" class="select160" tag="price"
 															style="width: 310px; text-align: right">
 														 <c:forEach items="${carTypes }" var="t1">
@@ -206,7 +218,7 @@
 													</c:if></td>
 											</tr>
 											<c:set var="sum_price" value="${sum_price+detail.itemTotal }" />
-											<c:set var="sum_sale" value="${sum_sale+detail.saleItemPrice }" />
+											<c:set var="sum_sale" value="${sum_sale+detail.saleItemPrice* detail.itemNum }" />
 										</c:forEach>
 									</c:if>
 								</tbody>
@@ -263,6 +275,11 @@
 				</c:forEach></select></c:if>
 <c:if test="${supplierType==2 }">	<select  name="type1Id" class="select-w80"> 
 			<c:forEach items="${resTypes}" var="t1" varStatus="vs">
+				<option value="${t1.id }"  >${t1.value }</option>
+			</c:forEach>
+		</select></c:if>
+<c:if test="${supplierType==16 }">	<select  name="type1Id" class="select-w80"> 
+			<c:forEach items="${deTypes}" var="t1" varStatus="vs">
 				<option value="${t1.id }"  >${t1.value }</option>
 			</c:forEach>
 		</select></c:if>
@@ -582,6 +599,23 @@ function selectHotel() {
 		}
 	});
 }
+function selectDelivery() {
+	layer.openSupplierLayer({
+		title: '选择地接',
+		content: '<%=ctx%>/component/supplierList.htm?supplierType=16',
+		callback: function (arr) {
+			if (arr.length == 0) {
+				$.warn("请选择地接 ");
+				return false;
+			}
+			$("#supplierName").val(arr[0].name);
+			$("#supplierId").val(arr[0].id);
+			selectCashType();
+			bindEvent(false);
+		}
+	});
+}
+
 
 function selectCars(){
 	var win;

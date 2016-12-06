@@ -1,5 +1,6 @@
 package com.yihg.erp.controller.queries;
 
+
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.WebUtils;
@@ -15,6 +16,34 @@ import org.apache.commons.lang.StringUtils;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
+import com.yimayhd.erpcenter.dal.sales.client.CommonDal;
+import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
+import com.yimayhd.erpcenter.facade.basic.service.RegionFacade;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.GetNumAndOrderDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.query.QueryDTO;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.GetNumAndOrderResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.QueryResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.result.RestaurantQueriesResult;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.service.DataAnalysisFacade;
+import com.yimayhd.erpcenter.facade.dataanalysis.client.service.QueryFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
+import com.yimayhd.erpresource.dal.constants.BasicConstants;
+import com.yimayhd.erpresource.dal.po.SupplierInfo;
+import org.apache.commons.lang.StringUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
@@ -22,22 +51,47 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+
+
 
 
 @Controller
 @RequestMapping("/placeOrderQuery")
 public class PlaceOrderQueryController extends BaseController {
 	@Autowired
+
 	private ProductCommonFacade productCommonFacade;
 	@Autowired
 	private PlaceOrderQueryFacade placeOrderQueryFacade;
+
+	private ApplicationContext appContext;
+
+	@Autowired
+	private SysPlatformEmployeeFacade platformEmployeeFacade;
+
+	@Autowired
+	private BizSettingCommon bizSettingCommon;
+	@Autowired
+	private SysPlatformOrgFacade orgFacade;
+	@Autowired
+	QueryFacade queryFacade;
+	@Autowired
+	DataAnalysisFacade dataAnalysisFacade;
+
+	@Autowired RegionFacade regionFacade;
+
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model,
 			HttpServletRequest request) {
 
+		model.addAttribute("orgJsonStr", orgFacade
+				.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
+		model.addAttribute("orgUserJsonStr", platformEmployeeFacade
+				.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
+	}
+	/**
+	 * 获取查询服务
+	 *
 	/*	model.addAttribute("orgJsonStr", orgService
 				.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
 		model.addAttribute("orgUserJsonStr", platformEmployeeService
@@ -57,17 +111,17 @@ public class PlaceOrderQueryController extends BaseController {
 	 * @param svc
 	 * @return
 	 */
-	/*private CommonService getCommonService(String svc) {
+	private CommonDal getCommonService(String svc) {
 		if (StringUtils.isBlank(svc)) {
 			svc = "commonsaleService";
 		}
-		return appContext.getBean(svc, CommonService.class);
-	}*/
+		return appContext.getBean(svc, CommonDal.class);
+	}
 
 	// 业务查询公共方法
-	/*private PageBean commonQuery(HttpServletRequest request, ModelMap model,
+	private PageBean commonQuery(HttpServletRequest request, ModelMap model,
 				String sl, Integer page, Integer pageSize, String svc) {
-			PageBean pb = new PageBean();
+			/*PageBean pb = new PageBean();
 			if (page == null) {
 				pb.setPage(1);
 			} else {
@@ -94,7 +148,7 @@ public class PlaceOrderQueryController extends BaseController {
 				for (String orgIdStr : orgIdArr) {
 					set.add(Integer.valueOf(orgIdStr));
 				}
-				set = platformEmployeeService.getUserIdListByOrgIdList(
+				set = platformEmployeeFacade.getUserIdListByOrgIdList(
 						WebUtils.getCurBizId(request), set);
 				String salesOperatorIds = "";
 				for (Integer usrId : set) {
@@ -106,11 +160,21 @@ public class PlaceOrderQueryController extends BaseController {
 				}
 			}
 			pb.setParameter(paramters);
-			pb = getCommonService(svc).queryListPage(sl, pb);
-			model.addAttribute("pageBean", pb);
+			pb = getCommonService(svc).queryListPage(sl, pb);*/
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setSvc(svc);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb = queryResult.getPageBean();
+		model.addAttribute("pageBean", queryResult.getPageBean());
 
-			return pb;
-		}*/
+		return pb;
+		}
 
 	/*预订明细统计查询*/
 	@SuppressWarnings("unchecked")
@@ -119,19 +183,19 @@ public class PlaceOrderQueryController extends BaseController {
 			HttpServletResponse reponse, ModelMap model, String sl, String ssl,
 			String rp, Integer page, Integer pageSize, String svc, Integer visit) {
 
-		Map paramters = WebUtils.getQueryParamters(request);
-		PlaceOrderQueryDTO placeOrderQueryDTO = new PlaceOrderQueryDTO();
-		placeOrderQueryDTO.setParamters(paramters);
-		placeOrderQueryDTO.setSl(sl);
-		placeOrderQueryDTO.setSsl(ssl);
-		placeOrderQueryDTO.setRp(rp);
-		placeOrderQueryDTO.setPage(page);
-		placeOrderQueryDTO.setPageSize(pageSize);
-		placeOrderQueryDTO.setSvc(svc);
-		placeOrderQueryDTO.setVisit(visit);
-		PlaceOrderQueryResult placeOrderQueryResult = placeOrderQueryFacade.getSupplierDetails(placeOrderQueryDTO);
-		model.addAttribute("sum", placeOrderQueryResult.getSum());
-		model.addAttribute("pageBean", placeOrderQueryResult.getPageBean());
+		GetNumAndOrderDTO getNumAndOrderDTO =new GetNumAndOrderDTO();
+		getNumAndOrderDTO.setBizId(WebUtils.getCurBizId(request));
+		getNumAndOrderDTO.setPage(page);
+		getNumAndOrderDTO.setPageSize(pageSize);
+		getNumAndOrderDTO.setParamters(WebUtils.getQueryParamters(request));
+		getNumAndOrderDTO.setSl(sl);
+		getNumAndOrderDTO.setSsl(ssl);
+		getNumAndOrderDTO.setSvc(svc);
+
+		getNumAndOrderDTO.setParamters(WebUtils.getQueryParamters(request));
+		GetNumAndOrderResult result = dataAnalysisFacade.getSupplierDetails(getNumAndOrderDTO);
+		model.addAttribute("sum", result.getSum());
+		model.addAttribute("pageBean", result.getPb());
 		return rp;
 	}
 
@@ -147,24 +211,24 @@ public class PlaceOrderQueryController extends BaseController {
 	public String sightList(HttpServletRequest request,
 			HttpServletResponse response, ModelMap modelMap,
 			SupplierInfo supplierInfo) {
-		//酒店、餐，景，车
-		modelMap.addAttribute("supplierType", Constants.RESTAURANT+","+Constants.HOTEL+","+Constants.FLEET+","+Constants.SCENICSPOT);
+		/*//酒店、餐，景，车
+		modelMap.addAttribute("supplierType", Constants.RESTAURANT+","+Constants.HOTEL+","+ Constants.FLEET+","+Constants.SCENICSPOT);
 		modelMap.addAttribute("supplierInfo", supplierInfo);
-		Integer bizId = WebUtils.getCurBizId(request);
-		PlaceOrderQueryDTO placeOrderQueryDTO = new PlaceOrderQueryDTO();
-		placeOrderQueryDTO.setBizId(bizId);
-		PlaceOrderQueryResult placeOrderQueryResult = placeOrderQueryFacade.sightList(placeOrderQueryDTO);
+		Integer bizId = WebUtils.getCurBizId(request);*/
 
 	/*	// 景区类型
 		List<DicInfo> Type1 = dicService
 				.getListByTypeCode(Constants.SCENICSPOT_TYPE_CODE);
 		modelMap.addAttribute("Type1", Type1);*/
 
-		//省份
-		modelMap.addAttribute("allProvince", placeOrderQueryResult.getAllProvince());
+	/*	//省份
+		List<RegionInfo> allProvince = regionFacade.getAllProvince();
+		modelMap.addAttribute("allProvince", allProvince);
 
 		//结算方式
-		modelMap.addAttribute("cashType", placeOrderQueryResult.getCashTypes());
+		List<DicInfo> cashTypes = dicService.getListByTypeCode(
+				BasicConstants.GYXX_JSFS, bizId);
+		modelMap.addAttribute("cashType", cashTypes);*/
 
 		/*// 获取酒店、餐，景，车类别
 		List<DicInfo> levelList = dicService
@@ -172,6 +236,13 @@ public class PlaceOrderQueryController extends BaseController {
 		
 		modelMap.addAttribute("levelList", levelList);*/
 
+		//酒店、餐，景，车
+		modelMap.addAttribute("supplierType", Constants.RESTAURANT+","+Constants.HOTEL+","+ Constants.FLEET+","+Constants.SCENICSPOT);
+		modelMap.addAttribute("supplierInfo", supplierInfo);
+		Integer bizId = WebUtils.getCurBizId(request);
+		RestaurantQueriesResult result = dataAnalysisFacade.sightJSFS(bizId);
+		modelMap.addAttribute("allProvince", result.getAllProvince());
+		modelMap.addAttribute("cashType", result.getCashTypes());
 		return "queries/placeorder/placeOrderDetailList";
 	}
 	

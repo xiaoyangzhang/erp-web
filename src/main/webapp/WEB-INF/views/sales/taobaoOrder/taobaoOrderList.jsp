@@ -182,7 +182,7 @@ function toOperatorExcel(){
 
 
 function goLogStock(orderId){
-    showInfo("订单日志","950px","550px","<%=staticPath%>/basic/singleList.htm?tableName=group_order&tableId=" + orderId);
+    showInfo("操作单日志","950px","550px","<%=staticPath%>/basic/singleList.htm?tableName=group_order&tableId=" + orderId);
 }
 
 function showInfo(title,width,height,url){

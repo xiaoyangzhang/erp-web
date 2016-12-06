@@ -164,4 +164,22 @@ document.onkeydown = function (e) {
 			<button type="button" class="button button-primary button-small" onclick="editOrderGroupInfo()">确定</button>
 		</div>
 	</div>
+
+
+<script type="text/javascript">
+function goLogStock(orderId) {
+	showInfo("计调操作单日志","950px","550px","<%=staticPath%>/basic/singleList.htm?tableName=group_order&tableId=" + orderId);
+}
+
+function showInfo(title, width, height, url) {
+	layer.open({
+		type : 2,
+		title : title,
+		shadeClose : true,
+		shade : 0.5,
+		area : [width,height],
+		content : url
+	});
+}
+</script>
 </html>

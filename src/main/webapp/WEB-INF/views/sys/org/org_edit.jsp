@@ -9,6 +9,7 @@
 	<%@ include file="../../../include/top.jsp"%>
 	<script type="text/javascript" src="<%=staticPath %>/assets/js/jquery.idTabs.min.js"></script>
 	<script type="text/javascript" src="<%=ctx %>/assets/js/sys/emp.js"></script>
+	<script type="text/javascript" src="<%=ctx %>/assets/js/json2.js?v=1"></script>
 	
 <script type="text/javascript">
 	function del(str){
@@ -183,7 +184,10 @@
 					<div class="dd_right">
 	    			<input type="submit" class="button button-primary button-small" value="提交"  />&nbsp;&nbsp;&nbsp;&nbsp;
 	    			
-					<input class="button button-primary button-small" type="reset"  value="重置表单" />
+					<input class="button button-primary button-small" type="reset"  value="重置表单" />&nbsp;&nbsp;&nbsp;&nbsp;
+					<c:if test="${org.orgId!=null}">
+						<input type="button" class="button button-primary button-small" value="组团社权限"  onclick="OrgSupplierAuth('${org.orgId}')" />
+					</c:if>
 					</div>
 					<div class="clear"></div>
 	    			</dd> 
@@ -203,7 +207,9 @@
 					</span>
 				</div>
 </script>
-			<script type="text/javascript">
+</body>
+</html>
+<script type="text/javascript">
 			$(function(){
 				var imgDelete=function () {
 					$(".icon_del").unbind("click").click(function(){
@@ -214,8 +220,28 @@
 					})
 				};
 				imgDelete();
-			})
-			</script>
-</body>
-</html>
+			});
+function OrgSupplierAuth(orgid){
+	layer.openOrgSupplierAuthLayer({
+		title : '选择组团社',
+		content :'<%=ctx %>/org/orgSupplierAuth.htm?supplierType=1&type=multi&orgid='+orgid,//参数：操作类型（type:单选(single)、多选(multi)）供应商类型supplierType=1
+		callback: function(authsMap,getTableTemplate){
+			//保存组织机构的组团社权限
+			authsMap && (authsMap["orgid"] = orgid);
+			$.ajax("<%=ctx %>/org/saveOrgAuthSuppliers.do",{
+				contentType:"application/json;charset=utf-8",
+				type:"post",
+				data:JSON.stringify(authsMap),
+				success:function(){
+					$.info("授权成功");
+					getTableTemplate();
+				},
+				error:function(){
+					$.error("服务器异常");
+				}
+			});
+	    }
+	});
+}	
+</script>
 
