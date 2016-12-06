@@ -245,7 +245,7 @@
 
 	<dubbo:reference id="taobaoFacade"
 					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TaobaoFacade" owner="ly" version="1.0.0.test"
-					 timeout="35000" />
+					 timeout="8000" />
 
 	<dubbo:reference id="tJFacade"
 					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TJFacade" owner="ly" version="1.0.0.test"
