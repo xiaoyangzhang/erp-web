@@ -1,13 +1,13 @@
 package com.yihg.erp.controller.product;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.alibaba.fastjson.JSONObject;
+import com.yimayhd.erpcenter.dal.product.po.*;
+import com.yimayhd.erpcenter.dal.product.vo.ProductTagVo;
+import com.yimayhd.erpcenter.facade.result.ToProductTagResult;
 import org.erpcenterFacade.common.client.query.BrandQueryDTO;
 import org.erpcenterFacade.common.client.result.BrandQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
@@ -35,11 +35,6 @@ import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.common.contants.BasicConstants;
 import com.yimayhd.erpcenter.common.util.DateUtils;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
-import com.yimayhd.erpcenter.dal.product.po.PriceView;
-import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
-import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
-import com.yimayhd.erpcenter.dal.product.po.ProductSales;
-import com.yimayhd.erpcenter.dal.product.po.ProductStock;
 import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
 import com.yimayhd.erpcenter.facade.query.DetailDTO;
 import com.yimayhd.erpcenter.facade.result.DetailResult;
@@ -80,13 +75,21 @@ public class ProductSalesController extends BaseController {
 	@RequestMapping(value = "/list.htm")
 	@RequiresPermissions(PermissionConstants.SALE_SK_ADD)
 	public String toList(ModelMap model,HttpServletRequest request) {
-		//产品名称
-//		List<DicInfo> brandList = dicService
-//				.getListByTypeCode(BasicConstants.CPXL_PP,WebUtils.getCurBizId(request));
 		BrandQueryDTO brandQueryDTO  = new BrandQueryDTO();
 		brandQueryDTO.setBizId(WebUtils.getCurBizId(request));
 		BrandQueryResult brandList = productCommonFacade.brandQuery(brandQueryDTO);
 		model.addAttribute("brandList", brandList.getBrandList());
+		ToProductTagResult result = productFacade.getProductTags(WebUtils.getCurBizId(request));
+
+		model.addAttribute("lineThemeList", result.getLineThemeListPlus());
+		model.addAttribute("lineLevelList", result.getLineLevelListPlus());
+		model.addAttribute("attendMethodList", result.getAttendMethodListPlus());
+		model.addAttribute("hotelLevelList", result.getHotelLevelListPlus());
+		model.addAttribute("daysPeriodList", result.getDaysPeriodListPlus());
+		model.addAttribute("priceRangeList", result.getPriceRangeListPlus());
+		model.addAttribute("exitDestinationList", result.getExitDestinationListPlus());
+		model.addAttribute("domesticDestinationList", result.getDomesticDestinationListPlus());
+		model.addAttribute("typeList", result.getTypeListPlus());
 		return "product/sales/list";
 	}
 
@@ -104,7 +107,6 @@ public class ProductSalesController extends BaseController {
 		}
 		pageBean.setParameter(productSales);
 		pageBean.setPage(page);
-//		pageBean = productInfoService.findProductSales(pageBean, bizId,WebUtils.getCurUser(request).getOrgId());
 		pageBean = productFacade.findProductSales(pageBean, bizId,WebUtils.getCurUser(request).getOrgId());
 		model.addAttribute("page", pageBean);
 		model.addAttribute("pageNum", page);
@@ -117,19 +119,12 @@ public class ProductSalesController extends BaseController {
 	public String loadMinPrice(HttpServletRequest request,String list){
 		List<Integer> productIds = JSON.parseArray(list, Integer.class);
 		Date date = DateUtils.formatDate(new Date(), DateUtils.FORMAT_SHORT);
-//		List<Map> mapList = priceService.getMinPriceByProductIdSetAndDate(productIds, date);
 		List<Map> mapList = productPricePlusFacade.loadMinPrice(productIds, date);
 		return JSON.toJSONString(mapList);
 	}
 	
 	@RequestMapping(value = "/detail.htm")
 	public String detail(HttpServletRequest request,Model model, @RequestParam Integer id) {
-        //ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(id);
-       // ProductRouteVo productRouteVo = productRouteService.findByProductId(id);
-		//ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(id);
-        //List<ProductGroup> productGroups = productGroupService.selectProductGroups(id);
-		//List<ProductGroup> productGroups = productGroupService.selectProductGroupsBySellerId(id,WebUtils.getCurUserId(request));
-
 		DetailDTO detailDTO = new DetailDTO();
 		detailDTO.setId(id);
 		DetailResult detailResult = productUpAndDownFrameFacade.detail(detailDTO);
@@ -159,8 +154,6 @@ public class ProductSalesController extends BaseController {
     	String endDateStr = month==12 ? ((year+1)+"-01-01"):(year+"-"+(month<9 ? ("0"+(month+1)):(""+(month+1)))+"-01");    	
     	Date startDate = DateUtils.parse(beginDateStr, "yyyy-MM-dd");
     	Date endDate = DateUtils.parse(endDateStr,"yyyy-MM-dd");
-//        List<PriceView> priceViews = productInfoService.getPriceViewsByDate(groupId, startDate, endDate);        
-//        List<ProductStock> stockList = stockService.getStocksByProductIdAndDateSpan(productId, startDate, endDate);
         ProductInfoResult result = productStockFacade.priceData(productId, groupId, startDate, endDate);
         List<PriceView> newPriceList = new ArrayList<PriceView>();
         List<ProductStock> stockList = result.getProductStocks();
@@ -182,14 +175,6 @@ public class ProductSalesController extends BaseController {
         if(!CollectionUtils.isEmpty(priceViews)){
         	for(PriceView price : priceViews){
         		if(price.getGroupDateTo()==null){ //旧的数据过滤掉
-	        		/*if(map.containsKey(DateUtils.format(price.getGroupDate(), "yyyy-MM-dd"))){
-	        			ProductStock stock = map.get(DateUtils.format(price.getGroupDate(), "yyyy-MM-dd"));
-	        			price.setItemDate(price.getGroupDate());
-	        			price.setStockCount(stock.getStockCount());
-	        			price.setReceiveCount(stock.getReceiveCount());
-	        			price.setReserveCount(stock.getReserveCount());
-	        			newPriceList.add(price);
-	        		}*/
         			continue;
         		}else{
         			//直接遍历当前月份的天数
@@ -209,21 +194,7 @@ public class ProductSalesController extends BaseController {
         						newPrice.setPriceCostAdult(price.getPriceCostAdult());
         						newPrice.setPriceCostChild(price.getPriceCostChild());
             					map.put(DateUtils.format(groupDate, "yyyy-MM-dd"), newPrice);
-        					}/*else{//没有库存，设置价格
-        						//new 一个新对象，否则数据有问题
-        						newPrice = new PriceView();
-        						newPrice.setGroupId(price.getGroupId());
-        						newPrice.setProductId(price.getProductId());
-        						newPrice.setPriceId(price.getPriceId());
-        						newPrice.setGroupDate(groupDate);
         					}
-        					newPrice.setPriceSettlementAdult(price.getPriceSettlementAdult());
-    						newPrice.setPriceSettlementChild(price.getPriceSettlementChild());
-    						newPrice.setPriceSuggestAdult(price.getPriceSuggestAdult());
-    						newPrice.setPriceSuggestChild(price.getPriceSuggestChild());
-    						newPrice.setPriceCostAdult(price.getPriceCostAdult());
-    						newPrice.setPriceCostChild(price.getPriceCostChild());
-        					map.put(DateUtils.format(groupDate, "yyyy-MM-dd"), newPrice);*/
         				}
         			}
         		}
@@ -237,20 +208,14 @@ public class ProductSalesController extends BaseController {
         }
         
         return JSONArray.toJSONString(newPriceList);
-        /*Map<String,Object> map = new HashMap<String,Object>();
-        map.put("price", priceViews);
-        map.put("stock", stockList);
-        return JSONArray.toJSONString(map);*/
+
     }
     
     @RequestMapping(value="/priceDate.htm")
     public String productGroupPriceDate(HttpServletRequest request,ModelMap model,Integer productId){
-    	//List<ProductGroup> productGroups = productGroupService.selectProductGroups(productId);
-//    	List<ProductGroup> productGroups = productGroupService.selectProductGroupsBySellerId(productId,WebUtils.getCurUserId(request));
     	ProductInfoResult result = productStockFacade.productGroupPriceDate(productId, WebUtils.getCurUserId(request));
     	model.addAttribute("productGroupSuppliers", result.getProductGroups());
     	model.addAttribute("productId",productId);
-//    	com.yihg.product.po.ProductInfo  info = productInfoService.findProductInfoById(productId);
     	ProductInfo info = result.getProductInfo();
     	if(info.getObligate()==null){
     		info.setObligate(0);
@@ -265,13 +230,21 @@ public class ProductSalesController extends BaseController {
     /****************************************地接版********************************/
     @RequestMapping(value = "/saleList.htm")
     public String saleList(ModelMap model,HttpServletRequest request){
-    	//产品名称
-//		List<DicInfo> brandList = dicService
-//				.getListByTypeCode(BasicConstants.CPXL_PP,WebUtils.getCurBizId(request));
     	BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
     	brandQueryDTO.setBizId(WebUtils.getCurBizId(request));
     	BrandQueryResult queryResult = productCommonFacade.brandQuery(brandQueryDTO);
 		model.addAttribute("brandList",queryResult.getBrandList());
+		ToProductTagResult result = productFacade.getProductTags(WebUtils.getCurBizId(request));
+
+		model.addAttribute("lineThemeList", result.getLineThemeListPlus());
+		model.addAttribute("lineLevelList", result.getLineLevelListPlus());
+		model.addAttribute("attendMethodList", result.getAttendMethodListPlus());
+		model.addAttribute("hotelLevelList", result.getHotelLevelListPlus());
+		model.addAttribute("daysPeriodList", result.getDaysPeriodListPlus());
+		model.addAttribute("priceRangeList", result.getPriceRangeListPlus());
+		model.addAttribute("exitDestinationList", result.getExitDestinationListPlus());
+		model.addAttribute("domesticDestinationList", result.getDomesticDestinationListPlus());
+		model.addAttribute("typeList", result.getTypeListPlus());
 		return "product/sales/list_plus";
     }
     
@@ -287,9 +260,20 @@ public class ProductSalesController extends BaseController {
 		}else{
 			pageBean.setPageSize(pageSize);
 		}
+		ProductTagVo productTagVo = JSONObject.parseObject(productSales.getProductTagVo(), ProductTagVo.class);
+
+		List<ProductTag> tabList = productTagVo.getProductTags();
+		Set<String> strSet = new HashSet<String>();
+		for(ProductTag tagBean:tabList){
+			strSet.add(tagBean.getTagName());
+		}
+		if(strSet.size()>0 ){
+			productSales.setStrSet(strSet);
+		}else {
+			productSales.setStrSet(null);
+		}
 		pageBean.setParameter(productSales);
 		pageBean.setPage(page);
-//		pageBean = productInfoService.findProductSalesPlus(pageBean, bizId,WebUtils.getCurUser(request).getOrgId());
 		pageBean = productStockFacade.findProductSalesPlus(pageBean, bizId,WebUtils.getCurUser(request).getOrgId());
 
 		model.addAttribute("page", pageBean);
@@ -308,14 +292,8 @@ public class ProductSalesController extends BaseController {
      */
     @RequestMapping("info.htm")
     public String productInfo(ModelMap model, @RequestParam Integer id){
-//    	ProductInfoVo productInfoVo = productInfoService.findProductInfoVoById(id);
-//        ProductRouteVo productRouteVo = productRouteService.findByProductId(id);
-//		ProductRemark productRemark = productRemarkService.findProductRemarkByProductId(id);
     	ProductInfoResult result = productFacade.toProductPreview(id);
 
-//		DetailDTO detailDTO = new DetailDTO();
-//		detailDTO.setId(id);
-//		DetailResult detailResult = productUpAndDownFrameFacade.detail(detailDTO);
 		model.addAttribute("productInfoVo", result.getProductInfoVo());
         model.addAttribute("productRouteVo", result.getProductRouteVo());
         model.addAttribute("productRemark", result.getProductRemark());
@@ -330,7 +308,6 @@ public class ProductSalesController extends BaseController {
     	String endDateStr = month==12 ? ((year+1)+"-01-01"):(year+"-"+(month<9 ? ("0"+(month+1)):(""+(month+1)))+"-01");    	
     	Date startDate = DateUtils.parse(beginDateStr, "yyyy-MM-dd");
     	Date endDate = DateUtils.parse(endDateStr,"yyyy-MM-dd");
-//    	List<ProductStock> stockList = stockService.getStocksByProductIdAndDateSpan(productId, startDate, endDate);
     	List<ProductStock> stockList = productStockFacade.getStocksByProductIdAndDateSpan(productId, startDate, endDate);
         return JSONArray.toJSONString(stockList);
     }

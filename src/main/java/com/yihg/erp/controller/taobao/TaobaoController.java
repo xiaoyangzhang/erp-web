@@ -279,6 +279,7 @@ public class TaobaoController extends BaseController {
 		dto.setTaobaoOrderIds(ids);
 		dto.setMyBizCode(settingCommon.getMyBizCode(request));
 		dto.setGroupMode(GroupMode);
+		dto.setVo(vo);
 		Integer orderId = 0;
 		GroupOrder go = null;
 		List<GroupOrderPrice> incomeList = null;
