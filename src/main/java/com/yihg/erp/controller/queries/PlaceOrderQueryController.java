@@ -29,7 +29,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
 import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
 import com.yimayhd.erpcenter.dal.sales.client.CommonDal;
-import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
 import com.yimayhd.erpcenter.facade.basic.service.RegionFacade;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.GetNumAndOrderDTO;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.query.QueryDTO;
@@ -84,18 +83,7 @@ public class PlaceOrderQueryController extends BaseController {
 	public void getOrgAndUserTreeJsonStr(ModelMap model,
 			HttpServletRequest request) {
 
-		model.addAttribute("orgJsonStr", orgFacade
-				.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
-		model.addAttribute("orgUserJsonStr", platformEmployeeFacade
-				.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
-	}
-	/**
-	 * 获取查询服务
-	 *
-	/*	model.addAttribute("orgJsonStr", orgService
-				.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService
-				.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));*/
+
 
 		DepartmentTuneQueryDTO departmentTuneQueryDTO = new  DepartmentTuneQueryDTO();
 		departmentTuneQueryDTO.setBizId(WebUtils.getCurBizId(request));
@@ -211,30 +199,8 @@ public class PlaceOrderQueryController extends BaseController {
 	public String sightList(HttpServletRequest request,
 			HttpServletResponse response, ModelMap modelMap,
 			SupplierInfo supplierInfo) {
-		/*//酒店、餐，景，车
-		modelMap.addAttribute("supplierType", Constants.RESTAURANT+","+Constants.HOTEL+","+ Constants.FLEET+","+Constants.SCENICSPOT);
-		modelMap.addAttribute("supplierInfo", supplierInfo);
-		Integer bizId = WebUtils.getCurBizId(request);*/
 
-	/*	// 景区类型
-		List<DicInfo> Type1 = dicService
-				.getListByTypeCode(Constants.SCENICSPOT_TYPE_CODE);
-		modelMap.addAttribute("Type1", Type1);*/
 
-	/*	//省份
-		List<RegionInfo> allProvince = regionFacade.getAllProvince();
-		modelMap.addAttribute("allProvince", allProvince);
-
-		//结算方式
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(
-				BasicConstants.GYXX_JSFS, bizId);
-		modelMap.addAttribute("cashType", cashTypes);*/
-
-		/*// 获取酒店、餐，景，车类别
-		List<DicInfo> levelList = dicService
-				.getListByTypeCode(BasicConstants.SUPPLIER_LEVEL_RESTAURANT+","+BasicConstants.SUPPLIER_LEVEL_FLEET+","+BasicConstants.SUPPLIER_LEVEL_SCENICSPOT);
-		
-		modelMap.addAttribute("levelList", levelList);*/
 
 		//酒店、餐，景，车
 		modelMap.addAttribute("supplierType", Constants.RESTAURANT+","+Constants.HOTEL+","+ Constants.FLEET+","+Constants.SCENICSPOT);
