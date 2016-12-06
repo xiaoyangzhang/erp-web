@@ -522,7 +522,12 @@ public class TeamGroupController extends BaseController {
 		} else {
 			return errorJson("服务器忙！");
 		}*/
-		return teamGroupFacade.deleteGroupOrderById(orderId,groupId,WebUtils.getCurBizId(request));
+		
+		String result = teamGroupFacade.deleteGroupOrderById(orderId,groupId,WebUtils.getCurBizId(request)); 
+		if(StringUtils.isNotEmpty(result) && "成功".equals(result)){
+			return successJson();
+		}
+		return errorJson(result);
 
 	}
 
