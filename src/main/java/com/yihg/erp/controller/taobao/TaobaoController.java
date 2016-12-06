@@ -166,6 +166,9 @@ public class TaobaoController extends BaseController {
 	@RequestMapping(value = "toEditTaobaoOrder.htm")
 	public String toEditTaobaoOrder(HttpServletRequest request,
 			HttpServletResponse reponse,Integer see, ModelMap model,Integer id,Integer operType) throws ParseException{
+		if(id <=0){
+			return "sales/taobaoOrder/addNewTaobaoOrder";
+		}
 	 	// see=0
 		// 查看
 		// see=1操作单编辑

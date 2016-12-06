@@ -422,7 +422,10 @@ public class TeamGroupController extends BaseController {
 		saveTeamGroupInfoDTO.setCurUserName(WebUtils.getCurUser(request).getName());
 		saveTeamGroupInfoDTO.setTeamGroupVO(teamGroupVO);
 		SaveTeamGroupInfoResult saveTeamGroupInfoResult = teamGroupFacade.saveTeamGroupInfo(saveTeamGroupInfoDTO);
-		return successJson("groupId",saveTeamGroupInfoResult.getTeamGroupVO().getTourGroup().getId()+"");
+		if(null != saveTeamGroupInfoResult.getTeamGroupVO() && null != saveTeamGroupInfoResult.getTeamGroupVO().getTourGroup()){
+			return successJson("groupId",saveTeamGroupInfoResult.getTeamGroupVO().getTourGroup().getId()+"");
+		}
+		return errorJson("保存失败");
 	}
 
 	/**
@@ -519,7 +522,12 @@ public class TeamGroupController extends BaseController {
 		} else {
 			return errorJson("服务器忙！");
 		}*/
-		return teamGroupFacade.deleteGroupOrderById(orderId,groupId,WebUtils.getCurBizId(request));
+		
+		String result = teamGroupFacade.deleteGroupOrderById(orderId,groupId,WebUtils.getCurBizId(request)); 
+		if(StringUtils.isNotEmpty(result) && "成功".equals(result)){
+			return successJson();
+		}
+		return errorJson(result);
 
 	}
 

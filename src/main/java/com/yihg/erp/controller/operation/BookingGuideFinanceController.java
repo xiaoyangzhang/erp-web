@@ -601,7 +601,9 @@ public class BookingGuideFinanceController extends BaseController {
 //							supplierName=listg.get(0).getSupplierName();
 //						}
 //					}
-			model.addAttribute("supplierName",result.getOrderList().get(0).getSupplierName());
+			if(null != result.getOrderList() && null!= result.getOrderList().get(0)){
+				model.addAttribute("supplierName",result.getOrderList().get(0).getSupplierName());
+			}
 			model.addAttribute("guidesVo", result.getGuidesVO());
 			model.addAttribute("group", result.getTourGroup());
 			BigDecimal count=new BigDecimal(0);

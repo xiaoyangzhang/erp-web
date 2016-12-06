@@ -35,8 +35,8 @@
 					<li>
 		  				<select id="coachMethod" name="coachMethod" style="width: 104px;text-align: right">
 							<option value="" selected="selected">请选择</option>
-							<option value="1" style="height:20px;">接</option>
-							<option value="0" style="height:20px;">送</option>
+							<option value="0" style="height:20px;">接</option>
+							<option value="1" style="height:20px;">送</option>
 						</select>
 					</li>
 					<li class="text" style="text-align: right;width:80px;">交通类型：</li>
