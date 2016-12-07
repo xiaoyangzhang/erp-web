@@ -1916,7 +1916,11 @@ public class BookingSupplierController extends BaseController {
 				List<DicInfo> golfTypes = saleCommonFacade.getGolfListByTypeCode();
 				model.addAttribute("golfTypes", golfTypes);
 				return "operation/supplier/golf/golf-add";
-			} else if (supplier.getSupplierType() == 120) {
+			}else if (supplier.getSupplierType() == 16) {
+				List<DicInfo> deliveryTypes = dicFacade.getListByTypeCode(Constants.LOCALTRAVEL_TYPE_CODE);
+				model.addAttribute("deliveryTypes", deliveryTypes);
+				return "operation/supplier/delivery/delivery-add";
+			}else if (supplier.getSupplierType() == 120) {
 				List<DicInfo> otherItems = saleCommonFacade.getOtherListByTypeCode();
 //				List<DicInfo> otherItems = dicService.getListByTypeCode(Constants.OTHER_TYPE_CODE);
 				model.addAttribute("otherItems", otherItems);
@@ -3124,7 +3128,20 @@ public class BookingSupplierController extends BaseController {
 			model.addAttribute("supplierType", Constants.RESTAURANT);
 			return "operation/supplier/eat/new-group-eat-list-booking";
 		}
-		
+	/**
+	 * 地接
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param groupId
+	 * @return
+	 */
+	@RequestMapping("newGroupDeliveryBookingList.htm")
+	public String newGroupDeliveryBooking(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+		bookingInfo(model, groupId, Constants.LOCALTRAVEL);
+		model.addAttribute("supplierType", Constants.LOCALTRAVEL);
+		return "operation/supplier/delivery/new-group-delivery-list-booking";
+	}
 		// 有销售价格
 		@RequestMapping("newGroupSightBookingInfo.htm")
 		public String newGroupSightBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
@@ -3200,6 +3217,15 @@ public class BookingSupplierController extends BaseController {
 			//餐厅
 			List<DicInfo> resTypes = dicFacade.getListByTypeCode(Constants.RESTAURANT_TYPE_CODE);
 			model.addAttribute("resTypes", resTypes);
+			}
+
+			if(supplierType==16){
+				Integer bizId = WebUtils.getCurBizId(request);
+				toAddSupplier(model, groupId, bookingId, bizId);
+				model.addAttribute("supplierType", Constants.LOCALTRAVEL);
+				//地接
+				List<DicInfo> deTypes = dicFacade.getListByTypeCode(Constants.LOCALTRAVEL_TYPE_CODE,bizId);
+				model.addAttribute("deTypes", deTypes);
 			}
 			if(supplierType==4){
 			Integer bizId = WebUtils.getCurBizId(request);
