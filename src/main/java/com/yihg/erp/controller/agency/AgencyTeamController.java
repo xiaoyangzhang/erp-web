@@ -143,9 +143,9 @@ public class AgencyTeamController extends BaseController {
 
 		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
 
-		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
-				: groupOrder.getPageSize());
-		pageBean.setPage(groupOrder.getPage());
+//		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
+//				: groupOrder.getPageSize());
+//		pageBean.setPage(groupOrder.getPage());
 
 		// 如果人员为空并且部门不为空，则取部门下的人id
 //		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
@@ -166,23 +166,23 @@ public class AgencyTeamController extends BaseController {
 //						salesOperatorIds.length() - 1));
 //			}
 //		}
-		groupOrder.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(groupOrder.getSaleOperatorIds(), 
-				groupOrder.getOrgIds(), WebUtils.getCurBizId(request)));
-		if (groupOrder.getDateType() != null && groupOrder.getDateType() == 2) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			if (groupOrder.getStartTime() != null
-					&& groupOrder.getStartTime() != "") {
-				groupOrder.setStartTime(sdf.parse(groupOrder.getStartTime())
-						.getTime() + "");
-			}
-			if (groupOrder.getEndTime() != null
-					&& groupOrder.getEndTime() != "") {
-				Calendar calendar = new GregorianCalendar();
-				calendar.setTime(sdf.parse(groupOrder.getEndTime()));
-				calendar.add(calendar.DATE, 1);// 把日期往后增加一天.整数往后推,负数往前移动
-				groupOrder.setEndTime(calendar.getTime().getTime() + "");
-			}
-		}
+//		groupOrder.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(groupOrder.getSaleOperatorIds(),
+//				groupOrder.getOrgIds(), WebUtils.getCurBizId(request)));
+//		if (groupOrder.getDateType() != null && groupOrder.getDateType() == 2) {
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//			if (groupOrder.getStartTime() != null
+//					&& groupOrder.getStartTime() != "") {
+//				groupOrder.setStartTime(sdf.parse(groupOrder.getStartTime())
+//						.getTime() + "");
+//			}
+//			if (groupOrder.getEndTime() != null
+//					&& groupOrder.getEndTime() != "") {
+//				Calendar calendar = new GregorianCalendar();
+//				calendar.setTime(sdf.parse(groupOrder.getEndTime()));
+//				calendar.add(calendar.DATE, 1);// 把日期往后增加一天.整数往后推,负数往前移动
+//				groupOrder.setEndTime(calendar.getTime().getTime() + "");
+//			}
+//		}
 		Integer listType = isSales != null && isSales.booleanValue() ? 1 : 0; 
 		pageBean.setParameter(groupOrder);
 		FindTourGroupByConditionDTO queryDTO = new FindTourGroupByConditionDTO();
@@ -195,37 +195,37 @@ public class AgencyTeamController extends BaseController {
 //				WebUtils.getCurBizId(request),
 //				WebUtils.getDataUserIdSet(request), listType);
 		
-		Integer pageTotalAudit = 0;
-		Integer pageTotalChild = 0;
-		Integer pageTotalGuide = 0;
-		List<GroupOrder> orderList = pageBean.getResult();
-		if (!CollectionUtils.isEmpty(orderList)) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			for (GroupOrder groupOrder2 : orderList) {
-				if (groupOrder2.getCreateTime() != null) {
-					Long createTime = groupOrder2.getTourGroup()
-							.getCreateTime();
-					String dateStr = sdf.format(createTime);
-					groupOrder2.getTourGroup().setCreateTimeStr(dateStr);
-				}
-				if (groupOrder2.getTourGroup().getUpdateTime() != null) {
-					Long updateTime = groupOrder2.getTourGroup()
-							.getUpdateTime();
-					String dateStr = sdf.format(updateTime);
-					groupOrder2.getTourGroup().setUpdateTimeStr(dateStr);
-				} else {
-					groupOrder2.getTourGroup().setUpdateTimeStr("无");
-					groupOrder2.getTourGroup().setUpdateName("无");
-				}
-				pageTotalAudit += groupOrder2.getNumAdult();
-				pageTotalChild += groupOrder2.getNumChild();
-				pageTotalGuide += groupOrder2.getNumGuide();
-			}
-		}
+//		Integer pageTotalAudit = 0;
+//		Integer pageTotalChild = 0;
+//		Integer pageTotalGuide = 0;
+//		List<GroupOrder> orderList = pageBean.getResult();
+//		if (!CollectionUtils.isEmpty(orderList)) {
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//			for (GroupOrder groupOrder2 : orderList) {
+//				if (groupOrder2.getCreateTime() != null) {
+//					Long createTime = groupOrder2.getTourGroup()
+//							.getCreateTime();
+//					String dateStr = sdf.format(createTime);
+//					groupOrder2.getTourGroup().setCreateTimeStr(dateStr);
+//				}
+//				if (groupOrder2.getTourGroup().getUpdateTime() != null) {
+//					Long updateTime = groupOrder2.getTourGroup()
+//							.getUpdateTime();
+//					String dateStr = sdf.format(updateTime);
+//					groupOrder2.getTourGroup().setUpdateTimeStr(dateStr);
+//				} else {
+//					groupOrder2.getTourGroup().setUpdateTimeStr("无");
+//					groupOrder2.getTourGroup().setUpdateName("无");
+//				}
+//				pageTotalAudit += groupOrder2.getNumAdult();
+//				pageTotalChild += groupOrder2.getNumChild();
+//				pageTotalGuide += groupOrder2.getNumGuide();
+//			}
+//		}
 
-		model.addAttribute("pageTotalAudit", pageTotalAudit);
-		model.addAttribute("pageTotalChild", pageTotalChild);
-		model.addAttribute("pageTotalGuide", pageTotalGuide);
+		model.addAttribute("pageTotalAudit", result.getPageTotalAudit());
+		model.addAttribute("pageTotalChild", result.getPageTotalChild());
+		model.addAttribute("pageTotalGuide", result.getPageTotalGuide());
 //		GroupOrder order = groupOrderService.selectTotalByCon(groupOrder,
 //				WebUtils.getCurBizId(request),
 //				WebUtils.getDataUserIdSet(request), listType);
@@ -241,9 +241,9 @@ public class AgencyTeamController extends BaseController {
 		 * 根据组团社id获取组团社名称
 		 */
 		List<GroupOrder> groupList = pageBean.getResult();
-		model.addAttribute("groupList", groupList);
-		model.addAttribute("groupOrder", groupOrder);
-		model.addAttribute("page", pageBean);
+		model.addAttribute("groupList", result.getPageBean().getResult());
+		model.addAttribute("groupOrder", result.getGroupOrder());
+		model.addAttribute("page", result.getPageBean());
 
 		return "agency/teamGroup/groupTable";
 	}
@@ -330,6 +330,8 @@ public class AgencyTeamController extends BaseController {
 		model.addAttribute("teamGroupVO", teamGroupVO);
 		int bizId = WebUtils.getCurBizId(request);
 		ToAddTeamGroupInfoDTO queryDTO = new ToAddTeamGroupInfoDTO();
+		queryDTO.setCurBizId(bizId);
+		queryDTO.setGroupOrder(groupOrder);
 		ToAddTeamGroupInfoResult result = teamGroupFacade.toAddTeamGroupInfo(queryDTO);
 		// 收费类型
 //		List<DicInfo> typeList = dicService
@@ -353,6 +355,7 @@ public class AgencyTeamController extends BaseController {
 		model.addAttribute("lysfxmList", result.getLysfxmList());
 		model.addAttribute("operType", "1");
 		model.addAttribute("isEdit", false);
+		model.addAttribute("guestSource", saleCommonFacade.getGuestSourcesByTypeCode(bizId));
 		return "agency/teamGroup/teamGroupInfo";
 
 	}
