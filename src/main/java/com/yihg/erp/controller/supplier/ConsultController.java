@@ -1,5 +1,6 @@
 package com.yihg.erp.controller.supplier;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
@@ -70,6 +71,11 @@ public class ConsultController extends BaseController {
 			
 			pageBean.setPageSize(pageSize);
 		}
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		if (consult.getConsultDateFrom() != null) {
+//			sdf.format(consult.getConsultDateFrom());
+//			consult.getConsultDateFrom();
+//		}
 		pageBean.setParameter(consult);
 		WebResult<PageBean> result = consultFacade.getGuestConsultList(pageBean, WebUtils.getCurBizId(request));
 		pageBean = result.getValue();
@@ -153,6 +159,7 @@ public class ConsultController extends BaseController {
 	@ResponseBody
 	public String saveConsultGuest(HttpServletRequest request,HttpServletResponse response,ModelMap model,GuestConsult guestConsult){
 		GuestConsultDTO guestConsultDTO = new GuestConsultDTO();
+		guestConsult.setBizId(WebUtils.getCurBizId(request));
 		guestConsultDTO.setGuestConsult(guestConsult);
 		WebResult<Integer> webResult = consultFacade.saveConsultGuest(guestConsultDTO);
 		if(webResult.isSuccess()){

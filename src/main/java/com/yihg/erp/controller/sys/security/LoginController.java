@@ -161,7 +161,7 @@ public class LoginController extends BaseController {
 				userSessionResult.setEmployeeInfo(platformEmployeePo);
 				userSessionResult.setBizInfo(curBizInfo);
 				BeanUtils.copyProperties(userSessionResult, userSession);//把userSession相关的信息拷贝到userSession中
-				
+//				userSession.setDataUserIdSet(userSessionResult.getDataUserIdSet());
 				String uuid = UUID.randomUUID().toString(); 
 				String sessionId = uuid.substring(0,8)+uuid.substring(9,13)+uuid.substring(14,18)+uuid.substring(19,23)+uuid.substring(24); 
 				

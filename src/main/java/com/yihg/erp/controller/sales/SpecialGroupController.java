@@ -472,6 +472,7 @@ public class SpecialGroupController extends BaseController {
 		model.addAttribute("pp", toAddSpecialGroupResult.getDicInfoList());
 		model.addAttribute("groupOrder", toAddSpecialGroupResult.getGroupOrder());
 		model.addAttribute("page", toAddSpecialGroupResult.getPage());
+		model.addAttribute("idLists", idLists);
 		return "sales/specialGroup/impNotGroupOrder";
 	}
 	
