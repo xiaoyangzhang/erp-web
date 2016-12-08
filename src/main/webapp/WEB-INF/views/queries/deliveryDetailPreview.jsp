@@ -38,19 +38,23 @@ div{ font-size:10pt !important; }
 	<col width="7%" />
 	<col width="15%" />
 	<col width="5%" />
+	<col width="5%" />
+
 	<col width="8%" />
 	<col width="15%" />
-	<col width="15%" />
+	<col width="10%" />
 	<col width="5%" />
 	<col width="5%" />
+
 	<col width="5%" />
-	<col width="7%" />
+	<col width="5%" />
 	<thead>
 		<tr>
 			<th>序号<i class="w_table_split"></i></th>
 			<th>团号<i class="w_table_split"></i></th>
 			<th>日期<i class="w_table_split"></i></th>
 			<th>地接社<i class="w_table_split"></i></th>
+			<th>客人<i class="w_table_split"></i></th>
 			<th>团类型<i class="w_table_split"></i></th>
 			<th>人数<i class="w_table_split"></i></th>
 			<th>产品名称<i class="w_table_split"></i></th>
@@ -70,6 +74,7 @@ div{ font-size:10pt !important; }
 				</td>
 				<td>${item.date_arrival}</td>
 				<td style="text-align: left">${item.supplier_name}</td>
+				<td>${item.receive_mode}</td>
 				<td>
 					<c:if test="${item.group_mode <1 }">散客</c:if>
 					<c:if test="${item.group_mode > 0}">团队</c:if>
@@ -100,6 +105,7 @@ div{ font-size:10pt !important; }
 			<td ><fmt:formatNumber value="${sum_total }" pattern="#.##"/></td>
 			<td ><fmt:formatNumber value="${sum_cash }" pattern="#.##"/></td>
 			<td ><fmt:formatNumber value="${sum_balance }" pattern="#.##"/></td>
+			<td></td>
 			<td></td>
 		</tr>
 		

@@ -80,7 +80,7 @@
 				<td><fmt:formatNumber value="${sumAdult}" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${sumChild}" pattern="#.##"/></td>
 				<td></td>
-				<td>${parameter.productName}</td>
+				<td></td>
 				<td><fmt:formatNumber value="${sumTotal}" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${sumTotalCash}" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${sumTotalBalance}" pattern="#.##"/></td>

@@ -249,7 +249,7 @@ public class LoginController extends BaseController {
 	    return null;
 	}
 	
-	 @RequestMapping(value = "visa")
+	 @RequestMapping(value = "visa.htm")
 	    public String visa(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
 	        return "visa";
 	    }
