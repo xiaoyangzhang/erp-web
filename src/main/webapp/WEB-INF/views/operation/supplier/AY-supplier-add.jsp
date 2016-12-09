@@ -326,7 +326,7 @@ $(function(){
 						            		}
 						            	})
 						            	}else{
-										$.error("操作失败");
+										$.error(data.msg);
 									}
 						        },
 						        error: function(data,msg) {

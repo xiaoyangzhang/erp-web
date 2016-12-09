@@ -946,6 +946,8 @@ public class BookingGuideController extends BaseController {
 			//团信息
 			//tourGroup = tourGroupService.selectByPrimaryKey(bookingGuide.getGroupId());
 			result = bookingGuideFacade.getGroupRouteInfo(id);
+			bookingGuide = result.getBookingGuide();
+			tourGroup = result.getTourGroup();
 			guestGuideString = getGuestNameAndMobile(result.getGuestGuides()) ;
 			guestIsLeaderString = getGuestNameAndMobile(result.getGuestLeaders()) ;
 			

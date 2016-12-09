@@ -17,6 +17,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.erpcenterFacade.common.client.query.BrandQueryDTO;
@@ -198,7 +199,7 @@ public class ComponentController extends BaseController {
 		Integer orgId =  WebUtils.getCurUser(request).getOrgId();
 		componentFacade.setSupplierIds(supplierInfo,canEditPrice,orgId);
 		RegionResult provinceResult = productCommonFacade.queryProvinces();
-		List<com.yimayhd.erpcenter.dal.basic.po.RegionInfo> allProvince = provinceResult.getRegionList();
+		List<RegionInfo> allProvince = provinceResult.getRegionList();
 		model.addAttribute("allProvince", allProvince);
 		// 根据供应商类型查询当前登录商家所属的供应商
 		PageBean pageBean = componentFacade.supplierList(WebUtils.getCurBizId(request), supplierInfo);

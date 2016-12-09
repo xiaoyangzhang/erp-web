@@ -2174,5 +2174,12 @@ public class ProductInfoController extends BaseController {
 		return id > 0 ? successJson("id", id + "") : errorJson("操作失败！");
 	}
 
+	@RequestMapping("/syncProducts.do")
+	@ResponseBody
+	public String syncProducts(HttpServletRequest request, HttpServletResponse response,
+							   ModelMap model, String authClient) {
+		productFacade.syncTaoBaoProducts(authClient);
+		return successJson();
+	}
 
 }

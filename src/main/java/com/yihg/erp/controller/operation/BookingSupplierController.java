@@ -2200,15 +2200,15 @@ public class BookingSupplierController extends BaseController {
 	@ResponseBody
 	public String delBookingSupplier(HttpServletRequest request, HttpServletResponse reponse, Integer bookingId) {
 		
-		try {
+//		try {
 //			bookingSupplierService.deleteSupplierWithFinanceByPrimaryKey(bookingId, true);
 			ResultSupport resultSupport = bookingSupplierFacade.delBookingSupplier(bookingId, true);
-		} catch (ClientException cx) {
-			return errorJson(cx.getMessage());
-		} catch (Exception ex) {
-			return errorJson("删除失败");
-		}
-		return successJson();
+//		} catch (ClientException cx) {
+//			return errorJson(cx.getMessage());
+//		} catch (Exception ex) {
+//			return errorJson("删除失败");
+//		}
+		return resultSupport.isSuccess() ? successJson() : errorJson(resultSupport.getResultMsg());
 	}
 	
 	@RequestMapping("editIncome.htm")

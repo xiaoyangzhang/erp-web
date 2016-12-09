@@ -48,7 +48,7 @@
                                class="button button-primary button-small">新增</a></li>
                         </c:if>
                         <li class="text">
-                        <button class="button button-primary button-small" type="button"
+                        <button class="button button-primary button-small" style="width: 140px;" type="button"
                                 onclick="syncProduct();">同步淘宝上架的商品
                         </button> 
                     <input type="hidden" id="optEdit" value="${optMap['EDIT'] }"/>

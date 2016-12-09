@@ -171,7 +171,8 @@
 						<td style="width: 6%;"></td>
 						<td style="width: 10%;"></td>
 						
-						<c:if test="${gbMap_SIGHT }">
+						<%--<c:if test="${gbMap_SIGHT }">--%>
+						<c:if test="${optMap['YDAP_SIGHT'] }">
 							<td style="width: 3%;"></td>
 						
 						</c:if>
@@ -199,8 +200,8 @@
 						<td style="width: 5%;"></td>
 						<td style="width: 6%;"></td>
 						<td style="width: 10%;"></td>
-						
-						<c:if test="${gbMap_SIGHT }">
+
+						<c:if test="${optMap['YDAP_SIGHT'] }">
 							<td style="width: 3%;"></td>
 						
 						</c:if>
