@@ -30,7 +30,7 @@
 	    	<input type="hidden" id="stateBooking" value="${booking.stateBooking}" />
 	    	<p class="p_paragraph_title"><b>地接社</b></p>
 	    	<dl class="p_paragraph_content">
-	    		<dd>group-detail.jspgroup-detail.jsp
+	    		<dd>
 	    			<div class="dd_left"><i class="red">* </i>地接社：</div> 
 	    			<div class="dd_right">
 	    				<input type="text" name="supplierName" id="supplierName" value="${booking.supplierName}" class="IptText300"/>
