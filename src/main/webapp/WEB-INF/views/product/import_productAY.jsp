@@ -66,6 +66,10 @@ function getProduct_Ashx() {
 	    	dataType:"json",
 	    	success:function(data){
 	    		//console.table(data);
+				if(data.result=='请指定param参数;产品名称条件，如：昆明'){
+					alert(data.result);
+					return false;
+				}
 	    		$(".w_tbodyss").empty();
 	    		$.each(data, function(i, result){
 	    			var item = "<tr ><td>"+(i+1)+"</td><td>"+result['pcode']+"</td><td>"+result['pname']+"</td><td>"+result['price_adult']+"</td><td>"+result['departure_plan']+"</td><td><input type='checkbox' id='chk_"+result['pid']+"'></td></tr>";
@@ -76,6 +80,10 @@ function getProduct_Ashx() {
 	    		alert(textStatus);
 	    	}
 	    };
+	if($("#txtcode").val()==""){
+		alert('请指定param参数;产品名称条件，如：昆明');
+		return false;
+	}
 	    $("#searchProductForm").ajaxSubmit(options);	
     
 }
