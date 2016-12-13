@@ -16,18 +16,11 @@
 		
 			<input type="hidden" name="page" id="page" />
 			<input type="hidden" name="pageSize" id="pageSize" />		
-			<input type="hidden" name="sl" value="com.yimayhd.erpresource.dal.dao.SupplierDriverMapper.queryDriverListPage" />		
-			<input type="hidden" name="rp" value="supplier/driver/driver-list-table"  />		
-			<input type="hidden" name="svc" value="commonSupplierFacade"  />
-			<input type="hidden" name="bizId" value="${bizId}"  />
-			<input type="hidden" name="bizId2" value="${reqpm.bizId2}"  />	
-<%-- 			<input type="hidden" name="page" id="page" />
-			<input type="hidden" name="pageSize" id="pageSize" />		
 			<input type="hidden" name="sl" value="com.yihg.supplier.dao.SupplierDriverMapper.queryDriverListPage" />		
 			<input type="hidden" name="rp" value="supplier/driver/driver-list-table"  />		
 			<input type="hidden" name="svc" value="commonSupplierService"  />
 			<input type="hidden" name="bizId" value="${bizId}"  />
-			<input type="hidden" name="bizId2" value="${reqpm.bizId2}"  />	 --%>
+			<input type="hidden" name="bizId2" value="${reqpm.bizId2}"  />	
 			
 			<div class="p_container_sub" >
 		    	<div class="searchRow">

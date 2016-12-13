@@ -395,7 +395,8 @@ function insertGroupByList(state){
 							$.post("../fitOrder/insertGroupMany.do", { ids: chk_value.toString(), code: code }, function(data){
 								  if(data.success){
 									  $.success('操作成功',function(){
-										 refreshCurrentPage();
+										/* refreshCurrentPage();*/
+										  refershPage();
 										layer.close(index); 
 										})
 								  }else{

@@ -1,7 +1,22 @@
 $(function(){
 	opGrid.loadGrid();
+	opGrid.reSize();
+
+
+	$(window).bind('resize', function () {
+		opGrid.reSize();
+	});
 });
 var opGrid = {
+	reSize: function(){
+		var width = $('.jqGrid_guest').width();
+
+		var height = $(window).height();//parent.get_MainContainerHeight();
+		var searchBox=80, jqGrid_head = 55, jqGrid_pager = 30, jqGrid_footer = 45;
+		height = height - searchBox - jqGrid_head - jqGrid_pager - jqGrid_footer;
+		$('#contentGroupOrderTable').setGridWidth(width);
+		$('#contentGroupOrderTable').setGridHeight(height - 10);
+	},
 	getParam: function(){
 		var rowListNum = $("#contentGroupOrderTable").jqGrid('getGridParam', 'rowNum');
 		if(rowListNum == undefined){
@@ -51,8 +66,8 @@ var opGrid = {
 			url: 'groupOrderGuestDataList.do',
 			datatype: "json",
 			mtype : "post",
-			//height: 250,
-			height: "100%",
+			height: 250,
+			//height: "100%",
 			autowidth: false,
 			shrinkToFit: false,
 			rownumbers:true,

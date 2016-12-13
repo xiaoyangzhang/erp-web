@@ -31,7 +31,7 @@
 					<col width="25%" />
 					<col width="20%" />
 					<thead>
-						<th>天数</th>
+						<th>天数1111</th>
 						<th>行程</th>
 						<th>餐饮</th>
 						<th>酒店</th>
@@ -159,11 +159,11 @@
 						<th>联系方式</th>
 						<th>结对司机</th>
 					</thead>
-					<c:if test="${!empty guide }">
+					<c:forEach items="${guidesList}" var="guides">
 						<tr>
 							<td>导游</td>
-							<td>${guide.guideName }</td>
-							<td>${guide.guideMobile }</td>
+							<td>${guides.guideName }</td>
+							<td>${guides.guideMobile }</td>
 							<td>
 								<select name ="driver" id="driver">
 			    					<option value="">请选择</option>
@@ -175,7 +175,8 @@
 			    				</select>
 							</td>
 						</tr>
-					</c:if>
+					</c:forEach>
+					
 				</table>
 			</div>
 		</dd>
