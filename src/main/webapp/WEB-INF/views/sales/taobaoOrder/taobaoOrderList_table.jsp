@@ -179,15 +179,6 @@ function printOrder(orderId){
 	});
 };
 
-
-/* $("#ckAll").live("click",function(){
-	 $("input[name='chkFitOrder']:enabled").prop("checked", this.checked);
-});
-$("input[name='chkFitOrder']").live("click",function() {
-   var $subs = $("input[name='chkFitOrder']");
-   $("#ckAll").prop("checked" , $subs.length == $subs.filter(":checked").length ? true :false);
-}); */
-
 function changeorderLockState(orderId){
 	$.confirm("是否确认提交给计调？",  function(){
 		$.getJSON("../taobao/changeOrderLockState.do?orderId=" + orderId, function(data) {

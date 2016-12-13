@@ -12,6 +12,7 @@
 <title>旅道旅行社管理系统-登录</title>
 <link href="<%=staticPath %>/assets/css/login/login.css" rel="stylesheet" />
 <link href="<%=staticPath %>/assets/js/supersized/supersized.css" rel="stylesheet" />
+<script type="text/javascript" src="<%=staticPath %>/assets/js/jquery.cookie.js"></script>
 <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 <![endif]-->
@@ -98,7 +99,8 @@
 <script type="text/javascript">
 	$(function(){
 		supersized('<%=staticPath%>');
-	})
+		$.cookie("YIHG_ERP_USER_SESSION","");
+	});
 </script>
 <div id='ft'>
 

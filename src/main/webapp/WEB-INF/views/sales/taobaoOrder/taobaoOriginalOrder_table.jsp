@@ -27,7 +27,9 @@
 		<c:set var="sumTotal" value="0"/>
 		<c:forEach items="${pageBean.result}" var="orders" varStatus="v">
 				<tr><td>${v.count}</td>
-				<td>${orders.tid}</td>
+				<td>
+				<c:if test="${orders.orderId != null}"><a href="javascript:void(0);" class="def" onclick="lookGroup(${orders.orderId})">${orders.tid}</a></td></c:if> 
+				<c:if test="${orders.orderId == null}">${orders.tid}</td></c:if> 
 				<td>${orders.buyerNick}</td>
 				<td style="text-align:left">${orders.outerIid}
 				<td style="text-align:left">${orders.title}
@@ -46,7 +48,7 @@
 				    <c:if test="${orders.isBrushSingle==0}">否</c:if>
                     <c:if test="${orders.isBrushSingle==1}"><font color="red">是</font></c:if> 
                 </td>
-				<td><input type="checkbox" name="idss" value="${orders.id}" vars="${orders.tid}"  <c:if test="${orders.tid}">checked</c:if>/></td>
+				<td><input type="checkbox" name="idss" value="${orders.id}" vars="${orders.tid}" <c:if test="${orders.myState=='CONFIRM' || orders.myState=='CANCEL'}"> disabled="disabled"</c:if> <c:if test="${orders.tid}">checked</c:if>/></td>
 				</tr>
 				<c:set var="sumTotal" value="${sumTotal + orders.payment }"/>
 				
@@ -82,5 +84,9 @@
 		});
 		//alert(retVal);
 		newWindow('新增操作单',"<%=staticPath %>/taobao/addNewTaobaoOrder.htm?retVal="+retVal);
+	}
+	
+	function lookGroup(id){
+		newWindow('查看订单','taobao/toEditTaobaoOrder.htm?id='+id+'&see=0')
 	}
 </SCRIPT>

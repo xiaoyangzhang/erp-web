@@ -63,7 +63,14 @@
 						<li>
 							<input type="text" name="groupCode" id="groupCode"/>
 						</li>
-					
+						<li class="text">团类别:</li>
+						<li>
+							<select name="groupMode" id="groupMode">
+								<option value="">全部</option>
+								<option value="0">散客</option>
+								<option value="1">团队</option>
+							</select>
+						</li>
 						<li class="text">产品:</li>
 						<li>
 							<input type="text" name="productName" id="productName"/>
@@ -73,7 +80,7 @@
 	    					<input type="text" name="orgNames" id="orgNames" stag="orgNames" value="${groupOrder.orgNames }" readonly="readonly" onclick="showOrg()"/>
 							<input name="orgIds" id="orgIds" stag="orgIds" value="${groupOrder.orgIds }" type="hidden" value=""/>	
 						</li>    		
-						<li>计调:</li>
+						<li class="text">计调:</li>
 						<li>
 							<input type="text" name="operatorName" id="operatorName" stag="userNames" readonly="readonly" onclick="showUser()"/>
 							<input name="saleOperatorIds" id="saleOperatorIds" stag="userIds" type="hidden" />
@@ -102,7 +109,8 @@ function toProfitOperatorNameExcel(){
 			+"&orgIds="+$("#orgIds").val()
 			+"&saleOperatorIds="+$("#saleOperatorIds").val()
 			+"&page="+$("#page").val()
-			+"&pageSize="+$("#pageSize").val());
+			+"&pageSize="+$("#pageSize").val()
+	        +"&groupMode="+$("#groupMode").val());
 }
 </script>
 </html>

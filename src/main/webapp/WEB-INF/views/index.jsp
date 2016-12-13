@@ -8,6 +8,7 @@
 <%@ include file="../include/top.jsp"%>
 <script type="text/javascript" src="<%=staticPath%>/assets/js/tabslide.js"></script>
 <script type="text/javascript" src="<%=staticPath%>/assets/js/toastr/toastr.min.js"></script>
+<script type="text/javascript" src="<%=staticPath %>/assets/js/jquery.cookie.js"></script>
 <link href="<%=staticPath%>/assets/css/toastr/toastr.min.css" rel="stylesheet" type="text/css" />
 </head>
 <body onresize="onResize_AutoHeight()">
@@ -71,7 +72,7 @@
 								</dt>
 								<c:forEach items="${menu.childMenuList }" var="child">
 									<dd>
-										<a title='${child.name }' lang='<%=ctx%>${child.url}'>${child.name }</a>
+										<a title='${child.name }' lang='<%=ctx%>${child.url}?yihg_erp_user_token=${userSession.userToken}'>${child.name }</a>
 									</dd>
 								</c:forEach>
 							</dl>
@@ -272,3 +273,12 @@
 </style>
 
 </html>
+
+<script type="text/javascript">
+	(function(){
+		//防止多个帐号登录同一个浏览器时 用户操作数据会串掉
+		$(document).on("mouseover",function(e){
+			$.cookie("YIHG_ERP_USER_SESSION",yihg_erp_web_config["yihg_erp_user_token"]);
+		});
+	})();
+</script>

@@ -70,8 +70,8 @@ function mergeGroup(ids) {
 						<li><input name="productName" type="text"
 							value="${groupOrder.productName}" /></li>
 						<li class="text">出团日期</li>
-						<li><input name="startTime" type="text"
-							value="${groupOrder.startTime }" class="Wdate"
+						<li><input name="departureDate" type="text"
+							value="${groupOrder.departureDate }" class="Wdate"
 							onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />~<input
 							name="endTime" value="${groupOrder.endTime}" type="text"
 							class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" /></li>

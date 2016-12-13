@@ -129,9 +129,7 @@
 					</td>
 					<c:if test="${canUpdate && optMap['CWGL_JSDSH_AUDIT']}">
 					<td>
-						<input type="checkbox" name="audit_id" value="${order.id}" 
-							${not empty order.audit_time?'checked':''} 
-						/>审核
+						<input type="checkbox" name="audit_id" value="${order.id}"<c:if test="${order.order_lock_state ne 2 && order.aiyou_group_id eq -1}">disabled </c:if> ${not empty order.audit_time?'checked':''}/>审核
 					</td>
 					</c:if>
 				</c:if>

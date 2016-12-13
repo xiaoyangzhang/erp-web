@@ -89,6 +89,7 @@
 		<col width="9%"/>
 		<col width="7%"/>
 		<col/>
+		<col width="5%"/>
 		<col width="8%"/>
 		<col width="6%"/>
 		
@@ -110,6 +111,7 @@
 			<th>团号<i class="w_table_split"></i></th>
 			<th>发团日期<i class="w_table_split"></i></th>
 			<th>产品名称<i class="w_table_split"></i></th>
+			<th>业务<i class="w_table_split"></i></th>
 			<th>客户<i class="w_table_split"></i></th>
 			<th>客人信息<i class="w_table_split"></i></th>
 			<th>客源地<i class="w_table_split"></i></th>
@@ -142,9 +144,10 @@
               <td><fmt:formatDate value="${gl.tourGroup.dateStart}" pattern="yyyy-MM-dd"/></td>
              <!--  产品名称 -->
               <td style="text-align: left">【${gl.productBrandName}】${gl.productName}</td>
+              <!-- 业务 -->
+				<td style="text-align: left">${gl.orderModeType}</td>
               <!-- 客户-->
               <td style="text-align: left">${gl.supplierName}</td>
-              
               <!-- 客人信息 -->
               <td style="text-align: left;">${gl.receiveMode}</td>
               <!-- 客源地 -->
@@ -231,6 +234,7 @@
 			<td></td>
 			<td></td>
 			<td></td>
+			<td></td>
 			<td colspan="1" style="text-align: right">合计：</td>
 			<td>${pageTotalAudit}+${pageTotalChild}+${pageTotalGuide}</td>
 		    <td></td>
@@ -248,6 +252,7 @@
 			<td></td>
 		</tr>
 		<tr class="footer2">
+			<td></td>
 			<td></td>
 			<td></td>
 			<td></td>

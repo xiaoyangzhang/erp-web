@@ -24,14 +24,14 @@
 		<dd>
 			<div class="dd_left">字典code</div> 		
 			<div class="dd_right">
-				<input type="text" name="code" value="${dic.code }"  class="IptText300"/>
+				<input type="text" name="code" value='${dic.code }'  class="IptText300"/>
            	</div>
 			<div class="clear"></div>						
 		</dd>
 		<dd>
 			<div class="dd_left">字典value</div> 		
 			<div class="dd_right">
-				<input type="text" name="value" value="${dic.value }"  class="IptText300"/>
+				<input type="text" name="value" value='${dic.value }'  class="IptText300"/>
            	</div>
 			<div class="clear"></div>						
 		</dd>
