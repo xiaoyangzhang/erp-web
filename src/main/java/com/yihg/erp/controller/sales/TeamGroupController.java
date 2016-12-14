@@ -52,7 +52,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.alibaba.dubbo.common.json.JSON;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
@@ -372,14 +372,14 @@ public class TeamGroupController extends BaseController {
 	 */
 	@RequestMapping("findTourGroupLoadModel.do")
 	@RequiresPermissions(PermissionConstants.SALE_TEAM_GROUP)
-	public String findTourGroupByConditionLoadModel(HttpServletRequest request,
+	public String findTourGroupByConditionLoadModel(HttpServletRequest request, Integer rows,Integer pageSize, Integer page,
 			GroupOrder groupOrder, Model model) throws ParseException {
-		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+		//PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
 		FindTourGroupByConditionDTO queryDTO = new FindTourGroupByConditionDTO();
 		queryDTO.setCurBizId(WebUtils.getCurBizId(request));
 		queryDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
 		queryDTO.setGroupOrder(groupOrder);
-		FindTourGroupByConditionResult result = teamGroupFacade.findTourGroupByConditionLoadModel(queryDTO,pageBean);
+		FindTourGroupByConditionResult result = teamGroupFacade.findTourGroupByConditionLoadModel(queryDTO,null);
 
 		model.addAttribute("pageTotalAudit", result.getPageTotalAudit());
 		model.addAttribute("pageTotalChild", result.getPageTotalChild());
@@ -399,9 +399,9 @@ public class TeamGroupController extends BaseController {
 		List<GroupOrder> groupList = result.getPageBean().getResult();
 		model.addAttribute("groupList", groupList);
 		model.addAttribute("groupOrder", groupOrder);
-		model.addAttribute("page", result.getPageBean());
-
-		return "sales/teamGroup/groupTable";
+		model.addAttribute("pageBean", result.getPageBean());
+		return JSON.toJSONString( result.getPageBean());
+		//return "sales/teamGroup/groupTable";
 	}
 
 	@RequestMapping(value = "saveTeamGroupInfo.do")
@@ -546,4 +546,23 @@ public class TeamGroupController extends BaseController {
 			return errorJson(resultSupport.getResultMsg());
 		}
 	}
+
+	@RequestMapping("findTourGroupLoadFooter.do")
+	@RequiresPermissions(PermissionConstants.SALE_TEAM_GROUP)
+	@ResponseBody
+	public String findTourGroupLoadFooter(HttpServletRequest request, Integer pageSize, Integer page,
+										  GroupOrder groupOrder, Model model) throws ParseException {
+		FindTourGroupLoadFooterDTO findTourGroupLoadFooterDTO = new FindTourGroupLoadFooterDTO();
+		findTourGroupLoadFooterDTO.setPage(page);
+		findTourGroupLoadFooterDTO.setPageSize(pageSize);
+		findTourGroupLoadFooterDTO.setGroupOrder(groupOrder);
+		findTourGroupLoadFooterDTO.setBizId(WebUtils.getCurBizId(request));
+		findTourGroupLoadFooterDTO.setDataUserIds(WebUtils.getDataUserIdSet(request));
+		FindTourGroupLoadFooterResult findTourGroupLoadFooterResult = teamGroupFacade.findTourGroupLoadFooter(findTourGroupLoadFooterDTO);
+
+		System.out.println("--pageBean--"+JSON.toJSONString(findTourGroupLoadFooterResult.getGroupOrder()));
+		return JSON.toJSONString(findTourGroupLoadFooterResult.getGroupOrder());
+		//return "sales/teamGroup/groupTable";
+	}
+
 }
