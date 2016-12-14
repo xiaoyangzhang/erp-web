@@ -8,11 +8,18 @@ public class ObjectUtils {
 
 	public static Integer parseInteger(Object src)
 	{
+		Integer num = null;
 		if(null != src )
 		{
-			return Integer.parseInt(src.toString());
+			try{
+				num = Integer.parseInt(src.toString());
+			}catch(Exception e){
+				e.printStackTrace();
+				num = null;
+			}
+
 		}
-		return null;
+		return num;
 	}
 	
 	public static Integer parseInteger(Object src,int defauleNum){
