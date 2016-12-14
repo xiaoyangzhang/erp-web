@@ -72,7 +72,7 @@
 								</dt>
 								<c:forEach items="${menu.childMenuList }" var="child">
 									<dd>
-										<a title='${child.name }' lang='<%=ctx%>${child.url}?yihg_erp_user_token=${userSession.userToken}'>${child.name }</a>
+										<a title='${child.name }' lang='<%=ctx%>${child.url}'>${child.name }</a>
 									</dd>
 								</c:forEach>
 							</dl>
