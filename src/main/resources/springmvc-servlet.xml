@@ -42,15 +42,43 @@
 
 	<!-- 对静态资源文件的访问， 将无法mapping到Controller的path交给default servlet handler处理 -->
 	<!-- <mvc:default-servlet-handler /> -->
+	<!-- 设置freeMarker的配置文件路径 -->
+	<bean id="freemarkerConfiguration"
+		  class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="location" value="classpath*:freemarker.properties" />
+	</bean>
+	<!-- 配置freeMarker的模板路径 -->
+	<bean id="freemarkerConfig"
+		  class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPath" value="/WEB-INF/ftl/" />
+		<property name="freemarkerSettings" ref="freemarkerConfiguration" />
+		<property name="freemarkerVariables">
+			<map>
+				<entry key="xml_escape" value-ref="fmXmlEscape" />
+			</map>
+		</property>
+	</bean>
 
+	<bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape" />
+	<!-- 配置freeMarker视图解析器 -->
+	<bean id="freemarkerViewResolver"
+		  class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.freemarker.FreeMarkerView"/>
+		<property name="contentType" value="text/html; charset=utf-8" />
+		<property name="cache" value="true" />
+		<property name="requestContextAttribute" value="rc"></property>
+		<property name="order" value="0"/>
+	</bean>
 
-	<!-- 视图文件解析配置 -->
+	<!-- JSP 视图文件解析配置 -->
 	<bean
-		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+			class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+			id="JspViewResolver">
 		<property name="viewClass"
-			value="org.springframework.web.servlet.view.JstlView" />
+				  value="org.springframework.web.servlet.view.JstlView" />
 		<property name="prefix" value="${web.view.prefix}" />
 		<property name="suffix" value="${web.view.suffix}" />
+		<property name="order" value="2" />
 	</bean>
 
 	<!-- 定义无Controller的path<->view直接映射 -->
