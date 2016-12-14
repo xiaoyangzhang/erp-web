@@ -22,9 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.yihg.erp.common.YihgTemplateFreemarkerService;
 import com.yihg.erp.utils.ObjectUtils;
-import com.yimayhd.erpcenter.biz.sales.client.service.finance.FinanceBiz;
-import com.yimayhd.erpcenter.biz.sales.client.service.sales.TourGroupBiz;
 import com.yimayhd.erpcenter.dal.sales.client.finance.po.InfoBean;
+import com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 import com.yimayhd.erpresource.dal.constants.Constants;
 import org.apache.commons.io.IOUtils;
@@ -91,7 +90,7 @@ public class FinanceController extends BaseController {
 	@Autowired
 	private FinanceFacade financeFacade;
 	@Autowired
-	private TourGroupBiz tourGroupBiz;
+	private TourGroupFacade tourGroupFacade;
 	@Autowired
 	private SysPlatformEmployeeFacade sysPlatformEmployeeFacade;
 	@Autowired
@@ -4324,7 +4323,7 @@ public class FinanceController extends BaseController {
 		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
 		model.addAttribute("bizId",bizId); // 过滤B商家
 		//获取所有已导出过数据的团 id 集合
-		model.addAttribute("groupIds", tourGroupBiz.getGroupIdsByTravelExportStatus(1, bizId));
+		model.addAttribute("groupIds",tourGroupFacade.getGroupIdsByTravelExportStatus(1,bizId));
 		return "finance/exportTravelList";
 	}
 
