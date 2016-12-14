@@ -4342,6 +4342,209 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("groupList", toPreviewResult.getPageBean().getResult());
 		return "sales/profit/profitQueryTable";
 	}
+
+
+	@RequestMapping(value = "toProfitExcel.do")
+	@ResponseBody
+	public void toProfitExcel(HttpServletRequest request, HttpServletResponse response, String startTime,
+							  String endTime, String groupCode, String receiveMode, String orgIds, Integer select, String saleOperatorIds,
+							  String productName, String supplierName, Integer provinceId, Integer cityId, String orderNo, Model model)
+			throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		GroupOrder groupOrder = new GroupOrder();
+		TourGroup tourGroup = new TourGroup();
+		tourGroup.setGroupCode(groupCode);
+		tourGroup.setStartTime(sdf.parse(startTime));
+		tourGroup.setEndTime(sdf.parse(endTime));
+		tourGroup.setProductName(productName);
+		groupOrder.setTourGroup(tourGroup);
+		groupOrder.setSupplierName(supplierName);
+		groupOrder.setReceiveMode(receiveMode);
+		groupOrder.setOrgIds(orgIds);
+		groupOrder.setSelect(select);
+		groupOrder.setSaleOperatorIds(saleOperatorIds);
+		groupOrder.setProvinceId(provinceId);
+		groupOrder.setCityId(cityId);
+		groupOrder.setOrderNo(orderNo);
+
+
+		ToProfitExcelResult result = tourGroupFacade.toProfitExcel(groupOrder,WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+		PageBean<GroupOrder> pageBean = result.getPageBean();
+		GroupOrder staticInfo = result.getStaticInfo();
+		GroupOrder groupOrderProfit = result.getGroupOrderProfit();
+		String path = "";
+		try {
+			String url = request.getSession().getServletContext().getRealPath("/template/excel/profitTable.xlsx");
+			FileInputStream input = new FileInputStream(new File(url)); // 读取的文件路径
+			XSSFWorkbook wb = new XSSFWorkbook(new BufferedInputStream(input));
+			CellStyle cellStyle = wb.createCellStyle();
+			cellStyle.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			cellStyle.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			cellStyle.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			cellStyle.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			cellStyle.setAlignment(CellStyle.ALIGN_CENTER); // 居中
+			cellStyle.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			cellStyle.setWrapText(true);
+
+			CellStyle styleLeft = wb.createCellStyle();
+			styleLeft.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleLeft.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleLeft.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleLeft.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleLeft.setAlignment(CellStyle.ALIGN_LEFT); // 居左
+			styleLeft.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			styleLeft.setWrapText(true);
+
+			CellStyle styleRight = wb.createCellStyle();
+			styleRight.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleRight.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleRight.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleRight.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleRight.setAlignment(CellStyle.ALIGN_RIGHT); // 居右
+			styleRight.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			styleRight.setWrapText(true);
+
+			Sheet sheet = wb.getSheetAt(0); // 获取到第一个sheet
+			Row row = null;
+			Cell cc = null;
+			// 遍历集合数据，产生数据行
+			Iterator<GroupOrder> it = pageBean.getResult().iterator();
+			int index = 0;
+			DecimalFormat df = new DecimalFormat("0.##");
+			while (it.hasNext()) {
+				GroupOrder orderBean = it.next();
+
+				row = sheet.createRow(index + 2);
+				cc = row.createCell(0);
+				cc.setCellValue(index + 1);
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(1);
+				cc.setCellValue(orderBean.getGroupCode());// 团号
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(2);
+				cc.setCellValue(orderBean.getDateStart());// 发团日期dateStart
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(3);
+				cc.setCellValue("【" + orderBean.getProductBrandName() + "】" + orderBean.getProductName());// 产品名称
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(4);
+				cc.setCellValue(orderBean.getSupplierName());// 客户
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(5);
+				cc.setCellValue(orderBean.getReceiveMode());// 客人信息
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(6);
+				cc.setCellValue(orderBean.getProvinceName());// 客源地
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(7);
+				cc.setCellValue(
+						orderBean.getNumAdult() + "+" + orderBean.getNumChild() + "+" + orderBean.getNumGuide());// 人数
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(8);
+				cc.setCellValue(orderBean.getSaleOperatorName());// 销售
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(9);
+				cc.setCellValue(orderBean.getOperatorName());// 计调
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(10);
+				cc.setCellValue(df.format(orderBean.getIncome()));// 收入
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(11);
+				cc.setCellValue(df.format(orderBean.getBudget()));// 成本
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(12);
+				cc.setCellValue(df.format(orderBean.getIncome().subtract(orderBean.getBudget())));// 毛利
+				cc.setCellStyle(cellStyle);
+
+				index++;
+			}
+
+			row = sheet.createRow(index + 2); // 加合计行
+			cc = row.createCell(0);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(1);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(2);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(3);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(4);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(5);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(6);
+			cc.setCellValue("总合计：");
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(7);
+			cc.setCellValue(staticInfo.getNumAdult() + "+" + staticInfo.getNumChild() + "+" + staticInfo.getNumGuide());
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(8);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(9);
+			cc.setCellStyle(styleRight);
+
+			cc = row.createCell(10);
+			cc.setCellValue(
+					groupOrderProfit.getTotalIncome() == null ? 0 : groupOrderProfit.getTotalIncome().doubleValue());
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(11);
+			cc.setCellValue(
+					groupOrderProfit.getTotalBudget() == null ? 0 : groupOrderProfit.getTotalBudget().doubleValue());
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(12);
+			cc.setCellValue(
+					(groupOrderProfit.getTotalIncome().subtract(groupOrderProfit.getTotalBudget())).doubleValue());
+			cc.setCellStyle(cellStyle);
+
+			CellRangeAddress region = new CellRangeAddress(pageBean.getResult().size() + 5,
+					pageBean.getResult().size() + 5, 0, 10);
+			sheet.addMergedRegion(region);
+
+			row = sheet.createRow(pageBean.getResult().size() + 5);
+			cc = row.createCell(0);
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName() + " 打印时间："
+					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
+					+ ".xlsx";
+			FileOutputStream out = new FileOutputStream(path);
+			wb.write(out);
+			out.close();
+			wb.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		String fileName = "";
+		try {
+			fileName = new String("销售利润.xlsx".getBytes("UTF-8"), "iso-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		download(path, fileName, request, response);
+	}
 	
 	/**
 	 * 按团查询预算利润
@@ -6144,7 +6347,7 @@ public class TourGroupController extends BaseController {
 	@RequestMapping(value = "toProfitOperatorExcel.do")
 	public void operatorSummaryTable(HttpServletRequest request, HttpServletResponse response,
 									 String startTime, String endTime, String groupCode,
-									 String productName, String orgIds, String saleOperatorIds,Model model) throws ParseException {
+									 String productName, String orgIds, String saleOperatorIds, Integer groupMode,Model model) throws ParseException {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		TourGroup tgBean = new TourGroup();
 		tgBean.setStartTime(startTime == ""?null:sdf.parse(startTime));
@@ -6153,6 +6356,7 @@ public class TourGroupController extends BaseController {
 		tgBean.setProductName(productName);
 		tgBean.setOrgIds(orgIds);
 		tgBean.setSaleOperatorIds(saleOperatorIds);
+		tgBean.setGroupMode(groupMode);
 
 		/*PageBean pageBean = new PageBean();
 		pageBean.setPage(1);
@@ -6255,26 +6459,34 @@ public class TourGroupController extends BaseController {
 				cc.setCellStyle(styleLeft);
 
 				cc = row.createCell(5);
-				cc.setCellValue(tg.getTotalAdult()+"+"+tg.getTotalChild()+"+"+tg.getTotalGuide());//人数
+				cc.setCellValue(tg.getTotalAdult());// 成人数
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(6);
-				cc.setCellValue(tg.getOperatorName());//计调
+				cc.setCellValue(tg.getTotalChild()); // 儿童数
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(7);
-				cc.setCellValue(df.format(tg.getTotalBudget()));//结算
+				cc.setCellValue(tg.getTotalGuide()); // 陪同数
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(8);
-				cc.setCellValue(df.format(tg.getTotalCost()));//成本
+				cc.setCellValue(tg.getOperatorName());//计调
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(9);
+				cc.setCellValue(df.format(tg.getTotalBudget()));//结算
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(10);
+				cc.setCellValue(df.format(tg.getTotalCost()));//成本
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(11);
 				cc.setCellValue(df.format(tg.getTotalBudget().subtract(tg.getTotalCost())));//毛利
 				cc.setCellStyle(cellStyle);
 
-				cc = row.createCell(10);//团状态
+				cc = row.createCell(12);//团状态
 				if(tg.getGroupState() == 0){
 					cc.setCellValue("未确认");
 				}else if(tg.getGroupState() == 1){
@@ -6332,25 +6544,33 @@ public class TourGroupController extends BaseController {
 			cc.setCellStyle(styleRight);
 
 			cc = row.createCell(5);
-			cc.setCellValue(allTotalAdult.toString()+"+"+allTotalChild.toString()+"+"+allTotalGuide.toString());
+			cc.setCellValue(allTotalAdult.toString());
 			cc.setCellStyle(cellStyle);
 
 			cc = row.createCell(6);
-			cc.setCellStyle(styleRight);
+			cc.setCellValue(allTotalChild.toString());
+			cc.setCellStyle(cellStyle);
 
 			cc = row.createCell(7);
-			cc.setCellValue(df.format(allTotalBudget));
+			cc.setCellValue(allTotalGuide.toString());
 			cc.setCellStyle(cellStyle);
 
 			cc = row.createCell(8);
-			cc.setCellValue(df.format(allTotalCost));
-			cc.setCellStyle(cellStyle);
+			cc.setCellStyle(styleRight);
 
 			cc = row.createCell(9);
-			cc.setCellValue(df.format(allTotalBudget.subtract(allTotalCost)));
+			cc.setCellValue(df.format(allTotalBudget));
 			cc.setCellStyle(cellStyle);
 
 			cc = row.createCell(10);
+			cc.setCellValue(df.format(allTotalCost));
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(11);
+			cc.setCellValue(df.format(allTotalBudget.subtract(allTotalCost)));
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(12);
 			cc.setCellStyle(styleRight);
 
 			CellRangeAddress region = new CellRangeAddress(pageBean.getResult().size() + 5,
@@ -6390,8 +6610,8 @@ public class TourGroupController extends BaseController {
 								  String startTime, String endTime, String groupCode, String dateType,
 								  String receiveMode,String orgIds,String operType,
 								  String saleOperatorIds,String productName,String productBrandId,String supplierName,
-								  String orderMode,String stateFinance,String orderLockState,
-								  Model model) throws ParseException {
+								  String stateFinance,String orderLockState,
+								  String orderNo,Model model) throws ParseException {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		GroupOrder groupOrder = new GroupOrder();
 		groupOrder.setDateType(dateType == "" ? null : Integer.valueOf(dateType));
@@ -6400,7 +6620,6 @@ public class TourGroupController extends BaseController {
 		groupOrder.setGroupCode(groupCode);
 		groupOrder.setSupplierName(supplierName);
 		groupOrder.setReceiveMode(receiveMode);
-		groupOrder.setOrderMode(orderMode == "" ? null : Integer.valueOf(orderMode));
 		groupOrder.setStateFinance(stateFinance == "" ? null : Integer.valueOf(stateFinance));
 		groupOrder.setOrderLockState(orderLockState == "" ? null : Integer.valueOf(orderLockState));
 		groupOrder.setOrgIds(orgIds);
@@ -6408,6 +6627,7 @@ public class TourGroupController extends BaseController {
 		groupOrder.setSaleOperatorIds(saleOperatorIds);
 		groupOrder.setProductBrandId(productBrandId == "" ? null : Integer.valueOf(productBrandId));
 		groupOrder.setProductName(productName);
+		groupOrder.setOrderNo(orderNo);
 
 		if (groupOrder.getDateType() != null && groupOrder.getDateType() == 2) {
 			if (!"".equals(groupOrder.getStartTime())) {
@@ -6448,6 +6668,7 @@ public class TourGroupController extends BaseController {
 */
 		BookingProfitTableResult bookingProfitTableResult = tourGroupFacade.toProfitSaleExcel(groupOrder,WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
 		PageBean pageBean = bookingProfitTableResult.getPageBean();
+		List<DicInfo> typeList = bookingProfitTableResult.getTypeList();
 		Map<String,Object> map = bookingProfitTableResult.getSum();
 		String path = "";
 		try {
@@ -6486,6 +6707,7 @@ public class TourGroupController extends BaseController {
 			Cell cc = null;
 			// 遍历集合数据，产生数据行
 			Iterator<GroupOrder> it = pageBean.getResult().iterator();
+
 			int index = 0;
 			DecimalFormat df = new DecimalFormat("0.##");
 			while (it.hasNext()) {
@@ -6501,54 +6723,74 @@ public class TourGroupController extends BaseController {
 				cc.setCellStyle(styleLeft);
 
 				cc = row.createCell(2);
-				cc.setCellValue(orderBean.getDateStart());//发团日期dateStart
+				cc.setCellValue(orderBean.getDepartureDate());//发团日期
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(3);
 				cc.setCellValue("【"+orderBean.getProductBrandName()+"】"+orderBean.getProductName());//产品名称
 				cc.setCellStyle(styleLeft);
 
+				for(DicInfo item:typeList){
+					if(item.getId().equals(orderBean.getOrderMode())) {
+						orderBean.setOrderModeType(item.getValue());
+						break;
+					}
+				}
+
 				cc = row.createCell(4);
-				cc.setCellValue(orderBean.getSupplierName());//客户
+				cc.setCellValue(orderBean.getOrderModeType()); // 业务
 				cc.setCellStyle(styleLeft);
 
 				cc = row.createCell(5);
-				cc.setCellValue(orderBean.getReceiveMode());//客人信息
+				cc.setCellValue(orderBean.getSupplierName());// 客户
 				cc.setCellStyle(styleLeft);
 
 				cc = row.createCell(6);
-				cc.setCellValue(orderBean.getProvinceName());//客源地
+				cc.setCellValue(orderBean.getReceiveMode());// 客人信息
 				cc.setCellStyle(styleLeft);
 
 				cc = row.createCell(7);
-				cc.setCellValue(orderBean.getNumAdult()+"+"+orderBean.getNumChild()+"+"+orderBean.getNumGuide());//人数
-				cc.setCellStyle(cellStyle);
+				cc.setCellValue(orderBean.getProvinceName());// 客源地
+				cc.setCellStyle(styleLeft);
 
 				cc = row.createCell(8);
-				cc.setCellValue(orderBean.getSaleOperatorName());//销售
+				cc.setCellValue(
+						orderBean.getNumAdult()); // 成人数
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(9);
-				cc.setCellValue(orderBean.getOperatorName());//计调
+				cc.setCellValue(orderBean.getNumChild()); // 儿童数
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(10);
-				cc.setCellValue(df.format(orderBean.getTotal()));//收入
+				cc.setCellValue(orderBean.getNumGuide());// 陪同数
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(11);
-				cc.setCellValue(df.format(orderBean.getQdtotal()));//其它收入
+				cc.setCellValue(orderBean.getSaleOperatorName());// 销售
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(12);
-				cc.setCellValue(df.format(orderBean.getBudget()));//成本
+				cc.setCellValue(orderBean.getOperatorName());// 计调
 				cc.setCellStyle(cellStyle);
 
 				cc = row.createCell(13);
-				cc.setCellValue(df.format(orderBean.getG_profit()));//毛利
+				cc.setCellValue(df.format(orderBean.getTotal()));// 收入
 				cc.setCellStyle(cellStyle);
 
-				cc = row.createCell(14);//团状态
+				cc = row.createCell(14);
+				cc.setCellValue(df.format(orderBean.getQdtotal()));// 其它收入
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(15);
+				cc.setCellValue(df.format(orderBean.getBudget()));// 成本
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(16);
+				cc.setCellValue(df.format(orderBean.getG_profit()));// 毛利
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(17);// 团状态
 				if(orderBean.getGroupState() == 0){
 					cc.setCellValue("未确认");
 				}else if(orderBean.getGroupState() == 1){
@@ -6616,36 +6858,47 @@ public class TourGroupController extends BaseController {
 			cc.setCellStyle(styleRight);
 
 			cc = row.createCell(6);
-			cc.setCellValue("总合计：");
 			cc.setCellStyle(styleRight);
 
 			cc = row.createCell(7);
-			cc.setCellValue(allNumAdult.toString()+"+"+allNumChild.toString()+"+"+allNumGuide.toString());
-			cc.setCellStyle(cellStyle);
+			cc.setCellValue("总合计：");
+			cc.setCellStyle(styleRight);
 
 			cc = row.createCell(8);
-			cc.setCellStyle(styleRight);
+			cc.setCellValue(allNumAdult.toString());
+			cc.setCellStyle(cellStyle);
 
 			cc = row.createCell(9);
-			cc.setCellStyle(styleRight);
+			cc.setCellValue(allNumChild.toString());
+			cc.setCellStyle(cellStyle);
 
 			cc = row.createCell(10);
-			cc.setCellValue(df.format(allSumTotal));
+			cc.setCellValue(allNumGuide.toString());
 			cc.setCellStyle(cellStyle);
 
 			cc = row.createCell(11);
-			cc.setCellValue(df.format(allSumGdtotal));
-			cc.setCellStyle(cellStyle);
+			cc.setCellStyle(styleRight);
 
 			cc = row.createCell(12);
-			cc.setCellValue(df.format(allSumBudget));
-			cc.setCellStyle(cellStyle);
+			cc.setCellStyle(styleRight);
 
 			cc = row.createCell(13);
-			cc.setCellValue(df.format(allSumProfit));
+			cc.setCellValue(df.format(allSumTotal));
 			cc.setCellStyle(cellStyle);
 
 			cc = row.createCell(14);
+			cc.setCellValue(df.format(allSumGdtotal));
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(15);
+			cc.setCellValue(df.format(allSumBudget));
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(16);
+			cc.setCellValue(df.format(allSumProfit));
+			cc.setCellStyle(cellStyle);
+
+			cc = row.createCell(17);
 			cc.setCellStyle(styleRight);
 
 			CellRangeAddress region = new CellRangeAddress(pageBean.getResult().size() + 5,
