@@ -100,7 +100,6 @@
 </body>
 <script type="text/javascript" src="<%=staticPath%>/assets/js/region/region.selection.js"></script>
 <script type="text/javascript">
-//var ExportedGroupIds = [<c:forEach items="${groupIds}" var="groupid">${groupid},</c:forEach> -1];
 
 //选择要导出的团
 var SelectedGroupMap = {};
