@@ -374,24 +374,27 @@ public class TeamGroupController extends BaseController {
 	@RequiresPermissions(PermissionConstants.SALE_TEAM_GROUP)
 	public String findTourGroupByConditionLoadModel(HttpServletRequest request, Integer rows,Integer pageSize, Integer page,
 			GroupOrder groupOrder, Model model) throws ParseException {
-		//PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+		String sidx = request.getParameter("sidx");//来获得排序的列名，
+		String sord = request.getParameter("sord");//来获得排序方式
+		groupOrder.setSidx(sidx);
+		groupOrder.setSord(sord);
 		FindTourGroupByConditionDTO queryDTO = new FindTourGroupByConditionDTO();
+		queryDTO.setRows(rows);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
 		queryDTO.setCurBizId(WebUtils.getCurBizId(request));
 		queryDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
 		queryDTO.setGroupOrder(groupOrder);
-		FindTourGroupByConditionResult result = teamGroupFacade.findTourGroupByConditionLoadModel(queryDTO,null);
+		FindTourGroupByConditionResult result = teamGroupFacade.findTourGroupByConditionLoadModel(queryDTO);
 
 		model.addAttribute("pageTotalAudit", result.getPageTotalAudit());
 		model.addAttribute("pageTotalChild", result.getPageTotalChild());
 		model.addAttribute("pageTotalGuide", result.getPageTotalGuide());
 
 		GroupOrder order = result.getGroupOrder();
-		model.addAttribute("totalAudit",
-				order == null ? 0 : order.getNumAdult());
-		model.addAttribute("totalChild",
-				order == null ? 0 : order.getNumChild());
-		model.addAttribute("totalGuide",
-				order == null ? 0 : order.getNumGuide());
+		model.addAttribute("totalAudit", result.getTotalAudit());
+		model.addAttribute("totalChild",result.getTotalChild());
+		model.addAttribute("totalGuide", result.getPageTotalGuide());
 
 //		*//**
 //		 * 根据组团社id获取组团社名称
