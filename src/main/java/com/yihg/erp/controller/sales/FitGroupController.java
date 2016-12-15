@@ -483,6 +483,8 @@ public class FitGroupController extends BaseController {
 		toFitGroupTableDTO.setRows(rows);
 		toFitGroupTableDTO.setPageSize(pageSize);
 		toFitGroupTableDTO.setPage(page);
+		toFitGroupTableDTO.setCurBizId(WebUtils.getCurBizId(request));
+		toFitGroupTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 		toFitGroupTableDTO.setTourGroup(tourGroup);
 		ToFitGroupTableResult toFitGroupTableResult = fitGroupFacade.toFitGroupTable(toFitGroupTableDTO);
 		model.addAttribute("pageBean", toFitGroupTableResult.getPageBean());
