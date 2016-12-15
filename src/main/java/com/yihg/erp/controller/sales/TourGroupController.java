@@ -1504,11 +1504,11 @@ public class TourGroupController extends BaseController {
 		model.addAttribute("groupOrder", groupOrder);
 		model.addAttribute("page", pageBean);*/
 
-		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+		//PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
 
-		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
-				: groupOrder.getPageSize());
-		pageBean.setPage(groupOrder.getPage());
+		//pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
+		//		: groupOrder.getPageSize());
+		//pageBean.setPage(groupOrder.getPage());
 
 		// 如果人员为空并且部门不为空，则取部门下的人id
 		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds())
@@ -1544,13 +1544,13 @@ public class TourGroupController extends BaseController {
 				groupOrder.setEndTime(calendar.getTime().getTime() + "");
 			}
 		}
-		pageBean.setParameter(groupOrder);
+	//	pageBean.setParameter(groupOrder);
 
 		FindTourGroupByConditionDTO findTourGroupByConditionDTO = new FindTourGroupByConditionDTO();
 		findTourGroupByConditionDTO.setGroupOrder(groupOrder);
 		findTourGroupByConditionDTO.setCurBizId(WebUtils.getCurBizId(request));
 		findTourGroupByConditionDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
-		FindTourGroupByConditionResult findTourGroupByConditionResult = teamGroupFacade.findTourGroupByConditionLoadModel(findTourGroupByConditionDTO,pageBean);
+		FindTourGroupByConditionResult findTourGroupByConditionResult = teamGroupFacade.findTourGroupByConditionLoadModel(findTourGroupByConditionDTO);
 
 		model.addAttribute("pageTotalAudit", findTourGroupByConditionResult.getPageTotalAudit());
 		model.addAttribute("pageTotalChild", findTourGroupByConditionResult.getPageTotalChild());
