@@ -372,6 +372,7 @@ public class TeamGroupController extends BaseController {
 	 */
 	@RequestMapping("findTourGroupLoadModel.do")
 	@RequiresPermissions(PermissionConstants.SALE_TEAM_GROUP)
+	@ResponseBody
 	public String findTourGroupByConditionLoadModel(HttpServletRequest request, Integer rows,Integer pageSize, Integer page,
 			GroupOrder groupOrder, Model model) throws ParseException {
 		String sidx = request.getParameter("sidx");//来获得排序的列名，
