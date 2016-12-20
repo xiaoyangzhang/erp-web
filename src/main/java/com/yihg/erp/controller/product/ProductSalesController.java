@@ -95,6 +95,18 @@ public class ProductSalesController extends BaseController {
 
 	@RequestMapping(value = "/productSalesList.do")
 	public String productSalesList(HttpServletRequest request, ModelMap model,ProductSales productSales,Integer page,Integer pageSize) {
+		ProductTagVo productTagVo = JSONObject.parseObject(productSales.getProductTagVo(), ProductTagVo.class);
+
+		List<ProductTag> tabList = productTagVo.getProductTags();
+		Set<String> strSet = new HashSet<String>();
+		for(ProductTag tagBean:tabList){
+			strSet.add(tagBean.getTagName());
+		}
+		if(strSet.size()>0 ){
+			productSales.setStrSet(strSet);
+		}else {
+			productSales.setStrSet(null);
+		}
 		Integer bizId = WebUtils.getCurBizId(request);
 		if(page==null){
 			page=1;
