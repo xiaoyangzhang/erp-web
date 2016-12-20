@@ -227,6 +227,9 @@ $(document).ready(function() {
 			<div class="print NoPrint">
 				<c:if test="${reqpm.isPrint ne true}">
   					<a class="button  button-primary button-small mr-20" href="<%=staticPath%>/finance/auditGroupListPrint.htm?groupId=${reqpm.groupId }&isPrint=true" target="_blank">打印预览</a>
+ 					<%-- 导出 --%>
+					<a target="_blank" href="<%=staticPath%>/finance/queryAuditGroupExcelList.htm?groupId=${reqpm.groupId }&isPrint=true"
+					   class="button button-primary button-small">导出到Excel</a>
  				</c:if>
  				<c:if test="${reqpm.isPrint eq true}">
   					<a class="button  button-primary button-small mr-20" onclick="opPrint();" href="#" >打印</a>

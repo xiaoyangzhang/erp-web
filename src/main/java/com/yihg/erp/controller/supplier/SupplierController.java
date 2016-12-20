@@ -1175,13 +1175,13 @@ public class SupplierController extends BaseController {
 		SupplierGuide guide = null;
 		guide = webResult.getSupplierGuide();
 		model.addAttribute("guide", guide);
-		if (guide.getProvinceId() != null) {
+		if (guide!=null&&guide.getProvinceId() != null) {
 			model.addAttribute("cityList", webResult.getCityList());
 		}
-		if (guide.getCityId() != null) {
+		if (guide!=null&&guide.getCityId() != null) {
 			model.addAttribute("areaList", webResult.getAreaList());
 		}
-		if (guide.getAreaId() != null) {
+		if (guide!=null&&guide.getAreaId() != null) {
 			model.addAttribute("townList", webResult.getTownList());
 		}
 

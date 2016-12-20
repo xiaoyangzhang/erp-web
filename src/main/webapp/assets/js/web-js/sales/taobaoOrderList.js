@@ -627,7 +627,7 @@ function delGroup(id){
 		$.getJSON("../groupOrder/delTaobaoGroupOrder.do?id=" + id, function(data) {
 			if (data.success) {
 				$.success('操作成功',function(){
-					refershPage();
+					searchBtn(); 
 				});
 			}else {
 				$.warn(data.msg);
@@ -644,13 +644,13 @@ function delGroup(id){
  * @param pageSize
  */
 function queryList(page,pageSize) {
-	if (!page || page < 1) {
+/*	if (!page || page < 1) {
 		page = 1;
 	}
 	$("#orderPage").val(page);
 	$("#orderPageSize").val(pageSize);
 	var options = {
-		/*url:"getSpecialGroupData.do",*/
+		url:"getSpecialGroupData.do",
 		url:"taobaoOrderList_table.htm",
     	type:"post",
     	dataType:"html",
@@ -661,12 +661,13 @@ function queryList(page,pageSize) {
     		$.warn("服务忙，请稍后再试",{icon:1,time:1000});
     	}
     };
-    $("#specialGroupListForm").ajaxSubmit(options);	
+    $("#specialGroupListForm").ajaxSubmit(options);	*/
 }
 
 function searchBtn() {
-	var pageSize=$("#orderPageSize").val();
-	queryList(1,pageSize);
+/*	var pageSize=$("#orderPageSize").val();
+	queryList(1,pageSize);*/
+	$("#tableDiv").jqGrid('setGridParam', {page:1, postData: opGrid.getParam()}).trigger("reloadGrid"); //重新载入 
 }
 function refershPage(){
 	var pageSize=$("#orderPageSize").val();

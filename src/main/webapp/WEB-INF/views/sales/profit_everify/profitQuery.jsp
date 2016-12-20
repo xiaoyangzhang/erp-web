@@ -61,13 +61,10 @@
 								</c:forEach>
 							</select><input name="productName" id="productName" type="text" 　placeholder="请输入产品名称"/>
 						</li>
-						<li class="text">业务:</li><li>
-						<select name="orderMode" id="orderMode">
-								<option value="">请选择</option>
-							<c:forEach items="${typeList}" var="v" varStatus="vs">
-								<option value="${v.id}">${v.value}</option>
-							</c:forEach>		
-							</select>
+						<li class="text">业务:</li>
+						<li>
+							<input type="text" id="dicNames" readonly="readonly" onclick="commonDicDlg()"/>
+							<input type="hidden" name="orderNo" id="dicIds" value=""  />
 						</li>
 					</ul>
 					<ul>
@@ -139,6 +136,7 @@ function setData(){
 
 /* 内部结算（销售）导出到Excel */
 function toProfitSaleExcel(){
+	
 	$("#toProfitSaleExcelId").attr("href","toProfitSaleExcel.do?startTime="+$("#startTime").val()
 			+"&endTime="+$("#endTime").val()
 			+"&dateType="+$("#dateType").val()
@@ -150,11 +148,15 @@ function toProfitSaleExcel(){
 			+"&saleOperatorIds="+$("#saleOperatorIds").val()
 			+"&productName="+$("#productName").val()
 			+"&productBrandId="+$("#productBrandId").val()
-			+"&orderMode="+$("#orderMode").val()
 			+"&stateFinance="+$("#stateFinance").val()
 			+"&orderLockState="+$("#orderLockState").val()
 			+"&page="+$("#page").val()
-			+"&pageSize="+$("#pageSize").val());
+			+"&pageSize="+$("#pageSize").val()
+			+"&orderNo="+$("#dicIds").val());
+}
+
+function commonDicDlg() {
+    $.dicItemDlg('SALES_TEAM_TYPE','dicNames','dicIds');
 }
 </script>
 </html>

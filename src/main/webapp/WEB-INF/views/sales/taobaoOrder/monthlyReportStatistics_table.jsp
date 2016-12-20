@@ -104,6 +104,7 @@
 function toExportWord(){
 	window.location = "getOrders.do?startTime=${parameter.startTime}&endTime=${parameter.endTime}"+
 	"&orderMode=${parameter.orderMode}"+
+	"&orderNo=${parameter.orderNo}"+
 	"&supplierName=${parameter.supplierName}"+
 	"&productName=${parameter.productName}"+
 	"&operType=${parameter.operType}"+

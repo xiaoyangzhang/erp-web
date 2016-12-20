@@ -46,13 +46,15 @@
 		}
 		
 		function sureBtn() {
+			var items = $("#tbody");
+	        var itemsChecked = items.find("input[type='checkbox']");
 			var retVal = [];
-			$("input[type='checkbox']").each(function(){
+			itemsChecked.each(function(){
 					if ($(this).prop("checked")){
 						retVal.push($(this).val())
 					}
 			});
-			//console.log(retVal);
+			// console.log(retVal);
 
 			parent.loadTaobaoData(retVal); 
 			
@@ -67,6 +69,16 @@
 
 		$(function () {
 			queryList();
+		});
+		
+		$(function(){
+			  $("#ckAll").live("click",function(){
+					 $("input[name='orderId']:enabled").prop("checked", this.checked);
+			  });
+			  $("input[name='orderId']").live("click",function() {
+			    var $subs = $("input[name='orderId']");
+			    $("#ckAll").prop("checked" , $subs.length == $subs.filter(":checked").length ? true :false);
+			  });
 		});
 </SCRIPT>
 <!-- <SCRIPT type="text/javascript">

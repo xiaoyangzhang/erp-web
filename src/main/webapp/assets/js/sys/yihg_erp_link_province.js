@@ -49,7 +49,9 @@ var linkProvinceSelect = function(config) {
 		}, {
 			"eleId" : "areaName",
 			"defaultLabel" : "请选择县"
-		} ]
+		} ],
+		linkDataMap:{},
+		firstDataList:[]
 	}, config || {});
 
 	var linkArray = myConfig.levelLinks || [];
@@ -79,33 +81,38 @@ var linkProvinceSelect = function(config) {
 					var currenLinkVal = currenSelectObj.val();
 
 					// 查询下一级数据
-					$.ajax(myConfig.regionUrl, {
+					myConfig.regionUrl && (currenLinkVal != "") && (!myConfig.linkDataMap[currenLinkVal+""]) && $.ajax(myConfig.regionUrl, {
 						type : "post",
 						dataType : "json",
 						data : {
 							"id" : currenLinkVal
 						},
 						success : function(data) {
-							parseLinkProvinceSelectTemplte(nextEleId, data,
+							myConfig.linkDataMap[currenLinkVal+""] = data;
+							parseLinkProvinceSelectTemplte(nextEleId,data,
 									defaultLabelMap[nextEleId]);
 						},
 						error : function(data) {
 							$.warn("查询信息失败");
 						}
 					});
-
+					
+					//数据已经被缓存 
+					 parseLinkProvinceSelectTemplte(nextEleId,myConfig.linkDataMap[currenLinkVal+""] || [],
+							defaultLabelMap[nextEleId]);
+					 
 					// 清空 nextEleId 以后的所有 select
-					var nextEleIdToEnd = nextEleId;
-					while ((nextEleIdToEnd = linkMap[nextEleIdToEnd])) {
+					var nextEleIdToEnd = linkMap[nextEleId];
+					while (nextEleIdToEnd) {
 						parseLinkProvinceSelectTemplte(nextEleIdToEnd, [],
 								defaultLabelMap[nextEleIdToEnd]);
+						nextEleIdToEnd = linkMap[nextEleIdToEnd];
 					}
-
 				});
 	}
 
-	// 渲染省
-	$.ajax(myConfig.proviceUrl, {
+	// 渲染省 第一级
+	myConfig.proviceUrl && $.ajax(myConfig.proviceUrl, {
 		type : "post",
 		dataType : "json",
 		success : function(data) {
@@ -119,4 +126,12 @@ var linkProvinceSelect = function(config) {
 			$.warn("查询省信息失败");
 		}
 	});
+	// 用firstDataList 渲染
+	if(!myConfig.proviceUrl && myConfig.firstDataList && myConfig.firstDataList.length){
+		var myEleId = linkArray.length ? linkArray[0]["eleId"] : "";
+		parseLinkProvinceSelectTemplte(myEleId, myConfig.firstDataList,
+				defaultLabelMap[myEleId]);
+		// 触发默认显示
+		$("#" + myEleId).trigger("change");
+	}
 }
