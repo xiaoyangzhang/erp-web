@@ -1,24 +1,6 @@
 package com.yihg.erp.controller.sales;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.alibaba.fastjson.JSON;
-import com.yimayhd.erpcenter.facade.sales.query.*;
-import com.yimayhd.erpcenter.facade.sales.result.ToFitGroupTableResult;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-//import com.yihg.basic.contants.BasicConstants;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.GroupCodeUtil;
 import com.yihg.erp.contant.PermissionConstants;
@@ -27,15 +9,28 @@ import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yimayhd.erpcenter.common.contants.BasicConstants;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
-//import com.yihg.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.FitGroupInfoVO;
+import com.yimayhd.erpcenter.facade.sales.query.*;
 import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToSecImpNotGroupListDTO;
 import com.yimayhd.erpcenter.facade.sales.result.BaseStateResult;
 import com.yimayhd.erpcenter.facade.sales.result.FitGroupInfoQueryResult;
 import com.yimayhd.erpcenter.facade.sales.result.FitTotalSKGroupQueryResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToFitGroupTableResult;
 import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToSecImpNotGroupListResult;
 import com.yimayhd.erpcenter.facade.sales.service.FitGroupFacade;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Set;
+
+//import com.yihg.basic.contants.BasicConstants;
+//import com.yihg.sales.po.GroupOrder;
 
 @Controller
 @RequestMapping(value = "/fitGroup")
