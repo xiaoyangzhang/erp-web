@@ -7231,10 +7231,10 @@ public class QueryController extends BaseController {
 		// Integer bizId = WebUtils.getCurBizId(request);
 		// getOrgAndUserTreeJsonStr(model, bizId);
 
-		QueryDTO queryDTO = new QueryDTO();
-		queryDTO.setParameters(WebUtils.getQueryParamters(request));
-		queryDTO.setBizId(WebUtils.getCurBizId(request));
-		QueryResult queryResult = queryFacade.productTrendTableList(queryDTO);
+//		QueryDTO queryDTO = new QueryDTO();
+//		queryDTO.setParameters(WebUtils.getQueryParamters(request));
+//		queryDTO.setBizId(WebUtils.getCurBizId(request));
+//		QueryResult queryResult = queryFacade.productTrendTableList(queryDTO);
 		model.addAttribute("allProvince", productCommonFacade.queryProvinces().getRegionList());
 		return "queries/guestSourceShop/supplier-guest_source-shopping-list";
 
