@@ -166,7 +166,7 @@ public class ResTrafficController extends BaseController{
 	 */
 	@RequestMapping(value = "/changeResState.do")
 	@ResponseBody
-	public String changeResState(HttpServletRequest request, Integer id,Integer state){
+	public String changeResState(HttpServletRequest request, Integer id,byte state){
 		TraficchangeResStateDTO dto = new TraficchangeResStateDTO();
 		dto.setId(id);
 		dto.setState(state);
