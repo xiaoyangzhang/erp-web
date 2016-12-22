@@ -4952,6 +4952,7 @@ public class QueryController extends BaseController {
 		model.addAttribute("groupOrder", result.getGroupOrder());
 		model.addAttribute("dataType", result.getDataType());
 		model.addAttribute("jsonStr", result.getJsonStr());
+		//result
 
 		return "queries/order/groupNumber";
 	}
