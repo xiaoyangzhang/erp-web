@@ -2,10 +2,13 @@ package com.yihg.erp.controller.basic;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSON;
+import com.yihg.erp.utils.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -174,5 +177,16 @@ public class DicController extends BaseController{
 		//Long dicId = Long.valueOf(id);
 		dicFacade.dicDel(id);		
 		return successJson();
+	}
+
+	/**
+	 * 根据字典code获取字典信息
+	 */
+	@RequestMapping("/getDictInfoByTypeCode.do")
+	@ResponseBody
+	public String getDictInfoByTypeCode(HttpServletRequest request,HttpServletResponse response){
+		Map<String,Object> requestParam = WebUtils.getQueryParamters(request);
+		String typeCode = ObjectUtils.toString(requestParam.get("typeCode"), "_");
+		return JSON.toJSONString(dicFacade.getListByTypeCode(typeCode, WebUtils.getCurBizId(request)));
 	}
 }

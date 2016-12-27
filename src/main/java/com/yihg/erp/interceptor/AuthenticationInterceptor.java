@@ -72,9 +72,9 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 			//request中可以直接使用的
 			request.setAttribute("userSession", userSession);
 			// 管理员默认有所有权限
-			/*if (userSession.getIsSuper() != 0) {
-				return true;
-			}*/
+//			if (userSession.getIsSuper() != 0) {
+//				return true;
+//			}
 			if(!(handler instanceof HandlerMethod)){//不是controller过来的其他类型的请求
 				return true;
 			}

@@ -17,4 +17,6 @@
 	<bean id="tfsUpload" class="com.yihg.erp.utils.TfsUpload">
 		<property name="sysConfig" ref="configBean"></property>
 	</bean>
+
+	<bean id="yihgTemplateFreemarkerService" class="com.yihg.erp.common.YihgTemplateFreemarkerService"/>
 </beans>

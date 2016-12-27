@@ -51,6 +51,10 @@
 		var val_adjust_uprodown = $('#adjust_uprodown input[name="adjustUpOrDown"]:checked ').val();
 		var var_price = $("#adjust_price").val();
 		var var_set_id = $("#setId").val();
+		if( var_price.length == 0 || isNaN(var_price)) {
+		    $.error("请输入数值类型的金额");
+		    return false;
+		}
 		$.ajax({
 			type : "post",
 			url : "<%=path%>/resTraffic/toUpdateProductPrice.do",

@@ -7,10 +7,10 @@
 	<colgroup> 
 		<col width="5%"/>
 		<col width="10%"/>
-		<col width="10%"/>
-		<col width="20%"/>
-		<col width="16%"/>
-		<col width="7%"/>
+		<col width="6%"/>
+		<col width="6%"/>
+		<col/>
+		<col width="9%"/>
 		<col width="6%"/>
 		<col width="7%"/>
 		<col width="7%"/>
@@ -21,6 +21,7 @@
 		<tr>
 			<th>序号<i class="w_table_split"></i></th>
 			<th>团号<i class="w_table_split"></i></th>
+			<th>团类别<i class="w_table_split"></i></th>
 			<th>发团日期<i class="w_table_split"></i></th>
 			<th>产品名称<i class="w_table_split"></i></th>
 			<th>组团社<i class="w_table_split"></i></th>
@@ -44,8 +45,12 @@
 	              	<a href="javascript:void(0);" class="def" onclick="newWindow('查看团信息','<%=staticPath %>/fitGroup/toFitGroupInfo.htm?groupId=${tg.id}&operType=0')">${tg.groupCode}</a>
 	              </c:if>
               </td>
-              <td style="text-align: left;"><fmt:formatDate value="${tg.dateStart}" pattern="yyyy-MM-dd"/></td>
-              <td style="text-align: left">${tg.productBrandName}${tg.productName}</td>
+			  <td>
+				  <c:if test="${tg.groupMode==0}">散客</c:if>
+				  <c:if test="${tg.groupMode>0}">团队</c:if>
+			  </td>
+				<td style="text-align: left;"><fmt:formatDate value="${tg.dateStart}" pattern="yyyy-MM-dd"/></td>
+				<td style="text-align: left">${tg.productBrandName}${tg.productName}</td>
               <td style="text-align: left">
               	
               		${tg.supplierName}
@@ -85,6 +90,7 @@
 			<td></td>
 			<td></td>
 			<td></td>
+			<td></td>
 			<td colspan="1" style="text-align: right">合计：</td>
 			<td>${sum_adult}大${sum_child}小${sum_guide}陪</td>
 		    <td></td>
@@ -94,6 +100,7 @@
 			<td></td>
 		</tr>
 		<tr>
+			<td></td>
 			<td></td>
 			<td></td>
 			<td></td>

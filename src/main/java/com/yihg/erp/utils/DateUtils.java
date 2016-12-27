@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class DateUtils {
+	public static String yyyyMMddHHmmss = "yyyyMMddHHmmss";
 	public static String format(Date date){
 		if(date == null){
 			return "";

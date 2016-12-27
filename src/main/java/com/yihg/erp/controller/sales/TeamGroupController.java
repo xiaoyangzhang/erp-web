@@ -52,7 +52,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.alibaba.dubbo.common.json.JSON;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
@@ -372,26 +372,30 @@ public class TeamGroupController extends BaseController {
 	 */
 	@RequestMapping("findTourGroupLoadModel.do")
 	@RequiresPermissions(PermissionConstants.SALE_TEAM_GROUP)
-	public String findTourGroupByConditionLoadModel(HttpServletRequest request,
+	@ResponseBody
+	public String findTourGroupByConditionLoadModel(HttpServletRequest request, Integer rows,Integer pageSize, Integer page,
 			GroupOrder groupOrder, Model model) throws ParseException {
-		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+		String sidx = request.getParameter("sidx");//来获得排序的列名，
+		String sord = request.getParameter("sord");//来获得排序方式
+		groupOrder.setSidx(sidx);
+		groupOrder.setSord(sord);
 		FindTourGroupByConditionDTO queryDTO = new FindTourGroupByConditionDTO();
+		queryDTO.setRows(rows);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
 		queryDTO.setCurBizId(WebUtils.getCurBizId(request));
 		queryDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
 		queryDTO.setGroupOrder(groupOrder);
-		FindTourGroupByConditionResult result = teamGroupFacade.findTourGroupByConditionLoadModel(queryDTO,pageBean);
+		FindTourGroupByConditionResult result = teamGroupFacade.findTourGroupByConditionLoadModel(queryDTO);
 
 		model.addAttribute("pageTotalAudit", result.getPageTotalAudit());
 		model.addAttribute("pageTotalChild", result.getPageTotalChild());
 		model.addAttribute("pageTotalGuide", result.getPageTotalGuide());
 
 		GroupOrder order = result.getGroupOrder();
-		model.addAttribute("totalAudit",
-				order == null ? 0 : order.getNumAdult());
-		model.addAttribute("totalChild",
-				order == null ? 0 : order.getNumChild());
-		model.addAttribute("totalGuide",
-				order == null ? 0 : order.getNumGuide());
+		model.addAttribute("totalAudit", result.getTotalAudit());
+		model.addAttribute("totalChild",result.getTotalChild());
+		model.addAttribute("totalGuide", result.getPageTotalGuide());
 
 //		*//**
 //		 * 根据组团社id获取组团社名称
@@ -399,9 +403,9 @@ public class TeamGroupController extends BaseController {
 		List<GroupOrder> groupList = result.getPageBean().getResult();
 		model.addAttribute("groupList", groupList);
 		model.addAttribute("groupOrder", groupOrder);
-		model.addAttribute("page", result.getPageBean());
-
-		return "sales/teamGroup/groupTable";
+		model.addAttribute("pageBean", result.getPageBean());
+		return JSON.toJSONString( result.getPageBean());
+		//return "sales/teamGroup/groupTable";
 	}
 
 	@RequestMapping(value = "saveTeamGroupInfo.do")
@@ -546,4 +550,23 @@ public class TeamGroupController extends BaseController {
 			return errorJson(resultSupport.getResultMsg());
 		}
 	}
+
+	@RequestMapping("findTourGroupLoadFooter.do")
+	@RequiresPermissions(PermissionConstants.SALE_TEAM_GROUP)
+	@ResponseBody
+	public String findTourGroupLoadFooter(HttpServletRequest request, Integer pageSize, Integer page,
+										  GroupOrder groupOrder, Model model) throws ParseException {
+		FindTourGroupLoadFooterDTO findTourGroupLoadFooterDTO = new FindTourGroupLoadFooterDTO();
+		findTourGroupLoadFooterDTO.setPage(page);
+		findTourGroupLoadFooterDTO.setPageSize(pageSize);
+		findTourGroupLoadFooterDTO.setGroupOrder(groupOrder);
+		findTourGroupLoadFooterDTO.setBizId(WebUtils.getCurBizId(request));
+		findTourGroupLoadFooterDTO.setDataUserIds(WebUtils.getDataUserIdSet(request));
+		FindTourGroupLoadFooterResult findTourGroupLoadFooterResult = teamGroupFacade.findTourGroupLoadFooter(findTourGroupLoadFooterDTO);
+
+		System.out.println("--pageBean--"+JSON.toJSONString(findTourGroupLoadFooterResult.getGroupOrder()));
+		return JSON.toJSONString(findTourGroupLoadFooterResult.getGroupOrder());
+		//return "sales/teamGroup/groupTable";
+	}
+
 }

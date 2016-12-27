@@ -64,7 +64,7 @@
 		for(;ownSupplierIdsIndex < ownSupplierIds.length;ownSupplierIdsIndex++)
 		{
 			var ownSupplierId = ownSupplierIds[ownSupplierIdsIndex];
-			ownSupplierIdsMap[ownSupplierId+""] = 1;
+			ownSupplierIdsMap[ownSupplierId] = 1;
 		}
 	}
 	
@@ -74,7 +74,7 @@
 		for(;orgOwnSupplierIdsIndex < orgOwnSupplierIds.length;orgOwnSupplierIdsIndex++)
 		{
 			var orgOwnSupplierId = orgOwnSupplierIds[orgOwnSupplierIdsIndex];
-			orgOwnSupplierIdsMap[orgOwnSupplierId+""] = 1;
+			orgOwnSupplierIdsMap[orgOwnSupplierId] = 1;
 		}
 	}
 	
@@ -122,14 +122,33 @@
 		{
 			if(!orgOwnSupplierIdsMap[supplierId] && orgLastAuthMap[supplierId]){
 				//新增的组团社id
-				addAuths.push(supplierId);
+				addAuths.push(parseInt(supplierId));
 			}
 			if(orgOwnSupplierIdsMap[supplierId] && !orgLastAuthMap[supplierId]){
 				//移除的组团社id
-				delAuths.push(supplierId);
+				delAuths.push(parseInt(supplierId));
 			}
 		}
 		return {"delSupplierIds":delAuths,"addSupplierIds":addAuths};
+	}
+	//状态重置
+	function dealAfterAjax(){
+		var authSuppliersMap = getOrgAuthSuppliers();
+		var delSupplierIds = authSuppliersMap["delSupplierIds"];
+		var addSupplierIds = authSuppliersMap["addSupplierIds"];
+		orgOwnSupplierIds = _.union(_.difference(orgOwnSupplierIds,delSupplierIds),addSupplierIds);
+		orgOwnSupplierIdsMap = {};
+		if(orgOwnSupplierIds &&orgOwnSupplierIds.length)
+		{
+			var orgOwnSupplierIdsIndex = 0;
+			for(;orgOwnSupplierIdsIndex < orgOwnSupplierIds.length;orgOwnSupplierIdsIndex++)
+			{
+				var orgOwnSupplierId = orgOwnSupplierIds[orgOwnSupplierIdsIndex];
+				orgOwnSupplierIdsMap[orgOwnSupplierId] = 1;
+			}
+		}
+		orgLastAuthMap = {};
+		$.extend(true,orgLastAuthMap,orgOwnSupplierIdsMap);
 	}
 	//单选状态事件
 	function checkSingleSupplier(thisObj){
@@ -168,6 +187,7 @@
 		    	dataType:"html",
 		    	success:function(data){
 		    		$("#orgSupplierAuthDiv").html(data);
+		    		dealAfterAjax();
 		    		checkLastCheckStatus();
 		    	},
 		    	error:function(XMLHttpRequest, textStatus, errorThrown){

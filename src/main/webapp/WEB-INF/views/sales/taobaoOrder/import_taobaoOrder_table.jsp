@@ -23,7 +23,7 @@
 			<th style="width: 5%">金额<i class="w_table_split"></i></th>
 			<th style="">卖家备注<i class="w_table_split"></i></th>
 			<th style="width: 5%">状态<i class="w_table_split"></i></th>
-			<th style="width: 4%">选择</th>
+			<th style="width: 4%">选择<input type="checkbox" id="ckAll"><i class="w_table_split"></i></th>
 		</tr>
 	</thead>
 	<tbody id="tbody">

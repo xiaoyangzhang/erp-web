@@ -141,7 +141,7 @@ public class AgencyTeamController extends BaseController {
 	public String findTourGroupByConditionLoadModel(HttpServletRequest request,
 			GroupOrder groupOrder, Model model, Boolean isSales) throws ParseException {
 
-		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+	//	PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
 
 //		pageBean.setPageSize(groupOrder.getPageSize() == null ? Constants.PAGESIZE
 //				: groupOrder.getPageSize());
@@ -184,13 +184,13 @@ public class AgencyTeamController extends BaseController {
 //			}
 //		}
 		Integer listType = isSales != null && isSales.booleanValue() ? 1 : 0; 
-		pageBean.setParameter(groupOrder);
+	//	pageBean.setParameter(groupOrder);
 		FindTourGroupByConditionDTO queryDTO = new FindTourGroupByConditionDTO();
 		queryDTO.setCurBizId(WebUtils.getCurBizId(request));
 		queryDTO.setDataUserIdSet(WebUtils.getDataUserIdSet(request));
 		queryDTO.setOperatorType(listType);
 		queryDTO.setGroupOrder(groupOrder);
-		FindTourGroupByConditionResult result = teamGroupFacade.findTourGroupByConditionLoadModel(queryDTO, pageBean);
+		FindTourGroupByConditionResult result = teamGroupFacade.findTourGroupByConditionLoadModel(queryDTO);
 //		pageBean = groupOrderService.selectByConListPage(pageBean,
 //				WebUtils.getCurBizId(request),
 //				WebUtils.getDataUserIdSet(request), listType);
@@ -240,7 +240,7 @@ public class AgencyTeamController extends BaseController {
 		/**
 		 * 根据组团社id获取组团社名称
 		 */
-		List<GroupOrder> groupList = pageBean.getResult();
+		List<GroupOrder> groupList = result.getPageBean().getResult();
 		model.addAttribute("groupList", result.getPageBean().getResult());
 		model.addAttribute("groupOrder", result.getGroupOrder());
 		model.addAttribute("page", result.getPageBean());

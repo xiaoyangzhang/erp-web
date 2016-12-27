@@ -15,7 +15,7 @@
 
 	<!-- <dubbo:registry protocol="zookeeper" address="192.168.0.82:2181,192.168.0.83:2181,192.168.0.84:2181" 
 		/> -->
-	<dubbo:registry protocol="zookeeper" address="192.168.1.147:2181" />
+	<dubbo:registry protocol="zookeeper" address="192.168.1.202:2181" />
 
 
 	<dubbo:consumer check="false" />

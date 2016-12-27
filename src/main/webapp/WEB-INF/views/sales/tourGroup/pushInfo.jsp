@@ -31,7 +31,7 @@
 					<col width="25%" />
 					<col width="20%" />
 					<thead>
-						<th>天数</th>
+						<th>天数1111</th>
 						<th>行程</th>
 						<th>餐饮</th>
 						<th>酒店</th>
@@ -149,6 +149,7 @@
 			</div>
 			<div class="dd_right" style="width: 80%">
 				<table border="" cellspacing="0" cellpadding="0" class="w_table">
+					<input type="hidden" value="${guide.id}" id="guideId" />
 					<col width="5%" />
 					<col width="10%" />
 					<col width="10%" />
@@ -159,11 +160,11 @@
 						<th>联系方式</th>
 						<th>结对司机</th>
 					</thead>
-					<c:if test="${!empty guide }">
+					<c:forEach items="${guidesList}" var="guides">
 						<tr>
 							<td>导游</td>
-							<td>${guide.guideName }</td>
-							<td>${guide.guideMobile }</td>
+							<td>${guides.guideName }</td>
+							<td>${guides.guideMobile }</td>
 							<td>
 								<select name ="driver" id="driver">
 			    					<option value="">请选择</option>
@@ -175,7 +176,8 @@
 			    				</select>
 							</td>
 						</tr>
-					</c:if>
+					</c:forEach>
+					
 				</table>
 			</div>
 		</dd>
@@ -229,7 +231,7 @@
 					<dl class="p_paragraph_content">
 						
 							<div style="text-align: center;">
-								<button type="button" class="button button-primary button-small" onclick="pushInfoWap(${groupId})">同步信息到APP</button>
+								<button type="button" class="button button-primary button-small" onclick="pushInfoWap(${groupId})" >同步信息到APP</button>
 							</div>
 					</dl>
 	</div>
@@ -250,7 +252,7 @@
 
 		});
 	}
-	
+
 	function pushInfoWap(groupId) {
 		$.getJSON("../tourGroup/pushWap.do?groupId=" + groupId, function(data) {
 			if (data.result == "success") {
@@ -263,6 +265,7 @@
 
 		});
 	}
+
 	
 	$(function() {
 		$("#selGuide").bind("change",function(){
@@ -290,7 +293,8 @@
 		$("#driver").bind("change",function(){
 			var driverId = $("#driver option:selected").val();
 			var groupId = ${groupId} ;
-			var guideId = ${guide.id} ;
+			var guideId = $("#guideId".val()) ;
+			<%--var guideId = ${guide.id} ;--%>
 			jQuery.ajax({
 				url : "../tourGroup/updateGuide.do",
 				type : "post",
@@ -309,5 +313,8 @@
 				}
 			});
 		}) ;
+
+
+
 	});
 </script>

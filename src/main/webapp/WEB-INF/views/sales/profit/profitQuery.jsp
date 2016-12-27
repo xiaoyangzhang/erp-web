@@ -43,7 +43,7 @@
 					
 						<li class="text">客人信息:</li>
 						<li>
-							<input type="text" name="receiveMode" id="tourGroupProductName" value="${groupOrder.receiveMode}"/>
+							<input type="text" name="receiveMode" id="receiveMode" value="${groupOrder.receiveMode}"/>
 						</li>
 					</ul>
 					<ul>
@@ -93,6 +93,7 @@
 						
 						<li style="padding-left:10px">
 							<button type="button" onclick="searchBtn();" class="button button-primary button-small" style="margin-left: 35px;">查询</button> 
+							<a href="javascript:void(0);" id="toProfitExcelId" target="_blank" onclick="toProfitExcel()" class="button button-primary button-small">导出到Excel</a>
 						</li>
 						<li class="clear"></li>
 					</ul>
@@ -108,6 +109,23 @@
 <script type="text/javascript">
 function commonDicDlg() {
 	$.dicItemDlg('SALES_TEAM_TYPE','dicNames','dicIds');
+}
+
+function toProfitExcel(){
+	$("#toProfitExcelId").attr("href","toProfitExcel.do?startTime="+$("#tourGroupStartTime").val()
+			+"&endTime="+$("#tourGroupEndTime").val()
+			+"&groupCode="+$("#tourGroupGroupCode").val()
+			+"&supplierName="+$("#supplierName").val()
+			+"&receiveMode="+$("#receiveMode").val()
+			+"&orgIds="+$("#orgIds").val()
+			+"&select="+$("#select").val()
+			+"&saleOperatorIds="+$("#saleOperatorIds").val()
+			+"&productName="+$("#tourGroupProductName").val()
+			+"&provinceId="+$("#provinceCode").val()
+			+"&cityId="+$("#cityCode").val()
+			+"&orderNo="+$("#dicIds").val()
+			+"&page="+$("#page").val()
+			+"&pageSize="+$("#pageSize").val());
 }
 </script>
 </html>

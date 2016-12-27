@@ -1,17 +1,6 @@
 package com.yihg.erp.controller.sales;
 
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-//import com.yihg.basic.contants.BasicConstants;
+import com.alibaba.fastjson.JSON;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.GroupCodeUtil;
 import com.yihg.erp.contant.PermissionConstants;
@@ -20,19 +9,28 @@ import com.yihg.erp.utils.SysConfig;
 import com.yihg.erp.utils.WebUtils;
 import com.yimayhd.erpcenter.common.contants.BasicConstants;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
-//import com.yihg.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.FitGroupInfoVO;
-import com.yimayhd.erpcenter.facade.sales.query.FitGroupInfoQueryDTO;
-import com.yimayhd.erpcenter.facade.sales.query.FitGroupInfoUpdateDTO;
-import com.yimayhd.erpcenter.facade.sales.query.FitTotalSKGroupQueryDTO;
-import com.yimayhd.erpcenter.facade.sales.query.FitUpdateTourGroupDTO;
+import com.yimayhd.erpcenter.facade.sales.query.*;
 import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToSecImpNotGroupListDTO;
 import com.yimayhd.erpcenter.facade.sales.result.BaseStateResult;
 import com.yimayhd.erpcenter.facade.sales.result.FitGroupInfoQueryResult;
 import com.yimayhd.erpcenter.facade.sales.result.FitTotalSKGroupQueryResult;
+import com.yimayhd.erpcenter.facade.sales.result.ToFitGroupTableResult;
 import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToSecImpNotGroupListResult;
 import com.yimayhd.erpcenter.facade.sales.service.FitGroupFacade;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Set;
+
+//import com.yihg.basic.contants.BasicConstants;
+//import com.yihg.sales.po.GroupOrder;
 
 @Controller
 @RequestMapping(value = "/fitGroup")
@@ -454,5 +452,58 @@ public class FitGroupController extends BaseController {
 		model.addAttribute("orgUserJsonStr",result.getOrgUserJsonStr());
 		
 		return "sales/fitGroup/fitGroupList";
+	}
+
+
+	/**
+	 * 跳转到散客团列表
+	 *
+	 * @param request
+	 * @param reponse
+	 * @param model
+	 * @param tourGroup
+	 * @return
+	 */
+	@RequestMapping(value = "toFitGroupTable.do")
+	@RequiresPermissions(PermissionConstants.SALE_SK_TEAM)
+	@ResponseBody
+	public String toFitGroupTable(HttpServletRequest request, Integer rows,Integer pageSize, Integer page,
+								  HttpServletResponse reponse, ModelMap model, TourGroup tourGroup) {
+
+		String sidx = request.getParameter("sidx");//来获得排序的列名，
+		String sord = request.getParameter("sord");//来获得排序方式
+		tourGroup.setSidx(sidx);
+		tourGroup.setSord(sord);
+		ToFitGroupTableDTO toFitGroupTableDTO = new ToFitGroupTableDTO();
+		toFitGroupTableDTO.setRows(rows);
+		toFitGroupTableDTO.setPageSize(pageSize);
+		toFitGroupTableDTO.setPage(page);
+		toFitGroupTableDTO.setCurBizId(WebUtils.getCurBizId(request));
+		toFitGroupTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		toFitGroupTableDTO.setTourGroup(tourGroup);
+		ToFitGroupTableResult toFitGroupTableResult = fitGroupFacade.toFitGroupTable(toFitGroupTableDTO);
+		model.addAttribute("pageBean", toFitGroupTableResult.getPageBean());
+		Integer bizId = WebUtils.getCurBizId(request);
+		return JSON.toJSONString(toFitGroupTableResult.getPageBean());
+
+	}
+
+
+	@RequestMapping(value = "toSelectTotalPerson.do")
+	@RequiresPermissions(PermissionConstants.SALE_SK_TEAM)
+	@ResponseBody
+	public String toSelectTotalPerson(HttpServletRequest request, Integer rows,Integer pageSize, Integer page,
+									  HttpServletResponse reponse, ModelMap model, TourGroup tourGroup) {
+		ToFitGroupTableDTO toFitGroupTableDTO = new ToFitGroupTableDTO();
+		toFitGroupTableDTO.setRows(rows);
+		toFitGroupTableDTO.setPageSize(pageSize);
+		toFitGroupTableDTO.setPage(page);
+		toFitGroupTableDTO.setTourGroup(tourGroup);
+		toFitGroupTableDTO.setCurBizId(WebUtils.getCurBizId(request));
+		toFitGroupTableDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		ToFitGroupTableResult toFitGroupTableResult = fitGroupFacade.toSelectTotalPerson(toFitGroupTableDTO);
+		model.addAttribute("group", toFitGroupTableResult.getGroup());//总合计
+		return JSON.toJSONString(toFitGroupTableResult.getGroup());
+
 	}
 }

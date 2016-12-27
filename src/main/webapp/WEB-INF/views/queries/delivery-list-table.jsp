@@ -77,11 +77,11 @@
 			<td >总计:</td>
 			<td>${sum.total_adult }大${sum.total_child }小${sum.total_guide }陪</td>
 			
-			<td ><fmt:formatNumber value="${originalDelivery.originalTotal }" pattern="#.##" type="currency"/></td>
+			<td ><fmt:formatNumber value="${sum.originalTotalBalance }" pattern="#.##" type="currency"/></td>
 			<td ><fmt:formatNumber value="${sum.total }" pattern="#.##" type="currency"/></td>
 			<td ><fmt:formatNumber value="${sum.total_cash }" pattern="#.##" type="currency"/></td>
 			<td ><fmt:formatNumber value="${sum.total-sum.total_cash}" pattern="#.##" type="currency"/></td>
-			<td ><fmt:formatNumber value="${originalDelivery.originalTotal+sum.total-sum.total_cash}" pattern="#.##" type="currency"/></td>
+			<td ><fmt:formatNumber value="${sum.originalTotalBalance+sum.total-sum.total_cash}" pattern="#.##" type="currency"/></td>
 			
 			<td></td>
 		</tr>

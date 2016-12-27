@@ -166,7 +166,7 @@ public class ResTrafficController extends BaseController{
 	 */
 	@RequestMapping(value = "/changeResState.do")
 	@ResponseBody
-	public String changeResState(HttpServletRequest request, Integer id,Integer state){
+	public String changeResState(HttpServletRequest request, Integer id,byte state){
 		TraficchangeResStateDTO dto = new TraficchangeResStateDTO();
 		dto.setId(id);
 		dto.setState(state);
@@ -459,8 +459,6 @@ public class ResTrafficController extends BaseController{
 	/**
 	 * 保存修改产品信息
 	 * @param request
-	 * @param resProBean
-	 * @param model
 	 * @return
 	 */
 	@RequestMapping(value = "/toSaveResProduct.do")
@@ -655,10 +653,6 @@ public class ResTrafficController extends BaseController{
 	 *
 	 * @param request
 	 * @param reponse
-	 * @param booking
-	 * @param groupId
-	 * @param supplierType
-	 * @param supplierId
 	 * @return
 	 * @throws ParseException s
 	 */
@@ -680,7 +674,6 @@ public class ResTrafficController extends BaseController{
 	/**
 	 * 跳转至机位库存状态页面
 	 * @param request
-	 * @param resId
 	 * @param model
 	 * @return
 	 */
@@ -698,12 +691,11 @@ public class ResTrafficController extends BaseController{
 	/**
 	 * 保存机位库存信息
 	 * @param request
-	 * @param productBean
 	 * @return
 	 */
 	@RequestMapping(value = "/toSaveResNumsSold.do")
 	@ResponseBody
-	public String toSaveResNumsSold(HttpServletRequest request,String productList,String numStock,String numDisable, String id,
+	public String toSaveResNumsSold(HttpServletRequest request,String productList,String numStock,String numDisable, Integer id,
 			Integer poorNumStock,Integer poorNumDisable){
 		ToSaveResNumsSoldDTO toSaveResNumsSoldDTO = new ToSaveResNumsSoldDTO();
 		toSaveResNumsSoldDTO.setCurUser(WebUtils.getCurUser(request));
