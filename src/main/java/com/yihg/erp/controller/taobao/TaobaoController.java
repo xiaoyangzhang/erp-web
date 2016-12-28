@@ -341,6 +341,7 @@ public class TaobaoController extends BaseController {
 		dto.setTaobaoOrderIds(ids);
 		dto.setMyBizCode(settingCommon.getMyBizCode(request));
 		//FIXME 页面没有传递这个参数
+
 		dto.setGroupMode(GroupMode);
 		dto.setVo(vo);
 		Integer orderId = 0;

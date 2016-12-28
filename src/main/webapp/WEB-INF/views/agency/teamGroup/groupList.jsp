@@ -11,7 +11,10 @@
 <style type="text/css">
 	.Wdate{width:95px;}
 </style>
-<script type="text/javascript" src="<%=ctx%>/assets/js/web-js/sales/groupOrder.js"></script>
+	<link rel="stylesheet" href="<%=staticPath %>/assets/js/jqgrid/css/ui.jqgrid.css" rel="stylesheet">
+	<script src="<%=staticPath %>/assets/js/jqgrid/js/i18n/grid.locale-cn.js"></script>
+	<script src="<%=staticPath %>/assets/js/jqgrid/js/jquery.jqGrid.min.js"></script>
+<script type="text/javascript" src="<%=ctx%>/assets/js/web-js/sales/agencyTeam.js"></script>
 
 <script type="text/javascript">
 	/**
@@ -141,7 +144,7 @@
 					<dd class="inl-bl">
 						<div class="dd_left">收款状态:</div>
 						<div class="dd_right">
-							<select name="cashState">
+							<select name="cashState" id="cashState">
 								<option value="">全部</option>
 								<option value="0">未收清</option>
 								<option value="1">已收清</option>
@@ -170,13 +173,14 @@
 					</dd>			
 				</form>
 				</dl>
-		 <dl class="p_paragraph_content">
-	    	<dd>
-				<div id="content"></div>
-			</dd>
-		</dl>
 	</div>
-</div>
+	</div>
+	<div class="p_container" >
+		<div class="jqGrid_wrapper">
+			<table id="tableDiv"></table>
+			<div id="pagerDiv"></div>
+		</div>
+	</div>
 
 </body>
 	<!-- 改变状态 -->

@@ -28,7 +28,7 @@ function loadRoute(){
 	 $.ajax({
 	        type: "post",
 	        cache: false,
-	        url : path+"/groupRoute/getData.do",
+	        url : "../groupRoute/getData.do",
 	        data : {
 	            groupId : $("input[name='tourGroup.id']").val()
 	        },

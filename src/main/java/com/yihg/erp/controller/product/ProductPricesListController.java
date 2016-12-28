@@ -1,10 +1,18 @@
 package com.yihg.erp.controller.product;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.erpcenterFacade.common.client.service.ProductCommonFacade;
+import com.alibaba.fastjson.JSONArray;
+import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.utils.WebUtils;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupExtraItem;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupPriceStockallocate;
+import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
+import com.yimayhd.erpcenter.dal.product.vo.ProductPriceVo;
+import com.yimayhd.erpcenter.facade.result.ProductGroupResult;
+import com.yimayhd.erpcenter.facade.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade;
+import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
 import org.erpcenterFacade.common.client.service.SaleCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,21 +24,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSONArray;
-import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.utils.WebUtils;
-import com.yimayhd.erpcenter.common.contants.BasicConstants;
-import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
-import com.yimayhd.erpcenter.dal.product.po.ProductGroup;
-import com.yimayhd.erpcenter.dal.product.po.ProductGroupExtraItem;
-import com.yimayhd.erpcenter.dal.product.po.ProductGroupPriceStockallocate;
-import com.yimayhd.erpcenter.dal.product.po.ProductGroupSupplier;
-import com.yimayhd.erpcenter.dal.product.po.ProductInfo;
-import com.yimayhd.erpcenter.dal.product.vo.ProductPriceVo;
-import com.yimayhd.erpcenter.facade.result.ProductGroupResult;
-import com.yimayhd.erpcenter.facade.result.ResultSupport;
-import com.yimayhd.erpcenter.facade.service.ProductPricePlusFacade;
-import com.yimayhd.erpcenter.facade.service.ProductUpAndDownFrameFacade;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author : xuzejun

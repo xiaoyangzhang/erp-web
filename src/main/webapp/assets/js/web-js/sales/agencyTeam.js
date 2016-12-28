@@ -303,16 +303,16 @@ function addCellAttr(rowId, val, rawObject, cm, rdata) {
  */
 var groupGrid = {
     reSize: function(){
-        var width = $('.jqGrid_guest').width();
+        var width = $('.jqGrid_wrapper').width();
 
         var height = $(window).height();//parent.get_MainContainerHeight();
         var searchBox=80, jqGrid_head = 55, jqGrid_pager = 30, jqGrid_footer = 45;
         height = height - searchBox - jqGrid_head - jqGrid_pager - jqGrid_footer;
-        $('#groupProfitTable').setGridWidth(width);
-        $('#groupProfitTable').setGridHeight(height -10);
+        $('#tableDiv').setGridWidth(width);
+        $('#tableDiv').setGridHeight(height -10);
     },
 	getParam: function(){
-		var rowListNum = $("#groupProfitTable").jqGrid('getGridParam', 'rowNum');
+		var rowListNum = $("#tableDiv").jqGrid('getGridParam', 'rowNum');
 		if(rowListNum == undefined){
 			$('#pageSize').val(15);
 		}else{
@@ -339,6 +339,7 @@ var groupGrid = {
 			,'tourState':$("#tourState").val()
 			,'pageSize':$("#pageSize").val()
 			,'page':$("#page").val()
+			,'cashState':$("#cashState").val()
 		};
 		return params;
 	},
@@ -419,47 +420,46 @@ var groupGrid = {
 		return ops;
 	},
 	loadGrid: function(){
-		$("#groupProfitTable").jqGrid({
-			url: '../teamGroup/findTourGroupLoadModel.do',
+		$("#tableDiv").jqGrid({
+			url: '../agencyTeam/findTourGroupLoadModel.do',
 			datatype: "json",
 			mtype : "post",
 			height: 250,
 			autowidth: false,
 			shrinkToFit: false,
-			rownumbers:true,
+            rownumbers:true,
 			async:false,
 			rowNum: 15,
 			rowList: [15, 30, 50, 100, 500, 1000],
 			colModel: [
-				{label:'团号',name: 'tourGroup.groupCode',index: 'tourGroup.groupCode',width: 160, sortable: false, align:'left'},
+				{label:'团号',name: 'tourGroup.groupCode',index: 'tourGroup.groupCode',width: 120, sortable: false, align:'left'},
 				{label:'发团日期',name: 'tourGroup.dateStart',index: 'date_start',align: "center",formatter:function(cellValue,options,rowObject){
-					return (moment(rowObject.tourGroup.dateStart).format("YYYY-MM-DD"));},width: 110, align:'center'},
+					return (moment(rowObject.tourGroup.dateStart).format("YYYY-MM-DD"));},width: 90, align:'center'},
 				{label:'产品名称',name: 'productName',index: 'productName',width: 250, sortable: false, align:'left',
                     formatter:function(cellValue,options,rowObject){
                         return ("【"+rowObject.productBrandName+"】"+cellValue);
                     }
                 },
-				{label:'天数',name: 'tourGroup.daynum',index: 'daynum',width: 80, sortable: true, align:'center'},
-				{label:'组团社',name: 'supplierName',index: 'supplierName',width: 300, sortable: false,align:'left'},
-				{label:'联系人',name: 'contactName',index: 'contactName',width: 90, sortable: false, align:'center'},
-				{label:'客源地',name: 'provinceName',index: 'provinceName',width: 120, sortable: false,  align:'center',
+				{label:'天数',name: 'tourGroup.daynum',index: 'daynum',width: 50, sortable: true, align:'center'},
+				{label:'组团社',name: 'supplierName',index: 'supplierName',width: 250, sortable: false,align:'left'},
+				{label:'客源地',name: 'provinceName',index: 'provinceName',width: 90, sortable: false,  align:'center',
                     formatter:function(cellValue,options,rowObject){
                         return (cellValue+rowObject.cityName);
                     }
                 },
-				{label:'类别',name: 'sourceTypeName',index: 'sourceTypeName',width: 80, sortable: false, align:'center'},
+                {label:'联系人',name: 'contactName',index: 'contactName',width: 50, sortable: false, align:'center'},
 
-                {label:'人数',name: 'tourGroup.totalAdult',index: 'totalAdult',width: 100, sortable: false, align:'center',formatter:groupGrid.formatPerson},
-				{label:'销售',name: 'saleOperatorName',index: 'saleOperatorName',width: 80, sortable: false, align:'center'},
-				{label:'计调',name: 'operatorName',index: 'operatorName',width: 80, sortable: false, align:'center'},
-				{label:'状态',name: 'tourGroup.groupState',index: 'tourGroup.groupState',width: 80, sortable: false, align:'center',
+                {label:'人数',name: 'tourGroup.totalAdult',index: 'totalAdult',width: 80, sortable: false, align:'center',formatter:groupGrid.formatPerson},
+				{label:'销售',name: 'saleOperatorName',index: 'saleOperatorName',width: 50, sortable: false, align:'center'},
+				{label:'操作',name: 'operatorName',index: 'operatorName',width: 50, sortable: false, align:'center'},
+				{label:'状态',name: 'tourGroup.groupState',index: 'tourGroup.groupState',width: 50, sortable: false, align:'center',
                     formatter:groupGrid.formatState
                 },
 				{label:'操作',name: 'operations',index: 'operations',width: 80, sortable: false,align:'center',cellattr: addCellAttr,
 					editable:true,edittype:'select',formatter:groupGrid.formatOptions
 				}
 			],
-			pager: "#groupProfitPage",
+			pager: "#pagerDiv",
 			viewrecords: true,
             caption: "",
 			jsonReader:{
@@ -469,10 +469,10 @@ var groupGrid = {
 			footerrow: true,//分页上添加一行，用于显示统计信息
 			loadComplete:function(xhr){
 				//查询为空的处理方式
-				var rowNum = $("#groupProfitTable").jqGrid('getGridParam','records');
+				var rowNum = $("#tableDiv").jqGrid('getGridParam','records');
 				if (rowNum == '0'){
 					if($("#norecords").html() == null)
-						$("#groupProfitTable").parent().append("</pre><div id='norecords' style='text:center;padding: 8px 8px;'>没有查询记录！</div><pre>");
+						$("#tableDiv").parent().append("</pre><div id='norecords' style='text:center;padding: 8px 8px;'>没有查询记录！</div><pre>");
 					$("#norecords").show();
 				}else{
 					$("#norecords").hide();
@@ -502,7 +502,7 @@ var groupGrid = {
                var $footerRow = $("tr.footrow");
                $footerRow.after("<tr role='row' class='footrow footRow2 footrow-ltr ui-widget-content'>"+$footerRow.html()+"</tr>");
                var $newFooterRow = $("tr.footRow2");
-               $("#groupProfitTable").footerData("set",{sourceTypeName:"页合计：", "tourGroup.totalAdult":pageObj.tAdult, tourGroup:{totalChild:pageObj.tChild, totalGuide:pageObj.tGuide}});
+               $("#tableDiv").footerData("set",{sourceTypeName:"页合计：", "tourGroup.totalAdult":pageObj.tAdult, tourGroup:{totalChild:pageObj.tChild, totalGuide:pageObj.tGuide}});
 
 
                if (data == null || data == 'null'){
@@ -520,7 +520,7 @@ var groupGrid = {
 }
 
 function searchBtn() {
-	$("#groupProfitTable").jqGrid('setGridParam', {page:1, postData: groupGrid.getParam()}).trigger("reloadGrid");
+	$("#tableDiv").jqGrid('setGridParam', {page:1, postData: groupGrid.getParam()}).trigger("reloadGrid");
 }
 
 /*function queryList(page,pageSize) {
