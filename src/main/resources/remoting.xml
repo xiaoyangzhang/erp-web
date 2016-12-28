@@ -153,7 +153,7 @@
 
 
 	<dubbo:reference id="sysMsgInfoFacade"
-					 interface="com.yimayhd.erpcenter.facade.sys.service.SysMsgInfoFacade" owner="gxx" version="1.0.0.test"
+					 interface="com.yimayhd.erpcenter.facade.sys.service.SysMsgInfoFacade" owner="gxx1" version="1.0.0.test"
 					 timeout="8000" />
 
 
