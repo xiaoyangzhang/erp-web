@@ -45,17 +45,24 @@
 							<table cellspacing="0" cellpadding="0" class="w_table">
 
 
-								<col width="4%" />
+								<col width="3%" />
 								<col  />
+								<col width="4%" />
+								<col width="4%" />
+								
+								<col width="6%" />
+								<col width="6%" />
+								<col width="6%" />
+								<col width="6%" />
+								<col width="6%" />
+								<col width="6%" />
 								<col width="6%" />
 								<col width="6%" />
 								
-								<col width="8%" />
-								<col width="7%" />
-								<col width="7%" />
-								<col width="7%" />
-								<col width="7%" />
-								<col width="7%" />
+								<col width="5%" />
+								<col width="5%" />
+								<col width="5%" />
+								<col width="5%" />
 								
 								<col width="6%" />
 								<col width="6%" />
@@ -69,8 +76,8 @@
 										<th rowspan="2">库存<i class="w_table_split"></i></th>
 										<th rowspan="2">已售<i class="w_table_split"></i></th>
 										
-										<th colspan="6">价格设置<i class="w_table_split"></i></th>
-
+										<th colspan="9">价格设置<i class="w_table_split"></i></th>
+										<!-- <th colspan="4">成人价<i class="w_table_split"></i></th> -->
 										<th rowspan="2">预留到期<br/>时长<i class="w_table_split"></i></th>
 										<th rowspan="2">预留库存<br/>下限<i class="w_table_split"></i></th>
 										<th rowspan="2">下单权限<i class="w_table_split"></i></th>
@@ -78,11 +85,16 @@
 									</tr>
 									<tr>
 										<th>规格<i class="w_table_split"></i></th>
-										<th>成本价<i class="w_table_split"></i></th>
+										<!-- <th style="display: none;">成本价<i class="w_table_split"></i></th> -->
 										<th>建议零售价<i class="w_table_split"></i></th>
 										<th>同行返款<i class="w_table_split"></i></th>
 										<th>代理返款<i class="w_table_split"></i></th>
 										<th>最低定金<i class="w_table_split"></i></th>
+									
+										<th>房<i class="w_table_split"></i></th>
+										<th>机票<i class="w_table_split"></i></th>
+										<th>接送<i class="w_table_split"></i></th>
+										<th>其他<i class="w_table_split"></i></th>
 									</tr>
 								</thead>
 								<tbody>
@@ -91,20 +103,26 @@
 											<input type="checkbox" name="resProid" id="chkAll" value="${res.id }" />
 										</td>
 										<td rowspan="3" hidden>${res.productCode }</td>
-										<td rowspan="3">${res.productName }</td>
+										<td rowspan="3" style="text-align: left;">${res.productName }</td>
 										<td rowspan="3">${res.numStock }</td>
 										<td rowspan="3">${res.numSold }</td>
-											<td>成人价</td>
-											<td><fmt:formatNumber value="${res.adultCostPrice }"  type="currency" pattern="#.00#"/></td>
-											<fmt:formatNumber value="${res.adultSuggestPrice }" var="adultSuggestPrice" type="currency" pattern="#.00#"/>
-											<td>${adultSuggestPrice }</td>
-											<fmt:formatNumber value="${res.adultSamePay }" var="adultSamePay" type="currency" pattern="#.00#"/>
-											<td>${adultSamePay }</td>
-											<fmt:formatNumber value="${res.adultProxyPay }" var="adultProxyPay" type="currency" pattern="#.00#"/>
-											<td>${adultProxyPay }</td>
-											<fmt:formatNumber value="${res.adultMinDeposit }" var="adultMinDeposit" type="currency" pattern="#.00#"/>
-											<td>${adultMinDeposit }
-										</td>
+										<td>成人价</td>
+										<td  style="display: none;"><fmt:formatNumber value="${res.adultCostPrice }"  type="currency" pattern="#.##"/></td>
+										<fmt:formatNumber value="${res.adultSuggestPrice }" var="adultSuggestPrice" type="currency" pattern="#.##"/>
+										<td>${adultSuggestPrice }</td>
+										<fmt:formatNumber value="${res.adultSamePay }" var="adultSamePay" type="currency" pattern="#.##"/>
+										<td>${adultSamePay }</td>
+										<fmt:formatNumber value="${res.adultProxyPay }" var="adultProxyPay" type="currency" pattern="#.##"/>
+										<td>${adultProxyPay }</td>
+										<fmt:formatNumber value="${res.adultMinDeposit }" var="adultMinDeposit" type="currency" pattern="#.##"/>
+										<td>${adultMinDeposit }</td>
+										
+										<td><fmt:formatNumber value="${res.adultCostHotel }" type="currency" pattern="#.##"/></td>
+										<td><fmt:formatNumber value="${res.adultCostTicket }" type="currency" pattern="#.##"/></td>
+										<td><fmt:formatNumber value="${res.adultCostJs }" type="currency" pattern="#.##"/></td>
+										<td><fmt:formatNumber value="${res.adultCostOther }" type="currency" pattern="#.##"/></td>
+										
+										
 										<td rowspan="3">
 											${res.reserveTime }
 											<%-- <fmt:parseDate value="${fn:replace(res.reserveTime, ':00.0', ':00')}" pattern="yyyy-MM-dd HH:mm:ss" var="date1"></fmt:parseDate>   --%>
@@ -134,30 +152,40 @@
 									</tr>
 									<tr>
 										<td>儿童价</td>
-										<fmt:formatNumber value="${res.childCostPrice }" var="childCostPrice" type="currency" pattern="#.00#"/>
-										<td>${childCostPrice } </td>
-										<fmt:formatNumber value="${res.childSuggestPrice }" var="childSuggestPrice" type="currency" pattern="#.00#"/>
+										<fmt:formatNumber value="${res.childCostPrice }" var="childCostPrice" type="currency" pattern="#.##"/>
+										<td style="display: none;">${childCostPrice } </td>
+										<fmt:formatNumber value="${res.childSuggestPrice }" var="childSuggestPrice" type="currency" pattern="#.##"/>
 										<td>${childSuggestPrice } </td>
-										<fmt:formatNumber value="${res.childSamePay }" var="childSamePay" type="currency" pattern="#.00#"/>
+										<fmt:formatNumber value="${res.childSamePay }" var="childSamePay" type="currency" pattern="#.##"/>
 										<td>${childSamePay } </td>
-										<fmt:formatNumber value="${res.childProxyPay }" var="childProxyPay" type="currency" pattern="#.00#"/>
+										<fmt:formatNumber value="${res.childProxyPay }" var="childProxyPay" type="currency" pattern="#.##"/>
 										<td>${childProxyPay } </td>
-										<fmt:formatNumber value="${res.childMinDeposit }" var="childMinDeposit" type="currency" pattern="#.00#"/>
+										<fmt:formatNumber value="${res.childMinDeposit }" var="childMinDeposit" type="currency" pattern="#.##"/>
 										<td>${childMinDeposit } </td>
-
+										
+										<td><fmt:formatNumber value="${res.childCostHotel }" type="currency" pattern="#.##"/></td>
+										<td><fmt:formatNumber value="${res.childCostTicket }" type="currency" pattern="#.##"/></td>
+										<td><fmt:formatNumber value="${res.childCostJs }" type="currency" pattern="#.##"/></td>
+										<td><fmt:formatNumber value="${res.childCostOther }" type="currency" pattern="#.##"/></td>
+			
 									</tr>
 									<tr>
 										<td>婴儿价</td>
-										<fmt:formatNumber value="${res.babyCostPrice }" var="babyCostPrice" type="currency" pattern="#.00#"/>
-										<td>${babyCostPrice } </td>
-										<fmt:formatNumber value="${res.babySuggestPrice }" var="babySuggestPrice" type="currency" pattern="#.00#"/>
+										<fmt:formatNumber value="${res.babyCostPrice }" var="babyCostPrice" type="currency" pattern="#.##"/>
+										<td style="display: none;">${babyCostPrice } </td>
+										<fmt:formatNumber value="${res.babySuggestPrice }" var="babySuggestPrice" type="currency" pattern="#.##"/>
 										<td>${babySuggestPrice } </td>
-										<fmt:formatNumber value="${res.babySamePay }" var="babySamePay" type="currency" pattern="#.00#"/>
+										<fmt:formatNumber value="${res.babySamePay }" var="babySamePay" type="currency" pattern="#.##"/>
 										<td>${babySamePay } </td>
-										<fmt:formatNumber value="${res.badyProxyPay }" var="badyProxyPay" type="currency" pattern="#.00#"/>
+										<fmt:formatNumber value="${res.badyProxyPay }" var="badyProxyPay" type="currency" pattern="#.##"/>
 										<td>${badyProxyPay} </td>
-										<fmt:formatNumber value="${res.badyMinDeposit }" var="badyMinDeposit" type="currency" pattern="#.00#"/>
+										<fmt:formatNumber value="${res.badyMinDeposit }" var="badyMinDeposit" type="currency" pattern="#.##"/>
 										<td>${badyMinDeposit } </td>
+										
+										<td><fmt:formatNumber value="${res.babyCostHotel }" type="currency" pattern="#.##"/></td>
+										<td><fmt:formatNumber value="${res.babyCostTicket }" type="currency" pattern="#.##"/></td>
+										<td><fmt:formatNumber value="${res.babyCostJs }" type="currency" pattern="#.##"/></td>
+										<td><fmt:formatNumber value="${res.babyCostOther }" type="currency" pattern="#.##"/></td>
 
 									</tr>
 								</tbody>

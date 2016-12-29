@@ -711,4 +711,126 @@ public class ResTrafficController extends BaseController{
 		return resTrafficFacade.toSaveResNumsSold(toSaveResNumsSoldDTO);
 	}
 
+	/**
+	 * 机票利润查询
+	 * @param request
+	 * @param reponse
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping("airTicketProfit.htm")
+	public String airTicketProfit(HttpServletRequest request,
+								  HttpServletResponse reponse, ModelMap model) {
+
+		return "resTraffic/airTicketProfitList";
+	}
+
+	/**
+	 * 机票利润查询table
+	 * @param request
+	 * @param model
+	 * @param pageSize
+	 * @param page
+	 * @return
+	 */
+	@RequestMapping("airTicketProfit_table.do")
+	public String airTicketProfit_table(HttpServletRequest request,ModelMap model, Integer pageSize, Integer page) {
+		SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd");
+		PageBean<TrafficRes> pageBean = new PageBean<TrafficRes>();
+		if(page==null){
+			pageBean.setPage(1);
+		}else{
+			pageBean.setPage(page);
+		}
+		if(pageSize==null){
+			pageBean.setPageSize(Constants.PAGESIZE);
+		}else{
+			pageBean.setPageSize(pageSize);
+		}
+		pageBean.setPage(page);
+		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
+		pageBean.setParameter(pm);
+		pageBean=trafficResService.selectAirTicketProfitListPage(pageBean);
+		List <TrafficRes> trafficRes=pageBean.getResult();
+		for(TrafficRes item:trafficRes){
+			GroupOrder go=groupOrderService.selectSumTotalByResId(item.getId());
+			item.setSumTotal(go.getTotal());
+			item.setSumCost(go.getCost());
+		}
+		pageBean.setResult(trafficRes);
+		model.addAttribute("pageBean", pageBean);
+
+		return "resTraffic/airTicketProfit_table";
+	}
+
+	/**
+	 * 预算明细
+	 * @param resId
+	 * @return
+	 */
+	@RequestMapping("budgetDetail.htm")
+	public String budgetDetail(HttpServletRequest request,HttpServletResponse reponse, ModelMap model,Integer resId,String dateStart) {
+		List<TrafficResProduct> lists=trafficResProductService.loadTrafficResProductInfo(resId);
+		model.addAttribute("lists", lists);
+		model.addAttribute("dateStart", dateStart);
+		return "resTraffic/budgetDetail";
+	}
+
+	/**
+	 * 实时明细
+	 * @param resId
+	 * @return
+	 */
+	@RequestMapping("constantlyDetail.htm")
+	public String constantlyDetail(HttpServletRequest request,HttpServletResponse reponse, ModelMap model,Integer resId,String dateStart) {
+ 		/*List<GroupOrder> gos=groupOrderService.selectGroupOrderGroupByPro(resId);
+		for(GroupOrder item:gos){
+			if(item.getProductId() !=null && item.getExtResId() != null){
+			TrafficResProduct trp=trafficResProductService.selectSumCostByProductCode(item.getProductId(), item.getExtResId());
+			item.setNumSold(trp.getNumSold());
+			item.setNumStock(trp.getNumStock());
+			item.setSumCost(trp.getSumCost());
+			}
+		}*/
+		List<TourGroup> lists= tourGroupService.selectTotalByResId(resId);
+		model.addAttribute("lists", lists);
+		model.addAttribute("dateStart", dateStart);
+		return "resTraffic/constantlyDetail";
+	}
+
+
+	@RequestMapping("resRoomExtrabed.htm")
+	public String resRoomExtrabed(HttpServletRequest request,
+								  HttpServletResponse reponse, ModelMap model) {
+		Integer bizId = WebUtils.getCurBizId(request);
+		List<DicInfo> brandList = dicService.getListByTypeCode(BasicConstants.CPXL_PP, bizId);
+		model.addAttribute("brandList", brandList);
+		return "resTraffic/resRoomExtrabedList";
+	}
+
+	@RequestMapping("resRoomExtrabed_table.do")
+	public String resRoomExtrabed_table(HttpServletRequest request,ModelMap model, Integer pageSize, Integer page,GroupOrder groupOrder) {
+
+		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+		if(page==null){
+			pageBean.setPage(1);
+		}else{
+			pageBean.setPage(page);
+		}
+		if(pageSize==null){
+			pageBean.setPageSize(Constants.PAGESIZE);
+		}else{
+			pageBean.setPageSize(pageSize);
+		}
+		pageBean.setPage(page);
+		pageBean.setParameter(groupOrder);
+		pageBean=groupOrderService.selectRoomExtrabedListPage(pageBean, WebUtils.getCurBizId(request));
+
+		Map<String, Object> sumRoomExtrabed = groupOrderService.selectSumRoomExtrabed(pageBean, WebUtils.getCurBizId(request));
+		model.addAttribute("sum", sumRoomExtrabed);
+		model.addAttribute("pageBean", pageBean);
+
+		return "resTraffic/resRoomExtrabed_table";
+	}
+
 }

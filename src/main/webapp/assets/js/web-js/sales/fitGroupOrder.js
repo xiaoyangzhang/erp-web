@@ -20,9 +20,6 @@ function togroupRequirement(){
 	}
 }
 
-
-
-
 function toGetRouteList(){
 	if($("#orderId").val().trim()==""){
 		$.warn("订单详情未保存") ;
@@ -129,11 +126,15 @@ $(function() {
 		 	};
 	 $("#tourGroupStartTime").val(vars.dateFrom);
 	 $("#tourGroupEndTime").val(vars.dateTo );	
+	
+	/*queryList();*/
+	groupGrid.loadGrid();
+    groupGrid.reSize();
+    $(window).bind('resize', function () {
+        groupGrid.reSize();
+    });
 
 	$("selA").hide();
-	
-	var pageSize=$("#pageSize").val();
-	queryList(1,pageSize);
 });
 /**
  * 页面选择部分调用函数(单选)
@@ -293,7 +294,221 @@ function addCellAttr(rowId, val, rawObject, cm, rdata) {
 	return "style='overflow: visible;'";
 }
 
-function queryList(page,pageSize) {
+
+/**
+ * 分页查询
+ * @param page
+ * @param pageSize
+ */
+var groupGrid = {
+    reSize: function(){
+        var width = $('.jqGrid_guest').width();
+
+        var height = $(window).height();//parent.get_MainContainerHeight();
+        var searchBox=80, jqGrid_head = 55, jqGrid_pager = 30, jqGrid_footer = 45;
+        height = height - searchBox - jqGrid_head - jqGrid_pager - jqGrid_footer;
+        $('#groupProfitTable').setGridWidth(width);
+        $('#groupProfitTable').setGridHeight(height -10);
+    },
+	getParam: function(){
+		var rowListNum = $("#groupProfitTable").jqGrid('getGridParam', 'rowNum');
+		if(rowListNum == undefined){
+			$('#pageSize').val(15);
+		}else{
+			$('#pageSize').val(rowListNum);
+		}
+		var params = {'startTime':$("#tourGroupStartTime").val()
+			,'endTime':$("#tourGroupEndTime").val()
+			,'dateType':$("#dateType").val()
+			,'supplierName':$("#supplierName").val()
+			,'tourGroup.groupCode':$("#tourGroupGroupCode").val()
+
+			,'provinceId':$("#provinceCode").val()
+			,'cityId':$("#cityCode").val()
+			,'sourceTypeId':$("#sourceTypeId").val()
+			,'orgNames':$("#orgNames").val()
+			,'operType':$("#operType").val()
+
+			,'orgIds':$("#orgIds").val()
+			,'saleOperatorName':$("#saleOperatorName").val()
+			,'saleOperatorIds':$("#saleOperatorIds").val()
+			,'tourGroup.productName':$("#tourGroupProductName").val()
+			,'orderLockState':$("#orderLockState").val()
+
+			,'tourState':$("#tourState").val()
+			,'pageSize':$("#pageSize").val()
+			,'page':$("#page").val()
+		};
+		return params;
+	},
+
+    formatter:'select', formatoptions:{
+        value:{ '0':'未确认','1':'已确认',2:'已废弃', '3':'已审核', '4':'已封存'}
+    },
+    formatPerson: function(cellValue, options, rowObject) {
+        return cellValue+"+"+rowObject.tourGroup.totalChild+"+"+rowObject.tourGroup.totalGuide;
+    },
+    formatState: function(cellValue,options,rowObject){
+        var unconfirmed = "未确认";
+        var confirmed_audit = "已确认(审)";
+        var confirmed = "已确认";
+        var abandoned = "已废弃";
+        var audit = "已审核";
+        var sealed = "已封存";
+        if(cellValue==0){
+            return '<span class="log_action update">'+unconfirmed+'</span>';
+        }else if(cellValue==1){
+            if(rowObject.tourGroup.stateFinance==1){
+                return '<span class="log_action normal">'+confirmed_audit+'</span>';
+            }else {
+                return '<span class="log_action normal">'+confirmed+'</span>';
+            }
+        }else if(cellValue==2){
+            return '<span class="log_action delete">'+abandoned+'</span>';
+        }else if(cellValue==3){
+            return '<span class="log_action insert">'+audit+'</span>';
+        }else {
+            return '<span class="log_action fuchsia">'+sealed+'</span>';
+        }
+    },
+
+	formatOptions:function (cellValue, options, rowObject){
+		var ops =  '<div class="tab-operate">' +
+			'<a href="####" class="btn-show">操作<span class="caret"></span></a>' +
+			'<div class="btn-hide" id="asd">' +
+			'<a href="javascript:void(0);" onclick="newWindow(\'查看团队信息\',\'teamGroup/toEditTeamGroupInfo.htm?groupId='+rowObject.tourGroup.id+'+&operType=0\')"  class="def" >查看</a>' +
+			'<a href="javascript:void(0);" onclick="printOrder('+rowObject.id+','+rowObject.tourGroup.groupState+','+rowObject.tourGroup.id+')" class="def">打印</a>';
+			if(rowObject.tourGroup.groupState != 3 && rowObject.tourGroup.groupState !=4){
+				if(rowObject.orderLockState != 1 && rowObject.stateFinance != 1){
+					ops+='<a href="javascript:void(0);" onclick="newWindow(\'编辑团订单\',\'teamGroup/toEditTeamGroupInfo.htm?groupId='+rowObject.tourGroup.id+'&operType=1\')" class="def">编辑</a>' +
+					'<a href="javascript:void(0);" onclick="changeGroupState('+rowObject.groupId+','+rowObject.tourGroup.groupState+')" class="def">状态</a>';
+				}
+			}
+			if(rowObject.tourGroup.groupState==2){
+				if(rowObject.orderLockState != 1){
+					ops+='<a href="javascript:void(0);" onclick="deleteGroupOrderById('+rowObject.id+','+rowObject.groupId+')" class="def">删除</a>';
+				}
+			}
+			if(rowObject.tourGroup.groupState !=2){
+				ops+='<a href="javascript:void(0);" onclick="newWindow(\'复制为新团\',\'tourGroup/toCopyTourGroup.htm?orderId='+rowObject.id+'&groupId='+rowObject.groupId+'\')" class="def">复制</a>';
+			}
+			if(rowObject.tourGroup.groupState ==4){
+				ops+='<a href="javascript:void(0);" onclick="newWindow(\'变更团\',\'tourGroup/toChangeGroup.htm?groupId='+rowObject.groupId+'\')" class="def">变更</a>';
+			}
+			ops+='</div></div>';
+		return ops;
+	},
+	loadGrid: function(){
+		$("#groupProfitTable").jqGrid({
+			url: '../teamGroup/findTourGroupLoadModel.do',
+			datatype: "json",
+			mtype : "post",
+			height: 250,
+			autowidth: false,
+			shrinkToFit: true,
+			rownumbers:true,
+			async:false,
+			rowNum: 15,
+			rowList: [15, 30, 50, 100, 500, 1000],
+			colModel: [
+				{label:'团号',name: 'tourGroup.groupCode',index: 'tourGroup.groupCode',width: 100,title:false, sortable: false, align:'left',formatter:function(cellValue,options,rowObject){
+					return '<a href="javascript:void(0);" onclick="newWindow(\'查看团队信息\',\'teamGroup/toEditTeamGroupInfo.htm?groupId='+rowObject.tourGroup.id+'+&operType=0\')"  class="def" ><span style="color: #09c;">'+cellValue+'</span></a>';
+				}
+				},
+				{label:'发团日期',name: 'tourGroup.dateStart',index: 'date_start',align: "center",title:false,width: 80, align:'center',formatter:function(cellValue,options,rowObject){
+					return moment(rowObject.tourGroup.dateStart).format("YYYY-MM-DD");
+					}
+				},
+				{label:'产品名称',name: 'productName',index: 'productName',width: 380, sortable: false, align:'left',
+                    formatter:function(cellValue,options,rowObject){
+                        return ("【"+rowObject.productBrandName+"】"+cellValue);
+                    }
+                },
+				{label:'天数',name: 'tourGroup.daynum',index: 'daynum',width: 50, sortable: true, title:false,align:'center'},
+				{label:'组团社',name: 'supplierName',index: 'supplierName',width: 260, sortable: false,title:false,align:'left'},
+				{label:'联系人',name: 'contactName',index: 'contactName',width: 60, sortable: false, title:false,align:'center'},
+				{label:'客源地',name: 'provinceName',index: 'provinceName',width: 100, sortable: false,  title:false,align:'center',
+                    formatter:function(cellValue,options,rowObject){
+                        return (cellValue+rowObject.cityName);
+                    }
+                },
+				{label:'类别',name: 'sourceTypeName',index: 'sourceTypeName',width: 40, sortable: false, title:false,align:'center'},
+
+                {label:'人数',name: 'tourGroup.totalAdult',index: 'totalAdult',width: 60, sortable: false, title:false,align:'center',formatter:groupGrid.formatPerson},
+				{label:'销售',name: 'saleOperatorName',index: 'saleOperatorName',width: 60, sortable: false, title:false,align:'center'},
+				{label:'计调',name: 'operatorName',index: 'operatorName',width: 60, sortable: false, title:false,align:'center'},
+				{label:'状态',name: 'tourGroup.groupState',index: 'tourGroup.groupState',width: 50, sortable: false, title:false,align:'center',
+                    formatter:groupGrid.formatState
+                },
+				{label:'操作',name: 'operations',index: 'operations',width: 60, sortable: false,align:'center',title:false,cellattr: addCellAttr,
+					editable:true,edittype:'select',formatter:groupGrid.formatOptions
+				}
+			],
+			pager: "#groupProfitPage",
+			viewrecords: true,
+            caption: "",
+			jsonReader:{
+				root: "result",total: "totalPage",page: "pageBean",records: "totalCount",repeatitems: false
+			},
+			postData:groupGrid.getParam(),
+			footerrow: true,//分页上添加一行，用于显示统计信息
+			loadComplete:function(xhr){
+				//查询为空的处理方式
+				var rowNum = $("#groupProfitTable").jqGrid('getGridParam','records');
+				if (rowNum == '0'){
+					if($("#norecords").html() == null)
+						$("#groupProfitTable").parent().append("</pre><div id='norecords' style='text:center;padding: 8px 8px;'>没有查询记录！</div><pre>");
+					$("#norecords").show();
+				}else{
+					$("#norecords").hide();
+				}
+
+                //处理合计
+                var GroupList = xhr.result;
+                groupGrid.getPageFooterTotal(GroupList);
+			}
+		});
+	},
+   getPageFooterTotal: function(totalRow){
+       var pageObj = {tAdult:0, tChild:0, tGuide:0};
+       $.each(totalRow, function(i,item){
+           pageObj.tAdult += parseInt(item.tourGroup.totalAdult);
+           pageObj.tChild += parseInt(item.tourGroup.totalChild);
+           pageObj.tGuide += parseInt(item.tourGroup.totalGuide);
+       });
+
+       var options = {
+           url:"findTourGroupLoadFooter.do",
+           type:"post",
+           dataType:"json",
+           success:function(data){
+
+               $("tr.footRow2").remove();
+               var $footerRow = $("tr.footrow");
+               $footerRow.after("<tr role='row' class='footrow footRow2 footrow-ltr ui-widget-content'>"+$footerRow.html()+"</tr>");
+               var $newFooterRow = $("tr.footRow2");
+               $("#groupProfitTable").footerData("set",{sourceTypeName:"页合计：", "tourGroup.totalAdult":pageObj.tAdult, tourGroup:{totalChild:pageObj.tChild, totalGuide:pageObj.tGuide}});
+
+
+               if (data == null || data == 'null'){
+                   data = {numAdult:0, numChild:0, numGuide:0};
+               }
+               $newFooterRow.find("td[aria-describedby*='_sourceTypeName']").text("总合计：");
+			   $newFooterRow.find("td[aria-describedby*='_tourGroup.totalAdult']").text(data.numAdult+"+"+data.numChild+"+"+data.numGuide);
+           },
+           error:function(XMLHttpRequest, textStatus, errorThrown){
+               $.error(textStatus+':'+errorThrown);
+           }
+       };
+       $("#tourGroupForm").ajaxSubmit(options);
+    }
+}
+
+function searchBtn() {
+	$("#groupProfitTable").jqGrid('setGridParam', {page:1, postData: groupGrid.getParam()}).trigger("reloadGrid");
+}
+
+/*function queryList(page,pageSize) {
 	if (!page || page < 1) {
 		page = 1;
 	}
@@ -312,17 +527,17 @@ function queryList(page,pageSize) {
     	}
     };
     $("#tourGroupForm").ajaxSubmit(options);	
-}
-
+}*/
+/*
 function searchBtn() {
 	var pageSize=$("#pageSize").val();
 	queryList(1,pageSize);
-}
-function refreshCurrentPage() {
+}*/
+/*function refreshCurrentPage() {
 	var page=$("#page").val();
 	var pageSize=$("#pageSize").val();
 	queryList(page,pageSize);
-}
+}*/
 
 
 

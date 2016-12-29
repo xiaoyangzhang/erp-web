@@ -44,7 +44,7 @@
       </tbody>
       	<tfoot>
        			<tr class="footer1">
-					<td colspan="4" style="text-align: right">合计:</td>
+					<td colspan="4" style="text-align: right">库存结余:</td>
 					<td>${sum }</td>
 					<td></td>
 					<td></td>
@@ -55,7 +55,7 @@
 <script type="text/javascript">	
 function taobaoOrder(orderId){
 	if(orderId>0)
-	newWindow("操作单","taobao/toEditTaobaoOrder.htm?orderId="+orderId);
+	newWindow('查看订单','taobao/toEditTaobaoOrder.htm?id='+orderId+'&see=0');
 }
 </script>
 </html>

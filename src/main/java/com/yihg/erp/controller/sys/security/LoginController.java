@@ -1,14 +1,13 @@
 package com.yihg.erp.controller.sys.security;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +66,11 @@ public class LoginController extends BaseController {
 	
 	@RequestMapping(value="login.htm")
 	public String login(HttpServletRequest request,HttpServletResponse response,ModelMap model){
+		String sessionId = WebUtils.getSessionId(request);
+		UserSessionResult sessionResult = sysLoginFacade.getUserSession(sessionId);
+		if(sessionResult != null ){
+			return "redirect:index.htm";
+		}
 		return "login";
 	}
 	
@@ -196,7 +200,10 @@ public class LoginController extends BaseController {
                      attrModel.addFlashAttribute("unreadCount", 0);
                 }
 
-                return "redirect:index.htm";
+				// 获取当前系统商家名称
+				attrModel.addFlashAttribute("bizName",curBizInfoResult.getName());
+
+				return "redirect:index.htm";
             } else {
                 attrModel.addFlashAttribute("loginName", loginName);
                 attrModel.addFlashAttribute("code", code);
@@ -319,4 +326,23 @@ public class LoginController extends BaseController {
 	        }
 	    	
 	    }
+
+	/**
+	 * 判断sessionId是否过期
+	 * @author daixiaoman
+	 * @date 2016年12月15日 下午12:02:33
+	 */
+	@RequestMapping("/login.verify")
+	@ResponseBody
+	public String loginVerifySession(HttpServletRequest request,HttpServletResponse response){
+		Map<String,Object> resultMap = new HashMap<String,Object>();
+		resultMap.put("flag",0);
+
+		String sessionId = request.getParameter("sid");
+		UserSessionResult sessionResult = sysLoginFacade.getUserSession(sessionId);
+		if(null != sessionResult){
+			resultMap.put("flag",1);
+		}
+		return JSON.toJSONString(resultMap);
+	}
 }

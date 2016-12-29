@@ -33,28 +33,44 @@ String path = request.getContextPath();
 						<col width="4%" />
 						<col width="7%" />
 						<col width="7%" />
+						
 						<col width="7%" />
 						<col width="7%" />
 						<col width="7%" />
 						<col width="7%" />
 						<col width="7%" />
 						<col width="7%" />
+						<col width="7%" />
+						
+						<col width="5%" />
+						<col width="5%" />
+						<col width="5%" />
+						<col width="5%" />
+						
+						<col width="6%" />
+						<col width="6%" />
 						<thead>
 							<tr>
 								<th rowspan="2">产品名称<i class="w_table_split"></i></th>
 								<th rowspan="2">库存<i class="w_table_split"></i></th>
 								<th rowspan="2">已售<i class="w_table_split"></i></th>
-								<th colspan="6">价格设置<i class="w_table_split"></i></th>
+								<th colspan="9">价格设置<i class="w_table_split"></i></th>
+								<!-- <th colspan="4">成人价<i class="w_table_split"></i></th> -->
 								<th rowspan="2">预留时长(分)<i class="w_table_split"></i></th>
 								<th rowspan="2">取消下限<i class="w_table_split"></i></th>
 							</tr>
 							<tr>
 								<th>规格<i class="w_table_split"></i></th>
-								<th>成本价<i class="w_table_split"></i></th>
+								<!-- <th style="display: none;">成本价<i class="w_table_split"></i></th> -->
 								<th>建议零售价<i class="w_table_split"></i></th>
 								<th>同行返款<i class="w_table_split"></i></th>
 								<th>代理返款<i class="w_table_split"></i></th>
 								<th>最低定金<i class="w_table_split"></i></th>
+								
+								<th>房<i class="w_table_split"></i></th>
+								<th>机票<i class="w_table_split"></i></th>
+								<th>接送<i class="w_table_split"></i></th>
+								<th>其他<i class="w_table_split"></i></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -83,20 +99,24 @@ String path = request.getContextPath();
 									${resProductBean.numSold }
 								</td>
 								<td>成人价</td>
-								<td>
-									<input class="input_w" type="text"  name="adultCostPrice" value="<fmt:formatNumber value="${resProductBean.adultCostPrice }"  type="currency" pattern="#.##"/>"/>
+								<td style="display: none;"><input class="input_w" type="text"  name="adultCostPrice" value="<fmt:formatNumber value="${resProductBean.adultCostPrice }"  type="currency" pattern="#.##"/>"/>
 								</td>
-								<td>
-									<input class="input_w" type="text" name="adultSuggestPrice" value="<fmt:formatNumber value="${resProductBean.adultSuggestPrice }" type="currency" pattern="#.##"/>"/>
+								<td><input class="input_w" type="text" name="adultSuggestPrice" value="<fmt:formatNumber value="${resProductBean.adultSuggestPrice }" type="currency" pattern="#.##"/>"/>
 								</td>
-								<td>
-									<input class="input_w" type="text" name="adultSamePay" value="<fmt:formatNumber value="${resProductBean.adultSamePay }" type="currency" pattern="#.##"/>"/>
+								<td><input class="input_w" type="text" name="adultSamePay" value="<fmt:formatNumber value="${resProductBean.adultSamePay }" type="currency" pattern="#.##"/>"/>
 								</td>
-								<td>
-									<input class="input_w" type="text" name="adultProxyPay" value="<fmt:formatNumber value="${resProductBean.adultProxyPay }" type="currency" pattern="#.##"/>"/>
+								<td><input class="input_w" type="text" name="adultProxyPay" value="<fmt:formatNumber value="${resProductBean.adultProxyPay }" type="currency" pattern="#.##"/>"/>
 								</td>
-								<td>
-									<input class="input_w" type="text"  name="adultMinDeposit" value="<fmt:formatNumber value="${resProductBean.adultMinDeposit }" type="currency" pattern="#.##"/>"/>
+								<td><input class="input_w" type="text"  name="adultMinDeposit" value="<fmt:formatNumber value="${resProductBean.adultMinDeposit }" type="currency" pattern="#.##"/>"/>
+								</td>
+								
+								<td><input class="input_w" type="text"  name="adultCostHotel" value="<fmt:formatNumber value="${resProductBean.adultCostHotel }" type="currency" pattern="#.##"/>"/>
+								</td>
+								<td><input class="input_w" type="text"  name="adultCostTicket" value="<fmt:formatNumber value="${resProductBean.adultCostTicket }" type="currency" pattern="#.##"/>"/>
+								</td>
+								<td><input class="input_w" type="text"  name="adultCostJs" value="<fmt:formatNumber value="${resProductBean.adultCostJs }" type="currency" pattern="#.##"/>"/>
+								</td>
+								<td><input class="input_w" type="text"  name="adultCostOther" value="<fmt:formatNumber value="${resProductBean.adultCostOther }" type="currency" pattern="#.##"/>"/>
 								</td>
 								<td rowspan="3">
 									<input class="input_w" type="text" name="reserveTime" value="${resProductBean.reserveTime }"/>
@@ -109,19 +129,29 @@ String path = request.getContextPath();
 							</tr>
 							<tr>
 								<td>儿童价<br/>(2岁以上)</td>
-								<td><input class="input_w" type="text" name="childCostPrice" value="<fmt:formatNumber value="${resProductBean.childCostPrice }" type="currency" pattern="#.##"/>"/></td>
+								<td  style="display: none;"><input class="input_w" type="text" name="childCostPrice" value="<fmt:formatNumber value="${resProductBean.childCostPrice }" type="currency" pattern="#.##"/>"/></td>
 								<td><input class="input_w" type="text" name="childSuggestPrice" value="<fmt:formatNumber value="${resProductBean.childSuggestPrice }" type="currency" pattern="#.##"/>"/></td>
 								<td><input class="input_w" type="text" name="childSamePay" value="<fmt:formatNumber value="${resProductBean.childSamePay }" type="currency" pattern="#.##"/>"/></td>
 								<td><input class="input_w" type="text" name="childProxyPay" value="<fmt:formatNumber value="${resProductBean.childProxyPay }" type="currency" pattern="#.##"/>"/></td>
 								<td><input class="input_w" type="text" name="childMinDeposit" value="<fmt:formatNumber value="${resProductBean.childMinDeposit }" type="currency" pattern="#.##"/>"/></td>
+								
+								<td><input class="input_w" type="text" name="childCostHotel" value="<fmt:formatNumber value="${resProductBean.childCostHotel }" type="currency" pattern="#.##"/>"/></td>
+								<td><input class="input_w" type="text" name="childCostTicket" value="<fmt:formatNumber value="${resProductBean.childCostTicket }" type="currency" pattern="#.##"/>"/></td>
+								<td><input class="input_w" type="text" name="childCostJs" value="<fmt:formatNumber value="${resProductBean.childCostJs }" type="currency" pattern="#.##"/>"/></td>
+								<td><input class="input_w" type="text" name="childCostOther" value="<fmt:formatNumber value="${resProductBean.childCostOther }" type="currency" pattern="#.##"/>"/></td>
 							</tr>
 							<tr>
 								<td>婴儿价<br/>(0~2岁)</td>
-								<td><input class="input_w" type="text" name="babyCostPrice" value="<fmt:formatNumber value="${resProductBean.babyCostPrice }" type="currency" pattern="#.##"/>"/></td>
+								<td  style="display: none;"><input class="input_w" type="text" name="babyCostPrice" value="<fmt:formatNumber value="${resProductBean.babyCostPrice }" type="currency" pattern="#.##"/>"/></td>
 								<td><input class="input_w" type="text" name="babySuggestPrice" value="<fmt:formatNumber value="${resProductBean.babySuggestPrice }" type="currency" pattern="#.##"/>"/></td>
 								<td><input class="input_w" type="text" name="babySamePay" value="<fmt:formatNumber value="${resProductBean.babySamePay }" type="currency" pattern="#.##"/>"/></td>
 								<td><input class="input_w" type="text" name="badyProxyPay" value="<fmt:formatNumber value="${resProductBean.badyProxyPay }" type="currency" pattern="#.##"/>"/></td>
 								<td><input class="input_w" type="text" name="badyMinDeposit" value="<fmt:formatNumber value="${resProductBean.badyMinDeposit }" type="currency" pattern="#.##"/>"/></td>
+								
+								<td><input class="input_w" type="text" name="babyCostHotel" value="<fmt:formatNumber value="${resProductBean.babyCostHotel }" type="currency" pattern="#.##"/>"/></td>
+								<td><input class="input_w" type="text" name="babyCostTicket" value="<fmt:formatNumber value="${resProductBean.babyCostTicket }" type="currency" pattern="#.##"/>"/></td>
+								<<td><input class="input_w" type="text" name="babyCostJs" value="<fmt:formatNumber value="${resProductBean.babyCostJs }" type="currency" pattern="#.##"/>"/></td>
+								<td><input class="input_w" type="text" name="babyCostOther" value="<fmt:formatNumber value="${resProductBean.babyCostOther }" type="currency" pattern="#.##"/>"/></td>
 							</tr>
 						</tbody>
 					</table>

@@ -57,6 +57,21 @@
 					<div class="clear"></div>
 	    		</dd> 
 	    		
+	    		<dd>
+	    			<div class="dd_left">产品说明：</div> 
+	    			<div class="dd_right">
+	    			<input type="hidden" name="productDes"class="IptText300" id="productDes"value="${booking.productDes }" /> 
+						<select name="productDesId" id="productDesId">
+								<option value="-1"> </option>
+								<c:forEach items="${cashTypes}" var="v">
+									<option value="${v.id }"
+										<c:if test="${v.id==booking.productDesId }"> selected="selected" </c:if>>${v.value}</option>
+								</c:forEach>
+						</select>
+					</div>
+					<div class="clear"></div>
+	    		</dd> 
+	    		
 	    			<dd>
 	    			<div class="dd_left">数量：</div> 
 	    			<div class="dd_right">
@@ -251,6 +266,8 @@ showGroupInfo();
     						contactTel:$("#contactTel").val(),
     						contactFax:$("#contactFax").val(),
     						contactMobile:$("#contactMobile").val(),
+    						productDesId:$("#productDesId").val(),
+    						productDes:$("#productDesId").find("option:selected").text(),
     						personAdult:person.adult,
     						personChild:person.child,
     						personGuide:person.guide,

@@ -10,12 +10,13 @@
 <script type="text/javascript" src="<%=staticPath%>/assets/js/toastr/toastr.min.js"></script>
 <script type="text/javascript" src="<%=staticPath %>/assets/js/jquery.cookie.js"></script>
 <link href="<%=staticPath%>/assets/css/toastr/toastr.min.css" rel="stylesheet" type="text/css" />
+
 </head>
 <body onresize="onResize_AutoHeight()">
 	<div class="head">
 		<div class="logo">
 			<span class="fl mt-5"><img src="<%=ctx%>/assets/img/logo.png"></span> 
-			<span class="logo-word fl">旅道 云旅游ERP系统</span>
+			<span class="logo-word fl">旅道旅游ERP系统【${bizName}】</span>
 		</div>
 		<div class="msg-title">
 			<span class="mr-20 fl"><em class="re-icon icon"></em>返回官网</span> 
@@ -275,10 +276,12 @@
 </html>
 
 <script type="text/javascript">
-	(function(){
-		//防止多个帐号登录同一个浏览器时 用户操作数据会串掉
-		$(document).on("mouseover",function(e){
-			$.cookie("YIHG_ERP_USER_SESSION",yihg_erp_web_config["yihg_erp_user_token"]);
-		});
-	})();
+(function(){
+	//防止多个帐号登录同一个浏览器时 用户操作数据会串掉
+	$(document).on("mouseover",function(e){
+		if ($.cookie("YIHG_ERP_USER_SESSION") != yihg_erp_web_config["yihg_erp_user_token"]){
+			window.location.reload();
+		}
+	});
+})();
 </script>

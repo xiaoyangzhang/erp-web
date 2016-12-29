@@ -4391,6 +4391,967 @@ public class FinanceController extends BaseController {
 				}
 			}
 		}
+
+	/**
+	 * 结算单审核导出Excel功能
+	 * @return
+	 */
+	@RequestMapping(value = "queryAuditGroupExcelList.htm")
+	public void queryAuditGroupExcelList(HttpServletRequest request,HttpServletResponse response,
+										 HttpServletResponse reponse, ModelMap model, Integer groupId) {
+
+		Integer bizId = WebUtils.getCurBizId(request);
+		//获取到团信息
+		Map map= financeService.queryAuditViewInfo(groupId, bizId);
+
+		Map groupMap = (Map) map.get("group");//获取到团信息
+		//获取销售单
+		Map<String, Object> pm = WebUtils.getQueryParamters(request);
+		List<Map<String, Object>> orderList = getCommonService(null).queryList("fin.selectOrderList", pm);
+
+		//获取地接社
+		//List<InfoBean>	del_list = (List) map.get("del");
+		List<Map<String, Object>> deliveryList = getCommonService(null).queryList("fin.selectDeliveryList", pm);
+
+		//获取地接社，餐厅，酒店，车队，景区，其他，保险
+		List<InfoBean>	list = (List) map.get("sup");
+
+		Map<String, Object> order_pm = WebUtils.getQueryParamters(request);
+		List<Map<String, Object>> supplierList = getCommonService(null).queryList("fin.selectSupplierList", pm);
+
+		//其他收入
+		List<Map<String, Object>> otherIncomeList = getCommonService(null).queryList("fin.selectOtherIncomeList", pm);
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		//System.out.println("supplierList="+supplierList);
+		String path = "";
+		try {
+			String url = request.getSession().getServletContext()
+					.getRealPath("/template/excel/financeAuditGroupList.xlsx");
+			FileInputStream input = new FileInputStream(new File(url)); // 读取的文件路径
+			XSSFWorkbook wb = new XSSFWorkbook(new BufferedInputStream(input));
+			XSSFFont createFont = wb.createFont();
+			createFont.setFontName("微软雅黑");
+			createFont.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);// 粗体显示
+			createFont.setFontHeightInPoints((short) 12);
+
+			XSSFFont tableIndex = wb.createFont();
+			tableIndex.setFontName("宋体");
+			tableIndex.setFontHeightInPoints((short) 11);
+
+			CellStyle cellStyleFont = wb.createCellStyle();
+			cellStyleFont.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			cellStyleFont.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			cellStyleFont.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			cellStyleFont.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			cellStyleFont.setAlignment(CellStyle.ALIGN_LEFT); // 居中
+			XSSFFont font = wb.createFont();
+			font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);//粗体显示
+			cellStyleFont.setFont(font);
+
+			CellStyle cellStyle = wb.createCellStyle();
+			cellStyle.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			cellStyle.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			cellStyle.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			cellStyle.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			cellStyle.setAlignment(CellStyle.ALIGN_CENTER); // 居中
+
+			CellStyle styleFontCenter = wb.createCellStyle();
+			styleFontCenter.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleFontCenter.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleFontCenter.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleFontCenter.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleFontCenter.setAlignment(CellStyle.ALIGN_CENTER); // 居中
+			styleFontCenter.setFont(createFont);
+
+			CellStyle styleFontTable = wb.createCellStyle();
+			styleFontTable.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleFontTable.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleFontTable.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleFontTable.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleFontTable.setAlignment(CellStyle.ALIGN_CENTER); // 居中
+			styleFontTable.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+			styleFontTable.setFillPattern(CellStyle.SOLID_FOREGROUND);
+
+			CellStyle styleLeft = wb.createCellStyle();
+			styleLeft.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleLeft.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleLeft.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleLeft.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleLeft.setAlignment(CellStyle.ALIGN_LEFT); // 居左
+
+			CellStyle styleRight = wb.createCellStyle();
+			styleRight.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleRight.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleRight.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleRight.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleRight.setAlignment(CellStyle.ALIGN_RIGHT); // 居右
+			Sheet sheet = wb.getSheetAt(0); // 获取到第一个sheet
+			Row row = null;
+			Cell cc = null;
+			// 遍历集合数据，产生数据行
+			int index = 0;
+
+			//1、团信息
+			if(groupMap.size()>0){
+				row = sheet.createRow(index + 3);
+				cc = row.createCell(0);
+				cc.setCellValue("团号");//
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(1);
+				cc.setCellValue((String)groupMap.get("group_code"));//团号
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(2);
+				cc.setCellValue("计调");//
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(3);
+				cc.setCellValue((String)groupMap.get("operator_name"));//计调
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(4);
+				cc.setCellValue("人数");//
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(5);
+				cc.setCellValue(groupMap.get("total_adult")+"+"+groupMap.get("total_child")+"+"+groupMap.get("total_guide"));//人数
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(6);
+				cc.setCellValue("状态");//
+				cc.setCellStyle(cellStyle);
+
+				Integer num = (Integer)groupMap.get("group_state");
+				if(num==0){
+					cc = row.createCell(7);
+					cc.setCellValue("未确认");//未确认
+					cc.setCellStyle(cellStyle);
+				}else if(num==1){
+					cc = row.createCell(7);
+					cc.setCellValue("已确认");//已确认
+					cc.setCellStyle(cellStyle);
+				}else if(num==2){
+					cc = row.createCell(7);
+					cc.setCellValue("作废");//作废
+					cc.setCellStyle(cellStyle);
+				}else if(num==3){
+					cc = row.createCell(7);
+					cc.setCellValue("已审核");//已审核
+					cc.setCellStyle(cellStyle);
+				}else {
+					cc = row.createCell(7);
+					cc.setCellValue("已封存");//已封存
+					cc.setCellStyle(cellStyle);
+				}
+
+				cc = row.createCell(8);
+				cc.setCellValue("产品名称");//
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(9);
+				cc.setCellValue("【"+groupMap.get("product_brand_name")+"】"+groupMap.get("product_name"));//产品名称
+				cc.setCellStyle(styleLeft);
+
+				row = sheet.createRow(index + 4);
+				cc = row.createCell(0);
+				cc.setCellValue("收入");//
+				cc.setCellStyle(cellStyle);
+
+				BigDecimal total_income = (BigDecimal) groupMap.get("total_income");
+				BigDecimal total_income_shop = (BigDecimal) groupMap.get("total_income_shop");
+				cc = row.createCell(1);
+				cc.setCellValue(df.format(total_income.add(total_income_shop)));//收入
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(2);
+				cc.setCellValue("支出");//
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(3);
+				cc.setCellValue(df.format(groupMap.get("total_cost")));//支出
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(4);
+				cc.setCellValue("单团利润");//
+				cc.setCellStyle(cellStyle);
+
+				BigDecimal total_profit = (BigDecimal) groupMap.get("total_profit");
+				cc = row.createCell(5);
+				cc.setCellValue(df.format(total_profit.add(total_income_shop)));//单团利润
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(6);
+				cc.setCellValue("人均利润");//
+				cc.setCellStyle(cellStyle);
+
+				Integer person_num = (Integer) groupMap.get("person_num");
+				BigDecimal sum = total_profit.add(total_income_shop);
+				if(person_num.intValue()==0){
+					cc = row.createCell(7);
+					cc.setCellValue(df.format(sum));//人均利润 = 单团利润
+					cc.setCellStyle(cellStyle);
+				}else {
+					cc = row.createCell(7);
+					cc.setCellValue(df.format(sum.divide(new BigDecimal(person_num),2, RoundingMode.HALF_UP)));//人均利润
+					cc.setCellStyle(cellStyle);
+				}
+
+				cc = row.createCell(8);
+				cc.setCellValue("起始日期");//
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(9);
+				cc.setCellValue(groupMap.get("date_start")+"~"+groupMap.get("date_end"));//起始日期
+				cc.setCellStyle(styleLeft);
+			}
+			//2、销售单
+			index=0;
+			if(orderList != null && orderList.size() > 0 ){
+				for(Map<String, Object> item : orderList){
+					row = sheet.createRow(index +9);
+					cc = row.createCell(0);
+					cc.setCellValue(index + 1);
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(1);
+					cc.setCellValue((String)item.get("supplier_name"));//组团社
+					cc.setCellStyle(styleLeft);
+
+					cc = row.createCell(2);
+					cc.setCellValue((String)item.get("sale_operator_name"));//销售
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(3);
+					cc.setCellValue((String)item.get("receive_mode"));//接站牌
+					cc.setCellStyle(styleLeft);
+
+					cc = row.createCell(4);
+					cc.setCellValue(item.get("num_adult")+"+"+item.get("num_child")+"+"+item.get("num_guide"));//人数
+					cc.setCellStyle(cellStyle);
+
+					String total = df.format(item.get("total"));
+					if(!"".equals(total)){
+						cc = row.createCell(5);
+						cc.setCellValue(total);//金额
+						cc.setCellStyle(cellStyle);
+					}else {
+						cc = row.createCell(5);
+						cc.setCellValue(0);//金额
+						cc.setCellStyle(cellStyle);
+					}
+
+					String total_cash = df.format(item.get("total_cash"));
+					if(!"".equals(total_cash)){
+						cc = row.createCell(6);
+						cc.setCellValue(total_cash);//已收
+						cc.setCellStyle(cellStyle);
+					}else {
+						cc = row.createCell(6);
+						cc.setCellValue(0);//已收
+						cc.setCellStyle(cellStyle);
+					}
+
+					String balance = df.format(item.get("balance"));
+					if(!"".equals(total_cash)){
+						cc = row.createCell(7);
+						cc.setCellValue(balance);//未收
+						cc.setCellStyle(cellStyle);
+					}else {
+						cc = row.createCell(7);
+						cc.setCellValue(0);//已收
+						cc.setCellStyle(cellStyle);
+					}
+					index ++;
+				}
+				//加合计行
+				index=0;
+				BigDecimal sumTotal = new BigDecimal(0);
+				BigDecimal sumTotalCost = new BigDecimal(0);
+				BigDecimal sumBalance = new BigDecimal(0);
+				for(int i=0; i<orderList.size(); i++) {
+					Map<String,Object> sumMap = orderList.get(i);
+					String total = df.format(sumMap.get("total"));
+					if(!"".equals(total)){
+						sumTotal = sumTotal.add((BigDecimal)sumMap.get("total"));
+					}else {
+						sumTotal = new BigDecimal(0);
+					}
+
+					String totalCash = df.format(sumMap.get("total_cash"));
+					if(!"".equals(totalCash)){
+						sumTotalCost = sumTotalCost.add((BigDecimal)sumMap.get("total_cash"));
+					}else {
+						sumTotalCost = new BigDecimal(0);
+					}
+
+					String balance = df.format(sumMap.get("balance"));
+					if(!"".equals(balance)){
+						sumBalance = sumBalance.add((BigDecimal)sumMap.get("balance"));
+					}else {
+						sumBalance = new BigDecimal(0);
+					}
+				}
+				row = sheet.createRow(index + orderList.size()+9); // 加合计行
+				cc = row.createCell(0);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(1);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(2);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(3);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(4);
+				cc.setCellValue("合计");
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(5);
+				cc.setCellValue(df.format(sumTotal));
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(6);
+				cc.setCellValue(df.format(sumTotalCost));
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(7);
+				cc.setCellValue(df.format(sumBalance));
+				cc.setCellStyle(cellStyle);
+
+			}
+
+			//3、地接社
+			index=0;
+			if(deliveryList != null && deliveryList.size()>0){
+
+				CellRangeAddress region = new CellRangeAddress(index +orderList.size()+11,
+						index +orderList.size()+11, 0, 5);
+				sheet.addMergedRegion(region);
+				row = sheet.createRow(index +orderList.size()+11);
+				cc = row.createCell(0);
+				cc.setCellValue("地接社");
+				cc.setCellStyle(cellStyleFont);
+
+				row = sheet.createRow(index +orderList.size()+12);
+				cc = row.createCell(0);
+				cc.setCellValue("序号");
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(1);
+				cc.setCellValue("商家");//商家
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(2);
+				cc.setCellValue("日期");//日期
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(3);
+				cc.setCellValue("金额");//成本/金额
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(4);
+				cc.setCellValue("已收");//已收
+				cc.setCellStyle(cellStyle);
+
+
+				cc = row.createCell(5);
+				cc.setCellValue("未收");//未收
+				cc.setCellStyle(cellStyle);
+
+				for(Map<String, Object> delItem : deliveryList){
+					row = sheet.createRow(index +orderList.size()+13);
+					cc = row.createCell(0);
+					cc.setCellValue(index + 1);
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(1);
+					cc.setCellValue((String)delItem.get("supplier_name"));//商家
+					cc.setCellStyle(styleLeft);
+
+					cc = row.createCell(2);
+					cc.setCellValue((String)delItem.get("create_date"));//日期
+					cc.setCellStyle(styleLeft);
+
+					if(delItem.get("total") == null){
+						cc = row.createCell(3);
+						cc.setCellValue(0);//成本/金额
+						cc.setCellStyle(styleLeft);
+					}else{
+						String t_totalCash = df.format(delItem.get("total"));
+						if("".equals(t_totalCash)){
+							cc = row.createCell(3);
+							cc.setCellValue(0);//已收
+							cc.setCellStyle(cellStyle);
+						}else {
+							cc = row.createCell(3);
+							cc.setCellValue(t_totalCash);//已收
+							cc.setCellStyle(cellStyle);
+						}
+					}
+
+					if(delItem.get("total_cash") == null){
+						cc = row.createCell(4);
+						cc.setCellValue(0);//已收
+						cc.setCellStyle(cellStyle);
+					}else{
+						String t_totalCash = df.format(delItem.get("total_cash"));
+						if("".equals(t_totalCash)){
+							cc = row.createCell(4);
+							cc.setCellValue(0);//已收
+							cc.setCellStyle(cellStyle);
+						}else {
+							cc = row.createCell(4);
+							cc.setCellValue(t_totalCash);//已收
+							cc.setCellStyle(cellStyle);
+						}
+					}
+
+					String b_balance = df.format(delItem.get("balance"));
+					if("".equals(b_balance)){
+						cc = row.createCell(5);
+						cc.setCellValue(0);//未收
+						cc.setCellStyle(cellStyle);
+					}else {
+						cc = row.createCell(5);
+						cc.setCellValue(b_balance);//未收
+						cc.setCellStyle(cellStyle);
+					}
+					index ++;
+				}
+				//加合计行
+				index=0;
+				BigDecimal sumDelTotal = new BigDecimal(0);
+				BigDecimal sumDelTotalCost = new BigDecimal(0);
+				BigDecimal sumDelBalance = new BigDecimal(0);
+				for(int i=0; i<deliveryList.size(); i++) {
+					Map<String,Object> sumDel = deliveryList.get(i);
+
+					if(sumDel.get("total") == null){
+						sumDelTotal = new BigDecimal(0);
+					}else{
+						String total = df.format(sumDel.get("total"));
+						if(!"".equals(total)){
+							sumDelTotal = sumDelTotal.add((BigDecimal)sumDel.get("total"));
+						}else {
+							sumDelTotal = new BigDecimal(0);
+						}
+					}
+					if(sumDel.get("total_cash") == null){
+						sumDelTotalCost = new BigDecimal(0);
+					}else{
+						String totalCash = df.format(sumDel.get("total_cash"));
+						if(!"".equals(totalCash)){
+							sumDelTotalCost = sumDelTotalCost.add((BigDecimal)sumDel.get("total_cash"));
+						}else {
+							sumDelTotalCost = new BigDecimal(0);
+						}
+					}
+
+					if(sumDel.get("balance") == null){
+						sumDelBalance = new BigDecimal(0);
+					}else{
+						String balance = df.format(sumDel.get("balance"));
+						if(!"".equals(balance)){
+							sumDelBalance = sumDelBalance.add((BigDecimal)sumDel.get("balance"));
+						}else {
+							sumDelBalance = new BigDecimal(0);
+						}
+					}
+				}
+
+				if(orderList.size()==1){
+					row = sheet.createRow(index +orderList.size()+14);
+				}
+				if(orderList.size()>1){
+					row = sheet.createRow(index +orderList.size()+15);
+				}
+				cc = row.createCell(0);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(1);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(2);
+				cc.setCellValue("合计");
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(3);
+				cc.setCellValue(df.format(sumDelTotal));
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(4);
+				cc.setCellValue(df.format(sumDelTotalCost));
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(5);
+				cc.setCellValue(df.format(sumDelBalance));
+				cc.setCellStyle(cellStyle);
+			}
+
+			//4、其他收入
+			index=0;
+			if(otherIncomeList.size() > 0 && otherIncomeList.size()>0){
+				if(deliveryList.size() == 0){
+					CellRangeAddress region = new CellRangeAddress(index +orderList.size()+11,
+							index +orderList.size()+11, 0, 5);
+					sheet.addMergedRegion(region);
+					row = sheet.createRow(index +orderList.size()+11);
+				}else {
+					CellRangeAddress region = new CellRangeAddress(index +orderList.size()+deliveryList.size()+15,
+							index +orderList.size()+deliveryList.size()+15, 0, 5);
+					sheet.addMergedRegion(region);
+					row = sheet.createRow(index +orderList.size()+deliveryList.size()+15);
+				}
+
+				cc = row.createCell(0);
+				cc.setCellValue("其他收入");
+				cc.setCellStyle(cellStyleFont);
+
+				if(deliveryList .size() == 0){
+					row = sheet.createRow(index +orderList.size()+12);
+				}else {
+					row = sheet.createRow(index +orderList.size()+deliveryList.size()+16);
+				}
+				cc = row.createCell(0);
+				cc.setCellValue("序号");
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(1);
+				cc.setCellValue("商家");//商家
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(2);
+				cc.setCellValue("日期");//日期
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(3);
+				cc.setCellValue("金额");//成本/金额
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(4);
+				cc.setCellValue("已收");//已收
+				cc.setCellStyle(cellStyle);
+
+
+				cc = row.createCell(5);
+				cc.setCellValue("未收");//未收
+				cc.setCellStyle(cellStyle);
+
+				for(Map<String, Object> otherMap : otherIncomeList){
+					if(deliveryList .size() == 0){
+						row = sheet.createRow(index +orderList.size()+13);
+					}else {
+						row = sheet.createRow(index +orderList.size()+deliveryList.size()+17);
+					}
+					cc = row.createCell(0);
+					cc.setCellValue(index + 1);
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(1);
+					cc.setCellValue((String)otherMap.get("supplier_name"));//商家
+					cc.setCellStyle(styleLeft);
+
+					cc = row.createCell(2);
+					cc.setCellValue(sdf.format(otherMap.get("booking_date")));//日期
+					cc.setCellStyle(styleLeft);
+
+					String _total = df.format(otherMap.get("total"));
+					if("".equals(_total)){
+						cc = row.createCell(3);
+						cc.setCellValue(0);//成本/金额
+						cc.setCellStyle(styleLeft);
+					}else {
+						cc = row.createCell(3);
+						cc.setCellValue(_total);//成本/金额
+						cc.setCellStyle(styleLeft);
+					}
+
+					if(otherMap.get("total_cash") == null){
+						cc = row.createCell(4);
+						cc.setCellValue(0);//已收
+						cc.setCellStyle(cellStyle);
+					}else{
+						String t_totalCash = df.format(otherMap.get("total_cash"));
+						if("".equals(t_totalCash)){
+							cc = row.createCell(4);
+							cc.setCellValue(0);//已收
+							cc.setCellStyle(cellStyle);
+						}else {
+							cc = row.createCell(4);
+							cc.setCellValue(t_totalCash);//已收
+							cc.setCellStyle(cellStyle);
+						}
+					}
+
+					String b_balance = df.format(otherMap.get("balance"));
+					if("".equals(b_balance)){
+						cc = row.createCell(5);
+						cc.setCellValue(0);//未收
+						cc.setCellStyle(cellStyle);
+					}else {
+						cc = row.createCell(5);
+						cc.setCellValue(b_balance);//未收
+						cc.setCellStyle(cellStyle);
+					}
+					index ++;
+				}
+				//加合计行
+				index=0;
+				BigDecimal sumOtherTotal = new BigDecimal(0);
+				BigDecimal sumOtherTotalCost = new BigDecimal(0);
+				BigDecimal sumOtherBalance = new BigDecimal(0);
+				for(int i=0; i<otherIncomeList.size(); i++) {
+					Map<String,Object> sumOther = otherIncomeList.get(i);
+
+					if(sumOther.get("total") == null){
+						sumOtherTotal = new BigDecimal(0);
+					}else{
+						String total = df.format(sumOther.get("total"));
+						if(!"".equals(total)){
+							sumOtherTotal = sumOtherTotal.add((BigDecimal)sumOther.get("total"));
+						}else {
+							sumOtherTotal = new BigDecimal(0);
+						}
+					}
+					if(sumOther.get("total_cash") == null){
+						sumOtherTotalCost = new BigDecimal(0);
+					}else{
+						String totalCash = df.format(sumOther.get("total_cash"));
+						if(!"".equals(totalCash)){
+							sumOtherTotalCost = sumOtherTotalCost.add((BigDecimal)sumOther.get("total_cash"));
+						}else {
+							sumOtherTotalCost = new BigDecimal(0);
+						}
+					}
+
+					if(sumOther.get("balance") == null){
+						sumOtherBalance = new BigDecimal(0);
+					}else{
+						String balance = df.format(sumOther.get("balance"));
+						if(!"".equals(balance)){
+							sumOtherBalance = sumOtherBalance.add((BigDecimal)sumOther.get("balance"));
+						}else {
+							sumOtherBalance = new BigDecimal(0);
+						}
+					}
+				}
+				if(deliveryList .size() == 0){
+					row = sheet.createRow(index +orderList.size()+14);
+				}else {
+					row = sheet.createRow(index +orderList.size()+deliveryList.size()+18);
+				}
+				cc = row.createCell(0);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(1);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(2);
+				cc.setCellValue("合计");
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(3);
+				cc.setCellValue(df.format(sumOtherTotal));
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(4);
+				cc.setCellValue(df.format(sumOtherTotalCost));
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(5);
+				cc.setCellValue(df.format(sumOtherBalance));
+				cc.setCellStyle(cellStyle);
+			}
+
+			//5、地接社，餐厅，酒店，车队，景区，其他，保险
+			index=0;
+			if (supplierList != null && supplierList.size() > 0) {
+				if(otherIncomeList.size() == 0 && deliveryList.size() >0){
+					row = sheet.createRow(index +orderList.size()+deliveryList.size()+16);
+				}else if (otherIncomeList .size() > 0 && deliveryList.size() ==0) {
+					row = sheet.createRow(index +orderList.size()+otherIncomeList.size()+16);
+				}else if (otherIncomeList.size() == 0 && deliveryList.size() ==0) {
+					row = sheet.createRow(index +orderList.size()+12);
+				}else{
+					row = sheet.createRow(index +orderList.size()+deliveryList.size()+otherIncomeList.size()+20);
+				}
+
+				cc = row.createCell(0);
+				cc.setCellValue("序号");
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(1);
+				cc.setCellValue("类别");//类别
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(2);
+				cc.setCellValue("商家");//商家
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(3);
+				cc.setCellValue("日期");//日期
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(4);
+				cc.setCellValue("成本");//成本/金额
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(5);
+				cc.setCellValue("已收");//已收
+				cc.setCellStyle(cellStyle);
+
+
+				cc = row.createCell(6);
+				cc.setCellValue("未收");//未收
+				cc.setCellStyle(cellStyle);
+
+				for (Map<String, Object> items : supplierList) {
+					if(otherIncomeList.size() == 0 && deliveryList.size() >0){
+						row = sheet.createRow(index +orderList.size()+deliveryList.size()+17);
+					}else if (otherIncomeList .size() > 0 && deliveryList.size() ==0) {
+						row = sheet.createRow(index +orderList.size()+otherIncomeList.size()+17);
+					}else if (otherIncomeList.size() == 0 && deliveryList.size() ==0) {
+						row = sheet.createRow(index +orderList.size()+12);
+					}else{
+						row = sheet.createRow(index +orderList.size()+deliveryList.size()+otherIncomeList.size()+21);
+					}
+
+					cc = row.createCell(0);
+					cc.setCellValue(index + 1);
+					cc.setCellStyle(cellStyle);
+
+					Integer type = (Integer)items.get("supplier_type");
+					if(type == Constants.TRAVELAGENCY){// 组团社
+						cc = row.createCell(1);
+						cc.setCellValue("组团社");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.RESTAURANT){// 餐厅
+						cc = row.createCell(1);
+						cc.setCellValue("餐厅");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.HOTEL){ // 酒店
+						cc = row.createCell(1);
+						cc.setCellValue("酒店");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.FLEET){// 车队
+						cc = row.createCell(1);
+						cc.setCellValue("车队");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.SCENICSPOT){// 景区
+						cc = row.createCell(1);
+						cc.setCellValue("景区");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.SHOPPING){// 购物
+						cc = row.createCell(1);
+						cc.setCellValue("购物");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.ENTERTAINMENT){// 娱乐
+						cc = row.createCell(1);
+						cc.setCellValue("娱乐");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.GUIDE){// 导游
+						cc = row.createCell(1);
+						cc.setCellValue("导游");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.AIRTICKETAGENT){// 机票代理
+						cc = row.createCell(1);
+						cc.setCellValue("机票代理");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.TRAINTICKETAGENT){// 火车票代理
+						cc = row.createCell(1);
+						cc.setCellValue("火车票代理");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.GOLF){// 高尔夫
+						cc = row.createCell(1);
+						cc.setCellValue("高尔夫");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.OTHER){// 其他
+						cc = row.createCell(1);
+						cc.setCellValue("其他");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.CONTRACTAGREEMENT){// 合同协议
+						cc = row.createCell(1);
+						cc.setCellValue("合同协议");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.SUPPLIERCOMMENT){// 商家评论
+						cc = row.createCell(1);
+						cc.setCellValue("商家评论");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.INSURANCE){// 保险
+						cc = row.createCell(1);
+						cc.setCellValue("保险");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.LOCALTRAVEL){// 地接社
+						cc = row.createCell(1);
+						cc.setCellValue("地接社");
+						cc.setCellStyle(styleLeft);
+					}else if(type == Constants.OTHERINCOME){// 其他收入
+						cc = row.createCell(1);
+						cc.setCellValue("其他收入");
+						cc.setCellStyle(styleLeft);
+					}else {// 其他支出
+						cc = row.createCell(1);
+						cc.setCellValue("其他支出");
+						cc.setCellStyle(styleLeft);
+					}
+
+					cc = row.createCell(2);
+					cc.setCellValue((String)items.get("supplier_name"));//商家
+					cc.setCellStyle(styleLeft);
+
+					cc = row.createCell(3);
+					cc.setCellValue(sdf.format(items.get("booking_date")));//日期
+					cc.setCellStyle(styleLeft);
+
+					String _total = df.format(items.get("total"));
+					if("".equals(_total)){
+						cc = row.createCell(4);
+						cc.setCellValue(0);//成本/金额
+						cc.setCellStyle(styleLeft);
+					}else {
+						cc = row.createCell(4);
+						cc.setCellValue(_total);//成本/金额
+						cc.setCellStyle(styleLeft);
+					}
+
+					if(items.get("total_cash") == null){
+						cc = row.createCell(5);
+						cc.setCellValue(0);//已收
+						cc.setCellStyle(cellStyle);
+					}else{
+						String t_totalCash = df.format(items.get("total_cash"));
+						if("".equals(t_totalCash)){
+							cc = row.createCell(5);
+							cc.setCellValue(0);//已收
+							cc.setCellStyle(cellStyle);
+						}else {
+							cc = row.createCell(5);
+							cc.setCellValue(t_totalCash);//已收
+							cc.setCellStyle(cellStyle);
+						}
+					}
+
+					String b_balance = df.format(items.get("balance"));
+					if("".equals(b_balance)){
+						cc = row.createCell(6);
+						cc.setCellValue(0);//未收
+						cc.setCellStyle(cellStyle);
+					}else {
+						cc = row.createCell(6);
+						cc.setCellValue(b_balance);//未收
+						cc.setCellStyle(cellStyle);
+					}
+					index ++;
+				}
+				//加合计行
+				index=0;
+				BigDecimal sumSupplierTotal = new BigDecimal(0);
+				BigDecimal sumSupplierTotalCost = new BigDecimal(0);
+				BigDecimal sumSupplierBalance = new BigDecimal(0);
+				for(int i=0; i<supplierList.size(); i++) {
+					Map<String,Object> sumSupplier = supplierList.get(i);
+
+					if(sumSupplier.get("total") == null){
+						sumSupplierTotal = new BigDecimal(0);
+					}else{
+						String total = df.format(sumSupplier.get("total"));
+						if(!"".equals(total)){
+							sumSupplierTotal = sumSupplierTotal.add((BigDecimal)sumSupplier.get("total"));
+						}else {
+							sumSupplierTotal = new BigDecimal(0);
+						}
+					}
+					if(sumSupplier.get("total_cash") == null){
+						sumSupplierTotalCost = new BigDecimal(0);
+					}else{
+						String totalCash = df.format(sumSupplier.get("total_cash"));
+						if(!"".equals(totalCash)){
+							sumSupplierTotalCost = sumSupplierTotalCost.add((BigDecimal)sumSupplier.get("total_cash"));
+						}else {
+							sumSupplierTotalCost = new BigDecimal(0);
+						}
+					}
+
+					if(sumSupplier.get("balance") == null){
+						sumSupplierBalance = new BigDecimal(0);
+					}else{
+						String balance = df.format(sumSupplier.get("balance"));
+						if(!"".equals(balance)){
+							sumSupplierBalance = sumSupplierBalance.add((BigDecimal)sumSupplier.get("balance"));
+						}else {
+							sumSupplierBalance = new BigDecimal(0);
+						}
+					}
+				}
+				if(otherIncomeList.size() == 0 && deliveryList.size() >0){
+					row = sheet.createRow(index +orderList.size()+deliveryList.size()+supplierList.size()+17);
+				}else if (otherIncomeList .size() > 0 && deliveryList.size() ==0) {
+					row = sheet.createRow(index +orderList.size()+otherIncomeList.size()+supplierList.size()+17);
+				}else if (otherIncomeList.size() == 0 && deliveryList.size() ==0) {
+					row = sheet.createRow(index +orderList.size()+supplierList.size()+12);
+				}else{
+					row = sheet.createRow(index +orderList.size()+deliveryList.size()+otherIncomeList.size()+supplierList.size()+21);
+				}
+				cc = row.createCell(0);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(1);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(2);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(3);
+				cc.setCellValue("合计");
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(4);
+				cc.setCellValue(df.format(sumSupplierTotal));
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(5);
+				cc.setCellValue(df.format(sumSupplierTotalCost));
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(6);
+				cc.setCellValue(df.format(sumSupplierBalance));
+				cc.setCellStyle(cellStyle);
+			}
+
+			/*CellRangeAddress region = new CellRangeAddress(supplierList.size() + 5,
+					supplierList.size() + 5, 0, 10);
+			sheet.addMergedRegion(region);
+
+			row = sheet.createRow(supplierList.size() + 5);
+			cc = row.createCell(0);
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
+					+ " 打印时间："
+					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));*/
+			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
+					+ ".xlsx";
+			FileOutputStream out = new FileOutputStream(path);
+			wb.write(out);
+			out.close();
+			wb.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		String fileName = "";
+		try {
+			fileName = new String("结算单详情.xlsx".getBytes("UTF-8"), "iso-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		download(path,fileName,request,response);
+
 	}
+
+
+
+}
 
 

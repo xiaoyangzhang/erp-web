@@ -22,6 +22,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yihg.erp.contant.OpenPlatformConstannt;
 import com.yihg.erp.utils.MD5Util;
+import com.yimayhd.erpcenter.dal.basic.constant.BasicConstants;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
 import com.yimayhd.erpcenter.dal.sys.po.PlatAuth;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatAuthFacade;
@@ -39,6 +41,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.service.BasicCommonFacade;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.erpcenterFacade.common.client.service.SaleCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +110,8 @@ public class BookingDeliveryController extends BaseController {
     private ProductCommonFacade productCommonFacade;
     @Autowired
     private SysPlatAuthFacade sysPlatAuthFacade;
+    @Autowired
+    private BasicCommonFacade basicCommonFacade;
     @ModelAttribute
     public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
 //        model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
@@ -289,6 +294,9 @@ public class BookingDeliveryController extends BaseController {
         loadAngencyInfo(request, model, gid, bid);
         model.addAttribute("orderId", orderId);
         model.addAttribute("see", see);
+//        List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.PRODUCT_DES,WebUtils.getCurBizId(request));
+        List<DicInfo> cashTypes = basicCommonFacade.getProductDesc(BasicConstants.PRODUCT_DES,WebUtils.getCurBizId(request));
+        model.addAttribute("cashTypes", cashTypes);
         return "/operation/delivery/ay-delivery-edit";
     }
     

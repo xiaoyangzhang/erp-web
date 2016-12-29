@@ -91,7 +91,7 @@ table,table tr th,table tr td{border-color: #000;}
 					<td class="rich_text" width="8%">${po.airPickup }</td>
 					<td class="rich_text" width="8%">${po.airOff }</td>
 					<td class="rich_text" width="8%">${po.trans }</td>
-					<td width="30%" height="100%">
+					<td width="20%" height="100%">
 						<table border="1" class="in_table">
 							<col width="20%" />
 							<col width="40%" />
@@ -107,7 +107,11 @@ table,table tr th,table tr td{border-color: #000;}
 							</tbody>
 						</table>
 					</td>
-					<td width="12%">${po.remark }</td>
+					
+					<td width="12%">
+						<c:if test="${empty po.remarkInternal}">${po.remark }</c:if>
+						<c:if test="${not empty po.remarkInternal}">${po.remarkInternal }</c:if>
+					</td>
 				</tr>
 			</c:forEach>
 			<tr>

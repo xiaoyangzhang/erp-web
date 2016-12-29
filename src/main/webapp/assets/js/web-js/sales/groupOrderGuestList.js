@@ -1,4 +1,4 @@
-$(function(){
+fitGroupSale.js$(function(){
 	opGrid.loadGrid();
 	opGrid.reSize();
 
@@ -69,34 +69,34 @@ var opGrid = {
 			height: 250,
 			//height: "100%",
 			autowidth: false,
-			shrinkToFit: false,
+			shrinkToFit: true,
 			rownumbers:true,
 			rowNum: 15,
 			rowList: [15, 30, 50, 100, 500, 1000],
 			//colNames: ['团号', '发团日期', '平台来源', '客人信息', '姓名', '性别',
 			//       '年龄','证件号','电话','籍贯','产品套餐','业务','销售','计调','金额'],
 			colModel: [
-				{label:'团号',name: 'group_code',index: 'groupCode',width: 130, sortable: false, align:'left'},
+				{label:'团号',name: 'group_code',index: 'groupCode',width: 150, sortable: false, align:'left'},
 				{label:'发团日期',name: 'departure_date',index: 'departure_date',align: "center",formatter:function(cellValue,options,rowObject){
-					return (moment(rowObject.departure_date).format("YYYY-MM-DD"));},width: 100, align:'center'},
-				{label:'平台来源',name: 'supplier_name',index: 'supplier_name',width: 60, sortable: false, align:'left'},
-				{label:'客人信息',name: 'receive_mode',index: 'receive_mode',width: 200, sortable: false, align:'left'},
-				{label:'姓名',name: 'name',index: 'name',width: 80, sortable: false,align:'center'},
+					return (moment(rowObject.departure_date).format("YYYY-MM-DD"));},width: 150, align:'center'},
+				{label:'平台来源',name: 'supplier_name',index: 'supplier_name',width: 100, sortable: false, align:'left'},
+				{label:'客人信息',name: 'receive_mode',index: 'receive_mode',width: 300, sortable: false, align:'left'},
+				{label:'姓名',name: 'name',index: 'name',width: 100, sortable: false,align:'center'},
 
-				{label:'性别',name: 'gender',index: 'gender',width: 50, sortable: false, align:'center',formatter:opGrid.formatGender},
-				{label:'年龄',name: 'age',index: 'age',width: 50,  align:'center'},
-				{label:'证件号',name: 'certificate_num',index: 'certificate_num',width: 150, sortable: false, align:'center'},
-				{label:'电话',name: 'mobile',index: 'mobile',width: 110, sortable: false, align:'center'},
-				{label:'籍贯',name: 'native_place',index: 'native_place',width: 120, sortable: false, align:'left'},
+				{label:'性别',name: 'gender',index: 'gender',width: 80, sortable: false, align:'center',formatter:opGrid.formatGender},
+				{label:'年龄',name: 'age',index: 'age',width: 80,  align:'center'},
+				{label:'证件号',name: 'certificate_num',index: 'certificate_num',width: 180, sortable: false, align:'center'},
+				{label:'电话',name: 'mobile',index: 'mobile',width: 120, sortable: false, align:'center'},
+				{label:'籍贯',name: 'native_place',index: 'native_place',width: 150, sortable: false, align:'left'},
 
-				{label:'产品套餐',name: 'remark',index: 'remark',width: 300, sortable: false, align:'left'},
-				{label:'业务',name: 'order_mode',index: 'order_mode',width: 70, sortable: false, align:'center',  formatter:'select', formatoptions:{
+				{label:'产品套餐',name: 'remark',index: 'remark',width: 350, sortable: false, align:'left'},
+				{label:'业务',name: 'order_mode',index: 'order_mode',width: 80, sortable: false, align:'center',  formatter:'select', formatoptions:{
 					value:{ '1374':'长线',1475:'短线', '1476':'签证', '1486':'门票', '1487':'酒店', '1488':'专线', '1489':'包车', '1490':'组团', '1493':'推广', '1555':'石林九乡'}
 				}
 				},
 				{label:'销售',name: 'sale_operator_name',index: 'sale_operator_name',width: 80, sortable: false, align:'center'},
-				{label:'计调',name: 'operator_name',index: 'operator_name',width: 50, sortable: false, align:'center'},
-				{label:'金额',name: 'total',index: 'total',width: 60, align:'center', formatter:opGrid.formatPerson}
+				{label:'计调',name: 'operator_name',index: 'operator_name',width: 80, sortable: false, align:'center'},
+				{label:'金额',name: 'total',index: 'total',width: 80, align:'center', formatter:opGrid.formatPerson}
 			],
 			pager: "#pagerGroupOrder",
 			viewrecords: true,

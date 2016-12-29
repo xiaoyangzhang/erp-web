@@ -78,6 +78,15 @@
 							<option value="0" ${parameters.group_mode < 1?'selected="selected"':'' }>散客</option>
 							<option value="1" ${parameters.group_mode > 0?'selected="selected"':'' }>团队</option>
 					</select></li>
+					
+					<li class="text">产品说明</li>
+					<li>
+					<select name="product_des_id" id="productDesId" class="w-100bi">
+							<option value="">全部</option>
+							<c:forEach items="${cashTypes}" var="v">
+									<option value="${v.id}">${v.value }</option>
+								</c:forEach>
+					</select></li>
 					<li class="clear" />
 					<li class="text"></li>
 					<li><button id="btnQuery" type="button"  class="button button-primary button-small">查询</button>

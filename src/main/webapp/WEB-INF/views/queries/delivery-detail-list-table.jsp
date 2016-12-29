@@ -5,8 +5,9 @@
 <table cellspacing="0" cellpadding="0" class="w_table">
 	<col width="3%" />
 	<col width="8%" />
-	<col width="8%" />
-	<col width="18%" />
+	<col width="6%" />
+	<col width="14%" />
+	<col width="7%" />
 	<col width="9%" />
 	
 	<col width="5%" />
@@ -23,6 +24,7 @@
 			<th>团号<i class="w_table_split"></i></th>
 			<th>日期<i class="w_table_split"></i></th>
 			<th>地接社<i class="w_table_split"></i></th>
+			<th>产品说明<i class="w_table_split"></i></th>
 			<th>客人<i class="w_table_split"></i></th>
 			
 			<th>团类型<i class="w_table_split"></i></th>
@@ -52,6 +54,7 @@
 				</td>
 				<td>${item.date_arrival}</td>
 				<td style="text-align: left">${item.supplier_name}</td>
+				<td>${item.product_des}</td>
 				<td style="text-align: left">${item.receive_mode }</td>
 				<td>
 					<c:if test="${item.group_mode <1 }">散客</c:if>
@@ -77,7 +80,7 @@
 		<tfoot>
 		<tr>
 			
-			<td colspan="6" >合计:</td>
+			<td colspan="7" >合计:</td>
 			<td>${sum_adult }大${sum_child }小${sum_guide }陪</td>
 			<td></td>
 			<td ><fmt:formatNumber value="${sum_total }" pattern="#.##"/></td>
@@ -86,7 +89,7 @@
 			<td></td>
 		</tr>
 		<tr>
-			<td colspan="6">总计:</td>
+			<td colspan="7">总计:</td>
 			<td>${sum.total_adult }大${sum.total_child }小${sum.total_guide }陪</td>
 			<td></td>
 			<td ><fmt:formatNumber value="${sum.total }" pattern="#.##"/></td>

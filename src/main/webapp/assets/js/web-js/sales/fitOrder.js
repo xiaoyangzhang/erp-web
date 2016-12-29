@@ -472,28 +472,60 @@ function recCertifNum(count){
 	var typeName = $("select[name='groupOrderGuestList["+count+"].certificateTypeId'] option:selected").text();
 	if(typeName=='身份证'){
 		var guestCertificateNum = $("input[name='groupOrderGuestList["+count+"].certificateNum']").val();
+		var orderId = $("input[name='groupOrder.id']").val();
+		
 		if(guestCertificateNum!=''){
+			
+			
 			if (reg.test(guestCertificateNum) === true) {
+				
 				var data = $.parseIDCard(guestCertificateNum);
-					if(data.tip==''){
+				
+				if(data.tip==''){
 					
-						$("input[name='groupOrderGuestList["+count+"].age").val(data.age);
-						if(data.age<12){
-							$("select[name='groupOrderGuestList["+count+"].type").val("2");
-						}else{
-							$("select[name='groupOrderGuestList["+count+"].type").val("1");
-						}
-						$("input[name='groupOrderGuestList["+count+"].nativePlace").val(data.birthPlace);
-						if(data.gender=='男'){
-							$("input[name='groupOrderGuestList["+count+"].gender'][value=1]").attr("checked", "checked");
-						}else{
-							$("input[name='groupOrderGuestList["+count+"].gender'][value=0]").attr("checked", "checked");
-						}
-						$("input[name='groupOrderGuestList["+count+"].certificateNum").next().remove();
+					$("input[name='groupOrderGuestList["+count+"].age").val(data.age);
+					if(data.age<12){
+						$("select[name='groupOrderGuestList["+count+"].type").val("2");
 					}else{
-						$("input[name='groupOrderGuestList["+count+"].certificateNum").next().remove();
-						$("input[name='groupOrderGuestList["+count+"].certificateNum").after("<span style='color:red'></br>该证件号不是有效的身份证号！</span>");
+						$("select[name='groupOrderGuestList["+count+"].type").val("1");
 					}
+					$("input[name='groupOrderGuestList["+count+"].nativePlace").val(data.birthPlace);
+					if(data.gender=='男'){
+						$("input[name='groupOrderGuestList["+count+"].gender'][value=1]").attr("checked", "checked");
+					}else{
+						$("input[name='groupOrderGuestList["+count+"].gender'][value=0]").attr("checked", "checked");
+					}
+					$("input[name='groupOrderGuestList["+count+"].certificateNum").next().remove();
+				}else{
+					
+					$("input[name='groupOrderGuestList["+count+"].certificateNum").next().remove();
+					$("input[name='groupOrderGuestList["+count+"].certificateNum").after("<span style='color:red'></br>该证件号不是有效的身份证号！</span>");
+				}
+				$.ajax({
+					type: "post",
+					cache: false,
+					url : "../guest/guestCertificateNumValidate.htm",
+					data : {guestCertificateNum :guestCertificateNum,orderId:orderId},
+					dataType: 'json',
+					async: false,
+					success: function (data) {
+						/*if(data && data.success == true){
+							alert(22);
+						}*/
+						if(data && data.success == false){
+							layer.open({
+								type : 2,
+								title : '参团信息',
+								shadeClose : true,
+								shade : 0.5,
+								area: ['720px', '460px'],
+								content: '../guest/getGuestOrderInfo.htm?guestCertificateNum='+guestCertificateNum+'&orderId='+orderId
+							});
+						}
+						
+					}
+				});
+				
 			}else{
 				$("input[name='groupOrderGuestList["+count+"].certificateNum").next().remove();
 				$("input[name='groupOrderGuestList["+count+"].certificateNum").after("<span style='color:red'></br>该证件号不是有效的身份证号！</span>");

@@ -277,4 +277,38 @@ public class GuestController extends BaseController {
 		model.addAttribute("orders", guestResult.getGroupOrderList()) ;
 		return "sales/tourGroup/guest/guestOrderInfo" ;
 	}
+
+	/**
+	 * 跳转至游客重复参团查询页面
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value="/getGroupGuestCardIDInfo.htm")
+	public String getGroupGuestCardIDInfo(HttpServletRequest request,HttpServletResponse response, Model model){
+		return "sales/tourGroup/guest/guestRepeatcardIDList";
+	}
+
+	/**
+	 * 获取游客重复参团信息
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param groupOrderGuest
+	 * @return
+	 */
+	@RequestMapping(value="/guestGroupCardIdInfo.do")
+	public String guestRepeatcardIDListPage(HttpServletRequest request,HttpServletResponse response, Model model,GroupOrderGuest groupOrderGuest){
+		groupOrderGuest.setNotChangeGroupCode("变更");
+		PageBean<GroupOrderGuest> pageBean = new PageBean<GroupOrderGuest>();
+		pageBean.setPage(groupOrderGuest.getPage());
+		pageBean.setPageSize(groupOrderGuest.getPageSize()==null?Constants.PAGESIZE:groupOrderGuest.getPageSize());
+		pageBean.setParameter(groupOrderGuest);
+
+		pageBean = groupOrderGuestService.selectGroupGuestRepeatListPage(pageBean, WebUtils.getCurBizId(request));
+		model.addAttribute("pageBean", pageBean);
+		return "sales/tourGroup/guest/guestRepeatcardIDList_table";
+	}
+
 }

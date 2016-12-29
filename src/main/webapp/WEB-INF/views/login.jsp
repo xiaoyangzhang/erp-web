@@ -12,7 +12,15 @@
 <title>旅道旅行社管理系统-登录</title>
 <link href="<%=staticPath %>/assets/css/login/login.css" rel="stylesheet" />
 <link href="<%=staticPath %>/assets/js/supersized/supersized.css" rel="stylesheet" />
+<!-- Javascript -->
+<script type="text/javascript" src="<%=staticPath %>/assets/js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="<%=staticPath %>/assets/js/layer/layer.min.js"></script>
+<script type="text/javascript" src="<%=staticPath %>/assets/js/layer/extend/layer.ext.js"></script>
+<script type="text/javascript" src="<%=staticPath %>/assets/js/layer/message.js"></script>
+<script type="text/javascript" src="<%=staticPath %>/assets/js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="<%=staticPath %>/assets/js/supersized/supersized.3.2.7.min.js"></script>
 <script type="text/javascript" src="<%=staticPath %>/assets/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="<%=staticPath %>/assets/js/login.js"></script>
 <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 <![endif]-->
@@ -87,19 +95,10 @@
 	</form>
 </div>
 
-<!-- Javascript -->
-<script type="text/javascript" src="<%=staticPath %>/assets/js/jquery-1.8.3.min.js"></script>
-<script type="text/javascript" src="<%=staticPath %>/assets/js/layer/layer.min.js"></script>
-<script type="text/javascript" src="<%=staticPath %>/assets/js/layer/extend/layer.ext.js"></script>
-<script type="text/javascript" src="<%=staticPath %>/assets/js/layer/message.js"></script>
-<script type="text/javascript" src="<%=staticPath %>/assets/js/jquery.validate.min.js"></script>
-<script type="text/javascript" src="<%=staticPath %>/assets/js/supersized/supersized.3.2.7.min.js"></script>
-<script type="text/javascript" src="<%=staticPath %>/assets/js/jquery.cookie.js"></script>
-<script type="text/javascript" src="<%=staticPath %>/assets/js/login.js"></script>
+
 <script type="text/javascript">
 	$(function(){
 		supersized('<%=staticPath%>');
-		$.cookie("YIHG_ERP_USER_SESSION","");
 	});
 </script>
 <div id='ft'>

@@ -764,9 +764,9 @@
 									<c:forEach items="${vo.groupOrderGuestList}" var="guest"
 										varStatus="index">
 										<tr   <c:if test="${!guest.editType }"> title="该客人已订机票,姓名、身份证号码不可修改" </c:if>>
-											<td>${index.count}<input type="hidden"
-												name="groupOrderGuestList[${index.index}].id" 
-												value="${guest.id}" />
+											<td>${index.count}
+											<input type="hidden" name="groupOrderGuestList[${index.index}].id"  value="${guest.id}" />
+												
 											</td>
 											<td><input type="text"
 												name="groupOrderGuestList[${index.index}].name" data-rule-required="true"

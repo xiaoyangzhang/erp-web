@@ -87,19 +87,27 @@ $(function(){
 			'groupOrder.productName' : {
 				required : true
 			},
-			'hotelInfo.countSingleRoom' : {
+			/*'hotelInfo.countSingleRoom' : {
 				required : true,
 				digits : true
-			},
-			'hotelInfo.countDoubleRoom' : {
+			},*/
+			/*'hotelInfo.countDoubleRoom' : {
 				required : true,
 				digits : true
-			},
-			'hotelInfo.countTripleRoom' : {
+			},*/
+			/*'hotelInfo.countTripleRoom' : {
 				required : true,
 				digits : true
 			},
 			'hotelInfo.peiFang' : {
+				required : true,
+				digits : true
+			},*/
+			/*'hotelInfo.extraBed' : {
+				required : true,
+				digits : true
+			}*/
+			'hotelInfo.countDoubleRoom' : {
 				required : true,
 				digits : true
 			},
@@ -108,7 +116,15 @@ $(function(){
 				digits : true
 			}
 		},
-		
+		messages:{
+			 'hotelInfo.countDoubleRoom' : {
+				 required: "数量不能为空！",
+				 number:true
+			 },
+			 'hotelInfo.extraBed' : {
+				 umber:true
+				}
+		 },
 		errorPlacement : function(error, element) {
 			if (element.is(':radio') || element.is(':checkbox')
 					|| element.is(':input')) {

@@ -614,7 +614,6 @@ public class TaobaoController extends BaseController {
 	@RequestMapping("synchroByTime.do")
 	public String synchroByTime(HttpServletRequest request,Integer pageSize, Integer page,ModelMap model,String authClient,String startTime,String endTime){
 		TaobaoOriginalOrderTableDTO dto = new TaobaoOriginalOrderTableDTO();
-		dto.setBizId(WebUtils.getCurBizId(request));
 		PageBean<PlatTaobaoTrade> pageBean = new PageBean<PlatTaobaoTrade>();
 		if(page==null){
 			pageBean.setPage(1);
@@ -629,12 +628,11 @@ public class TaobaoController extends BaseController {
 		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
 		pm.put("myStoreId",authClient);
 		pm.put("curUserName",WebUtils.getCurrentUserSession(request).getName());
-//		pm.put("startMin",startTime+" 00:00:00");
-//		pm.put("startMax",endTime+" 23:59:59");
 		pm.put("startTime", startTime);
-		
+
 		pageBean.setParameter(pm);
 		dto.setPageBean(pageBean);
+		dto.setBizId(WebUtils.getCurBizId(request));
 		PageBean result = taobaoFacade.synchroByTime(dto);
 		model.addAttribute("pageBean", result);
 		
@@ -738,14 +736,12 @@ public class TaobaoController extends BaseController {
             model.addAttribute("trade", trade);
 
             platTaobaoTrade.setIsBrushSingle(99);
-            queryDTO.setBizId( WebUtils.getCurBizId(request));
             queryDTO.setPlatTaobaoTrade(platTaobaoTrade);
             
             PlatTaobaoTrade tradeNoBrush = taobaoFacade.selectTaobaoshopSalesStatistics(queryDTO).getTrade();
             model.addAttribute("tradeNoBrush", tradeNoBrush);
             
             platTaobaoTrade.setIsBrushSingle(1);
-            queryDTO.setBizId( WebUtils.getCurBizId(request));
             queryDTO.setPlatTaobaoTrade(platTaobaoTrade);
             PlatTaobaoTrade tradeBrush = taobaoFacade.selectTaobaoshopSalesStatistics(queryDTO).getTrade();
             
@@ -3411,10 +3407,10 @@ public class TaobaoController extends BaseController {
             cc.setCellValue(list.get(10));
             cc.setCellStyle(styleRight);
             cc = row.createCell(8);
-            cc.setCellValue(list.get(4));
+            cc.setCellValue(list.get(14));//
             cc.setCellStyle(styleRight);
             cc = row.createCell(9);
-            cc.setCellValue(list.get(14));
+            cc.setCellValue(list.get(15));//
             cc.setCellStyle(cellStyle);
             CellRangeAddress region = new CellRangeAddress(orders.size() + 3, orders.size() + 4, 0, 9);
             sheet.addMergedRegion(region);

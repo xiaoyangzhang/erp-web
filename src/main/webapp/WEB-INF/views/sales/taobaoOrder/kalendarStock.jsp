@@ -80,7 +80,7 @@
 			            		<th><input type="checkbox" name="" id="checkAll" value="" /></th>
 			            		<th>日期</th>
 			            		<th>总数 | 调整数量</th>
-			            		<th>已收人数</th>
+			            		<th>已售人数</th>
 			            	</tr>
 			            </thead>
 			            <tbody> 

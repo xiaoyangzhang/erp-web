@@ -354,6 +354,7 @@ function saveMsg() {
                         title: msg_title.val(),
                         info: msg_info.val() ,
                         ids: operatorIds.val(),
+                        names: operatorName.val(),
                         msgType: 1
                     }, function(data){
                         if(data.success){

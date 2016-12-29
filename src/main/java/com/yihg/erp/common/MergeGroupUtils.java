@@ -26,7 +26,7 @@ public class MergeGroupUtils {
 		list.add(1);
 		list.add(2);
 		
-		System.out.println(hasSame(list));
+		//System.out.println(hasSame(list));
 		
 		
 	}

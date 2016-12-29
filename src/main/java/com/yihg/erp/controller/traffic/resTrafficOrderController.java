@@ -219,4 +219,268 @@ public class resTrafficOrderController extends BaseController{
 		String result = resTrafficOrderFacade.toDeleteOrderInfo(trafficOrderDTO);
 		return result;
 	}
+
+	/**
+	 * 订单管理导出到excel
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @throws ParseException
+	 */
+	@RequestMapping(value = "toResAdminOrderExcel.htm")
+	public void toOrderPreview(HttpServletRequest request, HttpServletResponse response, Integer pageSize, Integer page,Model model)
+			throws ParseException {
+
+		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
+		Map<String,Object> pmBean  = WebUtils.getQueryParamters(request);
+		pageBean.setPage(1);
+		pageBean.setPageSize(100000);
+		pageBean.setParameter(pmBean);
+		pageBean=groupOrderService.selectResAdminOrderList(pageBean,
+				WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+
+		HashMap<String, BigDecimal> map_sum = groupOrderService.sumResAdminOrder(pageBean);
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String path = "";
+		try {
+			String url = request.getSession().getServletContext().getRealPath("/template/excel/trafficOrderManageList.xlsx");
+			FileInputStream input = new FileInputStream(new File(url)); // 读取的文件路径
+			XSSFWorkbook wb = new XSSFWorkbook(new BufferedInputStream(input));
+			CellStyle cellStyle = wb.createCellStyle();
+			cellStyle.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			cellStyle.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			cellStyle.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			cellStyle.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			cellStyle.setAlignment(CellStyle.ALIGN_CENTER); // 居中
+			cellStyle.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			cellStyle.setWrapText(true);
+
+			CellStyle styleLeft = wb.createCellStyle();
+			styleLeft.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleLeft.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleLeft.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleLeft.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleLeft.setAlignment(CellStyle.ALIGN_LEFT); // 居左
+			styleLeft.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			styleLeft.setWrapText(true);
+
+			CellStyle styleRight = wb.createCellStyle();
+			styleRight.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleRight.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleRight.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleRight.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleRight.setAlignment(CellStyle.ALIGN_RIGHT); // 居右
+			styleRight.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+			styleRight.setWrapText(true);
+
+			Sheet sheet = wb.getSheetAt(0); // 获取到第一个sheet
+			Row row = null;
+			Cell cc = null;
+			// 遍历集合数据，产生数据行
+			//Iterator<GroupOrder> it = pageBean.getResult().iterator();
+
+			int index = 0;
+			DecimalFormat df = new DecimalFormat("0.##");
+			if (pageBean.getResult() != null && pageBean.getResult().size() > 0) {
+				for (GroupOrder goBean: pageBean.getResult()) {
+
+					//GroupOrder go = it.next();
+
+					row = sheet.createRow(index + 2);
+					cc = row.createCell(0);
+					cc.setCellValue(index + 1);
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(1);
+					cc.setCellValue(goBean.getOrderNo());//订单号
+					cc.setCellStyle(styleLeft);
+
+
+					if(goBean.getRemarkInternal() != ""){
+						cc = row.createCell(2);
+						cc.setCellValue("【"+goBean.getProductBrandName()+"】"+goBean.getProductName()+goBean.getRemarkInternal());//产品名称
+						cc.setCellStyle(styleLeft);
+					}else{
+						cc = row.createCell(2);
+						cc.setCellValue("【"+goBean.getProductBrandName()+"】"+goBean.getProductName());//产品名称
+						cc.setCellStyle(styleLeft);
+					}
+
+					cc = row.createCell(3);
+					cc.setCellValue(goBean.getDepartureDate());//出团日期
+					cc.setCellStyle(cellStyle);
+
+
+					if(goBean.getExtResState()==1){
+						cc = row.createCell(4);
+						cc.setCellValue("");//预留
+						cc.setCellStyle(cellStyle);
+					}else {
+						if(goBean.getType()==1){
+							cc = row.createCell(4);
+							cc.setCellValue("");//预留
+							cc.setCellStyle(cellStyle);
+						}else {
+							cc = row.createCell(4);
+							cc.setCellValue("是");//预留
+							cc.setCellStyle(cellStyle);
+						}
+					}
+
+					cc = row.createCell(5);
+					cc.setCellValue(goBean.getSupplierName()+"-"+goBean.getCreatorName());//组团社
+					cc.setCellStyle(styleLeft);
+
+					cc = row.createCell(6);
+					cc.setCellValue(goBean.getReceiveMode());//接站牌
+					cc.setCellStyle(styleLeft);
+
+					cc = row.createCell(7);
+					cc.setCellValue(goBean.getNumAdult()+"+"+goBean.getNumChild()+"+"+goBean.getNumChildBaby());//人数
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(8);
+					cc.setCellValue(df.format(goBean.getTotal()));//金额
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(9);
+					cc.setCellValue(df.format(goBean.getExtResPrepay()));//定金
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(10);
+					cc.setCellValue(df.format(goBean.getTotalCash()));//已付
+					cc.setCellStyle(cellStyle);
+
+					cc = row.createCell(11);
+					cc.setCellValue(df.format(goBean.getTotal().subtract(goBean.getTotalCash())));//尾款
+					cc.setCellStyle(cellStyle);
+					index++;
+				}
+
+				//添加合计行  map_sum
+				BigDecimal allTotal = new BigDecimal(0);
+				BigDecimal allExtResPrepay = new BigDecimal(0);
+				BigDecimal allTotalCash = new BigDecimal(0);
+				BigDecimal allTotalSubtractTotalCash = new BigDecimal(0);
+
+
+				if (null != map_sum) {
+					if (null != map_sum.get("total")) {
+						allTotal = new BigDecimal(map_sum.get("total").toString());
+					}
+					if (null != map_sum.get("extResPrepay")) {
+						allExtResPrepay = new BigDecimal(map_sum.get("extResPrepay").toString());
+					}
+					if (null != map_sum.get("totalCash")) {
+						allTotalCash = new BigDecimal(map_sum.get("totalCash").toString());
+					}
+					if (null != map_sum.get("total") && null != map_sum.get("totalCash")) {
+						allTotalSubtractTotalCash = allTotal.subtract(allTotalCash);
+					}
+				}
+				row = sheet.createRow(index + 2); // 加合计行
+				cc = row.createCell(0);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(1);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(2);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(3);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(4);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(5);
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(6);
+				cc.setCellValue("合计");
+				cc.setCellStyle(styleRight);
+
+				cc = row.createCell(7);
+				cc.setCellValue(map_sum.get("numAdult")+"+"+map_sum.get("numChild")+"+"+map_sum.get("numChildBaby"));
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(8);
+				cc.setCellValue(df.format(allTotal));
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(9);
+				cc.setCellValue(df.format(allExtResPrepay));
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(10);
+				cc.setCellValue(df.format(allTotalCash));
+				cc.setCellStyle(cellStyle);
+
+				cc = row.createCell(11);
+				cc.setCellValue(df.format(allTotalSubtractTotalCash));
+				cc.setCellStyle(cellStyle);
+
+
+			}
+			CellRangeAddress region = new CellRangeAddress(pageBean.getResult().size() + 5,
+					pageBean.getResult().size() + 5, 0, 10);
+			sheet.addMergedRegion(region);
+
+			row = sheet.createRow(pageBean.getResult().size() + 5);
+			cc = row.createCell(0);
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
+					+ " 打印时间："
+					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
+					+ ".xlsx";
+			FileOutputStream out = new FileOutputStream(path);
+			wb.write(out);
+			out.close();
+			wb.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		String fileName = "";
+		try {
+			fileName = new String("订单信息.xlsx".getBytes("UTF-8"), "iso-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		download(path, fileName, request, response);
+
+	}
+
+	private void download(String path, String fileName, HttpServletRequest request, HttpServletResponse response) {
+		try {
+			// path是指欲下载的文件的路径。
+			File file = new File(path);
+			// 以流的形式下载文件。
+			InputStream fis = new BufferedInputStream(new FileInputStream(path));
+			byte[] buffer = new byte[fis.available()];
+			fis.read(buffer);
+			fis.close();
+			// 清空response
+			response.reset();
+
+			/*
+			 * //解决IE浏览器下下载文件名乱码问题 if
+			 * (request.getHeader("USER-AGENT").indexOf("msie") > -1){ fileName
+			 * = new URLEncoder().encode(fileName) ; }
+			 */
+			// 设置response的Header
+			response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+			response.addHeader("Content-Length", "" + file.length());
+			OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+			response.setContentType("application/vnd.ms-excel;charset=gb2312");
+			toClient.write(buffer);
+			toClient.flush();
+			toClient.close();
+			file.delete();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
 }

@@ -437,25 +437,35 @@ table.gridtable td {
 						<td><div class="dd_right"  id="a">
 							<label ><input type="radio" name="groupOrder.type" value="0" <c:if test="${vo.groupOrder.type == 0 }"> checked="checked" </c:if> /><span>定金预留</span></label>
 	    					<label ><input type="radio" name="groupOrder.type" value="1" <c:if test="${vo.groupOrder.type != '0'}"> checked="checked" </c:if> /><span>全款购买</span></label>
-	    			</div>
-	    			<div class="clear"></td>
-	    			<td>团类型：</td>
-					<td> <select name="groupOrder.orderType" id="groupOrder.orderType" <c:if test="${vo.groupOrder.groupId>=0}">disabled="disabled"</c:if>>
-								<option value="0" <c:if test="${vo.groupOrder.orderType=='0' }"> selected="selected" </c:if>>散客</option>
-								<option value="1" <c:if test="${vo.groupOrder.orderType=='1' }"> selected="selected" </c:if>>团队</option>
-						</select>
-					</td>
-							</tr>
+		    			</div>
+		    			<div class="clear"></td>
+		    			<td>团类型：</td>
+						<td> <select name="groupOrder.orderType" id="groupOrder.orderType" <c:if test="${vo.groupOrder.groupId>=0}">disabled="disabled"</c:if>>
+									<option value="0" <c:if test="${vo.groupOrder.orderType=='0' }"> selected="selected" </c:if>>散客</option>
+									<option value="1" <c:if test="${vo.groupOrder.orderType=='1' }"> selected="selected" </c:if>>团队</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>酒店需求：</td>
+						<td>
+							<input name="hotelInfo.id" type="hidden" value="${vo.hotelInfo.id}" /> 
+							<input name="hotelInfo.supplierType" type="hidden" value="3" /> 
+							<input name="hotelInfo.orderId" type="hidden" value="${vo.groupOrder.id}" /> 
 							
+							<label>数量:</label>
+								<input type="text" name="hotelInfo.countDoubleRoom" value="${vo.hotelInfo.countDoubleRoom == '0'?null:vo.hotelInfo.countDoubleRoom}" 
+								placeholder="数量" />&nbsp;&nbsp;&nbsp;&nbsp;
+								
+							<label>加床:</label><input type="text" name="hotelInfo.extraBed"value="${vo.hotelInfo.extraBed == '0'?0:vo.hotelInfo.extraBed}" 
+								placeholder="加床" />
+							
+						</td>
+					</tr>		
 				
 				</table>
-                    
-                    
-                    
-				
-				
 
-				<p class="p_paragraph_title">
+				<%-- <p class="p_paragraph_title">
 					<b>酒店需求</b>
 				</p>
 				<dl class="p_paragraph_content">
@@ -512,7 +522,7 @@ table.gridtable td {
 						<div class="clear"></div>
 
 					</dd>
-				</dl>
+				</dl> --%>
 				<p class="p_paragraph_title">
 					<b>接送信息</b>
 				</p>

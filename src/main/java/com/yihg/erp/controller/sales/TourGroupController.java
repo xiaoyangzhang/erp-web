@@ -880,6 +880,10 @@ public class TourGroupController extends BaseController {
 			try {
 				HttpEntity httpEntity = closeableHttpResponse.getEntity();
 				resultString = EntityUtils.toString(httpEntity);
+				JSONObject jo = JSON.parseObject(resultString);
+				String resultCode = jo.get("resultCode").toString();
+				if ("0".equals(resultCode))
+					tourGroupService.updateWapType(groupId); // 更新wap_type为1
 			} finally {
 				closeableHttpResponse.close();
 			}
@@ -3829,17 +3833,22 @@ public class TourGroupController extends BaseController {
 		Map<String, Object> map0 = new HashMap<String, Object>();
 		map0.put("company", WebUtils.getCurBizInfo(request).getName()); // 当前单位
 		map0.put("groupCode", groupOrder.getTourGroup().getGroupCode());
-		map0.put("person",(groupOrder.getNumAdult()+groupOrder.getNumChild()+groupOrder.getNumGuide())+ "");
+//		map0.put("person",(groupOrder.getNumAdult()+groupOrder.getNumChild()+groupOrder.getNumGuide())+ "");
+//		map0.put("child", groupOrder.getNumChild()+ "");
+//		map0.put("departureDate", groupOrder.getDepartureDate());
+		map0.put("person",(groupOrder.getTourGroup().getTotalAdult()+groupOrder.getTourGroup().getTotalChild()+groupOrder.getTourGroup().getTotalGuide())+ "");
 		map0.put("child", groupOrder.getNumChild()+ "");
-		map0.put("departureDate", groupOrder.getDepartureDate());
+		map0.put("departureDate", DateUtils.format(groupOrder.getTourGroup().getDateStart()));
 		map0.put("maxDay",groupRoute.getMaxDay() );
 		map0.put("numDay",groupRoute.getNumDay()+"");
 		map0.put("numNig",(groupRoute.getNumDay()-1)+"");
-		map0.put("total", groupOrder.getTotal()+"");
+//		map0.put("total", groupOrder.getTotal()+"");
+		map0.put("total", groupOrder.getTourGroup().getTotalIncome()+"");
 		map0.put("printTime", DateUtils.format(new Date()));
 		map0.put("operator",WebUtils.getCurUser(request).getName());
 		map0.put("opTel",WebUtils.getCurUser(request).getMobile());
-		map0.put("guide", groupOrder.getNumGuide()+ "");
+//		map0.put("guide", groupOrder.getNumGuide()+ "");
+		map0.put("guide", groupOrder.getTourGroup().getTotalIncome()+ "");
 
 		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
 		Map<String, String> guestMap = null;
@@ -6958,5 +6967,80 @@ public class TourGroupController extends BaseController {
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	@RequestMapping("tourGroupCodeList.htm")
+	public String tourGroupCodeList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
+		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
+		model.addAttribute("pp", pp);
+
+		Integer bizId = WebUtils.getCurBizId(request);
+		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
+		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		model.addAttribute("curUser", WebUtils.getCurUser(request).getName());
+		model.addAttribute("curUserId", WebUtils.getCurUserId(request));
+
+		return "sales/tourGroup/tourGroupCodeList";
+	}
+
+	@RequestMapping("tourGroupCodeListData.do")
+	@ResponseBody
+	public String tourGroupCodeListData(HttpServletRequest request, HttpServletResponse reponse, ModelMap model,
+										Integer rows, GroupOrder groupOrder) throws ParseException {
+
+		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds()) && StringUtils.isNotBlank(groupOrder.getOrgIds())) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = groupOrder.getOrgIds().split(",");
+			for (String orgIdStr : orgIdArr) {
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			String salesOperatorIds = "";
+			for (Integer usrId : set) {
+				salesOperatorIds += usrId + ",";
+			}
+			if (!salesOperatorIds.equals("")) {
+				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
+			}
+		}
+		PageBean<GroupOrder> page = new PageBean<GroupOrder>();
+		page.setParameter(groupOrder);
+		page.setPage(groupOrder.getPage() == null ? 1 : groupOrder.getPage());
+		page.setPageSize(rows);
+		page =tourGroupService.selectTourGroupCodeListPage(page, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+		model.addAttribute("page", page);
+		return JSON.toJSONString(page);
+	}
+	@RequestMapping("changerGroupCodePage.htm")
+	public String changerGroupCodePage(HttpServletRequest request, HttpServletResponse reponse, ModelMap model,Integer groupId) {
+		TourGroup tg =tourGroupService.selectByPrimaryKey(groupId);
+		model.addAttribute("oldGroupCode", tg.getGroupCode());
+		List<GroupOrder> lists=groupOrderService.selectOrderByGroupId(groupId);
+		GroupOrder go=lists.get(0);
+		Integer orgId=0;
+		if(tg.getGroupMode()>0){
+			PlatformEmployeePo salePEP = platformEmployeeService
+					.findByEmployeeId(go.getSaleOperatorId());
+			orgId=salePEP.getOrgId();
+		}else{
+			PlatformEmployeePo operatorPEP = platformEmployeeService
+					.findByEmployeeId(tg.getOperatorId());
+			orgId=operatorPEP.getOrgId();
+		}
+		String supplierCode = orgService.getCompanyCodeByOrgId(WebUtils.getCurBizId(request),orgId);
+		TourGroup tourGroup=tourGroupService.selectGroupCodeSort(tg.getBizId(), tg.getGroupMode(), go.getDepartureDate());
+		String makeCodeByMode = tourGroupService.makeCodeByMode(supplierCode, tg.getGroupMode(), go.getDepartureDate(),
+				tg.getGroupCodeMark(), tourGroup == null ? 1: tourGroup.getGroupCodeSort() + 1);
+		model.addAttribute("newGroupCode", makeCodeByMode);
+		model.addAttribute("GroupCodeSort", tourGroup == null ? 1: tourGroup.getGroupCodeSort() + 1);
+		model.addAttribute("groupId", groupId);
+		return "sales/tourGroup/changeGroupCode";
+	}
+
+	@RequestMapping("saveNewGroupCode.do")
+	@ResponseBody()
+	public String saveVisaInfo(HttpServletRequest request, TourGroup tourGroup,ModelMap model) {
+		tourGroupService.updateTourGroup(tourGroup);
+		return successJson();
 	}
 }

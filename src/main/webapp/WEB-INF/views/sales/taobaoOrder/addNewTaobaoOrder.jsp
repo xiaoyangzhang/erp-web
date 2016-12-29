@@ -1047,6 +1047,7 @@ function showInfo(title,width,height,url){
           									<td>
           										单价<fmt:formatNumber value="${price.unitPrice }" pattern="#.##" type="currency"/>*
           										人数<fmt:formatNumber value="${price.numPerson }" pattern="#.##" type="currency"/>
+          									 <c:if test="${info.productDesId > 0 }"><br><span style="color:blue">产品说明：</span>${info.productDes }</c:if>
           									</td>
           								</tr>
 	          						</c:forEach>
@@ -1220,9 +1221,10 @@ $(function(){
 			if(orderId != ""){
 				var bookingDateId = $("#bookingDateId").val();
 			    var orderMode = $("#orderMode").val();
+			    if( typeof(bookingDateId) == "undefined"){
+			    	bookingDateId="";
+			    }
 			    //alert("orderMode="+orderMode);
-			   
-			    
 			    layer.open({
 			  		type : 2,
 			  		title : '新增签证信息',
@@ -1251,6 +1253,9 @@ function orderModeChange(){
 	    if(orderId != ""){
 			var bookingDateId = $("#bookingDateId").val();
 		    var orderMode = $("#orderMode").val();
+		    if( typeof(bookingDateId) == "undefined"){
+		    	bookingDateId="";
+		    }
 		    //alert("orderMode="+orderMode);
 		    layer.open({
 		  		type : 2,

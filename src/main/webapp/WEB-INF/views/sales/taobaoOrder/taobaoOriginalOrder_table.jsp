@@ -48,7 +48,7 @@
 				    <c:if test="${orders.isBrushSingle==0}">否</c:if>
                     <c:if test="${orders.isBrushSingle==1}"><font color="red">是</font></c:if> 
                 </td>
-				<td><input type="checkbox" name="idss" value="${orders.id}" vars="${orders.tid}" <c:if test="${orders.myState=='CONFIRM' || orders.myState=='CANCEL'}"> disabled="disabled"</c:if> <c:if test="${orders.tid}">checked</c:if>/></td>
+				<td><input type="checkbox" name="idss" value="${orders.id}" vars="${orders.tid}"  <c:if test="${orders.tid}">checked</c:if>/></td>
 				</tr>
 				<c:set var="sumTotal" value="${sumTotal + orders.payment }"/>
 				

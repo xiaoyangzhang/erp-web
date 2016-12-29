@@ -1751,6 +1751,12 @@ public class QueryController extends BaseController {
 
 		model.addAttribute("shoppingDataState", result.getShoppingDataState());
 		model.addAttribute("page", result.getPageBean());
+
+		/**
+		 * 增加总合计
+		 */
+		QueryGuideShop queryGuideShop = bookingShopService.getGuideShopListPageTotal(pageBean, WebUtils.getDataUserIdSet(request));
+		model.addAttribute("queryGuideShop",queryGuideShop);
 		return "queries/shop/guestShop-listView";
 	}
 
@@ -4458,7 +4464,31 @@ public class QueryController extends BaseController {
 		model.addAttribute("sum", result.getSum());
 		model.addAttribute("tourGroup", result.getTourGroup());
 		model.addAttribute("pageNum", result.getTourGroup().getPage());
+		//预定安排权限分配
+		UserSession user = WebUtils.getCurrentUserSession(request);
+		Map<String,Boolean> groupBookingMap = user.getOptMap();
+		String menuCode = PermissionConstants.JDGL_YDAP;
 
+		//System.out.println(menuCode.concat("_").concat(PermissionConstants.YDAP_SIGHT));
+
+		model.addAttribute("gbMap_SIGHT", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_SIGHT)));
+		model.addAttribute("gbMap_HOTEL", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_HOTEL)));
+		model.addAttribute("gbMap_EAT", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_EAT)));
+		model.addAttribute("gbMap_CAR", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_CAR)));
+
+		model.addAttribute("gbMap_AIR", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_AIR)));
+		model.addAttribute("gbMap_TRAIN", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_TRAIN)));
+		model.addAttribute("gbMap_INSURANCE", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_INSURANCE)));
+		model.addAttribute("gbMap_SHOP", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_SHOP)));
+
+		model.addAttribute("gbMap_GUIDE", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_GUIDE)));
+		model.addAttribute("gbMap_OTHERIN", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_OTHERIN)));
+		model.addAttribute("gbMap_OTHEROUT", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_OTHEROUT)));
+		model.addAttribute("gbMap_DELIVERY", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_DELIVERY)));
+
+		model.addAttribute("pageBean", pageBean);
+		model.addAttribute("sum",
+				queryService.getPersonCount(pageBean, bizId, set));
 		return "operation/group-booking-list-table";
 	}
 
@@ -4501,6 +4531,164 @@ public class QueryController extends BaseController {
 	// }
 	// return null;
 	// }
+
+	//					新预定安排
+
+	@RequestMapping("newGroupBooking.htm")
+	public String newGroupBooking(HttpServletRequest request,
+								  HttpServletResponse response, ModelMap model, TourGroupVO tourGroup) {
+		return "operation/newGroupBookingList";
+	}
+
+	@RequestMapping("newGroupBookingTable.do")
+	public String newGroupBookingTable(ModelMap model, HttpServletRequest request,
+									   TourGroupVO tourGroup) {
+		PageBean pageBean = new PageBean();
+		model.addAttribute("tourGroup", tourGroup);
+		model.addAttribute("pageNum", tourGroup.getPage());
+		if (tourGroup.getPage() == null) {
+			tourGroup.setPage(1);
+		} else {
+			pageBean.setPage(tourGroup.getPage());
+		}
+		if (tourGroup.getPageSize() == null) {
+			pageBean.setPageSize(Constants.PAGESIZE);
+		} else {
+			pageBean.setPageSize(tourGroup.getPageSize());
+		}
+		if (tourGroup != null
+				&& StringUtils.isNotEmpty(tourGroup.getReceiveMode())) {
+			if (tourGroup.getGroupMode() != null
+					&& tourGroup.getGroupMode().intValue() == 0) {
+				// 如果为散客，输入接站牌查询为空
+				pageBean.setResult(null);
+				model.addAttribute("pageBean", pageBean);
+				return "operation/group-booking-list-table";
+			}
+		}
+		if (StringUtils.isBlank(tourGroup.getSaleOperatorIds())
+				&& StringUtils.isNotBlank(tourGroup.getOrgIds())) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = tourGroup.getOrgIds().split(",");
+			for (String orgIdStr : orgIdArr) {
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = platformEmployeeService.getUserIdListByOrgIdList(
+					WebUtils.getCurBizId(request), set);
+			String salesOperatorIds = "";
+			for (Integer usrId : set) {
+				salesOperatorIds += usrId + ",";
+			}
+			if (!salesOperatorIds.equals("")) {
+				tourGroup.setSaleOperatorIds(salesOperatorIds.substring(0,
+						salesOperatorIds.length() - 1));
+			}
+		}
+		Integer bizId = WebUtils.getCurBizId(request);
+		tourGroup.setBizId(bizId);
+		pageBean.setParameter(tourGroup);
+
+		List<Map<String, Object>> mapList = groupOrderService
+				.selectGroupIdsByReceiveMode(tourGroup);
+		if (mapList != null && mapList.size() > 0) {
+			Set<Integer> groupIdSet = new HashSet<Integer>();
+			for (Map<String, Object> map : mapList) {
+				groupIdSet.add(TypeUtils.castToInt(map.get("group_id")));
+			}
+			if (groupIdSet.size() == 0) {
+				groupIdSet.add(-1);
+			}
+			tourGroup.setGroupIdSet(groupIdSet);
+		}
+
+		Set<Integer> set = WebUtils.getDataUserIdSet(request);
+		pageBean = queryService
+				.selectGroupBookingListPage(pageBean, bizId, set);
+		List result = pageBean.getResult();
+		if (result != null && result.size() > 0) {
+
+			GroupBookingInfo bookingInfo = null;
+			StringBuilder groupIds = new StringBuilder();
+			for (int i = 0; i < result.size(); i++) {
+				if (i > 0) {
+					groupIds.append(",");
+				}
+				bookingInfo = (GroupBookingInfo) result.get(i);
+				groupIds.append(bookingInfo.getGroupId());
+			}
+
+			String groupIdStr = groupIds.toString();
+
+			List<Map<String, Object>> sightList = queryService
+					.selectBookingSupplierCountForGroups(groupIdStr,
+							Constants.SCENICSPOT, tourGroup.getSupplierName());
+			List<Map<String, Object>> hotelList = queryService
+					.selectBookingSupplierCountForGroups(groupIdStr,
+							Constants.HOTEL, tourGroup.getSupplierName());
+			List<Map<String, Object>> eatList = queryService
+					.selectBookingSupplierCountForGroups(groupIdStr,
+							Constants.RESTAURANT, tourGroup.getSupplierName());
+			List<Map<String, Object>> carList = queryService
+					.selectBookingSupplierCountForGroups(groupIdStr,
+							Constants.FLEET, tourGroup.getSupplierName());
+			List<Map<String, Object>> airList = queryService
+					.selectBookingSupplierCountForGroups(groupIdStr,
+							Constants.AIRTICKETAGENT,
+							tourGroup.getSupplierName());
+			List<Map<String, Object>> trainList = queryService
+					.selectBookingSupplierCountForGroups(groupIdStr,
+							Constants.TRAINTICKETAGENT,
+							tourGroup.getSupplierName());
+			List<Map<String, Object>> insuranceList = queryService
+					.selectBookingSupplierCountForGroups(groupIdStr,
+							Constants.INSURANCE, tourGroup.getSupplierName());
+			List<Map<String, Object>> shopList = queryService
+					.selectBookingShopCountForGroups(groupIdStr,
+							tourGroup.getSupplierName());
+			List<Map<String, Object>> inList = queryService
+					.selectBookingSupplierCountForGroups(groupIdStr,
+							Constants.OTHERINCOME, tourGroup.getSupplierName());
+			List<Map<String, Object>> outList = queryService
+					.selectBookingSupplierCountForGroups(groupIdStr,
+							Constants.OTHEROUTCOME, tourGroup.getSupplierName());
+
+			List<Map<String, Object>> guideList = queryService
+					.selectBookingGuideForGroups(groupIdStr,
+							tourGroup.getSupplierName());
+			List<Map<String, Object>> deliveryList = queryService
+					.selectBookingDeliveryForGroups(groupIdStr,
+							tourGroup.getSupplierName());
+			List<Map<String, Object>> deList = queryService
+					.selectBookingSupplierCountForGroups(groupIdStr,
+							Constants.LOCALTRAVEL, tourGroup.getSupplierName());
+			for (int i = 0; i < result.size(); i++) {
+				bookingInfo = (GroupBookingInfo) result.get(i);
+				Integer groupId = bookingInfo.getGroupId();
+				bookingInfo.setSightCnt(getCountByGroupId(sightList, groupId));
+				bookingInfo.setHotelCnt(getCountByGroupId(hotelList, groupId));
+				bookingInfo.setEatCnt(getCountByGroupId(eatList, groupId));
+				bookingInfo.setCarCnt(getCountByGroupId(carList, groupId));
+				bookingInfo.setDeliveryCnt(getCountByGroupId(deList, groupId));
+				bookingInfo.setAirCnt(getCountByGroupId(airList, groupId));
+				bookingInfo.setTrainCnt(getCountByGroupId(trainList, groupId));
+				bookingInfo.setInsuranceCnt(getCountByGroupId(insuranceList,
+						groupId));
+				bookingInfo.setShopCnt(getCountByGroupId(shopList, groupId));
+				bookingInfo.setInCnt(getCountByGroupId(inList, groupId));
+				bookingInfo.setOutCnt(getCountByGroupId(outList, groupId));
+				bookingInfo
+						.setGuideNames(getNamesByGroupId(guideList, groupId));
+				bookingInfo.setDeliveryNames(getNamesByGroupId(deliveryList,
+						groupId));
+			}
+		}
+
+
+		model.addAttribute("pageBean", pageBean);
+		model.addAttribute("sum",
+				queryService.getPersonCount(pageBean, bizId, set));
+		return "operation/newGroupBookingTable";
+	}
 
 	@RequestMapping(value = "groupInfoListView.htm")
 	public String groupInfoList(ModelMap model, HttpServletRequest request, TourGroupVO tourGroup) {

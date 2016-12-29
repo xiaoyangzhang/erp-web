@@ -24,7 +24,7 @@
 					<dl class="">
 						<dd class="inl-bl">
 							<div class="dd_left">
-								<select name="dateType">
+								<select name="dateType" id="dateType">
 									<option value="1">出团日期</option>
 									<option value="2">输单日期</option>
 								</select>
@@ -106,6 +106,7 @@
 							<div class="dd_right">
 								<button type="button" onclick="searchBtn()"
 									class="button button-primary button-small">查询</button>
+								<a href="javascript:void(0);" id="toTrafficOrderExcelId" target="_blank" onclick="toTrafficOrderExcel()" class="button button-primary button-small">导出到Excel</a>
 							</div>
 							<div class="clear"></div>
 						</dd>
@@ -183,5 +184,23 @@ function showInfo(title,width,height,url){
  		content : url
  	});
  }
+ 
+/* 导出到Excel */
+function toTrafficOrderExcel(){
+	$("#toTrafficOrderExcelId").attr("href","toResAdminOrderExcel.htm?startTime="+$("#startTime_id").val()
+			+"&endTime="+$("#endTime_id").val()
+			+"&dateType="+$("#dateType").val()
+			+"&orderId="+$("#order_ids").val()
+			+"&receiveMode="+$("#receive_mode_id").val()
+			+"&productName="+$("#product_name_id").val()
+			+"&supplierName="+$("#supplierName_id").val()
+			+"&extHour="+$("#ext_res_clean_time_id").val()
+			+"&saleOperatorName="+$("#sale_operator_name_id").val()
+			+"&type="+$("#type_id").val()
+			+"&extResState="+$("#ext_res_state_id").val()
+			+"&gatherState="+$("#gatherState_id").val()
+			+"&page="+$("#searchPage").val()
+			+"&pageSize="+$("#searchPageSize").val());
+}
 </script>
 </html>
