@@ -1,6 +1,7 @@
 package com.yihg.erp.controller.traffic;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.facade.basic.service.DicFacade;
+import com.yimayhd.erpresource.dal.constants.BasicConstants;
 import org.erpcenterFacade.common.client.service.SaleCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +82,9 @@ public class ResTrafficController extends BaseController{
 	private ResTrafficFacade resTrafficFacade;
 	@Autowired
 	private SaleCommonFacade saleCommonFacade;
+	@Autowired
+	private DicFacade dicFacade;
+
 	
 	/**
 	 * 交通资源
@@ -709,6 +715,102 @@ public class ResTrafficController extends BaseController{
 		toSaveResNumsSoldDTO.setPoorNumStock(poorNumStock);
 		
 		return resTrafficFacade.toSaveResNumsSold(toSaveResNumsSoldDTO);
+	}
+
+
+	/**
+	 * 机票利润查询
+	 * @param request
+	 * @param reponse
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping("airTicketProfit.htm")
+	public String airTicketProfit(HttpServletRequest request,
+								  HttpServletResponse reponse, ModelMap model) {
+
+		return "resTraffic/airTicketProfitList";
+	}
+
+	/**
+	 * 机票利润查询table
+	 * @param request
+	 * @param model
+	 * @param pageSize
+	 * @param page
+	 * @return
+	 */
+	@RequestMapping("airTicketProfit_table.do")
+	public String airTicketProfit_table(HttpServletRequest request,ModelMap model, Integer pageSize, Integer page) {
+		TrafficResDTO var1 = new TrafficResDTO();
+		var1.setPage(page);
+		var1.setPageSize(pageSize);
+		var1.setPm(WebUtils.getQueryParamters(request));
+		TrafficAddResOrderResult trafficAddResOrderResult = resTrafficFacade.airTicketProfit_table(var1);
+		model.addAttribute("pageBean", trafficAddResOrderResult.getPageBean());
+
+		return "resTraffic/airTicketProfit_table";
+	}
+
+	/**
+	 * 预算明细
+	 * @param resId
+	 * @return
+	 */
+	@RequestMapping("budgetDetail.htm")
+	public String budgetDetail(HttpServletRequest request,HttpServletResponse reponse, ModelMap model,Integer resId,String dateStart) {
+		TrafficResDTO var1 = new TrafficResDTO();
+		var1.setResId(resId);
+		TrafficAddResOrderResult trafficAddResOrderResult = resTrafficFacade.budgetDetail(var1);
+		model.addAttribute("lists", trafficAddResOrderResult.getTrafficResProductLists());
+		model.addAttribute("dateStart", dateStart);
+		return "resTraffic/budgetDetail";
+	}
+
+	/**
+	 * 实时明细
+	 * @param resId
+	 * @return
+	 */
+	@RequestMapping("constantlyDetail.htm")
+	public String constantlyDetail(HttpServletRequest request,HttpServletResponse reponse, ModelMap model,Integer resId,String dateStart) {
+ 		/*List<GroupOrder> gos=groupOrderService.selectGroupOrderGroupByPro(resId);
+		for(GroupOrder item:gos){
+			if(item.getProductId() !=null && item.getExtResId() != null){
+			TrafficResProduct trp=trafficResProductService.selectSumCostByProductCode(item.getProductId(), item.getExtResId());
+			item.setNumSold(trp.getNumSold());
+			item.setNumStock(trp.getNumStock());
+			item.setSumCost(trp.getSumCost());
+			}
+		}*/
+		TrafficResDTO var1 = new TrafficResDTO();
+		var1.setResId(resId);
+		TrafficAddResOrderResult trafficAddResOrderResult = resTrafficFacade.constantlyDetail(var1);
+		model.addAttribute("lists", trafficAddResOrderResult.getTourGroupLists());
+		model.addAttribute("dateStart", dateStart);
+		return "resTraffic/constantlyDetail";
+	}
+
+
+	@RequestMapping("resRoomExtrabed.htm")
+	public String resRoomExtrabed(HttpServletRequest request,
+								  HttpServletResponse reponse, ModelMap model) {
+		Integer bizId = WebUtils.getCurBizId(request);
+		List<DicInfo> brandList = dicFacade.getListByTypeCode(BasicConstants.CPXL_PP, bizId);
+		model.addAttribute("brandList", brandList);
+		return "resTraffic/resRoomExtrabedList";
+	}
+
+	@RequestMapping("resRoomExtrabed_table.do")
+	public String resRoomExtrabed_table(HttpServletRequest request,ModelMap model, Integer pageSize, Integer page,GroupOrder groupOrder) {
+		TrafficResDTO var1 = new TrafficResDTO();
+		var1.setBizId(WebUtils.getCurBizId(request));
+		var1.setPage(page);
+		var1.setPageSize(pageSize);
+		TrafficAddResOrderResult trafficAddResOrderResult = resTrafficFacade.resRoomExtrabed_table(var1);
+		model.addAttribute("sum", trafficAddResOrderResult.getSumRoomExtrabed());
+		model.addAttribute("pageBean", trafficAddResOrderResult.getPageBean());
+		return "resTraffic/resRoomExtrabed_table";
 	}
 
 }
