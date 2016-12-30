@@ -7043,7 +7043,7 @@ public class TourGroupController extends BaseController {
 //		TourGroup tourGroup=tourGroupService.selectGroupCodeSort(tg.getBizId(), tg.getGroupMode(), go.getDepartureDate());
 //		String makeCodeByMode = tourGroupService.makeCodeByMode(supplierCode, tg.getGroupMode(), go.getDepartureDate(),
 //				tg.getGroupCodeMark(), tourGroup == null ? 1: tourGroup.getGroupCodeSort() + 1);
-		Map<String,String> result = tourGroupFacade.changerGroupCodePage(groupId,WebUtils.getCurBizId(request));
+		Map<String,Object> result = tourGroupFacade.changerGroupCodePage(groupId,WebUtils.getCurBizId(request));
 		model.addAttribute("newGroupCode", result.get("newGroupCode"));
 		model.addAttribute("oldGroupCode", result.get("oldGroupCode"));
 		model.addAttribute("GroupCodeSort", result.get("groupCodeSort") );

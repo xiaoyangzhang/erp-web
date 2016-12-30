@@ -9,6 +9,7 @@ import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sys.po.UserSession;
+import com.yimayhd.erpcenter.facade.sales.result.QueryResAdminOrderResult;
 import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
 import com.yimayhd.erpcenter.facade.tj.client.query.LockListTableDTO;
 import com.yimayhd.erpcenter.facade.tj.client.query.TrafficOrderDTO;

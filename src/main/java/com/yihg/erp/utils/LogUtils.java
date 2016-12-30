@@ -9,7 +9,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.yimayhd.erpcenter.common.contants.BasicConstants.LOG_ACTION;
+import com.yimayhd.erpcenter.dal.basic.constant.BasicConstants.LOG_ACTION;
 import com.yimayhd.erpcenter.dal.basic.po.LogOperator;
 import com.yimayhd.erpcenter.dal.basic.utils.LogFieldUtil;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
@@ -45,7 +45,7 @@ public class LogUtils {
 		if(!isNew){
 			orderId = objEdit.getId();
 			groupId = objEdit.getGroupId()==null?0: objEdit.getGroupId();
-			logList.add(LogFieldUtil.getLog_Instant(curUser.getBizId(), curUser.getName(),LOG_ACTION.UPDATE, "group_order", orderId,  groupId,"修改订单", objEdit, objDb));
+			logList.add(LogFieldUtil.getLog_Instant(curUser.getBizId(), curUser.getName(), LOG_ACTION.UPDATE, "group_order", orderId,  groupId,"修改订单", objEdit, objDb));
 		}else{                     
 			logList.add(LogFieldUtil.getLog_Instant(curUser.getBizId(), curUser.getName(),LOG_ACTION.INSERT, "group_order", 0,  0,"创建订单", objEdit, null));
 		}

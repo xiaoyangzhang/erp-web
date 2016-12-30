@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
+import com.yimayhd.erpcenter.facade.sales.service.QueryResRoomExtraBedResult;
 import com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade;
 import org.erpcenterFacade.common.client.query.BrandQueryDTO;
 import org.erpcenterFacade.common.client.result.BrandQueryResult;
