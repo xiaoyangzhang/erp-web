@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.facade.sales.query.grouporder.*;
+import com.yimayhd.erpcenter.facade.sales.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.sales.result.grouporder.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -5938,34 +5939,35 @@ public class GroupOrderController extends BaseController {
 	@ResponseBody
 	public String delTaobaoGroupOrder(HttpServletRequest request, HttpServletResponse reponse,
 									  Integer id) {
-		if (airTicketRequestService.doesOrderhaveRequested(WebUtils.getCurBizId(request), id)) {
-			return errorJson("删除订单前请先取消机票申请。");
-		}
-		GroupOrder groupOrder = groupOrderService.findById(id);
-		taobaoOrderService.updateOrderId(id);									// 更新淘宝原始单OrderId为0
-		groupOrder.setState(-1);
-		groupOrderService.updateGroupOrder(groupOrder);
-		if(groupOrder.getGroupId()!=null){    									// 判断是否成团，团中有无订单，若无订单删除团。
-			List<GroupOrder> list =groupOrderService.selectSubOrderList(groupOrder.getGroupId());
-			if(list==null || list.size()<1){
-				TourGroup tourGroup=tourGroupService.selectByPrimaryKey(groupOrder.getGroupId());
-				tourGroup.setGroupState(-1);
-				tourGroupService.updateByPrimaryKeySelective(tourGroup);
-			}
-		}
-		if (groupOrder.getPriceId() != null) {
-
-			boolean updateStock = productGroupPriceService.updateStock(groupOrder.getPriceId(),
-					groupOrder.getSupplierId(),
-					-(groupOrder.getNumAdult() + groupOrder.getNumChild()));
-
-			log.info("更新库存:" + updateStock);
-		}
-		bookingSupplierService.upateGroupIdAfterDelOrderFromGroup(id);
-		TaobaoStockLog sLog = taobaoStockService.selectStockLogAllByOrderId(id);  //判断是否存在淘宝产品库存，有则更新该单已售为0
-		if (sLog != null) {
-			taobaoStockService.delTaoBaoProductStock(sLog);
-		}
-		return successJson();
+//		if (airTicketRequestService.doesOrderhaveRequested(WebUtils.getCurBizId(request), id)) {
+//			return errorJson("删除订单前请先取消机票申请。");
+//		}
+//		GroupOrder groupOrder = groupOrderService.findById(id);
+//		taobaoOrderService.updateOrderId(id);									// 更新淘宝原始单OrderId为0
+//		groupOrder.setState(-1);
+//		groupOrderService.updateGroupOrder(groupOrder);
+//		if(groupOrder.getGroupId()!=null){    									// 判断是否成团，团中有无订单，若无订单删除团。
+//			List<GroupOrder> list =groupOrderService.selectSubOrderList(groupOrder.getGroupId());
+//			if(list==null || list.size()<1){
+//				TourGroup tourGroup=tourGroupService.selectByPrimaryKey(groupOrder.getGroupId());
+//				tourGroup.setGroupState(-1);
+//				tourGroupService.updateByPrimaryKeySelective(tourGroup);
+//			}
+//		}
+//		if (groupOrder.getPriceId() != null) {
+//
+//			boolean updateStock = productGroupPriceService.updateStock(groupOrder.getPriceId(),
+//					groupOrder.getSupplierId(),
+//					-(groupOrder.getNumAdult() + groupOrder.getNumChild()));
+//
+//			log.info("更新库存:" + updateStock);
+//		}
+//		bookingSupplierService.upateGroupIdAfterDelOrderFromGroup(id);
+//		TaobaoStockLog sLog = taobaoStockService.selectStockLogAllByOrderId(id);  //判断是否存在淘宝产品库存，有则更新该单已售为0
+//		if (sLog != null) {
+//			taobaoStockService.delTaoBaoProductStock(sLog);
+//		}
+		ResultSupport resultSupport = groupOrderFacade.delTaobaoGroupOrder(WebUtils.getCurBizId(request),id);
+		return resultSupport.isSuccess() ? successJson() : errorJson(resultSupport.getResultMsg());
 	}
 }

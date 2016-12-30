@@ -11,6 +11,7 @@ import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSONObject;
 import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.common.contants.BasicConstants;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
@@ -40,7 +41,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.erpcenterFacade.common.client.query.BrandQueryDTO;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
+import org.erpcenterFacade.common.client.result.BrandQueryResult;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.slf4j.Logger;
@@ -883,7 +886,7 @@ public class TourGroupController extends BaseController {
 				JSONObject jo = JSON.parseObject(resultString);
 				String resultCode = jo.get("resultCode").toString();
 				if ("0".equals(resultCode))
-					tourGroupService.updateWapType(groupId); // 更新wap_type为1
+					tourGroupFacade.updateWapType(groupId); // 更新wap_type为1
 			} finally {
 				closeableHttpResponse.close();
 			}
@@ -6971,12 +6974,19 @@ public class TourGroupController extends BaseController {
 
 	@RequestMapping("tourGroupCodeList.htm")
 	public String tourGroupCodeList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
-		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
-		model.addAttribute("pp", pp);
 
 		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr", platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+//		List<DicInfo> pp = dicService.getListByTypeCode(BasicConstants.CPXL_PP, WebUtils.getCurBizId(request));
+		BrandQueryDTO brandQueryDTO = new BrandQueryDTO();
+		brandQueryDTO.setBizId(bizId);
+		BrandQueryResult pp = productCommonFacade.brandQuery(brandQueryDTO);
+		model.addAttribute("pp", pp.getBrandList());
+
+		DepartmentTuneQueryDTO queryDTO = new DepartmentTuneQueryDTO();
+		queryDTO.setBizId(bizId);
+		DepartmentTuneQueryResult queryResult = productCommonFacade.departmentTuneQuery(queryDTO);
+		model.addAttribute("orgJsonStr", queryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", queryResult.getOrgUserJsonStr());
 		model.addAttribute("curUser", WebUtils.getCurUser(request).getName());
 		model.addAttribute("curUserId", WebUtils.getCurUserId(request));
 
@@ -6988,51 +6998,55 @@ public class TourGroupController extends BaseController {
 	public String tourGroupCodeListData(HttpServletRequest request, HttpServletResponse reponse, ModelMap model,
 										Integer rows, GroupOrder groupOrder) throws ParseException {
 
-		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds()) && StringUtils.isNotBlank(groupOrder.getOrgIds())) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = groupOrder.getOrgIds().split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds = "";
-			for (Integer usrId : set) {
-				salesOperatorIds += usrId + ",";
-			}
-			if (!salesOperatorIds.equals("")) {
-				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
-			}
-		}
+//		if (StringUtils.isBlank(groupOrder.getSaleOperatorIds()) && StringUtils.isNotBlank(groupOrder.getOrgIds())) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = groupOrder.getOrgIds().split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds = "";
+//			for (Integer usrId : set) {
+//				salesOperatorIds += usrId + ",";
+//			}
+//			if (!salesOperatorIds.equals("")) {
+//				groupOrder.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
+//			}
+//		}
+		String saleOperatorIds = productCommonFacade.setSaleOperatorIds(groupOrder.getSaleOperatorIds(),groupOrder.getOrgIds(),WebUtils.getCurBizId(request));
+		groupOrder.setSaleOperatorIds(saleOperatorIds);
 		PageBean<GroupOrder> page = new PageBean<GroupOrder>();
 		page.setParameter(groupOrder);
 		page.setPage(groupOrder.getPage() == null ? 1 : groupOrder.getPage());
 		page.setPageSize(rows);
-		page =tourGroupService.selectTourGroupCodeListPage(page, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+		page =tourGroupFacade.selectTourGroupCodeListPage(page, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
 		model.addAttribute("page", page);
 		return JSON.toJSONString(page);
 	}
 	@RequestMapping("changerGroupCodePage.htm")
 	public String changerGroupCodePage(HttpServletRequest request, HttpServletResponse reponse, ModelMap model,Integer groupId) {
-		TourGroup tg =tourGroupService.selectByPrimaryKey(groupId);
-		model.addAttribute("oldGroupCode", tg.getGroupCode());
-		List<GroupOrder> lists=groupOrderService.selectOrderByGroupId(groupId);
-		GroupOrder go=lists.get(0);
-		Integer orgId=0;
-		if(tg.getGroupMode()>0){
-			PlatformEmployeePo salePEP = platformEmployeeService
-					.findByEmployeeId(go.getSaleOperatorId());
-			orgId=salePEP.getOrgId();
-		}else{
-			PlatformEmployeePo operatorPEP = platformEmployeeService
-					.findByEmployeeId(tg.getOperatorId());
-			orgId=operatorPEP.getOrgId();
-		}
-		String supplierCode = orgService.getCompanyCodeByOrgId(WebUtils.getCurBizId(request),orgId);
-		TourGroup tourGroup=tourGroupService.selectGroupCodeSort(tg.getBizId(), tg.getGroupMode(), go.getDepartureDate());
-		String makeCodeByMode = tourGroupService.makeCodeByMode(supplierCode, tg.getGroupMode(), go.getDepartureDate(),
-				tg.getGroupCodeMark(), tourGroup == null ? 1: tourGroup.getGroupCodeSort() + 1);
-		model.addAttribute("newGroupCode", makeCodeByMode);
-		model.addAttribute("GroupCodeSort", tourGroup == null ? 1: tourGroup.getGroupCodeSort() + 1);
+//		TourGroup tg =tourGroupService.selectByPrimaryKey(groupId);
+//		model.addAttribute("oldGroupCode", tg.getGroupCode());
+//		List<GroupOrder> lists=groupOrderService.selectOrderByGroupId(groupId);
+//		GroupOrder go=lists.get(0);
+//		Integer orgId=0;
+//		if(tg.getGroupMode()>0){
+//			PlatformEmployeePo salePEP = platformEmployeeService
+//					.findByEmployeeId(go.getSaleOperatorId());
+//			orgId=salePEP.getOrgId();
+//		}else{
+//			PlatformEmployeePo operatorPEP = platformEmployeeService
+//					.findByEmployeeId(tg.getOperatorId());
+//			orgId=operatorPEP.getOrgId();
+//		}
+//		String supplierCode = orgService.getCompanyCodeByOrgId(WebUtils.getCurBizId(request),orgId);
+//		TourGroup tourGroup=tourGroupService.selectGroupCodeSort(tg.getBizId(), tg.getGroupMode(), go.getDepartureDate());
+//		String makeCodeByMode = tourGroupService.makeCodeByMode(supplierCode, tg.getGroupMode(), go.getDepartureDate(),
+//				tg.getGroupCodeMark(), tourGroup == null ? 1: tourGroup.getGroupCodeSort() + 1);
+		Map<String,String> result = tourGroupFacade.changerGroupCodePage(groupId,WebUtils.getCurBizId(request));
+		model.addAttribute("newGroupCode", result.get("newGroupCode"));
+		model.addAttribute("oldGroupCode", result.get("oldGroupCode"));
+		model.addAttribute("GroupCodeSort", result.get("groupCodeSort") );
 		model.addAttribute("groupId", groupId);
 		return "sales/tourGroup/changeGroupCode";
 	}
@@ -7040,7 +7054,7 @@ public class TourGroupController extends BaseController {
 	@RequestMapping("saveNewGroupCode.do")
 	@ResponseBody()
 	public String saveVisaInfo(HttpServletRequest request, TourGroup tourGroup,ModelMap model) {
-		tourGroupService.updateTourGroup(tourGroup);
+		WebResult<Boolean> result = tourGroupFacade.updateTourGroup(tourGroup);
 		return successJson();
 	}
 }

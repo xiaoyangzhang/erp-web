@@ -1,29 +1,45 @@
 package com.yihg.erp.controller.traffic;
 
-import java.text.ParseException;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.utils.DateUtils;
 import com.yihg.erp.utils.WebUtils;
+import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sys.po.UserSession;
+import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
 import com.yimayhd.erpcenter.facade.tj.client.query.LockListTableDTO;
 import com.yimayhd.erpcenter.facade.tj.client.query.TrafficOrderDTO;
 import com.yimayhd.erpcenter.facade.tj.client.result.AdminOrderListTableResult;
 import com.yimayhd.erpcenter.facade.tj.client.result.LockListTableResult;
 import com.yimayhd.erpcenter.facade.tj.client.service.ResTrafficOrderFacade;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/resOrder")
@@ -34,7 +50,8 @@ public class resTrafficOrderController extends BaseController{
 	
 	@Autowired
 	private ResTrafficOrderFacade resTrafficOrderFacade;
-	
+	@Autowired
+	private GroupOrderFacade groupOrderFacade;
 	@RequestMapping("resGroupOrderList.htm")
 	public String loadGroupOrderInfo(HttpServletRequest request, ModelMap model){
 		Integer bizId = WebUtils.getCurBizId(request);
@@ -228,7 +245,7 @@ public class resTrafficOrderController extends BaseController{
 	 * @throws ParseException
 	 */
 	@RequestMapping(value = "toResAdminOrderExcel.htm")
-	public void toOrderPreview(HttpServletRequest request, HttpServletResponse response, Integer pageSize, Integer page,Model model)
+	public void toOrderPreview(HttpServletRequest request, HttpServletResponse response, Integer pageSize, Integer page, Model model)
 			throws ParseException {
 
 		PageBean<GroupOrder> pageBean = new PageBean<GroupOrder>();
@@ -236,11 +253,13 @@ public class resTrafficOrderController extends BaseController{
 		pageBean.setPage(1);
 		pageBean.setPageSize(100000);
 		pageBean.setParameter(pmBean);
-		pageBean=groupOrderService.selectResAdminOrderList(pageBean,
-				WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
-
-		HashMap<String, BigDecimal> map_sum = groupOrderService.sumResAdminOrder(pageBean);
-
+//		pageBean=groupOrderService.selectResAdminOrderList(pageBean,
+//				WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+//
+//		HashMap<String, BigDecimal> map_sum = groupOrderService.sumResAdminOrder(pageBean);
+		QueryResAdminOrderResult result = groupOrderFacade.selectResAdminOrderList(pageBean,WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+		pageBean = result.getPageBean();
+		Map<String, BigDecimal> map_sum = result.getMap();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		String path = "";
 		try {

@@ -4395,7 +4395,7 @@ public class FinanceController extends BaseController {
 	/**
 	 * 结算单审核导出Excel功能
 	 * @return
-	 */
+	 *//*
 	@RequestMapping(value = "queryAuditGroupExcelList.htm")
 	public void queryAuditGroupExcelList(HttpServletRequest request,HttpServletResponse response,
 										 HttpServletResponse reponse, ModelMap model, Integer groupId) {
@@ -4416,7 +4416,7 @@ public class FinanceController extends BaseController {
 		//获取地接社，餐厅，酒店，车队，景区，其他，保险
 		List<InfoBean>	list = (List) map.get("sup");
 
-		Map<String, Object> order_pm = WebUtils.getQueryParamters(request);
+//		Map<String, Object> order_pm = WebUtils.getQueryParamters(request);
 		List<Map<String, Object>> supplierList = getCommonService(null).queryList("fin.selectSupplierList", pm);
 
 		//其他收入
@@ -5322,7 +5322,7 @@ public class FinanceController extends BaseController {
 				cc.setCellStyle(cellStyle);
 			}
 
-			/*CellRangeAddress region = new CellRangeAddress(supplierList.size() + 5,
+			*//*CellRangeAddress region = new CellRangeAddress(supplierList.size() + 5,
 					supplierList.size() + 5, 0, 10);
 			sheet.addMergedRegion(region);
 
@@ -5330,7 +5330,7 @@ public class FinanceController extends BaseController {
 			cc = row.createCell(0);
 			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
 					+ " 打印时间："
-					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));*/
+					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));*//*
 			path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
 					+ ".xlsx";
 			FileOutputStream out = new FileOutputStream(path);
@@ -5348,7 +5348,7 @@ public class FinanceController extends BaseController {
 		}
 		download(path,fileName,request,response);
 
-	}
+	}*/
 
 
 

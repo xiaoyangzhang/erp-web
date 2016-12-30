@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.yihg.erp.contant.BizConfigConstant;
+import com.yimayhd.erpcenter.dal.sys.po.UserSession;
 import com.yimayhd.erpresource.dal.constants.BasicConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -1755,7 +1756,8 @@ public class QueryController extends BaseController {
 		/**
 		 * 增加总合计
 		 */
-		QueryGuideShop queryGuideShop = bookingShopService.getGuideShopListPageTotal(pageBean, WebUtils.getDataUserIdSet(request));
+//		QueryGuideShop queryGuideShop = bookingShopService.getGuideShopListPageTotal(pageBean, WebUtils.getDataUserIdSet(request));
+		QueryGuideShop queryGuideShop = bookingShopFacade.getGuideShopListPageTotal(pageBean, WebUtils.getDataUserIdSet(request));
 		model.addAttribute("queryGuideShop",queryGuideShop);
 		return "queries/shop/guestShop-listView";
 	}
@@ -4486,9 +4488,6 @@ public class QueryController extends BaseController {
 		model.addAttribute("gbMap_OTHEROUT", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_OTHEROUT)));
 		model.addAttribute("gbMap_DELIVERY", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_DELIVERY)));
 
-		model.addAttribute("pageBean", pageBean);
-		model.addAttribute("sum",
-				queryService.getPersonCount(pageBean, bizId, set));
 		return "operation/group-booking-list-table";
 	}
 
@@ -4566,7 +4565,7 @@ public class QueryController extends BaseController {
 				return "operation/group-booking-list-table";
 			}
 		}
-		if (StringUtils.isBlank(tourGroup.getSaleOperatorIds())
+		/*if (StringUtils.isBlank(tourGroup.getSaleOperatorIds())
 				&& StringUtils.isNotBlank(tourGroup.getOrgIds())) {
 			Set<Integer> set = new HashSet<Integer>();
 			String[] orgIdArr = tourGroup.getOrgIds().split(",");
@@ -4583,12 +4582,14 @@ public class QueryController extends BaseController {
 				tourGroup.setSaleOperatorIds(salesOperatorIds.substring(0,
 						salesOperatorIds.length() - 1));
 			}
-		}
+		}*/
+		String saleOperatorIds = productCommonFacade.setSaleOperatorIds(tourGroup.getSaleOperatorIds(),tourGroup.getOrgIds(),WebUtils.getCurBizId(request));
+		tourGroup.setSaleOperatorIds(saleOperatorIds);
 		Integer bizId = WebUtils.getCurBizId(request);
 		tourGroup.setBizId(bizId);
 		pageBean.setParameter(tourGroup);
 
-		List<Map<String, Object>> mapList = groupOrderService
+		/*List<Map<String, Object>> mapList = groupOrderService
 				.selectGroupIdsByReceiveMode(tourGroup);
 		if (mapList != null && mapList.size() > 0) {
 			Set<Integer> groupIdSet = new HashSet<Integer>();
@@ -4682,11 +4683,10 @@ public class QueryController extends BaseController {
 						groupId));
 			}
 		}
-
-
-		model.addAttribute("pageBean", pageBean);
-		model.addAttribute("sum",
-				queryService.getPersonCount(pageBean, bizId, set));
+*/
+		ScheduledQueryResult result = dataAnalysisFacade.getScheduledList(pageBean,bizId,WebUtils.getDataUserIdSet(request));
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("sum", result.getMap());
 		return "operation/newGroupBookingTable";
 	}
 

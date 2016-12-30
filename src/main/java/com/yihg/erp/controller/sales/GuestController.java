@@ -7,9 +7,14 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import com.yihg.erp.utils.WebUtils;
+import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.dal.sys.constants.Constants;
 import com.yimayhd.erpcenter.facade.sales.result.GuestResult;
+import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
 import com.yimayhd.erpcenter.facade.sales.service.GuestFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +38,8 @@ public class GuestController extends BaseController {
 	private static final Logger logger = LoggerFactory.getLogger(SeatInCoachController.class);
 	@Autowired
 	private GuestFacade guestFacade ;
-	
+	@Autowired
+	private GroupOrderFacade groupOrderFacade;
 	/**
 	 * 保存客人信息，如果该订单在客人表中的人数大于等于订单中的总人数，不插入
 	 * @param groupOrderTransport
@@ -286,7 +292,7 @@ public class GuestController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping(value="/getGroupGuestCardIDInfo.htm")
-	public String getGroupGuestCardIDInfo(HttpServletRequest request,HttpServletResponse response, Model model){
+	public String getGroupGuestCardIDInfo(HttpServletRequest request, HttpServletResponse response, Model model){
 		return "sales/tourGroup/guest/guestRepeatcardIDList";
 	}
 
@@ -303,10 +309,10 @@ public class GuestController extends BaseController {
 		groupOrderGuest.setNotChangeGroupCode("变更");
 		PageBean<GroupOrderGuest> pageBean = new PageBean<GroupOrderGuest>();
 		pageBean.setPage(groupOrderGuest.getPage());
-		pageBean.setPageSize(groupOrderGuest.getPageSize()==null?Constants.PAGESIZE:groupOrderGuest.getPageSize());
+		pageBean.setPageSize(groupOrderGuest.getPageSize()==null? Constants.PAGESIZE:groupOrderGuest.getPageSize());
 		pageBean.setParameter(groupOrderGuest);
 
-		pageBean = groupOrderGuestService.selectGroupGuestRepeatListPage(pageBean, WebUtils.getCurBizId(request));
+		pageBean = groupOrderFacade.selectGroupGuestRepeatListPage(pageBean, WebUtils.getCurBizId(request));
 		model.addAttribute("pageBean", pageBean);
 		return "sales/tourGroup/guest/guestRepeatcardIDList_table";
 	}
