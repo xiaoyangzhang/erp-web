@@ -6787,7 +6787,7 @@ public class QueryController extends BaseController {
 		queryDTO.setProductGuestCondition(condition);
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
-		QueryResult queryResult = queryFacade.productTrendTableList(queryDTO);
+		QueryResult queryResult = queryFacade.exportExcel6(queryDTO);
 		List<ProductGuestStaticsVo> productGuestStatics = queryResult.getProductGuestStatics();
 		String path = "";
 		BigDecimal personCount = new BigDecimal(0);
@@ -6930,11 +6930,13 @@ public class QueryController extends BaseController {
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
 		model.addAttribute("guestSource", guestSourceStatics);
 		return "/queries/order/productSourcePreview";*/
-
+		String imgPath = bizSettingCommon.getMyBizLogo(request);
+		model.addAttribute("imgPath", imgPath);
 		QueryDTO queryDTO = new QueryDTO();
 		queryDTO.setProductGuestCondition(condition);
 		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
 		QueryResult queryResult = queryFacade.productSourcePreview(queryDTO);
 		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
 		model.addAttribute("guestSource", queryResult.getListMap());

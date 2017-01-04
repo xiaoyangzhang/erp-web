@@ -47,7 +47,27 @@ $(function(){
 			$("#cityName").val('');
 		}
 	});
-	
+
+
+	function checkGuestNum(guestString ) {
+        // 比对当前输入人数是否定制团人数范围之内
+        var numAdult =$("input[name='groupOrder.numAdult']").val();
+        var numChild =$("input[name='groupOrder.numChild']").val();
+        var numChildBaby =$("input[name='groupOrder.numChildBaby']").val();
+        if(numAdult=='' ||numChild=='' || numChildBaby==''){
+            $.warn("请先填写订单接纳人数！");
+            return ;
+        }
+        if(isNaN(numAdult) || isNaN(numChild) || isNaN(numChildBaby)){
+            $.warn("请正确填写订单容纳人数！");
+            return ;
+        }
+        var count = $("#newGuestData").children('tr').length;
+        if((Number(count)+Number(guestString.length))>(Number(numAdult)+Number(numChild)+Number(numChildBaby))){
+            $.warn("超过该订单最大容纳人数！");
+            return ;
+        }
+    }
 
 	
 	
@@ -134,7 +154,7 @@ $(function(){
 			}
 		},
 		submitHandler : function(form) {
-			
+			checkGuestNum("");
 			if($("#supplierId").val()==''){
 				$.warn("不存在的组团社");
 				return;

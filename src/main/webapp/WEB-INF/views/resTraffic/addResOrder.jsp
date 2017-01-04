@@ -889,7 +889,7 @@ table.gridtable td {
 				<c:set var="totalPerson" value="${vo.groupOrder.numChild+vo.groupOrder.numAdult}" />
 				<input type="hidden" name="totalPerson" id="totalPerson"value="${totalPerson}" /> 
 				<input type="hidden" name="allowNum"   id="allowNum" value="${trp.numStock}" />
-				<input type="hidden" name="numStock"  id="numStock" value="${trp.numStock}" />   // 库存
+				<input type="hidden" name="numStock"  id="numStock" value="${trp.numStock}" />
 				<input type="hidden" name="ids"  id="ids" value="${tbIds}" />
 				<input type="hidden" name="trpId"  id="trpId" value="${trp.id}" />
 				<input type="hidden" name="groupOrder.extResId"  id="groupOrder_extResId" value="${trp.resId}" />
@@ -1090,23 +1090,24 @@ $(function() {
 		            		return;
 		            	}
 						guestString  = $.parseJSON(guestString) ; //json字符传处理
-						// 比对当前输入人数是否定制团人数范围之内
-						var numAdult =$("input[name='groupOrder.numAdult']").val();
-						var numChild =$("input[name='groupOrder.numChild']").val();
-						var numChildBaby =$("input[name='groupOrder.numChildBaby']").val();
-						if(numAdult=='' ||numChild=='' || numChildBaby==''){
-							$.warn("请先填写订单接纳人数！");
-							return ;
-						}
-					 	if(isNaN(numAdult) || isNaN(numChild) || isNaN(numChildBaby)){
-							$.warn("请正确填写订单容纳人数！");
-							return ;
-						} 
+//						// 比对当前输入人数是否定制团人数范围之内
+//						var numAdult =$("input[name='groupOrder.numAdult']").val();
+//						var numChild =$("input[name='groupOrder.numChild']").val();
+//						var numChildBaby =$("input[name='groupOrder.numChildBaby']").val();
+//						if(numAdult=='' ||numChild=='' || numChildBaby==''){
+//							$.warn("请先填写订单接纳人数！");
+//							return ;
+//						}
+//					 	if(isNaN(numAdult) || isNaN(numChild) || isNaN(numChildBaby)){
+//							$.warn("请正确填写订单容纳人数！");
+//							return ;
+//						}
 						var count = $("#newGuestData").children('tr').length;
-						if((Number(count)+Number(guestString.length))>(Number(numAdult)+Number(numChild)+Number(numChildBaby))){
-							$.warn("超过该订单最大容纳人数！");
-							return ;
-						}
+//						if((Number(count)+Number(guestString.length))>(Number(numAdult)+Number(numChild)+Number(numChildBaby))){
+//							$.warn("超过该订单最大容纳人数！");
+//							return ;
+//						}
+                        checkGuestNum(guestString);
 						var cerNum = "" ; //统计录入数据是否重复
 		                for (var i = 0; i < guestString.length; i++) {
 		            		if($("input[name='groupOrder.receiveMode']").val()==''){

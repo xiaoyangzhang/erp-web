@@ -39,7 +39,7 @@ public class MsgInfoController extends BaseController{
 //    private final MsgInfoDetailService msgInfoDetailService;
 
     private final SocketHandler socketHandler;
-    
+
     private final SysMsgInfoFacade sysMsgInfoFacade;
 
     @Autowired

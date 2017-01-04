@@ -39,6 +39,7 @@ import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -3824,7 +3825,7 @@ public class FinanceController extends BaseController {
 
 			//4、其他收入
 			index=0;
-			if(otherIncomeList.size() > 0 && otherIncomeList.size()>0){
+			if(!CollectionUtils.isEmpty(otherIncomeList)){
 				if(deliveryList.size() == 0){
 					CellRangeAddress region = new CellRangeAddress(index +orderList.size()+11,
 							index +orderList.size()+11, 0, 5);

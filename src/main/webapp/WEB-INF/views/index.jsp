@@ -149,10 +149,10 @@
 	        sock = new SockJS("<%=basePath%>sockjs/socketServer");
 		}
 		sock.onopen = function(e) {
-			//console.log('open=' + e);
+			console.log('open=' + e);
 		};
 		sock.onmessage = function(e) {
-			//console.log('msg=' + e)
+			console.log('msg=' + e)
 			
 			// 更新数量
 			$("#totalCount").html(parseInt($("#totalCount").html()) + 1);

@@ -134,7 +134,8 @@ function toExportWord(){
 			"&saleOperatorIds=${saleOperatorIds}"+
 			"&guestName=${guestName}"+
 			"&mobile=${mobile}"+  
-			"&select=${select}";
+			"&select=${select}"+
+	"&mergeGroupState=${mergeGroupState}";
 			
 }
 </script>

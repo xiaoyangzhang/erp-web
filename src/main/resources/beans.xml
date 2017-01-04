@@ -13,10 +13,12 @@
         <property name="tfsGwUrl" value="http://file.yimayholiday.com/filegw/file/upload"></property>
 	</bean>   
 	
-	<bean id="bizSettingCommon" class="com.yihg.erp.common.BizSettingCommon"></bean>    
+	<bean id="bizSettingCommon" class="com.yihg.erp.common.BizSettingCommon"></bean>
+	<bean id="socketHandler" class="com.yihg.erp.socket.SocketHandler"/>
 	<bean id="tfsUpload" class="com.yihg.erp.utils.TfsUpload">
 		<property name="sysConfig" ref="configBean"></property>
 	</bean>
 
 	<bean id="yihgTemplateFreemarkerService" class="com.yihg.erp.common.YihgTemplateFreemarkerService"/>
+
 </beans>
