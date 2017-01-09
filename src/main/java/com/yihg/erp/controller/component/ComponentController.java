@@ -197,7 +197,7 @@ public class ComponentController extends BaseController {
 
 		String canEditPrice = WebUtils.getBizConfigValue(request, "SUPPLIER_CHOOSE");
 		Integer orgId =  WebUtils.getCurUser(request).getOrgId();
-		if(canEditPrice !=null && supplierInfo.getSupplierType()==1  && canEditPrice.equals("1")) {
+		if(canEditPrice !=null && supplierInfo.getSupplierType() != null && supplierInfo.getSupplierType()==1  && canEditPrice.equals("1")) {
 			supplierInfo.setChooseType(1);
 			String supplierIds = componentFacade.setSupplierIds(orgId);
 			supplierInfo.setSupplierIds(supplierIds);

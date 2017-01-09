@@ -1,4 +1,4 @@
-fitGroupSale.js$(function(){
+$(function(){
 	opGrid.loadGrid();
 	opGrid.reSize();
 

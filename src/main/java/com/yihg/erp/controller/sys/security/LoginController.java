@@ -187,6 +187,7 @@ public class LoginController extends BaseController {
 				//addLoginLog(request,platformEmployeePo);
 				
 				attrModel.addFlashAttribute("userSession", userSession);
+				attrModel.addFlashAttribute("userToken", sessionId);
                 // WebSocket session设置
                 httpSession.setAttribute("userSession", userSession);
 

@@ -212,7 +212,7 @@ $(function(){
 		rules : {
 			'supplierName' : {
 				required : true,
-				maxlength:20
+				maxlength:40
 			},			
 			'remark' : {
 				//required : true

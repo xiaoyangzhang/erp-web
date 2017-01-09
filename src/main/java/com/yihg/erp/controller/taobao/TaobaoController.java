@@ -1,34 +1,36 @@
 package com.yihg.erp.controller.taobao;
 
-import java.io.*;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.alibaba.fastjson.JSON;
+import com.yihg.erp.common.BizSettingCommon;
+import com.yihg.erp.contant.PermissionConstants;
+import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.*;
+import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.common.contants.BasicConstants;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
 import com.yimayhd.erpcenter.dal.basic.po.LogOperator;
-import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
-import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.*;
+import com.yimayhd.erpcenter.dal.product.constans.Constants;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrice;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.GroupOrderPriceVO;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.SpecialGroupOrderVO;
+import com.yimayhd.erpcenter.dal.sales.client.taobao.po.PlatTaobaoTrade;
 import com.yimayhd.erpcenter.dal.sys.po.MsgInfo;
-import com.yimayhd.erpcenter.facade.result.WebResult;
+import com.yimayhd.erpcenter.dal.sys.po.UserSession;
+import com.yimayhd.erpcenter.facade.basic.service.DicFacade;
+import com.yimayhd.erpcenter.facade.basic.service.LogFacade;
+import com.yimayhd.erpcenter.facade.sales.query.ReportStatisticsQueryDTO;
+import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysMsgInfoFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
 import com.yimayhd.erpcenter.facade.tj.client.query.*;
-
+import com.yimayhd.erpcenter.facade.tj.client.result.*;
+import com.yimayhd.erpcenter.facade.tj.client.service.TaobaoFacade;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.SheetUtil;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -41,30 +43,15 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yihg.erp.common.BizSettingCommon;
-import com.yihg.erp.contant.PermissionConstants;
-import com.yihg.erp.controller.BaseController;
-import com.yihg.mybatis.utility.PageBean;
-import com.yimayhd.erpcenter.common.contants.BasicConstants;
-import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
-import com.yimayhd.erpcenter.dal.product.constans.Constants;
-import com.yimayhd.erpcenter.dal.sales.client.sales.vo.SpecialGroupOrderVO;
-import com.yimayhd.erpcenter.dal.sales.client.taobao.po.PlatTaobaoTrade;
-import com.yimayhd.erpcenter.dal.sys.po.UserSession;
-import com.yimayhd.erpcenter.facade.basic.service.DicFacade;
-import com.yimayhd.erpcenter.facade.basic.service.LogFacade;
-import com.yimayhd.erpcenter.facade.sales.query.ReportStatisticsQueryDTO;
-import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
-import com.yimayhd.erpcenter.facade.sales.service.SpecialGroupFacade;
-import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
-import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
-import com.yimayhd.erpcenter.facade.tj.client.result.AddNewTaobaoOrderResult;
-import com.yimayhd.erpcenter.facade.tj.client.result.ImportTaobaoOrderTableResult;
-import com.yimayhd.erpcenter.facade.tj.client.result.SaveSpecialGroupResult;
-import com.yimayhd.erpcenter.facade.tj.client.result.TaobaoOrderListResult;
-import com.yimayhd.erpcenter.facade.tj.client.result.TaobaoOrderListTableResult;
-import com.yimayhd.erpcenter.facade.tj.client.result.ToEditTaobaoOrderResult;
-import com.yimayhd.erpcenter.facade.tj.client.service.TaobaoFacade;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by zhoum on 2016/8/10.
@@ -73,7 +60,7 @@ import com.yimayhd.erpcenter.facade.tj.client.service.TaobaoFacade;
 @RequestMapping(value = "/taobao")
 public class TaobaoController extends BaseController {
 	@Autowired
-	private TaobaoFacade taobaoFacade;
+	private TaobaoFacade   taobaoFacade;
 	@Autowired
 	private SysConfig config;
 	@Autowired
@@ -2445,40 +2432,39 @@ public class TaobaoController extends BaseController {
 									 String orgIds,String orgNames,String operType,String saleOperatorIds,String saleOperatorName,
 									 String orderMode,String remark,Integer page,Integer pageSize,Integer userRightType,
 									 String guestName,Integer gender,Integer ageFirst,Integer ageSecond,String nativePlace) {
-		GroupOrder vo = new GroupOrder();
-		vo.setPage(page);
-		vo.setPageSize(pageSize);
-		vo.setStartTime(startTime);
-		vo.setEndTime(endTime);
-		vo.setRemark(remark);
-		vo.setGuestName(guestName);
-		vo.setOrderNo(orderMode);
-		vo.setGroupCode(groupCode);
-		vo.setSaleOperatorIds(saleOperatorIds);
-		vo.setOrgIds(orgIds);
-		vo.setOperType(Integer.valueOf(operType));
-		vo.setReceiveMode(receiveMode);
-		vo.setOrgNames(orgNames);
-		vo.setSaleOperatorName(saleOperatorName);
-		vo.setSupplierName(supplierName);
-		vo.setGender(gender);
-		vo.setAgeFirst(ageFirst);
-		vo.setAgeSecond(ageSecond);
-		vo.setNativePlace(nativePlace);
-
-		PageBean pageBean = new PageBean();
-		if (page == null) {
-			pageBean.setPage(1);
-		} else {
-			pageBean.setPage(page);
-		}
-		if (pageSize == null) {
-			pageBean.setPageSize(10000);
-		} else {
-			pageBean.setPageSize(10000);
-		}
-		pageBean.setParameter(vo);
-		pageBean.setPage(page);
+//		GroupOrder vo = new GroupOrder();
+//		vo.setPage(page);
+//		vo.setPageSize(pageSize);
+//		vo.setStartTime(startTime);
+//		vo.setEndTime(endTime);
+//		vo.setRemark(remark);
+//		vo.setGuestName(guestName);
+//		vo.setOrderNo(orderMode);
+//		vo.setGroupCode(groupCode);
+//		vo.setSaleOperatorIds(saleOperatorIds);
+//		vo.setOrgIds(orgIds);
+//		vo.setOperType(Integer.valueOf(operType));
+//		vo.setReceiveMode(receiveMode);
+//		vo.setOrgNames(orgNames);
+//		vo.setSaleOperatorName(saleOperatorName);
+//		vo.setSupplierName(supplierName);
+//		vo.setGender(gender);
+//		vo.setAgeFirst(ageFirst);
+//		vo.setAgeSecond(ageSecond);
+//		vo.setNativePlace(nativePlace);
+//
+//		PageBean pageBean = new PageBean();
+//		if (page == null) {
+//			pageBean.setPage(1);
+//		} else {
+//			pageBean.setPage(page);
+//		}
+//		if (pageSize == null) {
+//			pageBean.setPageSize(10000);
+//		} else {
+//			pageBean.setPageSize(10000);
+//		}
+//		pageBean.setParameter(vo);
 
 		ToSaleGuestListExcelDTO toSaleGuestListExcelDTO = new ToSaleGuestListExcelDTO();
 		toSaleGuestListExcelDTO.setPage(page);
@@ -2500,13 +2486,12 @@ public class TaobaoController extends BaseController {
 		toSaleGuestListExcelDTO.setAgeFirst(ageFirst);
 		toSaleGuestListExcelDTO.setAgeSecond(ageSecond);
 		toSaleGuestListExcelDTO.setNativePlace(nativePlace);
-		toSaleGuestListExcelDTO.setPage(page);
 
 		toSaleGuestListExcelDTO.setBizId(WebUtils.getCurBizId(request));
 		toSaleGuestListExcelDTO.setDataUserIdSets(WebUtils.getDataUserIdSet(request));
 		toSaleGuestListExcelDTO.setUserRightType(userRightType);
 		ToSaleGuestListExcelDTO webResult = taobaoFacade.toSaleGuestListExcel(toSaleGuestListExcelDTO);
-		pageBean = webResult.getPageBean();
+		PageBean pageBean = webResult.getPageBean();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		String path = "";
 		try {
@@ -2700,7 +2685,7 @@ public class TaobaoController extends BaseController {
 									   String guestName,Integer gender,Integer ageFirst,Integer ageSecond,String nativePlace){
 
 
-		PageBean pageBean = new PageBean();
+//		 = new PageBean();
 		ToSaleGuestListExcelDTO toSaleGuestListExcelDTO = new ToSaleGuestListExcelDTO();
 		toSaleGuestListExcelDTO.setPage(page);
 		toSaleGuestListExcelDTO.setPageSize(pageSize);
@@ -2721,7 +2706,6 @@ public class TaobaoController extends BaseController {
 		toSaleGuestListExcelDTO.setAgeFirst(ageFirst);
 		toSaleGuestListExcelDTO.setAgeSecond(ageSecond);
 		toSaleGuestListExcelDTO.setNativePlace(nativePlace);
-		toSaleGuestListExcelDTO.setPage(page);
 
 		toSaleGuestListExcelDTO.setBizId(WebUtils.getCurBizId(request));
 		toSaleGuestListExcelDTO.setDataUserIdSets(WebUtils.getDataUserIdSet(request));
@@ -2730,7 +2714,7 @@ public class TaobaoController extends BaseController {
 		toSaleGuestListExcelDTO.setDoType(1);
 
 		ToSaleGuestListExcelDTO webResult = taobaoFacade.toSaleGuestListExcel(toSaleGuestListExcelDTO);
-		pageBean = webResult.getPageBean();
+		PageBean pageBean = webResult.getPageBean();
 		String path = "";
 		try {
 			String url = request.getSession().getServletContext().getRealPath("/template/excel/groupGuestContact.xlsx");
