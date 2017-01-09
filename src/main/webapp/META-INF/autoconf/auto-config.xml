@@ -31,7 +31,7 @@
 	</group>
 	
 	<script>
-		<generate template="config.properties.vm" destfile="classpath*:/application.properties"
+		<generate template="config.properties.vm" destfile="WEB-INF/classes/application.properties"
 				  charset="UTF-8" />
 		<generate template="logback.xml.vm" destfile="WEB-INF/logback.xml"
 				  charset="UTF-8" />
