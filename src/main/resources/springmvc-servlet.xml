@@ -46,7 +46,7 @@
 	<!-- 设置freeMarker的配置文件路径 -->
 	<bean id="freemarkerConfiguration"
 		  class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-		<property name="location" value="/WEB-INF/classes/freemarker.properties" />
+		<property name="location" value="/WEB-INF/classes/application.properties" />
 	</bean>
 	<!-- 配置freeMarker的模板路径 -->
 	<bean id="freemarkerConfig"

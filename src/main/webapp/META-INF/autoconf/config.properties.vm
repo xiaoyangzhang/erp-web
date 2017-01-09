@@ -1,0 +1,27 @@
+zk.address = ${zk.address}
+zk.port = ${zk.port}
+dubbo.timeout = ${dubbo.timeout}
+dubbo.version = ${dubbo.version}
+
+page.pageSize= ${page.pageSize}
+
+web.view.index=${web.view.index}
+
+web.view.prefix=${web.view.prefix}
+web.view.suffix=${web.view.suffix}
+
+web.maxUploadSize=${web.maxUploadSize}
+
+IMG_SERVER_URL = ${IMG_SERVER_URL}
+IMAGES_CUT_SERVER_URL=${IMAGES_CUT_SERVER_URL}
+
+IMAGES_WITH_WATER = ${IMAGES_WITH_WATER}
+
+IMAGES_SERVER_IMAGES_340= ${IMAGES_SERVER_IMAGES_340}
+
+IMAGES_SERVER_IMAGES_200 = ${IMAGES_SERVER_IMAGES_200}
+
+sys.code=${sys.code}
+
+default_encoding=${default_encoding}
+template_update_delay=${template_update_delay}
