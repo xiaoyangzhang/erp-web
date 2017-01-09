@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
 	<group name="dubbo">
-		<property name="zk.address" defaultValue="192.168.1.202:2181"			description="dubbo注册的zookeeper地址" />
+		<property name="zk.address" defaultValue="192.168.1.203:2181"			description="dubbo注册的zookeeper地址" />
 		<property name="zk.port" defaultValue="-1" description="dubbo服务使用的端口号" />
 		<property name="dubbo.timeout" defaultValue="5000"			description="dubbo服务的默认超时时间" />
 		<property name="dubbo.version" defaultValue="LATEST"			description="dubbo的版本号" />
@@ -27,6 +27,7 @@
 		<property name="sys.code"	defaultValue="YIHG-ERP"			description="数据库链接url" />
 		<property name="default_encoding" defaultValue="UTF-8"	/>
 		<property name="template_update_delay" defaultValue="10800"	/>
+		<property name="log.home" defaultValue="/home/admin/logs/center"			description="日志输出目录" />
 	</group>
 	
 	<script>

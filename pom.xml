@@ -560,15 +560,18 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.4.3</version></dependency>
 	</dependencies>
-<build>
+	
+	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 					<encoding>UTF-8</encoding>
+					<showWarnings>true</showWarnings>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -582,27 +585,6 @@
 			</plugin>
 		</plugins>
 	</build>
-	<profiles>
-		<profile>
-			<id>test</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.alibaba.citrus.tool</groupId>
-						<artifactId>autoconfig-maven-plugin</artifactId>
-						<configuration>
-							<charset>UTF-8</charset>
-							<dest>../target/erp-web.war</dest>
-							<userProperties>../run/test.properties</userProperties>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 
-	</profiles>
 	
 </project>

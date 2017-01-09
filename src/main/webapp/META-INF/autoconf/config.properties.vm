@@ -2,6 +2,7 @@ zk.address = ${zk.address}
 zk.port = ${zk.port}
 dubbo.timeout = ${dubbo.timeout}
 dubbo.version = ${dubbo.version}
+log.home = ${log.home}
 
 page.pageSize= ${page.pageSize}
 
