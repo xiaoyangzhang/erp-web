@@ -27,7 +27,7 @@
 		<property name="sys.code"	defaultValue="YIHG-ERP"			description="数据库链接url" />
 		<property name="default_encoding" defaultValue="UTF-8"	/>
 		<property name="template_update_delay" defaultValue="10800"	/>
-		<property name="log.home" defaultValue="/home/admin/logs/center"			description="日志输出目录" />
+		<property name="log.home" defaultValue="/home/admin/logs/erpweb"			description="日志输出目录" />
 	</group>
 	
 	<script>
