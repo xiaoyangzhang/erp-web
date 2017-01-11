@@ -85,7 +85,7 @@
 	<!-- 定义无Controller的path<->view直接映射 -->
 	<mvc:view-controller path="/" view-name="/index" />
 
-	<!-- 静态文件（css、js、images）配置不经过DispatchServelet处理 <mvc:resources location="/resources/" 
+	<!-- 静态文件（css、js、images）配置不经过DispatchServelet处理 <mvc:resources location="/resources/"
 		mapping="/resources/**" /> -->
 
 	<!-- 上传文件拦截，设置最大上传文件大小 10M=10*1024*1024(B)=10485760 bytes -->
@@ -122,11 +122,11 @@
 						<value>/taobaoJst/**</value>
 						<value>/visa.**</value>
 					</list>
-				</property>				
+				</property>
 			</bean>
 		</mvc:interceptor>
 	</mvc:interceptors>
-		
+
 	<aop:aspectj-autoproxy />
 	<bean class="com.yihg.erp.aop.PostInterceptor" />
 

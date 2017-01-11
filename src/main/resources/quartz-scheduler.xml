@@ -29,7 +29,7 @@
 		<property name="targetObject">
 			<ref bean="SpringQtzJob" />
 		</property>
-		<!--<property name="targetMethod"></property>-->
+		<property name="targetMethod" value="executeUpdateResOrderState"></property>
 		
 		
 	</bean>
