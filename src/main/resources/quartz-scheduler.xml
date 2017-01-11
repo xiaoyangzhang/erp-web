@@ -29,17 +29,16 @@
 		<property name="targetObject">
 			<ref bean="SpringQtzJob" />
 		</property>
-		<property name="targetMethod">  <!-- 要执行的方法名称 -->
-				<!-- <value>execute</value> -->
-				<!-- <value>executeUpdateResOrderState</value> -->
-		</property>
+		<!--<property name="targetMethod"></property>-->
 		
 		
 	</bean>
 
 	<!-- ======================== 调度触发器 ======================== -->
-	<bean id="AgencyOrderAutoCancelCronTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerBean">
-		<property name="jobDetail" ref="SpringQtzJobMethod"></property>
+	<bean id="AgencyOrderAutoCancelCronTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" >
+			<ref bean="SpringQtzJobMethod"/>
+		</property>
 		<property name="cronExpression" value="0 0/1 * * * ?"></property>
 	</bean>
 
