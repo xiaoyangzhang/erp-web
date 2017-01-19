@@ -563,7 +563,7 @@
 
 
 		<build>
-		<finalName>ROOT</finalName>
+		<finalName>erp-web</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
