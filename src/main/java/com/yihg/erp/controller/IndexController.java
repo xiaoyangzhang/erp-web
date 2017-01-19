@@ -26,7 +26,7 @@ public class IndexController {
 //    	}else{
 //    		return "redirect:login.htm";
 //    	}
-    	
+    	System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>"+request.getContextPath());
     	//UserSession userSession = WebUtils.getCurrentUserSession(request);
     	model.addAttribute("userSession", userSession);
 
