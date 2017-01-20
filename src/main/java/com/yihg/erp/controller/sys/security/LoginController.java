@@ -66,14 +66,14 @@ public class LoginController extends BaseController {
 	
 	@RequestMapping(value="login.htm")
 	public String login(HttpServletRequest request,HttpServletResponse response,ModelMap model){
-		String sessionId = WebUtils.getSessionId(request);
-		if(sessionId == null) {
-			return "login";
-		}
-		UserSessionResult sessionResult = sysLoginFacade.getUserSession(sessionId);
-		if(sessionResult != null ){
-			return "redirect:index.htm";
-		}
+//		String sessionId = WebUtils.getSessionId(request);
+//		if(sessionId == null) {
+//			return "login";
+//		}
+//		UserSessionResult sessionResult = sysLoginFacade.getUserSession(sessionId);
+//		if(sessionResult != null ){
+//			return "redirect:index.htm";
+//		}
 		return "login";
 	}
 	
