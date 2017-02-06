@@ -52,6 +52,10 @@
         <url-pattern>/* </url-pattern> 
     </filter-mapping>
     
+    <session-config>
+		<session-timeout>5</session-timeout>
+	</session-config>
+    
     <!-- <filter>
     	<filter-name>xssFilter</filter-name>
     	<filter-class>com.yihg.erp.filter.XssFilter</filter-class>
