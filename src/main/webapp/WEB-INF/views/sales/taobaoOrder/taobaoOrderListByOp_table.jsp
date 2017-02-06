@@ -84,7 +84,7 @@
 						  <c:if test="${groupOrder.orderLockState == 1}">
 		              	  	<a href="javascript:void(0);" onclick="changeorderLockStateByOp(${groupOrder.id})" class="def">确认接收</a>
 						  </c:if>
-						  <c:if test="${groupOrder.orderLockState == 2}">
+						  <c:if test="${groupOrder.orderLockState == 2 and groupOrder.stateFinance ne 1}">
 							<a href="javascript:void(0);" onclick="goBackOrderLockStateByOp(${groupOrder.id})" class="def">退回</a>
 						  </c:if>
 						</c:if>

@@ -1,6 +1,7 @@
 package com.yihg.erp.controller.traffic;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ import com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade;
 import org.erpcenterFacade.common.client.query.BrandQueryDTO;
 import org.erpcenterFacade.common.client.result.BrandQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
+import com.yimayhd.erpcenter.facade.basic.service.DicFacade;
+import com.yimayhd.erpresource.dal.constants.BasicConstants;
 import org.erpcenterFacade.common.client.service.SaleCommonFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +95,10 @@ public class ResTrafficController extends BaseController{
 	private ProductCommonFacade productCommonFacade;
 	@Autowired
 	private GroupOrderFacade groupOrderFacade;
+	@Autowired
+	private DicFacade dicFacade;
+
+	
 	/**
 	 * 交通资源
 	 * @param request
@@ -723,6 +730,7 @@ public class ResTrafficController extends BaseController{
 		return resTrafficFacade.toSaveResNumsSold(toSaveResNumsSoldDTO);
 	}
 
+
 	/**
 	 * 机票利润查询
 	 * @param request
@@ -771,6 +779,12 @@ public class ResTrafficController extends BaseController{
 //		pageBean.setResult(trafficRes);
 		pageBean = resTrafficFacade.selectAirTicketProfitList(pageBean);
 		model.addAttribute("pageBean", pageBean);
+		TrafficResDTO var1 = new TrafficResDTO();
+		var1.setPage(page);
+		var1.setPageSize(pageSize);
+		var1.setPm(WebUtils.getQueryParamters(request));
+		TrafficAddResOrderResult trafficAddResOrderResult = resTrafficFacade.airTicketProfit_table(var1);
+		model.addAttribute("pageBean", trafficAddResOrderResult.getPageBean());
 
 		return "resTraffic/airTicketProfit_table";
 	}
@@ -784,6 +798,10 @@ public class ResTrafficController extends BaseController{
 	public String budgetDetail(HttpServletRequest request,HttpServletResponse reponse, ModelMap model,Integer resId,String dateStart) {
 		List<TrafficResProduct> lists=resTrafficFacade.loadTrafficResProductInfo(resId);
 		model.addAttribute("lists", lists);
+		TrafficResDTO var1 = new TrafficResDTO();
+		var1.setResId(resId);
+		TrafficAddResOrderResult trafficAddResOrderResult = resTrafficFacade.budgetDetail(var1);
+		model.addAttribute("lists", trafficAddResOrderResult.getTrafficResProductLists());
 		model.addAttribute("dateStart", dateStart);
 		return "resTraffic/budgetDetail";
 	}
@@ -806,6 +824,10 @@ public class ResTrafficController extends BaseController{
 		}*/
 		List<TourGroup> lists= tourGroupFacade.selectTotalByResId(resId);
 		model.addAttribute("lists", lists);
+		TrafficResDTO var1 = new TrafficResDTO();
+		var1.setResId(resId);
+		TrafficAddResOrderResult trafficAddResOrderResult = resTrafficFacade.constantlyDetail(var1);
+		model.addAttribute("lists", trafficAddResOrderResult.getTourGroupLists());
 		model.addAttribute("dateStart", dateStart);
 		return "resTraffic/constantlyDetail";
 	}
@@ -820,6 +842,8 @@ public class ResTrafficController extends BaseController{
 		brandQueryDTO.setBizId(bizId);
 		BrandQueryResult queryResult =productCommonFacade.brandQuery(brandQueryDTO);
 		model.addAttribute("brandList", queryResult.getBrandList());
+		List<DicInfo> brandList = dicFacade.getListByTypeCode(BasicConstants.CPXL_PP, bizId);
+		model.addAttribute("brandList", brandList);
 		return "resTraffic/resRoomExtrabedList";
 	}
 
@@ -846,6 +870,13 @@ public class ResTrafficController extends BaseController{
 		model.addAttribute("sum", result.getMap());
 		model.addAttribute("pageBean", result.getPageBean());
 
+		TrafficResDTO var1 = new TrafficResDTO();
+		var1.setBizId(WebUtils.getCurBizId(request));
+		var1.setPage(page);
+		var1.setPageSize(pageSize);
+		TrafficAddResOrderResult trafficAddResOrderResult = resTrafficFacade.resRoomExtrabed_table(var1);
+		model.addAttribute("sum", trafficAddResOrderResult.getSumRoomExtrabed());
+		model.addAttribute("pageBean", trafficAddResOrderResult.getPageBean());
 		return "resTraffic/resRoomExtrabed_table";
 	}
 

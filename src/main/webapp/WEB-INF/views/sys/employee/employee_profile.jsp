@@ -144,9 +144,9 @@ $(function(){
 						dataType:"json",
 						success:function(data){
 							if(data.success){	
-		                		$.successR('密码修改成功',function(){closeDia();});			                		
+		                		$.successR('信息修改成功',function(){closeDia();});
 		                	}else{
-		                		$.errorR('密码修改失败',function(){closeDia();});
+		                		$.errorR('信息修改失败',function(){closeDia();});
 		                	}							
 						},
 						error:function(){

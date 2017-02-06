@@ -1,5 +1,53 @@
 package com.yihg.erp.controller.traffic;
 
+import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToNotGroupListDTO;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToNotGroupListResult;
+import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.SheetUtil;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.yihg.erp.utils.DateUtils;
+
 import com.yihg.erp.common.BizSettingCommon;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
@@ -53,6 +101,10 @@ public class resTrafficOrderController extends BaseController{
 	private ResTrafficOrderFacade resTrafficOrderFacade;
 	@Autowired
 	private GroupOrderFacade groupOrderFacade;
+
+	@Autowired
+	private GroupOrderFacade groupOrderFacade;
+	
 	@RequestMapping("resGroupOrderList.htm")
 	public String loadGroupOrderInfo(HttpServletRequest request, ModelMap model){
 		Integer bizId = WebUtils.getCurBizId(request);
@@ -262,6 +314,18 @@ public class resTrafficOrderController extends BaseController{
 		pageBean = result.getPageBean();
 		Map<String, BigDecimal> map_sum = result.getMap();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	public void toOrderPreview(HttpServletRequest request, HttpServletResponse response, Integer pageSize, Integer page,Model model)
+			throws ParseException {
+
+		ToNotGroupListDTO var1 = new ToNotGroupListDTO();
+		var1.setPmBean( WebUtils.getQueryParamters(request));
+		var1.setBizId(WebUtils.getCurBizId(request));
+		var1.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		ToNotGroupListResult toNotGroupListResult = groupOrderFacade.toOrderPreview(var1);
+		PageBean<GroupOrder> pageBean = toNotGroupListResult.getPageBean();
+		HashMap<String, BigDecimal> map_sum = toNotGroupListResult.getMap_sum();
+
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		String path = "";
 		try {
 			String url = request.getSession().getServletContext().getRealPath("/template/excel/trafficOrderManageList.xlsx");
