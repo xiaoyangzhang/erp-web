@@ -10,7 +10,7 @@
   <script type="text/javascript">
 	$(function() {
 		var vars={
-			dateFrom : $.currentMonthFirstDay2(-3),
+			dateFrom : $.currentMonthFirstDay(),
    		 	dateTo : $.currentMonthLastDay()
    		 	};
 		 $("input[name='startTime']").val(vars.dateFrom);
@@ -119,6 +119,10 @@ document.onkeydown = function (e) {
 								</c:forEach>
 							</select><input name="productName" id="productName" type="text" 　placeholder="请输入产品名称"  style="width: 121px;"/>
 						</li>
+						<li class="text">产品品牌:</li>
+						<li><input name="productBrandName" id="productBrandName" type="text" /> </li>
+						</ul>
+						<ul>
 						<li class="text">状态:</li><li> <select name="stateFinance" id="stateFinance">
 								<option value="">审核状态</option>
 								<option value="0">未审核</option>
