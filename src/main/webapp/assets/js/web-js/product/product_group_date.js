@@ -75,7 +75,7 @@ function processData(container, year, month) {
                     
                     var groupDate = new Date(item.groupDate);
                     if(price){
-                    	priceStr = "成" + item.priceSuggestAdult + "<br/>童" + item.priceSuggestChild;                    	
+                        priceStr = "成" + item.priceSettlementAdult + "<br/>童" + item.priceSettlementChild;
                     }
                     if(stock){
                     	stockStr = leave  > 0 ? "余" + leave + yuliu : "已满";

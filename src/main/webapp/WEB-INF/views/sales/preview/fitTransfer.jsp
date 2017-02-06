@@ -107,10 +107,19 @@ table,table tr th,table tr td{border-color: #000;}
 							</tbody>
 						</table>
 					</td>
-					
+
 					<td width="12%">
 						<c:if test="${empty po.remarkInternal}">${po.remark }</c:if>
 						<c:if test="${not empty po.remarkInternal}">${po.remarkInternal }</c:if>
+					</td>
+					<td width="12%">${po.remark }</td>
+
+					<td width="12%">
+						<c:if test="${tourGroup.bizId==1}">${po.remarkInternal }</c:if>
+						<c:if test="${tourGroup.bizId!=1}">
+							<c:if test="${empty po.remarkInternal}">${po.remark }</c:if>
+							<c:if test="${not empty po.remarkInternal}">${po.remarkInternal }</c:if>
+						</c:if>
 					</td>
 				</tr>
 			</c:forEach>

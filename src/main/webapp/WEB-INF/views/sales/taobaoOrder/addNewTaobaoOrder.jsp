@@ -104,6 +104,11 @@ table.gridtable td {
 		var path = '<%=ctx%>';
 		var startDate='${vo.groupOrder.departureDate}'==''?new Date().getTime():new Date('${vo.groupOrder.departureDate}').getTime();
 		var img200Url = '${config.images200Url}';
+        var ob;
+        var pbId;
+        var pId;
+        var sc;
+        var pn;
 		$(function(){
 		    $(".l_textarea").autoTextarea({minHeight:50});
 		    $(".l_textarea_mark").autoTextarea({minHeight:40});
@@ -355,8 +360,13 @@ function showInfo(title,width,height,url){
 						<td><i class="red">* </i>出团日期：</td>
 						<td><input type="text" name="groupOrder.departureDate" id="groupOrder_departureDate"
 							class="Wdate"
-							onClick="WdatePicker({onpicking: function(dp){startDate=new Date(dp.cal.getNewDateStr()).getTime() ;},dateFmt:'yyyy-MM-dd'})"
-							value="${vo.groupOrder.departureDate }" /></td>
+								   onClick="WdatePicker({onpicking: function(dp){startDate=new Date(dp.cal.getNewDateStr()).getTime(); if($('#orderBusiness').val()==='stock'){$('#productBrandId').val('');$('#productBrandName').val('');$('#productId').val('');$('#stockCount').val('');$('#productName').val('');$('#groupOrder_numAdult').val(0);$('#groupOrder_numChild').val(0);} },dateFmt:'yyyy-MM-dd'})"
+								   value="${vo.groupOrder.departureDate }" />
+							离团日期：
+							<input type="text" name="groupOrder.dateEnd" id="groupOrder_dateEnd"
+								   class="Wdate"
+								   onClick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'groupOrder_departureDate\')}',onpicked:pickedFunc})"
+								   value="${vo.groupOrder.dateEnd }" /></td>
 						<td><i class="red">* </i>业务类别：</td>
 								<td><select name="groupOrder.orderMode" id="orderMode" onchange="orderModeChange()">
 								<option value="-1">请选择</option>
@@ -398,7 +408,7 @@ function showInfo(title,width,height,url){
 						<td><input style="width: 80px;" type="text" onblur="limitInput(this);"
 							name="groupOrder.numAdult" id="groupOrder_numAdult" placeholder="成人数"
 							value="${(empty vo.groupOrder.numAdult)?0:vo.groupOrder.numAdult}" />
-							<input style="width: 90px;" type="text"
+							<input style="width: 90px;" type="text" id="groupOrder_numChild"
 							name="groupOrder.numChild" placeholder="小孩数" onblur="limitInput(this);"
 							value="${(empty vo.groupOrder.numChild)?0:vo.groupOrder.numChild}" />
 							<input style="width: 90px;" type="text"
@@ -412,10 +422,10 @@ function showInfo(title,width,height,url){
 							</tr>
 					<tr>
 						<td><i class="red">* </i>产品名称：</td>
-						<td><input type="hidden" name="groupOrder.productBrandId"value="${vo.groupOrder.productBrandId }" /> 
-						<input type="text"name="groupOrder.productBrandName"value="${vo.groupOrder.productBrandName }" readonly="readonly" placeholder="产品品牌" />
-						~ <input type="hidden" name="groupOrder.productId" id="productId"value="${vo.groupOrder.productId }" /> 
-						<input type="text"name="groupOrder.productName"value="${vo.groupOrder.productName }" style="width: 300px" placeholder="产品名称" /> 
+						<td><input type="hidden" id="productBrandId" name="groupOrder.productBrandId"value="${vo.groupOrder.productBrandId }" />
+						<input type="text"name="groupOrder.productBrandName" id="productBrandName" value="${vo.groupOrder.productBrandName }" readonly="readonly" placeholder="产品品牌" />
+						~ <input type="hidden" name="groupOrder.productId" id="productId" value="${vo.groupOrder.productId }" />
+						<input type="text"name="groupOrder.productName" id="productName" value="${vo.groupOrder.productName }" style="width: 300px" placeholder="产品名称" />
 						<span id="stockCount" style="color:red"></span>
 						<div class="tab-operate">
 							<a href="javascript:void(0)" class="btn-show">选择产品<span class="caret"></span></a>
@@ -811,7 +821,7 @@ function showInfo(title,width,height,url){
 											<td><input type="text"
 												name="groupOrderGuestList[${index.index}].certificateNum" 
 												class="certificateNum" value="${guest.certificateNum }"
-												onblur="recCertifNum(${index.index})" style="width: 130px" <c:if test="${!guest.editType }"> readonly="readonly" </c:if>/>
+												onblur="recCertifNum(${index.index})" style="width: 140px" <c:if test="${!guest.editType }"> readonly="readonly" </c:if>/>
 											</td>
 											<td><input type="text"
 												name="groupOrderGuestList[${index.index}].mobile"
@@ -1191,7 +1201,28 @@ function showInfo(title,width,height,url){
 	</div>
 
 <script type ="text/javascript">
-function F5(){
+    function pickedFunc(){
+        var departureDate=$("#groupOrder_departureDate").val();
+        var dateEnd=$dp.cal.getDateStr("yyyy-MM-dd");
+        var days=DateDiff(departureDate,dateEnd);
+        $(".day_content").html('');
+        for(var i = 0; i <= days; i++){
+            $('.proAdd_btn').click();
+        }
+
+    }
+
+    //计算天数差的函数，通用
+    function  DateDiff(sDate1,  sDate2){    //sDate1和sDate2是2006-12-18格式
+        var  aDate,  oDate1,  oDate2,  iDays
+        aDate  =  sDate1.split("-")
+        oDate1  =  new  Date(aDate[1]  +  '-'  +  aDate[2]  +  '-'  +  aDate[0])    //转换为12-18-2006格式
+        aDate  =  sDate2.split("-")
+        oDate2  =  new  Date(aDate[1]  +  '-'  +  aDate[2]  +  '-'  +  aDate[0])
+        iDays  =  parseInt(Math.abs(oDate1  -  oDate2)  /  1000  /  60  /  60  /24)    //把相差的毫秒数转换为天数
+        return  iDays
+    }
+    function F5(){
 	location.reload();
 }
 
@@ -1275,25 +1306,34 @@ function orderModeChange(){
 	//通过 【业务类别】下拉框（字典设置的规则 yihg_erp_basic.sys_dic.type_code='SALES_TEAM_TYPE' 的note字段）满足业务需求
 	//note字段信息 绑定在#orderMode的lang里
 	var lang = $("#orderMode").find("option:selected").attr("lang");
+    var curOrgId = '${OrgId}';
 	<c:if test="${vo.groupOrder.id == null }">
-		if(lang.indexOf('SK,')!=-1){
-			$("input[name='groupOrder.orderType']").get(1).checked=true; 
-		}else{
-			$("input[name='groupOrder.orderType']").get(0).checked=true; 
-		}
-		
-		
-		//默认操作计调
-		if(lang.indexOf('@')!=-1){
-			var ary = lang.split(',');
-			for(var i=0; i<ary.length; i++){
-				if (ary[i].indexOf('@') != -1){
-					var opAry = ary[i].split('@');
-					$("#operatorName").val(opAry[0]);
-					$("#operatorId").val(opAry[1]);
-				}
-			}
-		}
+    if (lang != ''){
+        if(lang.indexOf(curOrgId+'@SK,')!=-1){
+            $("input[name='groupOrder.orderType']").get(1).checked=true;
+        }else{
+            $("input[name='groupOrder.orderType']").get(0).checked=true;
+        }
+
+
+        //默认操作计调
+        if(lang.indexOf('$')!=-1){
+            var ary = lang.split(',');
+            for(var i=0; i<ary.length; i++){
+                if (ary[i].indexOf('$') != -1){
+                    var opAry = ary[i].split('$');
+                    for (var j=0; j<opAry.length; j ++){
+                        var idAry = opAry[j].split('@');
+                        if (idAry[0] == curOrgId){
+                            $("#operatorName").val(idAry[1]);
+                            $("#operatorId").val(idAry[2]);
+                        }
+                    }
+
+                }
+            }
+        }
+    }
 	</c:if>
 	//若业务类别：长线，要求保存时，检查接送信息至少有一行！
 	if(lang.indexOf('REQUIRE_TRAFFIC,')!=-1){
@@ -1319,7 +1359,9 @@ $(document).ready(function(){
 		$("#groupOrder_departureDate").val($.currentDay());
 		salesRoute.dayAdd();
 	}
-	
+    if ($("#orderId").val() == '' && $("#groupOrder_dateEnd").val()==''){
+        $("#groupOrder_dateEnd").val($.currentDay());
+    }
 	
 	var taobaoIds = $("#ids").val();
 	 loadTaobaoDataAjax(taobaoIds, "");
@@ -1445,6 +1487,7 @@ function loadTaobaoDataAjax(ids, opType){
 						  	templateRow = templateRow.replace("$id", data[i].id);
 						  	templateRow = templateRow.replace("$title", data[i].title);
 						  	templateRow = templateRow.replace("$skuPropertiesName", data[i].skuPropertiesName);
+                          templateRow = templateRow.replace("$skuPropertiesName", data[i].skuPropertiesName);
 						  	templateRow = templateRow.replace("$tid", data[i].tid);
 						  	templateRow = templateRow.replace("$tid", data[i].tid);
 						  	
@@ -1641,7 +1684,7 @@ function receiverMode_setValue(){
 	if (firstGuestName==undefined || firstGuestName== 'undefined' || firstGuestName==null)
 		firstGuestName = "";
 	
-	var taobao_outerIid = "";
+	var taobao_outerIid = "", taobao_sku = "";
 	var taobao_buyerNick=$("#groupOrder_buyerNick").val();
 	
 	//产品赋值，默认为SKU
@@ -1657,6 +1700,16 @@ function receiverMode_setValue(){
 			if (isIngore)
 				personNum += parseInt($(this).closest("table").find("#taobao_num").text());
 				if (taobao_outerIid=="") taobao_outerIid = $(this).val();
+            if (taobao_sku == "") {
+                taobao_sku =  $(this).closest("table").find("#taobao_sku").val();
+                if (taobao_sku != ""){
+                    var skuAry = taobao_sku.split(";")[0];
+                    if (skuAry.indexOf('套餐类型') != -1)
+                        taobao_sku = skuAry.split(":")[1];
+                    else
+                        taobao_sku = "";
+                }
+            }
 				if (taobao_buyerNick=="")
 					taobao_buyerNick =  $(this).closest("table").find("#taobao_buyerNick").val();
 				else{
@@ -1668,11 +1721,22 @@ function receiverMode_setValue(){
 						firstGuestName=ary[1];
 						departureDate = ary[0];
 						 $("#groupOrder_departureDate").val(departureDate);
+                        startDate=new Date(departureDate).getTime();
+                        $(".day_content").html('');
+                        $("#groupOrder_dateEnd").val($("#groupOrder_departureDate").val());
+                        $('.proAdd_btn').click();
 					}
 				}
 		});
+
 		if (taobao_buyerNick != '') $("#groupOrder_buyerNick").val(taobao_buyerNick);
-		if (taobao_outerIid != '') $("input[name='groupOrder.productName']").val(taobao_outerIid);
+
+    if (taobao_sku != "")
+        $("input[name='groupOrder.productName']").val(taobao_sku);
+    else if (taobao_outerIid != '')
+        $("input[name='groupOrder.productName']").val(taobao_outerIid);
+    if (taobao_outerIid != '')
+        $("input[name='groupOrder.productBrandName']").val(taobao_outerIid);
 		if (personNum > 0) $("#groupOrder_numAdult").val(personNum);
 
 		departureDate = departureDate.replace("-","");
@@ -1903,7 +1967,7 @@ function changeType(count){
 		<th>买家邮箱</th><td>$buyerEmail</td>
 	</tr>
 	<tr>
-		<th >SKU数据</th><td colspan="3">$skuPropertiesName </td>
+		<th >SKU数据</th><td colspan="3">$skuPropertiesName <input type="hidden" id="taobao_sku" value="$skuPropertiesName" /></td>
 	</tr>
 	<tr>
 		<th>商品单价</th><td>$price</td>

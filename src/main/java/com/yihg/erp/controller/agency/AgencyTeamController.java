@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.alibaba.fastjson.JSON;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
 import org.erpcenterFacade.common.client.result.RegionResult;
@@ -104,7 +105,7 @@ public class AgencyTeamController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping(value = "toOperateGroupList.htm")
-	@RequiresPermissions(PermissionConstants.JDGL_TDGL_ZTS)
+//	@RequiresPermissions(PermissionConstants.JDGL_TDGL_ZTS)
 	public String toOperateGroupList(HttpServletRequest request, Model model) {
 		Integer bizId = WebUtils.getCurBizId(request);
 //		List<RegionInfo> allProvince = regionService.getAllProvince();
@@ -137,7 +138,8 @@ public class AgencyTeamController extends BaseController {
 	 * @throws ParseException
 	 */
 	@RequestMapping("findTourGroupLoadModel.do")
-	// @RequiresPermissions(PermissionConstants.XSGL_TDGL_ZTS)
+	 @RequiresPermissions(PermissionConstants.XSGL_TDGL_ZTS)
+	@ResponseBody
 	public String findTourGroupByConditionLoadModel(HttpServletRequest request,
 			GroupOrder groupOrder, Model model, Boolean isSales) throws ParseException {
 
@@ -229,23 +231,23 @@ public class AgencyTeamController extends BaseController {
 //		GroupOrder order = groupOrderService.selectTotalByCon(groupOrder,
 //				WebUtils.getCurBizId(request),
 //				WebUtils.getDataUserIdSet(request), listType);
-		GroupOrder order = result.getGroupOrder();
-		model.addAttribute("totalAudit",
-				order == null ? 0 : order.getNumAdult());
-		model.addAttribute("totalChild",
-				order == null ? 0 : order.getNumChild());
-		model.addAttribute("totalGuide",
-				order == null ? 0 : order.getNumGuide());
+//		GroupOrder order = result.getGroupOrder();
+//		model.addAttribute("totalAudit",
+//				order == null ? 0 : order.getNumAdult());
+//		model.addAttribute("totalChild",
+//				order == null ? 0 : order.getNumChild());
+//		model.addAttribute("totalGuide",
+//				order == null ? 0 : order.getNumGuide());
 
 		/**
 		 * 根据组团社id获取组团社名称
 		 */
-		List<GroupOrder> groupList = result.getPageBean().getResult();
-		model.addAttribute("groupList", result.getPageBean().getResult());
-		model.addAttribute("groupOrder", result.getGroupOrder());
+//		List<GroupOrder> groupList = result.getPageBean().getResult();
+//		model.addAttribute("groupList", result.getPageBean().getResult());
+//		model.addAttribute("groupOrder", result.getGroupOrder());
 		model.addAttribute("page", result.getPageBean());
-
-		return "agency/teamGroup/groupTable";
+		return JSON.toJSONString(result.getPageBean());
+//		return "agency/teamGroup/groupTable";
 	}
 	
 	@RequestMapping(value = "toEditTeamGroupInfo.htm")

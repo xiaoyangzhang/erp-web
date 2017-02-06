@@ -147,6 +147,11 @@ function queryList(page,pageSize) {
 	}
 	$("#searchPageSize").val(pageSize);
 	$("#searchPage").val(page);
+    var tmpStart = $("#startTime_id").val(), tmpEnd = $("#endTime_id").val();
+    if ($("#dateType").val() == "2"){
+        $("#startTime_id").val($("#startTime_id").val()+" 00:00");
+        $("#endTime_id").val($("#endTime_id").val()+" 23:59");
+    }
 	var options = {
 		url:"loadResAdmOrderInfo.do",
     	type:"post",
@@ -159,7 +164,9 @@ function queryList(page,pageSize) {
     		$.error("服务忙，请稍后再试");
     	}
     };
-    $("#queryResAdminOrderForm").ajaxSubmit(options);	
+    $("#queryResAdminOrderForm").ajaxSubmit(options);
+    $("#startTime_id").val(tmpStart);
+    $("#endTime_id").val(tmpEnd);
 }	
 
 function searchBtn(){
