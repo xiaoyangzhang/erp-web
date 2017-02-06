@@ -141,7 +141,9 @@
         	<taglib-location>/WEB-INF/tags/systaglib.tld</taglib-location>
 		</taglib>
 	</jsp-config> -->
-	
+	<session-config>
+		<session-timeout>5</session-timeout>
+	</session-config>
 	<jsp-config>
 		<taglib>
 			<taglib-uri>http://yihg.com/custom-taglib</taglib-uri>

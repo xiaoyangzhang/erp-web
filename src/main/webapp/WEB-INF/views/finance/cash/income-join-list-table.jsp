@@ -143,7 +143,7 @@
 					</c:if>
 					<c:if test="${empty order.balance}">
 						0
-						<input type="hidden" name="itemBalance" value="0"/>
+						<input type="hidden" id="itemBalance" name="itemBalance" value="0"/>
 					</c:if>
 				</td>
 				<td><label id="itemAmounts">0</label></td>
@@ -274,10 +274,22 @@
 						var checkboxObj = $(this).find("input[type='checkbox']"); // 选择框
 						var itemBalance = parseFloat($(this).find("input[name='itemBalance']").val()); // 未收金额
 						var itemAmounts = $(this).find("label[id='itemAmounts']");
-						if (amounts == 0) return;
+                        var currentRowPay = 0;
+                        if (amounts == 0) return;
+
+                        if (amounts < 0){
+                            currentRowPay = itemBalance;
+                        }else{
+                            currentRowPay = amounts > parseFloat(itemBalance) ? itemBalance : amounts;
+                        }
+                        amounts -= currentRowPay;
+                        //alert('after:amounts='+amounts);
+                        itemAmounts.html(currentRowPay);
+                        checkboxObj.attr('checked', true);
+                        chk(checkboxObj, checkboxObj.attr('sid'), checkboxObj.attr('groupCode'));
 						
 						
-						var isAdd = false;
+						/*var isAdd = false;
 						if (amounts > 0 && parseFloat(itemBalance) > 0) {
 							itemBalance = amounts > parseFloat(itemBalance) ? itemBalance : amounts;
 							amounts -= itemBalance;
@@ -292,7 +304,7 @@
 							itemAmounts.html(itemBalance);
 							checkboxObj.attr('checked', true);
 							chk(checkboxObj, checkboxObj.attr('sid'), checkboxObj.attr('groupCode'));
-						}
+						}*/
 					});
 				} else {
 					alert('请输入下账金额！');

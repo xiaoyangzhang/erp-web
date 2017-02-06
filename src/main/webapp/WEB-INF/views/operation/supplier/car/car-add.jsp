@@ -22,6 +22,7 @@
 				<input type="hidden" name="bookingId" id="bookingId" value="${bookingId }" />
 				<input type="hidden" name="stateBooking" id="stateBooking" value="${supplier.stateBooking }" />
 				<input type="hidden" name="flag" id="flag" value="${flag }" />
+				<input type="hidden" name="isShow" id="isShow_id" value="${isShow }" />
 				<input type="hidden" name="supplierType" id="supplierType"
 					value="${supplierType }" />
 				<input type="hidden" name="stateFinance" id="stateFinance" value="${supplier.stateFinance }" />
@@ -195,7 +196,41 @@
 							</div>
 							<div class="clear"></div>
 						</dd>
-
+					<c:if test="${sysBizConfig.itemValue eq 1 and isShow == 1}">
+						<dd id="sbf_id" style="background-color:#B0C4DE;width: 405px;">
+							<div class="dd_left"><i class="red">* </i>计调费:</div>
+							<div class="dd_right" style="width: 100px;">
+								<input type="text" tag="price" name="carProfitTotal" id="carProfitTotal" style="width: 60px;"
+									   value="<fmt:formatNumber value="${bookingDetailList[0].carProfitTotal eq null ? 0:bookingDetailList[0].carProfitTotal}"  pattern="#.##" type="number"/>"
+									   class="IptText300" />
+							</div>
+							<div class="dd_left"><i class="red">* </i>备注:</div>
+							<select id="carPayType" name="carPayType" class="select160" tag="price" text-align: right" style="width: 100px;">
+							<option value="">--请选择--</option>
+							<option value="短线" <c:if test="${bookingDetailList[0].carPayType eq '短线'}">selected="selected"</c:if>>短线</option>
+							<option value="接送机" <c:if test="${bookingDetailList[0].carPayType eq '接送机'}">selected="selected"</c:if>>接送机</option>
+							</select>
+							<div class="clear">
+							</div>
+						</dd>
+						<dd id="sbf_id2" style="background-color:#B0C4DE;width: 405px;">
+							<div class="dd_left"><i class="red">* </i>其他利润:</div>
+							<div class="dd_right" style="width: 100px;">
+								<input type="text" tag="price" name="carProfitTotal2" id="carProfitTotal2" style="width: 60px;"
+									   value="<fmt:formatNumber value="${bookingDetailList[0].carProfitTotal2 eq null ? 0:bookingDetailList[0].carProfitTotal2}"  pattern="#.##" type="number"/>"
+									   class="IptText300" />
+							</div>
+							<div class="dd_left"><i class="red">* </i>备注:</div>
+							<select id="carPayType2" name="carPayType2" class="select160" tag="price" text-align: right" style="width: 100px;">
+							<option value="">--请选择--</option>
+							<option value="套团" <c:if test="${bookingDetailList[0].carPayType2 eq '套团'}">selected="selected"</c:if> >套团</option>
+							<option value="临时团" <c:if test="${bookingDetailList[0].carPayType2 eq '临时团'}">selected="selected"</c:if> >临时团</option>
+							<option value="特殊线" <c:if test="${bookingDetailList[0].carPayType2 eq '特殊线'}">selected="selected"</c:if> >特殊线</option>
+							<option value="其他" <c:if test="${bookingDetailList[0].carPayType2 eq '其他'}">selected="selected"</c:if> >其他</option>
+							</select>
+							<div class="clear"></div>
+						</dd>
+					</c:if>
 
 
 
@@ -269,6 +304,10 @@ $(function(){
 		 $("#type1Id").attr("disabled","disabled");
 		 $("#carLisence").attr("disabled","disabled");
 		 $("#type2Name").attr("disabled","disabled");
+         $("#carProfitTotal").attr("disabled","disabled");
+         $("#carPayType").attr("disabled","disabled");
+         $("#carProfitTotal2").attr("disabled","disabled");
+         $("#carPayType2").attr("disabled","disabled");
 		 $("#itemNum").attr("disabled","disabled");
 		 $("#selPrice").attr("style","display:none");
 		 $("#itemPrice").attr("disabled","disabled");
@@ -318,6 +357,22 @@ $(function(){
 				required:true,
 				number:true
 			},
+            'carProfitTotal':{
+                required:true,
+                number:true
+            },
+            'carPayType':{
+                required:false,
+                maxlength:45
+            },
+            'carProfitTotal2':{
+                required:true,
+                number:true
+            },
+            'carPayType2':{
+                required:false,
+                maxlength:45
+            },
 			'type2Name':{
 				required:true
 				//maxlength:11
@@ -349,7 +404,20 @@ $(function(){
 			'itemPrice':{
 				required:"请输入价格",
 				number:"请输入数字"
-				
+            },
+            'carProfitTotal':{
+                required: "请输入计调费",
+                isDouble:"请输入数字"
+            },
+            'carPayType':{
+                required:"请填写备注"
+            },
+            'carProfitTotal2':{
+                required: "请输入其他利润",
+                isDouble:"请输入数字"
+            },
+            'carPayType2':{
+                required:"请填写备注",
 			},
 			'type2Name':{
 				required:"请输入座位数"
@@ -381,6 +449,10 @@ $(function(){
 			book.itemDate = $(form).find("#itemDate").val();
 			book.itemDateTo = $(form).find("#itemDateTo").val();
 			book.itemPrice = $(form).find("#itemPrice").val();
+            book.carProfitTotal = $(form).find("#carProfitTotal").val();
+            book.carPayType = $(form).find("#carPayType").val();
+            book.carProfitTotal2 = $(form).find("#carProfitTotal2").val();
+            book.carPayType2 = $(form).find("#carPayType2").val();
 			book.itemNum = $(form).find("#itemNum").val();
 			book.driverName = $(form).find("#driverName").val();
 			book.driverTel = $(form).find("#driverTel").val();
@@ -438,7 +510,7 @@ $(function(){
 						            if (data.sucess ) {		
 						            	$.success("保存成功",function(){
 						            		if(saveFrom=='saveadd'){
-						            			refreshWindow("新增车辆订单","toAddCar?groupId="+data['groupId']);
+						            			refreshWindow("新增车辆订单","toAddCar?groupId="+data['groupId']+"&isShow="+$("#isShow_id").val());
 						            		}else{
 						            			refreshWindow("修改车辆订单","toAddCar?groupId="+data['groupId']+"&bookingId="+data['bookingId']+"&stateBooking="+data['stateBooking']);
 						            		}
@@ -496,7 +568,16 @@ $(function(){
 					required:true
 					//maxlength:11
 					
-				}
+				},
+                'carProfitTotal':{
+                    required:true,
+                    isDouble:true
+
+                },
+                'carPayType':{
+                    required: true
+
+                },
 			},
 			messages: {
 				'itemDate':{
@@ -521,7 +602,15 @@ $(function(){
 					required:"请输入司机联系方式"
 					//maxlength:"长度不大于11"
 					
-				}
+				},
+				'carProfitTotal':{
+                    required: "请输入计调费",
+                    isDouble:"请输入数字"
+                },
+                'carPayType':{
+                    required:"请选择方式",
+
+                }
 			},
 			errorPlacement : function(error, element) { // 指定错误信息位置
 				if (element.is(':radio') || element.is(':checkbox')
@@ -817,6 +906,11 @@ $(function(){
     });
     function customerTicketCallback(event, value) {
     	selectCashType();
-    } 
+    }
+    (function(){
+        var  formUtils = yihg_utils_fun;
+        var params = formUtils.getParams("bookingForm");
+        (params["bookingId"]=="") && formUtils.setDefault("bookingForm",{"carProfitTotal":"200","carProfitTotal2":"0"});
+    })();
 </script>
 </html>
