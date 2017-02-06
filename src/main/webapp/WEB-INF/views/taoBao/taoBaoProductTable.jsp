@@ -6,16 +6,16 @@
     	<tr>
     		<th>选择<i class="w_table_split"></i></th>
     		<th>自编码<i class="w_table_split"></i></th>
-    		<th>产品名称<i class="w_table_split"></i></th>
-    		
-    	</tr>
-    </thead>
-    <tbody>
-    <c:forEach items="${pageBean.result}" var="tbpResult" varStatus="status">
-       <tr id="${tbpResult.id }"> 
-       	  <td width="8%"><input type="checkbox" name="productId" id="productId" value="${tbpResult.id}"></td>
-          <td width="30%">${tbpResult.outerId }</td>
-          <td width="60%" style="text-align:left;">${tbpResult.title }</td> 
+			<th>套餐名称<i class="w_table_split"></i></th>
+		</tr>
+	</thead>
+	<tbody>
+	<c:forEach items="${pageBean.result}" var="tbpResult" varStatus="status">
+		<tr id="${tbpResult.id }">
+			<td width="5%"><input type="checkbox" name="tpsId" id="tpsId" value="${tbpResult.tpsId}"></td>
+			<td width="25%">${tbpResult.outerId }</td>
+			<td width="40%" style="text-align:left;">${tbpResult.title }</td>
+			<td width="30%" style="text-align:left;">${tbpResult.pidName }</td>
        </tr>
      </c:forEach>
     </tbody>
