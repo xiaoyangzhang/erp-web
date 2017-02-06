@@ -8,7 +8,7 @@
     <title>淘宝原始单</title>
     <%@ include file="../../../include/top.jsp" %>
     <SCRIPT type="text/javascript">
-        $(function () {
+     /*    $(function () {
             function setData() {
                 var curDate = new Date();
                 var startTime = curDate.getFullYear() + "-" + (curDate.getMonth() + 1) + "-01";
@@ -27,7 +27,7 @@
             }
             
             setData();
-        });
+        }); */
         
         
         function queryList(page, pagesize) {
@@ -158,6 +158,20 @@
                 content: $("#show").show()
             });
         }
+        
+        /* 导出到Excel */
+        function toExcel(){
+        	$("#toExcelId").attr("href","toPresellExcel.do?startMin="+$("#startMin").val()
+        			+"&startMax="+$("#startMax").val()
+        			+"&tid="+$("#tid").val()
+        			+"&buyerNick="+$("#buyerNick").val()
+        			+"&isBrushSingle="+$("#isBrushSingle").val()
+        			+"&title="+$("#title").val()
+        			+"&outerIid="+$("#outerIid").val()
+        			+"&authClient="+$("#authClient").val()
+        			+"&page="+$("#orderPage").val()
+        			+"&pageSize="+$("#orderPageSize").val());
+        }
     </SCRIPT>
 </head>
 <body>
@@ -171,28 +185,28 @@
                 <ul>
                     <li class="text" style="">订单日期</li>
                     <li>
-                        <input name="startMin" id="today" type="text" value="${startMin}"
+                        <input name="startMin" id="startMin" type="text" value="${startMin}"
                                style="width: 140px;" class="Wdate"
                                onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/> ~ <input
-                            name="startMax" id="today1" type="text" value="${startMax}"
+                            name="startMax" id="startMax" type="text" value="${startMax}"
                             style="width: 140px;" class="Wdate"
                             onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/></li>
                     <li class="text">订单号</li>
-                    <li><input type="text" name="tid"/></li>
+                    <li><input type="text" name="tid" id="tid"/></li>
                     
                     <li class="text">旺旺号</li>
-                    <li><input type="text" name="buyerNick" style="width: 100px"  value="${buyerNick}"/></li>
+                    <li><input type="text" name="buyerNick" id="buyerNick" style="width: 100px"  value="${buyerNick}"/></li>
                     
                     <li class="text">特单状态</li>
-                    <li><select name="isBrushSingle">
+                    <li><select name="isBrushSingle" id="isBrushSingle">
                         <option value=""  <c:if test="${isBrushSingle==''}">selected </c:if>>全部</option>
                         <option value="1" <c:if test="${isBrushSingle=='1'}">selected </c:if>>淘宝</option>
                         <option value="0" <c:if test="${isBrushSingle=='0'}">selected </c:if>>正常下单</option>
                     </select></li>
                     <li class="text">产品名称</li>
-                    <li><input type="text" name="title" value="${title}"/></li>
+                    <li><input type="text" name="title" id="title" value="${title}"/></li>
                      <li class="text">自编码</li>
-                    <li><input type="text" name="outerIid" value="${outerIid}"/></li>
+                    <li><input type="text" name="outerIid" id="outerIid" value="${outerIid}"/></li>
                     <li class="text">店铺</li>
                     <li><select id="authClient" name="authClient">
                         <c:if test="${optMap_AY}">
@@ -220,6 +234,7 @@
                         <button id="btnOK" type="button" class="button button-primary button-small"
                                 onclick="synBtn()">同步
                         </button>
+                        <a href="javascript:void(0);" id="toExcelId" target="_blank" onclick="toExcel()" class="button button-primary button-small">导出到Excel</a>
                       <!--   <button id="btnOK" type="button" class="button button-primary button-small"
                                 onclick="cancelBtn()">废弃
                         </button>
@@ -263,7 +278,7 @@
         <br>
 
         <button type="button" onclick="synchBtn()" class="button button-primary button-small">开始同步</button>
-    
+    	
     </div>
 
 </div>

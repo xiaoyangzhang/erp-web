@@ -47,6 +47,10 @@
 			<input type="hidden" name="flag" id="flag" value="${flag }"/>
 			<input type="hidden" name="editType" id="editType" value="${editType }"/>
 			<input type="hidden" name="stateFinance" id="stateFinance" value="${supplier.stateFinance }"/>
+			<input type="hidden" name="sys_itemValue" id="sys_itemValue" value="${sysBizConfig.itemValue  }" />
+
+			<input type="hidden" name="isShow" id="isShow_id" value="${isShow }"/>
+
 			<p class="p_paragraph_title">
 				<b>预订酒店</b>
 			</p>
@@ -160,7 +164,7 @@
 							<col width="10%"/>
 							<col width="10%"/>
 							<col width="10%"/>
-
+							<col width="10%"/>
 							<col width="10%"/>
 							<col width="15%"/>
 							<col width="10%"/>
@@ -170,7 +174,10 @@
 								<!-- <th>房型<i class="w_table_split"></i></th> -->
 								<th>入住日期<i class="w_table_split"></i></th>
 								<th>数量/间<i class="w_table_split"></i></th>
-								<th>单价<i class="w_table_split"></i></th>
+								<th>结算价<i class="w_table_split"></i></th>
+								<c:if test="${sysBizConfig.itemValue eq 1 and isShow == 1}">
+									<th>采购价<i class="w_table_split"></i></th>
+								</c:if>
 								<th>免去数<i class="w_table_split"></i></th>
 
 								<th>金额<i class="w_table_split"></i></th>
@@ -219,6 +226,12 @@
 											       value="<fmt:formatNumber value="${detail.itemPrice}" pattern="#.##" type="number"/>"
 											       class="input-w80"/>
 										</td>
+										<c:if test="${sysBizConfig.itemValue eq 1 and isShow == 1}">
+											<td>
+												<input type="text" name="saleItemPrice" id="saleItemPrice"
+													   value="<fmt:formatNumber value="${detail.saleItemPrice}" pattern="#.##" type="number"/>" class="input-w80" />
+											</td>
+										</c:if>
 										<td>
 											<input type="text" id="itemNumMinus" name="itemNumMinus" ${readonly }
 											       value="<fmt:formatNumber value="${detail.itemNumMinus }" pattern="#.##" type="number"/>"
@@ -245,13 +258,22 @@
 							</c:if>
 							</tbody>
 							<tfoot>
-							<tr>
-								<td colspan="5" style="text-align: right;" class="fontBold">合计（￥）：</td>
-								<td id="sumPrice"><fmt:formatNumber value="${sum_price }" pattern="#.##"
-								                                    type="number"/></td>
-								<td></td>
-								<td></td>
-							</tr>
+							<c:if test="${sysBizConfig.itemValue eq 0 or isShow == 0}">
+								<tr>
+									<td colspan="5" style="text-align: right;" class="fontBold">合计（￥）：</td>
+									<td id="sumPrice"><fmt:formatNumber value="${sum_price }" pattern="#.##" type="number"/></td>
+									<td></td>
+									<td></td>
+								</tr>
+							</c:if>
+							<c:if test="${sysBizConfig.itemValue eq 1 and isShow == 1}">
+								<tr>
+									<td colspan="6" style="text-align: right;" class="fontBold">合计（￥）：</td>
+									<td id="sumPrice"><fmt:formatNumber value="${sum_price }" pattern="#.##" type="number"/></td>
+									<td></td>
+									<td></td>
+								</tr>
+							</c:if>
 							</tfoot>
 						</table>
 					</div>
@@ -304,6 +326,9 @@
 		<td>
 			<input type="text" name="itemPrice" id="itemPrice" value="0" class="input-w80" <c:if test="${canEditPrice==0}"> readonly="readonly" </c:if> />
 		</td>
+		<td class="td_saleItemPrice" style="display:none">
+			<input type="text" name="saleItemPrice" id="saleItemPrice_id"  value="0" class="input-w80" />
+		</td>
 		<td>
 			<input type="text" id="itemNumMinus" name="itemNumMinus" value="0" class="input-w80"/>
 		</td>
@@ -341,6 +366,7 @@
 			//绑定行计算
 			var itemPriceObj = $(this).find("input[name='itemPrice']");
 			var itemNumObj = $(this).find("input[name='itemNum']");
+            var saleItemPriceObj = $(this).find("input[name='saleItemPrice']");
 			var itemNumMinusObj = $(this).find("input[name='itemNumMinus']");
 			var itemTotalObj = $(this).find("input[name='itemTotal']");
 			itemPriceObj.removeAttr("onblur").blur(function () {
@@ -395,7 +421,7 @@
 						var typeid = typeidObj.val();
 						var date = itemDateObj.val();
 						
-						onPrice(typeid, date, itemPriceObj, itemNumObj, itemNumMinusObj, itemTotalObj, noteObj);
+						onPrice(typeid, date, itemPriceObj,saleItemPriceObj, itemNumObj, itemNumMinusObj, itemTotalObj, noteObj);
 					}
 				});
 			})
@@ -403,13 +429,13 @@
 			$(this).find("select[name='type1Id']").unbind("change").change(function () {
 				var typeid = typeidObj.val();
 				var date = itemDateObj.val();
-				onPrice(typeid, date, itemPriceObj, itemNumObj, itemNumMinusObj, itemTotalObj, noteObj);
+				onPrice(typeid, date, itemPriceObj,saleItemPriceObj, itemNumObj, itemNumMinusObj, itemTotalObj, noteObj);
 			})
 			//新增时不用计算price，页面加载完（修改）计算price
 			if (!isAdd) {
 				var typeid = typeidObj.val();
 				var date = itemDateObj.val();
-				onPrice(typeid, date, itemPriceObj, itemNumObj, itemNumMinusObj, itemTotalObj, noteObj);
+				onPrice(typeid, date, itemPriceObj,saleItemPriceObj, itemNumObj, itemNumMinusObj, itemTotalObj, noteObj);
 			}
 
 			function calcSum() {
@@ -422,7 +448,7 @@
 				return sum;
 			}
 
-			function onPrice(typeid, date, priceObj, numObj, minusObj, totalObj, noteObj) {
+			function onPrice(typeid, date, priceObj,salePriceObj, numObj, minusObj, totalObj, noteObj) {
 				var supplierId = $("#supplierId").val();
 				if (supplierId && typeid && date) {
 					var data = {supplierId: supplierId, type1: typeid, date: date};
@@ -436,10 +462,13 @@
 							if (data) {
 								price = {};
 								price.contractPrice = data.contractPrice;
-								price.derateReach = data.derateReach;
-								price.derateReduction = data.derateReduction;
-								priceObj.val(data.contractPrice ? data.contractPrice : priceObj.val());
-								price.note = data.note;
+                                price.contractSale = data.contractSale;
+                                price.derateReach = data.derateReach;
+                                price.derateReduction = data.derateReduction;
+                                priceObj.val(data.contractPrice ? data.contractPrice : priceObj.val());
+                                salePriceObj.val(data.contractSale ? data.contractSale : salePriceObj.val());
+
+                                price.note = data.note;
 
 								minusObj.val(0);
 								//协议
@@ -456,6 +485,7 @@
 
 								var itemPrice = priceObj.val();
 								var itemNum = numObj.val();
+                                var saleItemPrice = salePriceObj.val();
 								var itemNumMinus = minusObj.val();
 								var total = (new Number(itemPrice == '' ? '0' : itemPrice)).mul((new Number(itemNum == '' ? '1' : itemNum)).sub(new Number(itemNumMinus == '' ? '0' : itemNumMinus)));
 								itemTotalObj.val(isNaN(total) ? 0 : total);
@@ -464,6 +494,7 @@
 								price = null;
 								<c:if test="${canEditPrice==0}">								
 									itemPriceObj.val(0);
+                                saleItemPriceObj.val(0);
 									itemNumMinusObj.val(0);
 									itemTotalObj.val(0);
 									noteObj.val('');
@@ -585,6 +616,7 @@
 						itemNumMinus: $(this).find("input[name='itemNumMinus']").val(),
 						itemTotal: $(this).find("input[name='itemTotal']").val(),
 						itemBrief: $(this).find("textarea[name='itemBrief']").val(),
+                        saleItemPrice:$(this).find("input[name='saleItemPrice']").val(),
 						fangDiaoLuRu: fangDiaoLuRu
 					});
 				});
@@ -617,14 +649,14 @@
 									if (data.sucess) {
 										$.success("保存成功", function () {
 											if (saveFrom == 'saveadd') {
-												refreshWindow("新增酒店订单", "toAddHotel?groupId=" + data['groupId']);
+												refreshWindow("新增酒店订单", "toAddHotel?groupId=" + data['groupId']+"&isShow="+$("#isShow_id").val());
 											}
 											else if ($("#editType").val()) {
 
-												refreshWindow("修改酒店订单", "toAddHotel?groupId=" + data['groupId'] + "&bookingId=" + data['bookingId'] + "&stateBooking=" + data['stateBooking'] + "&editType=" + $("#editType").val());
+												refreshWindow("修改酒店订单", "toAddHotel?groupId=" + data['groupId'] + "&bookingId=" + data['bookingId'] + "&stateBooking=" + data['stateBooking'] + "&editType=" + $("#editType").val()+"&isShow="+$("#isShow_id").val());
 											}
 											else {
-												refreshWindow("修改酒店订单", "toAddHotel?groupId=" + data['groupId'] + "&bookingId=" + data['bookingId'] + "&stateBooking=" + data['stateBooking']);
+												refreshWindow("修改酒店订单", "toAddHotel?groupId=" + data['groupId'] + "&bookingId=" + data['bookingId'] + "&stateBooking=" + data['stateBooking']+"&isShow="+$("#isShow_id").val());
 											}
 										})
 									} else {
@@ -662,6 +694,11 @@
 			bindEvent(false);
 
 			changeRoomType();
+            var sys_itemValue = $("#sys_itemValue").val();
+            var isShow = $("#isShow_id").val();
+            if(sys_itemValue == 1 && isShow == 1){
+                $(".td_saleItemPrice").css('display','block')
+            }
 		});
 		bindEvent(false);
 	});

@@ -8,7 +8,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>计调统计信息</title>
+    <title>预订安排</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <%@ include file="../../include/top.jsp" %>
     <link rel="stylesheet" type="text/css" href="<%=staticPath %>/assets/css/operate/operate.css"/>
@@ -33,6 +33,7 @@
 <form  id="queryForm">
 		<input name="page" type="hidden" id="page"/>
 	    <input type="hidden" id="pageSize" name="pageSize"/>
+	<input name="isShow" type="hidden" id="isShow_id" value="${isShow }"/>
 	    <div class="p_container_sub" id="list_search">
 	    	<dl class="p_paragraph_content">
 	    		<dd class="inl-bl">
@@ -129,6 +130,7 @@
     </div>
      
 <script type="text/javascript">
+    var isShow = $("#isShow_id").val();
 $(document).ready(function () {
 	queryList();
 });
@@ -223,19 +225,19 @@ function searchBtn() {
  }
  
  function showSightBooking(groupId){
-	 showInfo("门票安排","850px","500px",'<%=ctx %>/booking/groupSightBookingInfo.htm?groupId='+groupId);
+	 showInfo("门票安排","850px","500px",'<%=ctx %>/booking/groupSightBookingInfo.htm?groupId='+groupId+'&isShow='+isShow);
  }
  
  function showHotelBooking(groupId){
-	 showInfo("酒店安排","850px","500px",'<%=ctx %>/booking/groupHotelBookingInfo.htm?groupId='+groupId);
+	 showInfo("酒店安排","850px","500px",'<%=ctx %>/booking/groupHotelBookingInfo.htm?groupId='+groupId+'&isShow='+isShow);
  }
  
  function showEatBooking(groupId){
-	 showInfo("餐厅安排","850px","500px",'<%=ctx %>/booking/groupEatBookingInfo.htm?groupId='+groupId);
+	 showInfo("餐厅安排","850px","500px",'<%=ctx %>/booking/groupEatBookingInfo.htm?groupId='+groupId+'&isShow='+isShow);
  }
  
  function showCarBooking(groupId){
-	 showInfo("车辆安排","850px","500px",'<%=ctx %>/booking/groupCarBookingInfo.htm?groupId='+groupId);
+	 showInfo("车辆安排","850px","500px",'<%=ctx %>/booking/groupCarBookingInfo.htm?groupId='+groupId+'&isShow='+isShow);
  }
  
  function showAirBooking(groupId){

@@ -6,21 +6,23 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>订单明细统计</title>
-<!-- 此统计页面，只有薛桃（资源供应系统：应付审核时使用）  ou
+<!-- 此统计页面，（资源供应系统：审核时使用）  ou
  -->
 <%@ include file="../../../include/top.jsp"%>
 <link href="<%=staticPath%>/assets/css/supplier/supplier.css" rel="stylesheet" />
 </head>
 <body>
 	<div class="p_container">
-		<form id="detailForm" method="post">
+		<form id="detailTwoForm" method="post">
 			<input type="hidden" name="page" id="page" />
 			<input type="hidden" name="pageSize" id="pageSize" />
-			<input type="hidden" name="sl" value="booking.bookingSupplierDetailListPage" />
-			<input type="hidden" name="ssl" value="booking.bookingSupplierDetailTotal" />
-			<input type="hidden" name="rp" value="queries/hotel/supplierDetailQueryTable" />
+			<input type="hidden" name="sl" value="booking.bookingSupplierDetailTwoListPage" />
+			<input type="hidden" name="ssl" value="booking.bookingSupplierDetailTwoTotal" />
+			<input type="hidden" name="rp" value="queries/hotel/supplierDetailQueryTableTwo" />
 			<input type="hidden" name="supplierId" id="supplierId" value=""/>
 			<input type="hidden" name="bizId" id="bizId" value="${bizId}"/>
+			<input type="hidden" name="supplierType" id="supplierType" value="${supplierType}"/>
+			
 			<input type="hidden" name="supplerIds" id="supplerIds" value=""/>
 			<div class="p_container_sub" >
 			<div class="searchRow">
@@ -36,7 +38,7 @@
 					</li>
 					<li class="text">团号：</li>
 					<li><input id="groupCode"  name="groupCode" type="text"/></li>
-					<li class="text">商家类别:</li>
+					<li class="text">商家类别：</li>
 					<li><select name="supplierType" id="supplierType">
 						<c:if test="${supplierType == 3}">
 							<option value="3">酒店</option>
@@ -47,8 +49,6 @@
 						<c:if test="${supplierType == 5}">
 							<option value="5">景区</option>
 						</c:if>
-						<%--<option value="4">车</option>
-						<option value="4">地接</option>--%>
 					</select></li>
 					<li class="text">商家名称：</li>
 					<li><input id="supplierName"  name="supplierName" style="width: 180px"type="text" value="" placeholder="商家名称"/></li>
@@ -94,11 +94,12 @@
 						</select>
 					</li>
 					<li class="text">项目：</li>
-					<li><input id="type1Name"  name="type1Name" type="text"/></li>
+					<li><input id="type1Name"  name="type1Name" type="text"/></li>	
+					<li class="clear" />	
 					<li  style="margin-left: 20px;">
 						<button type="button" onclick="searchBtn()" class="button button-primary button-small">查询</button>
-						<input name="limitSupplerIds" id="limitSupplerIds" type="hidden" lang="此值为商家限定-旅游集团财务要求:ou"
-							   value="955,2469,1078,867,1563,1560,1561,1562,1559,1882,1827,2040,1083,1077,0,2180,1239,1188,1199,1507,1208,1197,1811,1232,1237,1204,1555,1220,1234,0,1293,1556,0,926,943,1799,860,945,2392,2040,1081,1989"/>
+						<input name="limitSupplerIds" id="limitSupplerIds" type="hidden" lang="此值为商家限定-旅游集团财务要求:ou" 
+						value="955,2469,1078,867,1563,1560,1561,1562,1559,1882,1827,2040,1083,1077,0,2180,1239,1188,1199,1507,1208,1197,1811,1232,1237,1204,1555,1220,1234,0,1293,1556,0,926,943,1799,860,945,2392,2040,1081,1989"/>
 					</li>
 					<li class="clear" />
 				</ul>
@@ -106,7 +107,7 @@
 			</div>
 		</form>
 	</div>
-	<div id="tableDiv"></div>
+	<div id="tableTwoDiv"></div>
 
 </body>
 <%@ include file="/WEB-INF/views/component/org-user/org_user_multi.jsp" %>
@@ -116,15 +117,13 @@ $(function(){
 	if ($("#startTime").val()=='') $("#startTime").val(vars.dateFrom);
 	if ($("#endTime").val()=='') $("#endTime").val(vars.dateTo );
 	
-	
-//	$("#btnQuery").click(function(){
-//		 queryList(1,$("#searchPageSize").val());
-//	});
+	//queryList(1, 15);
 	queryList();
 });
 function searchBtn(){
-    queryList(1,$("#pageSize").val());
+	 queryList(1,$("#pageSize").val());
 }
+
 function queryList(page,pagesize) {	
 	if (!page || page < 1) {
 		page = 1;
@@ -133,17 +132,17 @@ function queryList(page,pagesize) {
 	$("#pageSize").val(pagesize);
 	
 	var options = {
-			url:"../query/queryBookingDetailProfit_Table",
+			url:"../query/queryBookingDetailProfit_TableTwo",
 			type:"post",
 			dataType:"html",
 			success:function(data){
-				$("#tableDiv").html(data);
+				$("#tableTwoDiv").html(data);
 			},
 			error:function(XMLHttpRequest, textStatus, errorThrown){
 				$.error(textStatus+":"+errorThrown);
 			}
 	};
-	$("#detailForm").ajaxSubmit(options);	
+	$("#detailTwoForm").ajaxSubmit(options);	
 }
 
 </script>

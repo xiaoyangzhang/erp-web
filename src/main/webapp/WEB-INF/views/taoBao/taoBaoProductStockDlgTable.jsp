@@ -8,6 +8,7 @@
     		<th>库存名<i class="w_table_split"></i></th>
     		<th>自编码<i class="w_table_split"></i></th>
     		<th>产品名称<i class="w_table_split"></i></th>
+			<th>套餐名称<i class="w_table_split"></i></th>
     		<th>总库存<i class="w_table_split"></i></th>
     		<th>已售<i class="w_table_split"></i></th>
     		<th>余位<i class="w_table_split"></i></th>
@@ -20,6 +21,7 @@
           <td width="10%">${res['stock_name']}</td>
           <td width="20%" style="text-align:left;">${res['outer_id']}</td>
           <td style="text-align:left;">${res['title']}</td>
+		   <td width="20%" style="text-align:left;">${res['pid_name']}</td>
           <td width="8%">${res['stock_count']}</td>
           <td width="8%">${res['sale_count']}</td>
           <td width="8%;font-weight:bold;">${res['stockBalance']}</td>

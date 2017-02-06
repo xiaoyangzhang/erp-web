@@ -13,15 +13,17 @@
 </head>
 <body>
 	<div class="p_container">
-		<form id="detailForm" method="post">
+		<form id="detailCarForm" method="post">
 			<input type="hidden" name="page" id="page" />
 			<input type="hidden" name="pageSize" id="pageSize" />
-			<input type="hidden" name="sl" value="booking.bookingSupplierDetailListPage" />
-			<input type="hidden" name="ssl" value="booking.bookingSupplierDetailTotal" />
-			<input type="hidden" name="rp" value="queries/hotel/supplierDetailQueryTable" />
+			<input type="hidden" name="sl" value="booking.bookingSupplierCarListPage" />
+			<input type="hidden" name="ssl" value="booking.bookingSupplierCarTotal" />
+			<input type="hidden" name="rp" value="queries/car/querySupplierCarTable" />
 			<input type="hidden" name="supplierId" id="supplierId" value=""/>
 			<input type="hidden" name="bizId" id="bizId" value="${bizId}"/>
 			<input type="hidden" name="supplerIds" id="supplerIds" value=""/>
+			<input type="hidden" name="include" value="${include}" />
+			<input name="limitSupplerIds" id="limitSupplerIds" type="hidden" lang="此值为商家限定-旅游集团财务要求:ou" value="13,1249,1248"/>
 			<div class="p_container_sub" >
 			<div class="searchRow">
 				<ul>
@@ -36,27 +38,40 @@
 					</li>
 					<li class="text">团号：</li>
 					<li><input id="groupCode"  name="groupCode" type="text"/></li>
-					<li class="text">商家类别:</li>
-					<li><select name="supplierType" id="supplierType">
-						<c:if test="${supplierType == 3}">
-							<option value="3">酒店</option>
-						</c:if>
-						<c:if test="${supplierType == 2}">
-							<option value="2">餐厅</option>
-						</c:if>
-						<c:if test="${supplierType == 5}">
-							<option value="5">景区</option>
-						</c:if>
-						<%--<option value="4">车</option>
-						<option value="4">地接</option>--%>
-					</select></li>
+					<li class="text">商家类别：</li>
+					<li><input id="className"  name="className" type="text"/></li>
 					<li class="text">商家名称：</li>
 					<li><input id="supplierName"  name="supplierName" style="width: 180px"type="text" value="" placeholder="商家名称"/></li>
 					 <li class="text">产品：</li>
 					<li><input id="productBrandName"  name="productBrandName" style="width: 200px" type="text" value="" placeholder="产品名称或品牌"/></li>
 					<li class="clear"/>
-				 </ul>
-				<ul> 
+					<li class="text">计调费用：</li>
+					<li><select id="carProfitTotal" name="carProfitTotal">
+								<option value="" >全部</option>
+								<option value="1" >有</option>
+								<option value="0" >无</option>
+					</select></li>
+					<li class="text">计调费备注：</li>
+					<li><select id="carPayType" name="carPayType">
+								<option value="" >全部</option>
+								<option value="短线" >短线</option>
+								<option value="接送机" >接送机</option>
+					</select></li>
+					<li class="text">其他利润：</li>
+					<li><select id="carProfitTotal2" name="carProfitTotal2">
+								<option value="" >全部</option>
+								<option value="1" >有</option>
+								<option value="0" >无</option>
+					</select></li>	
+					<li class="text">其他备注：</li>
+					<li><select id="carPayType2" name="carPayType2">
+								<option value="" >全部</option>
+								<option value="套团" >套团</option>
+								<option value="临时团" >临时团</option>
+								<option value="短线" >短线</option>
+								<option value="其他" >其他</option>
+					</select></li>	
+				
 					<li class="text">部门：</li>
 						<li>
 	    				<input type="text" name="orgNames" id="orgNames" stag="orgNames" value="" style="width: 181px;" readonly="readonly" onclick="showOrg()"/>
@@ -82,7 +97,7 @@
 					<li>
 						<select name="cashType" id="cashType">
 								<option value="">请选择</option>
-								<c:forEach items="${cashType }" var="type">
+								<c:forEach items="${cashType}" var="type">
 									<option value="${type.value }">${type.value }</option>
 								</c:forEach>
 							</select>
@@ -94,11 +109,11 @@
 						</select>
 					</li>
 					<li class="text">项目：</li>
-					<li><input id="type1Name"  name="type1Name" type="text"/></li>
+					<li><input id="type1Name"  name="type1Name" type="text"/></li>	
+								
 					<li  style="margin-left: 20px;">
 						<button type="button" onclick="searchBtn()" class="button button-primary button-small">查询</button>
-						<input name="limitSupplerIds" id="limitSupplerIds" type="hidden" lang="此值为商家限定-旅游集团财务要求:ou"
-							   value="955,2469,1078,867,1563,1560,1561,1562,1559,1882,1827,2040,1083,1077,0,2180,1239,1188,1199,1507,1208,1197,1811,1232,1237,1204,1555,1220,1234,0,1293,1556,0,926,943,1799,860,945,2392,2040,1081,1989"/>
+						<!-- <input name="limitSupplerIds" id="limitSupplerIds" type="hidden" lang="此值为商家限定（因为旅游集团财务要求，只有全发票的商家才能显示出来:ou" value="1379,1385,1388,1394,1378,1377,1386,1390,2307,1382,1078,867,1563,1560,1561,1562,1559,1882,1827,2040,1083,1077,1239,1188,1199,1507,1208,1197,1811,1232,1237,1204,1555,1220,1234,1293,1556,13,1249,1248"/> -->
 					</li>
 					<li class="clear" />
 				</ul>
@@ -106,7 +121,7 @@
 			</div>
 		</form>
 	</div>
-	<div id="tableDiv"></div>
+	<div id="carTableDiv"></div>
 
 </body>
 <%@ include file="/WEB-INF/views/component/org-user/org_user_multi.jsp" %>
@@ -116,14 +131,11 @@ $(function(){
 	if ($("#startTime").val()=='') $("#startTime").val(vars.dateFrom);
 	if ($("#endTime").val()=='') $("#endTime").val(vars.dateTo );
 	
-	
-//	$("#btnQuery").click(function(){
-//		 queryList(1,$("#searchPageSize").val());
-//	});
 	queryList();
 });
+
 function searchBtn(){
-    queryList(1,$("#pageSize").val());
+	 queryList(1,$("#pageSize").val());
 }
 function queryList(page,pagesize) {	
 	if (!page || page < 1) {
@@ -133,17 +145,17 @@ function queryList(page,pagesize) {
 	$("#pageSize").val(pagesize);
 	
 	var options = {
-			url:"../query/queryBookingDetailProfit_Table",
+			url:"../query/queryBookingSupplierCar_Table",
 			type:"post",
 			dataType:"html",
 			success:function(data){
-				$("#tableDiv").html(data);
+				$("#carTableDiv").html(data);
 			},
 			error:function(XMLHttpRequest, textStatus, errorThrown){
 				$.error(textStatus+":"+errorThrown);
 			}
 	};
-	$("#detailForm").ajaxSubmit(options);	
+	$("#detailCarForm").ajaxSubmit(options);	
 }
 
 </script>

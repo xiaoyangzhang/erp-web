@@ -35,8 +35,9 @@
 								<col width="5%" />
 								<col width="15%" />
 								<col width="30%"/>
-								<col width="25%" />
-								<col width="25%" />
+								<col width="10%" />
+								<col width="30%" />
+								<col width="10%" />
 
 								<thead>
 								
@@ -45,6 +46,7 @@
 										<th>自编码<i class="w_table_split"></i></th>
 										<th>产品名称<i class="w_table_split"></i></th>
 										<th>商品属性<i class="w_table_split"></i></th>
+										<th>套餐名称<i class="w_table_split"></i></th>
 										<th>创建时间<i class="w_table_split"></i></th>
 									</tr>
 								</thead>
@@ -53,11 +55,12 @@
 									
 									<tr>
 										<td>
-											<input type="checkbox" name="productId" id="chkAll" value="${tbProduct.id }" />
+											<input type="checkbox" name="tpsId" id="chkAll" value="${tbProduct.id }" />
 										</td>
 										<td>${tbProduct.outerId }</td>
 										<td style="text-align: left;">${tbProduct.title }</td>
 										<td>${tbProduct.props }</td>
+										<td>${tbProduct.pidName }</td>
 										<td><fmt:formatDate value="${tbProduct.created }" pattern="yyyy-MM-dd HH:mm:ss"/> </td>
 									</tr>
 									
@@ -95,14 +98,14 @@ function addTaoBaoProductBindingBtn() {
 		yes: function(index){
 			var setId = "";
 			 var body = layer.getChildFrame('body', index);
-			    body.find("input[name='productId']").each(function(){
+			    body.find("input[name='tpsId']").each(function(){
 				if ($(this).attr("checked") || $(this).prop("checked")){
 					//alert($(this).val());
 					setId += $(this).val() + ",";  
 				}
 			    });
 			    if(setId != ''){
-			    	$.getJSON('../taobaoProect/saveStockProBinding.do?productId='+setId+"&stockId="+stock_id, function(data){
+			    	$.getJSON('../taobaoProect/saveStockProBinding.do?tpsId='+setId+"&stockId="+stock_id, function(data){
 				    	/* $.success('添加成功',function(){
 							layer.closeAll();
 							parent.location.reload();
@@ -132,14 +135,14 @@ function addTaoBaoProductBindingBtn() {
 function deleteTaoBaoProductInfo(){
 	var stock_id = $("#stock_id").val();
 	var setId = "";
-	$("input[name=productId]").each(function() {  
+	$("input[name=tpsId]").each(function() {
         if ($(this).attr("checked")) {  
             setId += $(this).val() + ",";  
         }  
     });
 	
 	$.confirm("确认删除吗？",function(){
-		  $.post("deleteTaoBaoStockProduct.do",{stockId:stock_id,productId:setId},function(data){
+		  $.post("deleteTaoBaoStockProduct.do",{stockId:stock_id,tpsId:setId},function(data){
 		   		if(data.success == 1){
 		   			$.success('删除成功！', function(){
 		   				//刷新页面

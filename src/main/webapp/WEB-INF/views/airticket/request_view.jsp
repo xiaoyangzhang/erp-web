@@ -223,8 +223,12 @@ function changeComment(guestId, orderId){
 		</tbody>
 		</table>
 	<c:if test="${isArrange and (bo.po.status=='ISSUED')}">
-	<p style="padding:3px 2px 3px 2px;"><a href="javascript:goBookingSupplier(${bo.groupOrder.groupId==null?0:bo.groupOrder.groupId},${bo.po.groupOrderId}, ${bo.po.bookingSupplierId});">修改计调订单</a></p>
-	</c:if>
+		<c:if test="${stateFinance !=1}">
+			<p style="padding:3px 2px 3px 2px;"><a href="javascript:goBookingSupplier(${bo.groupOrder.groupId==null?0:bo.groupOrder.groupId},${bo.po.groupOrderId}, ${bo.po.bookingSupplierId});">修改计调订单</a></p>
+		</c:if>
+		<c:if test="${stateFinance ==1}">
+			<p style="padding:3px 2px 3px 2px;">该计调订单已被审核！</p>
+		</c:if>	</c:if>
    </div>
    
    

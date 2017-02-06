@@ -8,7 +8,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>计调统计信息</title>
+    <title>资源预订</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <%@ include file="../../include/top.jsp" %>
     <link rel="stylesheet" type="text/css" href="<%=staticPath %>/assets/css/operate/operate.css"/>

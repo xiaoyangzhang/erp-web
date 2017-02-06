@@ -74,13 +74,15 @@
 	            
 	            <div class="store-tab">
 		            <table cellspacing="0" cellpadding="0" class="w_table" border="1" > 
-			            <col width="5%"/><col width="25%" /><col width="40%" /><col width="30%" />
+			            <col width="5%"/><col width="25%" /><col width="25%" /><col width="15%" /><col width="15%" /><col width="15%" />
 			            <thead>
 			            	<tr>
 			            		<th><input type="checkbox" name="" id="checkAll" value="" /></th>
 			            		<th>日期</th>
 			            		<th>总数 | 调整数量</th>
 			            		<th>已售人数</th>
+								<th>剩余库存</th>
+								<th>备注</th>
 			            	</tr>
 			            </thead>
 			            <tbody> 
@@ -111,7 +113,10 @@
 				'<td>{1}<input type="hidden" id="id-{2}" name="dateId" /></td>' +
 				'<td><span id="spStock-{2}">0</span><input type="text" id="stock-{2}" name="stockCount-{2}" class="w-100" tag="stock" receive="0" total="0" style="display:none;" /></td>' + 
 				'<td id="receive-{2}" tag="receive" class="peoplenum">0</td>' +
-				'</tr>';
+                '<td><span id="spStockBalance-{2}">0</span></td>' +
+                '<td><span id="spStockRemark-{2}"></span><input type="text" id="stockRemark-{2}" class="w-100" tag="Remark" style="display:none;" /></td>' +
+
+                '</tr>';
 			var html = "",
 				weekStr = "",
 				dayStr = "",
@@ -198,15 +203,18 @@
 	                var datestr = formatDate(itemDate.getFullYear(),itemDate.getMonth()+1,itemDate.getDate(),'');
 	                var stockDate = formatDate(itemDate.getFullYear(),itemDate.getMonth()+1,itemDate.getDate(),'');
 	                var stockDateId=item.id;
+                    var surplus =parseInt(item.stockCount)-item.saleCount;
 	               /*  $("#chk-"+datestr).attr("checked","checked");              
 	                if(item.saleCount>0){
 	                	$("#chk-"+datestr).attr("disabled","disabled");                	
 	                } */
 	                $("#id-"+datestr).val(item.id);                
 	                $("#spStock-"+datestr).text(item.stockCount);
-	                $("#stock-"+datestr).attr("receive",item.saleCount).attr("total",item.stockCount);
-	                $("#receive-"+datestr).html('<a href="javascript:void(0)"   onclick="stocklog('+stockDateId+','+stockDate+')" class="def">'+item.saleCount+'</a>');
-	                //addValidateRule(datestr);
+                    $("#spStockBalance-"+datestr).text(surplus);
+                    $("#spStockRemark-"+datestr).text(item.remark);
+                    $("#stock-"+datestr).attr("receive",item.saleCount).attr("total",item.stockCount);
+                    $("#receive-"+datestr).html('<a href="javascript:void(0)"   onclick="stocklog('+stockDateId+','+stockDate+')" class="def">'+item.saleCount+'</a>');
+                    $("#surplus-"+datestr).text(item.surplus); //addValidateRule(datestr);
 				}
 			},function(err){
 				$.error("服务器忙，请稍后再试");
@@ -307,8 +315,10 @@
 	    	if($(this).attr("checked")){
 	    		$("#stock-"+datestr).rules("add",{required:true,reasonable:true,messages: { required: "必填"}});
 	    		$("#stock-"+datestr).css("display","");
-	    	}else{
-	    		$("#stock-"+datestr).css("display","none");
+                $("#stockRemark-"+datestr).css("display","");
+            }else{
+                $("#stock-"+datestr).css("display","none");
+                $("#stockRemark-"+datestr).css("display","none");
 	    	}
 	    })
 	    
@@ -358,8 +368,10 @@
 				var tr = $(this).closest("tr");
 				var stock = tr.find("input[tag='stock']").val();
 				var dateId = tr.find("input[name='dateId']").val();
-				stockArr.push({id:dateId,stockId:stockId,stockDate:date,stockCount:stock});
-			});
+                var remarkText = tr.find("input[tag='Remark']").val();
+                stockArr.push({id:dateId,stockId:stockId,stockDate:date,stockCount:stock,remark:remarkText});
+
+            });
 			return stockArr;
 		}
 	});

@@ -36,6 +36,19 @@
                     <li>
                         <input type="text" name="title"/>
                     </li>
+                    <li class="text">套餐名称:</li>
+                    <li>
+                        <input type="text" name="pidName"/>
+                    </li>
+                    <li class="text">店铺</li>
+                    <li><select id="myStoreId" name="myStoreId">
+                        <option value="" >全部</option>
+                        <option value="AY" >爱游</option>
+                        <option value="YM">怡美</option>
+                        <option value="JY">景怡</option>
+                        <option value="TX">天翔</option>
+                        <option value="OUTSIDE">出境店</option>
+                    </select></li>
                     <li class="text">
                         <button type="button" onclick="searchBtn()"
                                 class="button button-primary button-small">查询
@@ -44,7 +57,7 @@
                         <c:if test="${optMap['EDIT'] }">
                          <li class="text">
                             <a href="javascript:void(0)"
-                               onclick="newWindow('新增产品', '<%=path%>/productInfo/add.htm')"
+                               onclick="AddBtn(0)"
                                class="button button-primary button-small">新增</a></li>
                         </c:if>
                         <li class="text">
@@ -143,6 +156,23 @@
             }, cancel: function (index) {
                 layer.close(index);
             }
+        });
+    }
+    function AddBtn(skuId){
+        layer.open({
+            type : 2,
+            title : '新增淘宝产品',
+            shadeClose : true,
+            shade : 0.5,
+            area: ['500px', '300px'],
+            content: '<%=path%>/taobaoProect/addTaobaoSku.htm?skuId='+skuId
+        });
+    }
+
+    function reloadPage(){
+        $.success('操作成功',function(){
+            layer.closeAll();
+            queryList($("#searchPage").val(), $("#searchPageSize").val());
         });
     }
 </script>

@@ -36,6 +36,14 @@
                     <div class="clear"></div>
                 </dd>
                 
+                <dd class="inl-bl">
+	    			<div class="dd_left">套餐名称：</div>
+	    			<div class="dd_right">
+		    			<input type="text" name="pidName" />
+	    			</div>
+                    <div class="clear"></div>
+                </dd>
+                
                    <dd class="inl-bl">
                     <div class="dd_right">
                     	<button type="button" onclick="searchBtn();" class="button button-primary button-small">查询</button>

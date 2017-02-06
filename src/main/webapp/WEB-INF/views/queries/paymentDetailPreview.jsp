@@ -21,7 +21,7 @@
 		<div class="print NoPrint">
 			<div class="print-btngroup">
 			    <input id="btnPrint" type="button" value="打印" onclick="opPrint();"/>
-			    <input type="button"  value="导出到Word" onclick="toExportWord()" />
+			    <input type="button"  value="导出到Excel" onclick="toExportWord()" />
 			    <input id="btnClose" type="button" value="关闭" onclick="window.close();"/>
 			</div>
 		</div>

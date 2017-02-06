@@ -12,11 +12,12 @@
 			<th style="width: 2%">序号<i class="w_table_split"></i></th>
 			<th style="width: 9%">订单号<i class="w_table_split"></i></th>
 			<th style="width: 6%">旺旺号<i class="w_table_split"></i></th>
-			<th style="width: 11%">自编码<i class="w_table_split"></i></th>
+			<th style="width: 7%">自编码<i class="w_table_split"></i></th>
 			<th style="width: 20%">产品<i class="w_table_split"></i></th>
+			<th style="width: 6%">订单来源<i class="w_table_split"></i></th>
 			<th style="width: 6%">付款时间<i class="w_table_split"></i></th>
 			<th style="width: 6%">单价<i class="w_table_split"></i></th>
-			<th style="width: 6%">件数<i class="w_table_split"></i></th>
+			<th style="width: 4%">件数<i class="w_table_split"></i></th>
 			<th style="width: 6%">已付金额<i class="w_table_split"></i></th>
 			<th style="width: 6%">应收金额<i class="w_table_split"></i></th>
 			<th style="width: 3%">是否是特单<i class="w_table_split"></i></th>
@@ -30,6 +31,7 @@
 				<td>${orders.buyerNick}</td>
 				<td style="text-align:left">${orders.outerIid}
 				<td style="text-align:left">${orders.title}</td>
+				<td>${orders.tradeFrom}</td>
 				<td><fmt:formatDate value="${orders.payTime}" pattern="yyyy-MM-dd HH:mm:ss" /></td>
 				<td>${orders.price}</td>
 				<td>${orders.num}</td>
@@ -45,7 +47,7 @@
 				<c:set var="sumStepPaidFee" value="${sumStepPaidFee + orders.stepPaidFee }"/>
 		</c:forEach>
 			<tr>
-				<td colspan="7" style="text-align: right">合计:</td>
+				<td colspan="8" style="text-align: right">合计:</td>
 				<td><fmt:formatNumber value="${sumNum}" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${sumStepPaidFee}" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${sumTotal}" pattern="#.##"/></td>

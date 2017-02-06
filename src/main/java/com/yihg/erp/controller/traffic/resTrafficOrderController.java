@@ -9,7 +9,9 @@ import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sys.po.UserSession;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToNotGroupListDTO;
 import com.yimayhd.erpcenter.facade.sales.result.QueryResAdminOrderResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToNotGroupListResult;
 import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
 import com.yimayhd.erpcenter.facade.tj.client.query.LockListTableDTO;
 import com.yimayhd.erpcenter.facade.tj.client.query.TrafficOrderDTO;
@@ -53,6 +55,10 @@ public class resTrafficOrderController extends BaseController{
 	private ResTrafficOrderFacade resTrafficOrderFacade;
 	@Autowired
 	private GroupOrderFacade groupOrderFacade;
+
+	@Autowired
+	private GroupOrderFacade groupOrderFacade;
+	
 	@RequestMapping("resGroupOrderList.htm")
 	public String loadGroupOrderInfo(HttpServletRequest request, ModelMap model){
 		Integer bizId = WebUtils.getCurBizId(request);
@@ -262,6 +268,18 @@ public class resTrafficOrderController extends BaseController{
 		pageBean = result.getPageBean();
 		Map<String, BigDecimal> map_sum = result.getMap();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	public void toOrderPreview(HttpServletRequest request, HttpServletResponse response, Integer pageSize, Integer page,Model model)
+			throws ParseException {
+
+		ToNotGroupListDTO var1 = new ToNotGroupListDTO();
+		var1.setPmBean( WebUtils.getQueryParamters(request));
+		var1.setBizId(WebUtils.getCurBizId(request));
+		var1.setUserIdSet(WebUtils.getDataUserIdSet(request));
+		ToNotGroupListResult toNotGroupListResult = groupOrderFacade.toOrderPreview(var1);
+		PageBean<GroupOrder> pageBean = toNotGroupListResult.getPageBean();
+		HashMap<String, BigDecimal> map_sum = toNotGroupListResult.getMap_sum();
+
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		String path = "";
 		try {
 			String url = request.getSession().getServletContext().getRealPath("/template/excel/trafficOrderManageList.xlsx");
