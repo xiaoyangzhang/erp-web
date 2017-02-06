@@ -24,7 +24,7 @@ public class OpenPlatformConstannt {
     
     static {
         //openAPI_OrderMap.put("Url", "http://localhost:9876/yihg-open-api/transferOrder/");
-        openAPI_OrderMap.put("Url", "http://http://172.16.1.164:8080/transferOrder/");
+    	openAPI_OrderMap.put("Url", "http://172.16.1.164:8080/transferOrder/");
 //        openAPI_OrderMap.put("appKey", "57253556");
 //        openAPI_OrderMap.put("secretKey", "d95tu574dec5d04aece19d76db4b376n");
         openAPI_OrderMap.put("pushMethod", "importErp.do");

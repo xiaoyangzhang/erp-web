@@ -202,6 +202,7 @@ function stockOpt_TaobaoProduct(){
 					$("input[name='groupOrder.productId']").val(ary[1]);
 					$("#stockCount").text(ary[2]);
 					$("input[name='groupOrder.productName']").val(ary[3]);
+					$("input[name='groupOrder.productBrandName']").val(ary[4]);
 					limitInput();
 			    }
 			});

@@ -40,6 +40,7 @@
 	    <input type="hidden" id="pageSize" name="pageSize"  value="${pageBean.pageSize }"/>
 		<input  type="hidden" id="supplierType" name="supplierType" value="${supplierType }">
 		<input  type="hidden" id="selectDate" name="selectDate" value="0">
+		<input type="hidden" id="isShow" name="isShow"  value="${isShow }"/>
 	    <div class="p_container_sub" id="list_search">
 	    	<dl class="p_paragraph_content">
 	    		<dd class="inl-bl">
@@ -143,7 +144,7 @@ $(function() {
 		//$("#searchPage").val(page);
 	    var url="hotelList.do";
 	    	
-	    
+	    var isShow = $("#isShow").val();
 	    var options = {
 			url:url,
 	    	type:"post",
@@ -153,6 +154,7 @@ $(function() {
 	    		//saleOperatorName:$("#saleOperatorName").val(),
 	    		//saleOperatorIds:$("#saleOperatorIds").val()
 	    	//},
+	    	date:{isShow:isShow},
 	    	success:function(data){
 	    		$("#supplierDiv").html(data);
 	    	},
