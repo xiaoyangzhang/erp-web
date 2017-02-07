@@ -3450,6 +3450,77 @@ public class QueryController extends BaseController {
 
 		return "queries/delivery-detail-list";
 	}
+	/**
+	 * 跳转到下接社明细
+	 *
+	 * @param request
+	 * @param response
+	 * @param modelMap
+	 * @return
+	 */
+	@RequestMapping("saleDeliveryDetailList.htm")
+	public String saleDeliveryDetailList(HttpServletRequest request,Integer djType,
+										 HttpServletResponse response, ModelMap modelMap) {
+		// Integer bizId = WebUtils.getCurBizId(request);
+		// getOrgAndUserTreeJsonStr(modelMap, bizId);
+		// modelMap.addAttribute("bizId", bizId);
+
+		Map paramters = WebUtils.getQueryParamters(request);
+		paramters.put("djType", djType);
+		if (null == paramters.get("start_min")
+				&& null == paramters.get("start_max")) {
+			Calendar c = Calendar.getInstance();
+			int year = c.get(Calendar.YEAR);
+			int month = c.get(Calendar.MONTH);
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			c.set(year, month, 1, 0, 0, 0);
+			// condition.setStartTime(c.getTime()+"");
+			paramters.put("start_min", df.format(c.getTime()));
+			c.set(year, month, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+			paramters.put("start_max", df.format(c.getTime()));
+			// condition.setEndTime(c.getTime()+"");
+
+		}
+		if (StringUtils.isNotBlank((String) paramters.get("orgIds"))) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = ((String) paramters.get("orgIds")).split(",");
+			for (String orgIdStr : orgIdArr) {
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			List<PlatformOrgPo> orgList = orgService.getOrgListByIdSet(
+					WebUtils.getCurBizId(request), set);
+			StringBuilder sb = new StringBuilder();
+			for (PlatformOrgPo orgPo : orgList) {
+				sb.append(orgPo.getName() + ",");
+			}
+			// condition.setOrgNames(sb.substring(0, sb.length()-1));
+			paramters.put("orgNames", sb.substring(0, sb.length() - 1));
+
+		}
+		// 如果计调不为null，查询计调名字
+		if (StringUtils.isNotBlank((String) paramters.get("saleOperatorIds"))) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] userIdArr = ((String) paramters.get("saleOperatorIds"))
+					.split(",");
+			for (String userIdStr : userIdArr) {
+				set.add(Integer.valueOf(userIdStr));
+			}
+			List<PlatformEmployeePo> empList = platformEmployeeService
+					.getEmpList(WebUtils.getCurBizId(request), set);
+			StringBuilder sb = new StringBuilder();
+			for (PlatformEmployeePo employeePo : empList) {
+				sb.append(employeePo.getName() + "");
+			}
+			// condition.setSaleOperatorName(sb.substring(0, sb.length()-1));
+			paramters.put("saleOperatorName", sb.substring(0, sb.length() - 1));
+
+		}
+		modelMap.addAttribute("parameters", paramters);
+		List<DicInfo> cashTypes = null;
+		cashTypes = dicService.getListByTypeCode(BasicConstants.PRODUCT_DES,WebUtils.getCurBizId(request));
+		modelMap.addAttribute("cashTypes", cashTypes);
+		return "queries/sale-delivery-detail-list";
+	}
 
 	@RequestMapping(value = "getAirTicketDetail.do")
 	public String getAirTicketDetail(HttpServletRequest request, HttpServletResponse reponse, Integer flag,
@@ -4273,13 +4344,21 @@ public class QueryController extends BaseController {
 			TourGroupVO tourGroup) {
 		// Integer bizId = WebUtils.getCurBizId(request);
 		// getOrgAndUserTreeJsonStr(model, bizId);
-		return "operation/group-booking-list";
+		Map<String, Object> pm = WebUtils.getQueryParamters(request);
+		String isShow = (String) pm.get("isShow");
+
+		model.addAttribute("isShow", Integer.valueOf(isShow));
+		if("1".equals(isShow)){
+			return "operation/group-booking-list";
+		}else {
+			return "operation/group-booking-sale-list";
+		}
 
 	}
 
 	@RequestMapping("groupBookingList.do")
 	@RequiresPermissions(PermissionConstants.JDGL_YDAP)
-	public String groupBookingList(ModelMap model, HttpServletRequest request, TourGroupVO tourGroup) {
+	public String groupBookingList(ModelMap model, HttpServletRequest request,Integer isShow, TourGroupVO tourGroup) {
 
 		// PageBean pageBean = new PageBean();
 		// model.addAttribute("tourGroup", tourGroup);
@@ -4456,7 +4535,12 @@ public class QueryController extends BaseController {
 		model.addAttribute("gbMap_OTHEROUT", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_OTHEROUT)));
 		model.addAttribute("gbMap_DELIVERY", groupBookingMap.containsKey(menuCode.concat("_").concat(PermissionConstants.YDAP_DELIVERY)));
 
-		return "operation/group-booking-list-table";
+		model.addAttribute("isShow", isShow);
+		if(isShow == 1){
+			return "operation/group-booking-list-table";
+		}else {
+			return "operation/group-booking-sale-list-table";
+		}
 	}
 
 	// private Integer getCountByGroupId(List<Map<String, Object>> list,
@@ -8988,4 +9072,389 @@ public class QueryController extends BaseController {
 //		}
 //		return appContext.getBean(svc, CommonFacade.class);
 //	}
+
+	/**
+	 * 资源订单统计
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping("queryBookingDetailProfit.htm")
+	public String queryBookingDetailProfit(HttpServletRequest request,
+										   HttpServletResponse response, ModelMap model) {
+		Integer bizId = WebUtils.getCurBizId(request);
+		List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
+		model.addAttribute("bizId", bizId);
+		model.addAttribute("cashType", cashTypes);
+
+		//获取URL请求路径中的参数supplierType
+		Map<String, Object> supMap = WebUtils.getQueryParamters(request);
+		String supplierType = (String)supMap.get("supplierType");
+		model.addAttribute("supplierType", Integer.valueOf(supplierType));
+		return "queries/hotel/supplierDetailQuery";
+	}
+
+	/**
+	 * 资源订单统计2
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping("queryBookingDetailProfitTwo.htm")
+	public String queryBookingDetailProfit2(HttpServletRequest request,
+											HttpServletResponse response, ModelMap model) {
+		Integer bizId = WebUtils.getCurBizId(request);
+		List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
+		model.addAttribute("bizId", bizId);
+		model.addAttribute("cashType", cashTypes);
+		Map<String, Object> pmRequest = WebUtils.getQueryParamters(request);
+		String supplierType = (String) pmRequest.get("supplierType");
+		model.addAttribute("supplierType", Integer.valueOf(supplierType));
+		return "queries/hotel/supplierDetailQueryTwo";
+	}
+
+	/**
+	 * 资源车队统计
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping("querySupplierCarDetail.htm")
+	public String querySupplierCarDetail(HttpServletRequest request,
+										 HttpServletResponse response, ModelMap model) {
+		Integer bizId = WebUtils.getCurBizId(request);
+		List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
+		model.addAttribute("bizId", bizId);
+		model.addAttribute("cashType", cashTypes);
+		model.addAttribute("include","1");
+		return "queries/car/querySupplierCarList";
+	}
+	@RequestMapping("querySupplierCarDetail2.htm")
+	public String querySupplierCarDetail2(HttpServletRequest request,
+										  HttpServletResponse response, ModelMap model) {
+		Integer bizId = WebUtils.getCurBizId(request);
+		List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
+		model.addAttribute("bizId", bizId);
+		model.addAttribute("cashType", cashTypes);
+		model.addAttribute("include","0");
+		return "queries/car/querySupplierCarList";
+	}
+
+	/**
+	 * 资源车队统计-Table
+	 * @param request
+	 * @param reponse
+	 * @param model
+	 * @param sl
+	 * @param ssl
+	 * @param rp
+	 * @param page
+	 * @param pageSize
+	 * @param svc
+	 * @return
+	 */
+	@RequestMapping("queryBookingSupplierCar_Table")
+	public String queryBookingSupplierCar_Table(HttpServletRequest request,
+												HttpServletResponse reponse, ModelMap model, String sl, String ssl,
+												String rp, Integer page, Integer pageSize, String svc) {
+		@SuppressWarnings("rawtypes")
+		Map paramters = WebUtils.getQueryParamters(request);
+
+		// 如果选择了【省份】作为查询条件
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("bizId", paramters.get("bizId"));
+
+		//获取供应商类别
+		String className = ObjectUtils.toString(paramters.get("className"));
+		Map<String,Object> supplierIdsOtherMap = new HashMap<String,Object>();
+		if(!ObjectUtils.isNull(className.trim())){
+			Map<String,Object> supplierParams = new HashMap<String,Object>();
+			supplierParams.put("supplierType",Constants.FLEET);
+			supplierParams.put("className",className);
+			//获取供应商id集合
+			List<Integer> ids = supplierSerivce.getSupplierIds(supplierParams);
+			if(null != ids && ids.size() > 0){
+				supplierIdsOtherMap.put("classNameSupplierIds",ids);
+			}else{
+				PageBean pageBean = new PageBean();
+				model.addAttribute("pageBean", pageBean);
+				return rp;
+			}
+		}
+
+		@SuppressWarnings("rawtypes")
+		PageBean pb = commonQuery(request,supplierIdsOtherMap,model, sl, page, pageSize, svc);
+
+		// 总计查询
+		if (StringUtils.isNotBlank(ssl)) {
+			Map<String, Object> pm = (Map<String, Object>) pb.getParameter();
+			pm.put("parameter", pm);
+			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
+		}
+
+		return rp;
+	}
+
+
+	@RequestMapping("queryBookingDetailProfit_TableTwo")
+	public String queryBookingDetailProfit_TableTwo(HttpServletRequest request,
+													HttpServletResponse reponse, ModelMap model, String sl, String ssl,
+													String rp, Integer page, Integer pageSize, String svc) {
+		@SuppressWarnings("rawtypes")
+		Map paramters = WebUtils.getQueryParamters(request);
+
+		// 如果选择了【省份】作为查询条件
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("bizId", paramters.get("bizId"));
+
+
+		@SuppressWarnings("rawtypes")
+		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
+
+		// 总计查询
+		if (StringUtils.isNotBlank(ssl)) {
+			Map<String, Object> pm = (Map<String, Object>) pb.getParameter();
+			pm.put("parameter", pm);
+			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
+		}
+
+		return rp;
+	}
+
+	@RequestMapping("queryBookingDetailProfit_Table")
+	public String queryBookingDetailProfit_Table(HttpServletRequest request,
+												 HttpServletResponse reponse, ModelMap model, String sl, String ssl,
+												 String rp, Integer page, Integer pageSize, String svc) {
+		@SuppressWarnings("rawtypes")
+		Map paramters = WebUtils.getQueryParamters(request);
+
+		// 如果选择了【省份】作为查询条件
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("bizId", paramters.get("bizId"));
+
+
+		@SuppressWarnings("rawtypes")
+		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
+
+		// 总计查询
+		if (StringUtils.isNotBlank(ssl)) {
+			Map<String, Object> pm = (Map<String, Object>) pb.getParameter();
+			pm.put("parameter", pm);
+			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
+		}
+
+		return rp;
+	}
+
+	@RequestMapping(value = "saleDeliveryDetailPreview.htm")
+	public String saleDeliveryDetailPreview(HttpServletRequest request,
+											HttpServletResponse reponse, ModelMap model, String sl, String ssl,
+											String rp, Integer page, Integer pageSize, String svc) {
+		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+		String imgPath = bizSettingCommon.getMyBizLogo(request);
+		model.addAttribute("imgPath", imgPath);
+
+		model.addAttribute("printName", WebUtils.getCurUser(request).getName());
+
+		return "/queries/saleDeliveryDetailPreview";
+	}
+
+	/**
+	 * 其他收入、其他支出导出excel
+	 *
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param sl
+	 * @param ssl
+	 * @param rp
+	 * @param page
+	 * @param pageSize
+	 * @param svc
+	 */
+	@RequestMapping("saleDeliveryExportExcel.do")
+	public void saleDeliveryExportExcel(HttpServletRequest request,
+										HttpServletResponse response, ModelMap model, String sl,
+										String ssl, String rp, Integer page, Integer pageSize, String svc) {
+		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+
+		String path = "";
+		BigDecimal total = new BigDecimal(0);
+		BigDecimal totalCash = new BigDecimal(0);
+		BigDecimal totalBalance = new BigDecimal(0);
+		BigDecimal totalSale = new BigDecimal(0);
+		BigDecimal profit = new BigDecimal(0);
+		long totalAdult = 0;
+		long totalChild = 0;
+		long totalGuide = 0;
+		try {
+			String url = "";
+			url = request.getSession().getServletContext()
+					.getRealPath("/template/excel/sale_delivery_bookings.xlsx");
+
+			FileInputStream input = new FileInputStream(new File(url)); // 读取的文件路径
+			XSSFWorkbook wb = new XSSFWorkbook(new BufferedInputStream(input));
+			CellStyle cellStyle = wb.createCellStyle();
+			cellStyle.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			cellStyle.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			cellStyle.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			cellStyle.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			cellStyle.setAlignment(CellStyle.ALIGN_CENTER); // 居中
+
+			CellStyle styleLeft = wb.createCellStyle();
+			styleLeft.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleLeft.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleLeft.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleLeft.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleLeft.setAlignment(CellStyle.ALIGN_LEFT); // 居左
+			styleLeft.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+			styleLeft.setWrapText(true);
+
+			CellStyle styleRight = wb.createCellStyle();
+			styleRight.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+			styleRight.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+			styleRight.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+			styleRight.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+			styleRight.setAlignment(CellStyle.ALIGN_RIGHT); // 居右
+			Sheet sheet = wb.getSheetAt(0); // 获取到第一个sheet
+			Row row = null;
+			Cell cc = null;
+			// 遍历集合数据，产生数据行
+			List<Map<String, Object>> result = pb.getResult();
+			int index = 0;
+			for (Map<String, Object> map : result) {
+				row = sheet.createRow(index + 3);
+				cc = row.createCell(0);
+				cc.setCellValue(index + 1);
+				cc.setCellStyle(cellStyle);
+				cc = row.createCell(1);
+				cc.setCellValue(map.get("group_code") + "");
+				cc.setCellStyle(styleLeft);
+				cc = row.createCell(2);
+				cc.setCellValue(map.get("date_arrival") + "");
+				cc.setCellStyle(styleLeft);
+				cc = row.createCell(3);
+				cc.setCellValue(map.get("supplier_name") + "");
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(4);
+				cc.setCellValue(map.get("receive_mode") + "");
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(5);
+				cc.setCellValue((Integer) map.get("group_mode") > 0 ? "团队"
+						: "散客");
+				cc.setCellStyle(styleLeft);
+				cc = row.createCell(6);
+				cc.setCellValue(map.get("total_adult") + "大"
+						+ map.get("total_child") + "小" + map.get("total_guide")
+						+ "陪");
+				cc.setCellStyle(styleLeft);
+				cc = row.createCell(7);
+				cc.setCellValue("【" + map.get("product_brand_name") + "】"
+						+ map.get("product_name"));
+				cc.setCellStyle(styleLeft);
+
+				cc = row.createCell(8);
+				cc.setCellValue(map.get("detailInfo") == null ? "" : map
+						.get("detailInfo").toString().replace(";", "\n"));
+				cc.setCellStyle(styleLeft);
+				cc = row.createCell(9);
+				BigDecimal total2 = new BigDecimal(0);
+				total2 = total2.add((BigDecimal) map.get("total"));
+				cc.setCellValue(total2.doubleValue());
+				// cc.setCellValue(map.get("total") + "");
+				cc.setCellStyle(cellStyle);
+				cc = row.createCell(10);
+				BigDecimal totalSale2 = new BigDecimal(0);
+				totalSale2 = totalSale2.add((BigDecimal) map.get("totalSale"));
+				cc.setCellValue(totalSale2.doubleValue());
+				// cc.setCellValue(map.get("totalCash") + "");
+				cc.setCellStyle(cellStyle);
+				cc = row.createCell(11);
+				// BigDecimal itemPrice = new BigDecimal(0);
+				// itemPrice = itemPrice.add((BigDecimal)
+				// map.get("item_price"));
+				cc.setCellValue(total2.subtract(totalSale2).doubleValue());
+				cc.setCellStyle(cellStyle);
+				cc = row.createCell(12);
+				// BigDecimal itemNum = new BigDecimal(0);
+				// itemNum = itemNum.add((BigDecimal) map.get("item_num"));
+				cc.setCellValue(map.get("operator_name") + "");
+				cc.setCellStyle(cellStyle);
+
+				index++;
+				totalAdult += (Long) map.get("total_adult");
+				totalChild += (Long) map.get("total_child");
+				totalGuide += (Long) map.get("total_guide");
+				total = total.add((BigDecimal) map.get("total"));
+				totalCash = totalCash.add((BigDecimal) map.get("totalCash"));
+				totalSale= totalSale.add((BigDecimal) map.get("totalSale"));
+				//	totalBalance = totalBalance.add(totalSale.subtract(total));
+				profit=total.subtract(totalSale);
+			}
+			row = sheet.createRow(pb.getResult().size() + 3); // 加合计行
+			cc = row.createCell(0);
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(1);
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(2);
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(3);
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(4);
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(5);
+			cc.setCellValue("合计：");
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(6);
+			cc.setCellValue(String.valueOf(totalAdult) + "大"
+					+ String.valueOf(totalChild) + "小"
+					+ String.valueOf(totalGuide) + "陪");
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(7);
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(8);
+			// cc.setCellValue("合计：");
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(9);
+			cc.setCellValue(total.doubleValue());
+			cc.setCellStyle(cellStyle);
+			cc = row.createCell(10);
+			cc.setCellValue(totalSale.doubleValue());
+			cc.setCellStyle(styleRight);
+
+
+			cc = row.createCell(11);
+			cc.setCellValue(profit.doubleValue());
+			// cc.setCellValue(totalCash2.intValue());
+			cc.setCellStyle(styleRight);
+			cc = row.createCell(12);
+			// cc.setCellValue(totalBalance2.doubleValue());
+			cc.setCellStyle(cellStyle);
+
+			CellRangeAddress region = new CellRangeAddress(pb.getResult()
+					.size() + 4, pb.getResult().size() + 4, 0, 12);
+			sheet.addMergedRegion(region);
+			// row = sheet.getRow(orders.size()+3); //打印信息
+			row = sheet.createRow(pb.getResult().size() + 4);
+			cc = row.createCell(0);
+			cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName()
+					+ " 打印时间："
+					+ DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+			path = request.getSession().getServletContext().getRealPath("/")
+					+ "/download/" + System.currentTimeMillis() + ".xlsx";
+			FileOutputStream out = new FileOutputStream(path);
+			wb.write(out);
+			out.close();
+			wb.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		download2(path, request, response);
+		// return "";
+	}
 }

@@ -28,6 +28,7 @@ import com.yimayhd.erpcenter.dal.sys.po.PlatAuth;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatAuthFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
+import com.yimayhd.erpresource.dal.po.SupplierContractPrice;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.http.HttpEntity;
@@ -176,19 +177,25 @@ public class BookingDeliveryController extends BaseController {
         return "/operation/delivery/supplierTable";
     }
     
-    @RequestMapping("deliveryList.htm")
+    @RequestMapping("deliveryList2.htm")
     @RequiresPermissions(PermissionConstants.JDGL_ANGENCY)
-    public String deliveryList(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
+    public String deliveryList2(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
         model.addAttribute("supplierType", Constants.LOCALTRAVEL);
 //		Integer bizId = WebUtils.getCurBizId(request);
 //		getOrgAndUserTreeJsonStr(model, bizId);
-        return "/operation/delivery/delivery-list";
+        Map<String, Object> pm = WebUtils.getQueryParamters(request);
+        String isShow = (String) pm.get("isShow");
+        if(isShow == null){
+            isShow = "0";
+        }
+        model.addAttribute("isShow", Integer.valueOf(isShow));
+        return "/operation/delivery/delivery-list2";
     }
     
     
-    @RequestMapping("deliveryList.do")
+    @RequestMapping("deliveryList2.do")
     @RequiresPermissions(PermissionConstants.JDGL_ANGENCY)
-    public String deliveryList(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroupVO group) {
+    public String deliveryList2(HttpServletRequest request, HttpServletResponse response, ModelMap model,Integer isShow, TourGroupVO group) {
         PageBean pageBean = new PageBean();
         if (group.getPage() == null) {
             pageBean.setPage(1);
@@ -227,10 +234,80 @@ public class BookingDeliveryController extends BaseController {
         pageBean = bookingDeliveryFacade.getLocalTravelAngencyGroupList(pageBean, group, WebUtils.getDataUserIdSet(request));
         
         model.addAttribute("pageBean", pageBean);
+        model.addAttribute("isShow", isShow);
+        model.addAttribute("supplierType", group.getSupplierType());
+        return "/operation/delivery/delivery-list-table2";
+    }
+    @RequestMapping("deliveryList.htm")
+    @RequiresPermissions(PermissionConstants.JDGL_ANGENCY)
+    public String deliveryList(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
+        model.addAttribute("supplierType", Constants.LOCALTRAVEL);
+//		Integer bizId = WebUtils.getCurBizId(request);
+//		getOrgAndUserTreeJsonStr(model, bizId);
+        Map<String, Object> pm = WebUtils.getQueryParamters(request);
+        String isShow = (String) pm.get("isShow");
+        if(isShow == null){
+            isShow = "0";
+        }
+        model.addAttribute("isShow", Integer.valueOf(isShow));
+        return "/operation/delivery/delivery-list";
+    }
+
+
+    @RequestMapping("deliveryList.do")
+    @RequiresPermissions(PermissionConstants.JDGL_ANGENCY)
+    public String deliveryList(HttpServletRequest request, HttpServletResponse response, ModelMap model,Integer isShow, TourGroupVO group) {
+        PageBean pageBean = new PageBean();
+        if (group.getPage() == null) {
+            pageBean.setPage(1);
+        } else {
+            pageBean.setPage(group.getPage());
+        }
+        if (group.getPageSize() == null) {
+            pageBean.setPageSize(Constants.PAGESIZE);
+        } else {
+            pageBean.setPageSize(group.getPageSize());
+        }
+
+        //如果人员为空并且部门不为空，则取部门下的人id
+//        if (StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())) {
+//            Set<Integer> set = new HashSet<Integer>();
+//            String[] orgIdArr = group.getOrgIds().split(",");
+//            for (String orgIdStr : orgIdArr) {
+//                set.add(Integer.valueOf(orgIdStr));
+//            }
+//            set = sysPlatformEmployeeFacade.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//            String salesOperatorIds = "";
+//            for (Integer usrId : set) {
+//                salesOperatorIds += usrId + ",";
+//            }
+//            if (!salesOperatorIds.equals("")) {
+//                group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
+//            }
+//        }
+        group.setSaleOperatorIds(productCommonFacade.setSaleOperatorIds(group.getSaleOperatorIds(),
+                group.getOrgIds(), WebUtils.getCurBizId(request)));
+        //group.setSupplierType(Constants.GUIDE);
+        group.setBizId(WebUtils.getCurBizId(request));
+        pageBean.setParameter(group);
+
+//        pageBean = tourGroupService.getLocalTravelAngencyGroupList(pageBean, group, WebUtils.getDataUserIdSet(request));
+        pageBean = bookingDeliveryFacade.getLocalTravelAngencyGroupList(pageBean, group, WebUtils.getDataUserIdSet(request));
+
+        model.addAttribute("pageBean", pageBean);
+        model.addAttribute("isShow", isShow);
         model.addAttribute("supplierType", group.getSupplierType());
         return "/operation/delivery/delivery-list-table";
     }
-    
+    @RequestMapping("deliveryBookingList2.htm")
+    @RequiresPermissions(PermissionConstants.JDGL_ANGENCY)
+    public String deliveryOrderList2(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer gid,Integer isShow) {
+        BookingDeliveryResult result = bookingDeliveryFacade.getDeliveryBookingDetailList(gid);
+        model.addAttribute("list", result.getBookingDeliveries());
+        model.addAttribute("isShow", isShow);
+        model.addAttribute("deliverBroker", getDeliveryBrokerUser(request));
+        return "/operation/delivery/delivery-booking-list2";
+    }
     /**
      * 地接社预定列表
      *
@@ -242,7 +319,7 @@ public class BookingDeliveryController extends BaseController {
      */
     @RequestMapping("deliveryBookingList.htm")
     @RequiresPermissions(PermissionConstants.JDGL_ANGENCY)
-    public String deliveryOrderList(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer gid) {
+    public String deliveryOrderList(HttpServletRequest request, HttpServletResponse response, ModelMap model,Integer isShow, Integer gid) {
 //        List<BookingDelivery> list = deliveryService.getDeliveryListByGroupId(gid);
 //        if (list != null && list.size() > 0) {
 //            for (BookingDelivery delivery : list) {
@@ -251,6 +328,7 @@ public class BookingDeliveryController extends BaseController {
 //        }
         BookingDeliveryResult result = bookingDeliveryFacade.getDeliveryBookingDetailList(gid);
         model.addAttribute("list", result.getBookingDeliveries());
+        model.addAttribute("isShow", isShow);
         model.addAttribute("deliverBroker", getDeliveryBrokerUser(request));
         return "/operation/delivery/delivery-booking-list";
     }
@@ -281,6 +359,184 @@ public class BookingDeliveryController extends BaseController {
         model.addAttribute("deliverBroker", getDeliveryBrokerUser(request));
         return "/operation/delivery/group-delivery-booking-list";
     }
+
+    /**
+     * 跳转->添加附加价页面
+     * @param request
+     * @param response
+     * @param model
+     * @return
+     */
+    @RequestMapping(value = "bookingDeliverySubjoinPriceAddList.htm")
+    public String bookingDeliverySubjoinPriceAddList(HttpServletRequest request,HttpServletResponse response,
+                                                     ModelMap model,Integer supplierId,Integer isShow,String dateArrival){
+        model.addAttribute("supplierId", supplierId);
+        model.addAttribute("isShow", isShow);
+        model.addAttribute("dateArrival", dateArrival);
+        return "/operation/delivery/delivery-subjoin-add-list";
+    }
+
+    /**
+     * 添加附加价-table
+     * @param request
+     * @param response
+     * @param model
+     * @return
+     */
+    @RequestMapping(value = "deliverySubJoinPriceAddTable.do")
+    public String deliverySubJoinPriceAddTable(HttpServletRequest request,HttpServletResponse response,ModelMap model,
+                                               String productName,Integer supplierId,Integer page,Integer pageSize,Integer isShow,String dateArrival){
+        int bizId = WebUtils.getCurBizId(request);
+        PageBean pageBean = new PageBean();
+
+        SupplierContractPrice scpBean = new SupplierContractPrice();
+        scpBean.setProductName(productName);
+        scpBean.setDateArrival(dateArrival);
+
+        if (page == null) {
+            pageBean.setPage(1);
+        } else {
+            pageBean.setPage(page);
+        }
+
+        if (pageSize == null) {
+            pageBean.setPageSize(Constants.PAGESIZE);
+        } else {
+            pageBean.setPageSize(pageSize);
+        }
+        pageBean.setParameter(scpBean);
+        pageBean = contractService.findJoinPriceListPage(pageBean,supplierId,WebUtils.getCurBizId(request));
+        model.addAttribute("pageBean", pageBean);
+        model.addAttribute("isShow", isShow);
+        return "/operation/delivery/delivery-subjoin-add-table";
+    }
+
+    /**
+     * 跳转到添加基础价页面
+     * @param request
+     * @param response
+     * @param model
+     * @return
+     */
+    @RequestMapping(value = "bookingDeliveryBasePriceAddList.htm")
+    public String bookingDeliveryBasePriceAddList(HttpServletRequest request,HttpServletResponse response,
+                                                  ModelMap model,Integer supplierId,Integer isShow,String dateArrival){
+        int bizId = WebUtils.getCurBizId(request);
+        //获取项目信息
+        List<DicInfo> typeList = dicService.getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
+        model.addAttribute("typeList", typeList);
+        model.addAttribute("supplierId", supplierId);
+        model.addAttribute("isShow", isShow);
+        model.addAttribute("dateArrival", dateArrival);
+        return "/operation/delivery/delivery-base-add-list";
+    }
+
+    /**
+     * 添加基础价页面Table加载
+     * @param request
+     * @param response
+     * @param model
+     * @return
+     */
+    @RequestMapping(value = "deliveryBasePriceAddTable.do")
+    public String deliveryBasePriceAddTable(HttpServletRequest request,HttpServletResponse response,ModelMap model,
+                                            Integer itemType,String productName,Integer supplierId,Integer page,Integer pageSize,Integer isShow,String dateArrival){
+        int bizId = WebUtils.getCurBizId(request);
+        //获取项目信息
+        List<DicInfo> typeList = dicService.getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
+        SupplierContractPrice scpBean = new SupplierContractPrice();
+        scpBean.setItemType(itemType);
+        scpBean.setProductName(productName);
+        scpBean.setDateArrival(dateArrival);
+        PageBean pageBean = new PageBean();
+
+        if (page == null) {
+            pageBean.setPage(1);
+        } else {
+            pageBean.setPage(page);
+        }
+
+        if (pageSize == null) {
+            pageBean.setPageSize(Constants.PAGESIZE);
+        } else {
+            pageBean.setPageSize(pageSize);
+        }
+        pageBean.setParameter(scpBean);
+        pageBean = contractService.findBasePriceListPage(pageBean,supplierId,WebUtils.getCurBizId(request));
+        model.addAttribute("pageBean", pageBean);
+        model.addAttribute("isShow", isShow);
+        return "/operation/delivery/delivery-base-add-table";
+    }
+
+
+    /**
+     * 地接社订单-修改
+     * @param request
+     * @param response
+     * @param model
+     * @param gid
+     * @param bid
+     * @return
+     */
+    @RequestMapping("bookingDeliveryEdit.htm")
+    //@RequiresPermissions(PermissionConstants.JDGL_ANGENCY)
+    public String bookingDeliveryEdit(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer gid, Integer bid,Integer isShow) {
+        loadBookingDeliveryInfo(request, model, gid, bid);
+        model.addAttribute("isShow", isShow);
+        return "/operation/delivery/delivery-edit-new";
+    }
+
+    /**
+     * 地接社订单-查看
+     * @param request
+     * @param response
+     * @param model
+     * @param gid
+     * @param bid
+     * @return
+     */
+    @RequestMapping("bookingDeliveryView.htm")
+    //@RequiresPermissions(PermissionConstants.JDGL_ANGENCY)
+    public String bookingDeliveryView(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer gid, Integer bid,Integer isShow) {
+        // 添加新价格项目类型字典
+        loadBookingDeliveryInfo(request, model, gid, bid);
+        model.addAttribute("view", 1);
+        model.addAttribute("isShow", isShow);
+        return "/operation/delivery/delivery-edit-new";
+    }
+
+    private void loadBookingDeliveryInfo(HttpServletRequest request, ModelMap model, Integer gid, Integer bid) {
+        int bizId = WebUtils.getCurBizId(request);
+        List<DicInfo> typeList = dicService
+                .getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
+        model.addAttribute("typeList", typeList);
+
+        TourGroup groupInfo = tourGroupService.selectByPrimaryKey(gid);
+        List<GroupRoute> routeList = routeService.selectByGroupId(gid);
+        if (groupInfo.getGroupMode() < 1) {
+            List<GroupOrder> orderList = orderService.selectOrderByGroupId(gid);
+            if (orderList != null && orderList.size() > 0) {
+                for (GroupOrder order : orderList) {
+                    SupplierInfo supplierInfo = supplierSerivce.selectBySupplierId(order.getSupplierId());
+                    if (supplierInfo != null) {
+                        order.setSupplierName(supplierInfo.getNameFull());
+                    }
+                }
+            }
+            model.addAttribute("orderList", orderList);
+        }
+        model.addAttribute("group", groupInfo);
+        /*if(groupInfo!=null && routeList!=null){
+            for(GroupRoute route : routeList){
+				route.setGroupDate(DateUtils.addDays(groupInfo.getDateStart(), route.getDayNum()));
+			}
+		}*/
+        model.addAttribute("routeList", routeList);
+        if (bid != null) {
+            BookingDelivery delivery = deliveryService.loadBookingInfoById(bid);
+            model.addAttribute("booking", delivery);
+        }
+    }
     
     @RequestMapping("delivery.htm")
     //@RequiresPermissions(PermissionConstants.JDGL_ANGENCY)
@@ -288,6 +544,7 @@ public class BookingDeliveryController extends BaseController {
         loadAngencyInfo(request, model, gid, bid);
         return "/operation/delivery/delivery-edit";
     }
+
 
     @RequestMapping("AYDelivery.htm")
     public String AYDelivery(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer gid, Integer bid, Integer see, Integer orderId) {
@@ -1422,8 +1679,14 @@ public class BookingDeliveryController extends BaseController {
     public String pushList(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
 
         List<PlatAuth> paList = sysPlatAuthFacade.findByBizIdAndOrgNotZero(WebUtils.getCurBizId(request)).getPlatAuthList();
+        List<PlatAuth> platAuthList = new ArrayList<PlatAuth>();
 
-        model.addAttribute("platAuth", paList);
+        for (PlatAuth platAuth : paList) {
+            if (platAuth.getOrgId().equals(WebUtils.getCurOrgInfo(request).getParentId())) {
+                platAuthList.add(platAuth);
+            }
+        }
+        model.addAttribute("platAuth", platAuthList);
 
         return "/operation/delivery/push_delivery_list";
     }
@@ -1456,70 +1719,83 @@ public class BookingDeliveryController extends BaseController {
 
     @RequestMapping("pushRemoteSave.do")
     @ResponseBody
-    public String pushRemoteSave(HttpServletRequest request, Integer groupId, Integer bookingId,
-                                 String fromAppKey, String fromSecretKey, String toAppKey) {
-        WebResult<String> webResult =  bookingDeliveryFacade.pushRemoteSave(groupId, bookingId, WebUtils.getCurBizId(request), fromAppKey, fromSecretKey, toAppKey);
-        String jsonStr;
+    public String pushRemoteSave(HttpServletRequest request,String pushParam,
+                                 String fromAppKey, String fromSecretKey) {
+        if (StringUtils.isNotBlank(pushParam)) {
+            String[] paramArr = pushParam.split("#");
+            if (paramArr.length > 0) {
+                for (String str : paramArr) {
+                    Integer groupId = Integer.parseInt(str.split(",")[0]);
+                    Integer bookingId = Integer.parseInt(str.split(",")[1]);
+                    String toAppKey = str.split(",")[2];
+                    WebResult<String> webResult = bookingDeliveryFacade.pushRemoteSave(groupId, bookingId, WebUtils.getCurBizId(request), fromAppKey, fromSecretKey, toAppKey);
+                    String jsonStr;
 
-        if(webResult.isSuccess()){
-            jsonStr = webResult.getValue();
-        }else{
-            return errorJson("推送信息失败,请检查信息是否正确");
-        }
-
-
-
-        String resultString;
-        try {
-            String timeStamp = DateUtil.date2Str(new Date(), "yyyy-MM-dd HH:mm:ss");
-
-            // 签名
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("appKey", fromAppKey);
-            params.put("timestamp", timeStamp);
-            String getSign = MD5Util.getSign_Taobao(fromSecretKey, params);
-
-            // 访问参数
-            List<NameValuePair> nameValuePairList = new ArrayList<NameValuePair>();
-            nameValuePairList.add(new BasicNameValuePair("fromAppKey", fromAppKey));
-            nameValuePairList.add(new BasicNameValuePair("timestamp", timeStamp));
-            nameValuePairList.add(new BasicNameValuePair("sign", getSign));
-            nameValuePairList.add(new BasicNameValuePair("toAppKey", toAppKey));
-            nameValuePairList.add(new BasicNameValuePair("jsonStr", jsonStr));
-
-            HttpPost httpPost = new HttpPost(OpenPlatformConstannt.openAPI_OrderMap.get("Url")
-                    + OpenPlatformConstannt.openAPI_OrderMap.get("pushMethod"));
-
-            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairList, "utf-8"));
-            // 访问接口
-            CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
-
-            CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpPost);
-
-            try {
-                HttpEntity httpEntity = closeableHttpResponse.getEntity();
-                resultString = EntityUtils.toString(httpEntity);
-                JSONObject jsonObject = JSON.parseObject(resultString);
-
-                if (jsonObject.get("result").equals("success")) {
-                    // 更新状态
-//                    deliveryService.updatePushStatus(bookingId);
-                    WebResult<Boolean> result = bookingDeliveryFacade.updatePushStatus(bookingId);
-                    if(result.isSuccess()){
-                        return successJson();
-                    }else{
+                    if (webResult.isSuccess()) {
+                        jsonStr = webResult.getValue();
+                    } else {
                         return errorJson("推送信息失败,请检查信息是否正确");
                     }
 
-                } else {
-                    return errorJson("推送信息失败,请检查信息是否正确");
+
+                    String resultString;
+                    try {
+                        String timeStamp = DateUtil.date2Str(new Date(), "yyyy-MM-dd HH:mm:ss");
+
+                        // 签名
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("appKey", fromAppKey);
+                        params.put("timestamp", timeStamp);
+                        String getSign = MD5Util.getSign_Taobao(fromSecretKey, params);
+
+                        // 访问参数
+                        List<NameValuePair> nameValuePairList = new ArrayList<NameValuePair>();
+                        nameValuePairList.add(new BasicNameValuePair("fromAppKey", fromAppKey));
+                        nameValuePairList.add(new BasicNameValuePair("timestamp", timeStamp));
+                        nameValuePairList.add(new BasicNameValuePair("sign", getSign));
+                        nameValuePairList.add(new BasicNameValuePair("toAppKey", toAppKey));
+                        nameValuePairList.add(new BasicNameValuePair("jsonStr", jsonStr));
+
+                        HttpPost httpPost = new HttpPost(OpenPlatformConstannt.openAPI_OrderMap.get("Url")
+                                + OpenPlatformConstannt.openAPI_OrderMap.get("pushMethod"));
+
+                        httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairList, "utf-8"));
+                        // 访问接口
+                        CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
+
+                        CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpPost);
+
+                        try {
+                            HttpEntity httpEntity = closeableHttpResponse.getEntity();
+                            resultString = EntityUtils.toString(httpEntity);
+                            JSONObject jsonObject = JSON.parseObject(resultString);
+
+                            if (jsonObject.get("result").equals("success")) {
+                                // 更新状态
+//                    deliveryService.updatePushStatus(bookingId);
+                                WebResult<Boolean> result = bookingDeliveryFacade.updatePushStatus(bookingId);
+                                if (result.isSuccess()) {
+                                    return successJson();
+                                } else {
+                                    return errorJson("推送信息失败,请检查信息是否正确");
+                                }
+
+                            } else {
+                                return errorJson("推送信息失败,请检查信息是否正确");
+                            }
+                        } finally {
+                            closeableHttpResponse.close();
+                        }
+                    } catch (Exception ex) {
+                        return errorJson("推送信息异常" + ex.getMessage());
+                    }
                 }
-            } finally {
-                closeableHttpResponse.close();
             }
-        } catch (Exception ex) {
-            return errorJson("推送信息失败,请检查信息是否正确");
+        }else {
+            return errorJson("推送信息失败,参数有误");
         }
+
+        return successJson();
     }
 
 }

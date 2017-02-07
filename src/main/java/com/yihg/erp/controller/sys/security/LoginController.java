@@ -205,7 +205,7 @@ public class LoginController extends BaseController {
                 }
 
 				// 获取当前系统商家名称
-				attrModel.addFlashAttribute("bizName",curBizInfoResult.getName());
+				attrModel.addFlashAttribute("bizName",curBizInfoResult.getName()+"-"+curBizInfo.getCode());
 
 				return "redirect:index.htm";
             } else {
