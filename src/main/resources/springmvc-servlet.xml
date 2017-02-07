@@ -60,6 +60,9 @@
 	</bean>
 
 	<bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape" />
+	<bean id="yihgTemplateFreemarkerService" class="com.yihg.common.YihgTemplateFreemarkerService">
+		<property name="freeMarkerConfigurer" ref="freemarkerConfig"/>
+	</bean>
 	<!-- 配置freeMarker视图解析器 -->
 	<bean id="freemarkerViewResolver"
 		  class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
@@ -120,6 +123,7 @@
 						<value>/b2b/**</value>
 						<value>/taobaoJst/**</value>
 						<value>/visa.**</value>
+						<value>/ticketCenter/**</value>
 					</list>
 				</property>
 			</bean>
