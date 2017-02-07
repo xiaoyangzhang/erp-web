@@ -33,7 +33,7 @@ public class HttpUtil {
      * @param map 参数
      * @return 远程数据
      */
-    public static String RemoteAccess(String url, Map<String, String> map) {
+    public static String doPost(String url, Map<String, String> map) {
         CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
         
         HttpPost httpPost = new HttpPost(url);
