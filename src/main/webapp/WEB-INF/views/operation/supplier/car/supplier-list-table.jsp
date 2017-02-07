@@ -82,7 +82,7 @@
 				                  	<td>
 				                  	<c:if test="${groupInfo.groupState eq 1}">
 				                  		<c:if test="${optMap['EDIT'] }">
-				                  			<a class="def" href="javascript:void(0)" onclick="newWindow('新增车辆订单','<%=staticPath %>/booking/toAddCar?groupId=${groupInfo.groupId }')">新增</a>
+				                  			<a class="def" href="javascript:void(0)" onclick="newWindow('新增车辆订单','<%=staticPath %>/booking/toAddCar?groupId=${groupInfo.groupId }&isShow=${isShow }')">新增</a>
 				                  		</c:if>
 				                  	</c:if>
 				                  			<a class="def"  href="javascript:void(0)" onclick="toGroupPreview(${groupInfo.groupId })">打印</a>
@@ -139,8 +139,8 @@ $(document).ready(function () {
  
  
  function loadData(containerId, groupId, supplierType){
-	 
-	 $("#"+containerId).load("carBookingInfo.htm?groupId="+groupId);
+	 var isShow = "${isShow}";
+	 $("#"+containerId).load("carBookingInfo.htm?groupId="+groupId+"&isShow="+isShow);
 	 
  }
  function toGroupPreview(groupId){

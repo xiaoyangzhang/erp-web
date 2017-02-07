@@ -78,7 +78,7 @@
 				                  	<td>				                  	
 				                  	<c:if test="${groupInfo.groupState eq 1}">
 				                  			<c:if test="${optMap['EDIT'] }">
-				                  			<a class="def" href="javascript:void(0)" onclick="newWindow('新增餐饮订单','<%=staticPath %>/booking/toAddEat?groupId=${groupInfo.groupId }')">新增</a>
+				                  			<a class="def" href="javascript:void(0)" onclick="newWindow('新增餐饮订单','<%=staticPath %>/booking/toAddEat?groupId=${groupInfo.groupId }&isShow=${isShow }')">新增</a>
 				                  			</c:if>
 				                  		</c:if>
 				                  </td>
@@ -135,7 +135,8 @@ $(document).ready(function () {
  
  function loadData(containerId, groupId, supplierType){
 	 
-	 $("#"+containerId).load("eatBookingInfo.htm?groupId="+groupId);
+	 var isShow = "${isShow}";
+	 $("#"+containerId).load("eatBookingInfo.htm?groupId="+groupId+"&isShow="+isShow);
 	 
  }
  </script>

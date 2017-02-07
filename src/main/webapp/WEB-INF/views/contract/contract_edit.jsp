@@ -18,6 +18,8 @@
     <%--<script type="text/javascript" src="<%=ctx%>/assets/js/jquery-ui-1.10.3.custom.min.js"></script>--%>
     <%--<script src="<%=ctx%>/assets/js/jquery.validate.min.js"></script>--%>
     <%--<script src="<%=ctx %>/assets/js/My97DatePicker/WdatePicker.js"></script>--%>
+    
+    <script src="<%=ctx %>/assets/js/web-js/contract_edit.js"></script>
     <style>
         .help-block{
             display: inline-block;
@@ -478,8 +480,8 @@
                             <thead>
                             <tr>
                                 <td width="20%">线路品牌</td>
-                                <td width="8%" >成本价</td>
-                                <td width="8%" >销售价</td>
+                                <td width="8%" >结算价</td>
+                                <td width="8%" >采购价</td>
                                 <td width="7%">操作</td>
                             </tr>
                             </thead>
@@ -509,7 +511,7 @@
                                                name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.salePrice" value="${priceExtVo.supplierContractPriceExt.salePrice}" /> 元
                                     </td>
                                     <td>
-                                        <a class="def" href="javascript:void(0)" onclick="deleteSecondLevelPrice(this, '${s.index}');">删除</a>
+                                        <a class="def" href="javascript:void(0)" onclick="deleteSecondLevelPrice(this, '${s.index}','${priceExtVo.supplierContractPriceExt.id}');">删除</a>
                                     </td>
                                 </tr>
                             </c:forEach>
@@ -532,15 +534,21 @@
     	<button type="button" onclick="addPriceInfoRow('DeliveryPriceRow', 'DeliveryPriceData');" class="button button-primary button-small" >添加</button>
         <table cellspacing="0" class="w_table">
         	<colgroup>
-        		<col width="15%" />
-        		<col width="50%" />
-        		<col width="25%" />
+        		<col width="10%" />
+        		<col width="8%" />
+        		<col width="8%" />
+        		<col width="35%" />
+        		<col width="10%" />
+        		<col width="10%" />
         		<col width="10%" />
         	</colgroup>
             <thead>            
 	            <tr>
 	                <th>项目<i class="w_table_split"></i></th>
+	                <th>结算价<i class="w_table_split"></i></th>
+	                <th>采购价<i class="w_table_split"></i></th>
 	                <th>二级协议价<i class="w_table_split"></i></th>
+	                <th>方向<i class="w_table_split"></i></th>
 	                <th>备注<i class="w_table_split"></i></th>
 	                <th>操作</th>
 	            </tr>
@@ -561,18 +569,28 @@
                         </select>
                         <input id="priceVoList[${s.index}].supplierContractPrice.itemTypeName" type="hidden" name="priceVoList[${s.index}].supplierContractPrice.itemTypeName" value="${priceVo.supplierContractPrice.itemTypeName}"/>
                     </td>
-                    
+                	 <!--11 一级结算价 -->
+                	 <td>
+                          <input id="priceVoList[${s.index}].supplierContractPrice.contractPrice" type="text" style="width: 40px;"
+                                 name="priceVoList[${s.index}].supplierContractPrice.contractPrice" value="${priceVo.supplierContractPrice.contractPrice}" /> 元
+                      </td>
+                       <!--11 一级销售价 -->
+                      <td>
+                          <input id="priceVoList[${s.index}].supplierContractPrice.contractSale" type="text" style="width: 40px;"
+                                 name="priceVoList[${s.index}].supplierContractPrice.contractSale" value="${priceVo.supplierContractPrice.contractSale}" /> 元
+                      </td>
                     <td id="secondLevelPrice_${s.index}">
                         <table>
                             <thead>
                             <tr>
                                 <td width="20%">线路品牌</td>
-                                <td width="8%" >成本价</td>
-                                <td width="8%" >销售价</td>
+                                <td width="8%" >结算价</td>
+                                <td width="8%" >采购价</td>
                                 <td width="7%">操作</td>
                             </tr>
                             </thead>
                             <tbody id="secondLevelPriceRow_${s.index}" >
+                            
                             <c:forEach items="${priceVo.priceExtVoList}" var="priceExtVo" varStatus="s2">
                                 <tr>
                                     <td>
@@ -598,13 +616,27 @@
                                                name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.salePrice" value="${priceExtVo.supplierContractPriceExt.salePrice}" /> 元
                                     </td>
                                     <td>
-                                        <a class="def" href="javascript:void(0)" onclick="deleteSecondLevelPrice(this, '${s.index}');">删除</a>
+                                        <a class="def" href="javascript:void(0)" onclick="deleteSecondLevelPrice(this, '${s.index}','${priceExtVo.supplierContractPriceExt.id}');">删除</a>
                                     </td>
                                 </tr>
                             </c:forEach>
                             </tbody>
                         </table>
                         <a href="javascript:void(0);" onclick="addSecLevelPriceInfoRow('${s.index}', 'secondLevelPriceRow_${s.index}', 'secondLevelPriceData');">添加</a>
+                    </td>
+                    <!--55 方向 -->
+                    <td>
+                		<label >
+                			<input type="radio" id="priceVoList[${s.index}].supplierContractPrice.receivablePayable" 
+                				name="priceVoList[${s.index}].supplierContractPrice.receivablePayable" 
+                				value="0" <c:if test="${priceVo.supplierContractPrice.receivablePayable == '0'}"> checked="checked" </c:if> />
+                				<span>应收</span></label>
+						<label >
+							<input type="radio" id="priceVoList[${s.index}].supplierContractPrice.receivablePayable" 
+								name="priceVoList[${s.index}].supplierContractPrice.receivablePayable" 
+								value="1" <c:if test="${priceVo.supplierContractPrice.receivablePayable == 1 }"> checked="checked" </c:if> />
+								<span>应付</span></label>
+								
                     </td>
                     <td>
                         <textarea id="priceVoList[${s.index}].supplierContractPrice.note" class="control-row4 input-large" style="text-align:center;" name="priceVoList[${s.index}].supplierContractPrice.note" >${priceVo.supplierContractPrice.note}</textarea>
@@ -634,8 +666,8 @@
             <tr>
                 <th>类别<i class="w_table_split"></i></th>
                 <%--<th>房型<i class="w_table_split"></i></th>--%>
-                <th>协议价<i class="w_table_split"></i></th>
-                 <th>销售价<i class="w_table_split"></i></th>
+                <th>结算价<i class="w_table_split"></i></th>
+                <th>采购价<i class="w_table_split"></i></th>
                 <th>减免政策<i class="w_table_split"></i></th>
                 <th>备注<i class="w_table_split"></i></th>
                 <th>操作</th>
@@ -693,19 +725,21 @@
         <button type="button" onclick="addPriceInfoRow('commonPriceRow', 'commonPriceData');" class="button button-primary button-small" >添加</button>
         <table cellspacing="0" class="w_table">
             <colgroup>
-                <col width="15%" />
                 <col width="10%" />
-                 <col width="10%" />
-                <col width="25%" />
+                <col width="10%" />
+                <col width="10%" />
+                <col width="20%" />
+                <col width="10%" />
                 <col width="30%" />
                 <col width="10%" />
             </colgroup>
             <thead>
             <tr>
                 <th>项目<i class="w_table_split"></i></th>
-                <th>协议价<i class="w_table_split"></i></th>
-                <th>销售价<i class="w_table_split"></i></th>
+                <th>结算价<i class="w_table_split"></i></th>
+                <th>采购价<i class="w_table_split"></i></th>
                 <th>减免政策<i class="w_table_split"></i></th>
+              	<th>方向<i class="w_table_split"></i></th>
                 <th>备注<i class="w_table_split"></i></th>
                 <th>操作</th>
             </tr>
@@ -757,6 +791,20 @@
                                  name="priceVoList[${s.index}].supplierContractPrice.derateReach" value="${priceVo.supplierContractPrice.derateReach}" /> 免
                         <input id="priceVoList[${s.index}].supplierContractPrice.derateReduction" type="text" style="width: 40px;"
                                name="priceVoList[${s.index}].supplierContractPrice.derateReduction" value="${priceVo.supplierContractPrice.derateReduction}" />
+                    </td>
+                   <!--55 方向 -->
+                    <td>
+                		<label >
+                			<input type="radio" id="priceVoList[${s.index}].supplierContractPrice.receivablePayable" 
+                				name="priceVoList[${s.index}].supplierContractPrice.receivablePayable" 
+                				value="${priceVo.supplierContractPrice.receivablePayable}" <c:if test="${priceVo.supplierContractPrice.receivablePayable == 0}"> checked="checked" </c:if> />
+                				<span>应收</span></label>
+						<label >
+							<input type="radio" id="priceVoList[${s.index}].supplierContractPrice.receivablePayable" 
+								name="priceVoList[${s.index}].supplierContractPrice.receivablePayable" 
+								value="${priceVo.supplierContractPrice.receivablePayable}" <c:if test="${priceVo.supplierContractPrice.receivablePayable == 1 }"> checked="checked" </c:if> />
+								<span>应付</span></label>
+								
                     </td>
                     <td>
                         <textarea id="priceVoList[${s.index}].supplierContractPrice.note" class="control-row4 input-large" style="text-align:center;"
@@ -884,8 +932,8 @@
                     <thead>
                     <tr>
                         <td width="20%">线路品牌</td>
-                        <td width="8%">成本价</td>
-                        <td width="8%">销售价</td>
+                        <td width="8%">结算价</td>
+                        <td width="8%">采购价</td>
                         <td width="7%">操作</td>
                     </tr>
                     </thead>
@@ -909,22 +957,35 @@
             <tbody>
             <tr>
                 <td>
-                    <select id="priceVoList[$index].supplierContractPrice.itemType" name="priceVoList[$index].supplierContractPrice.itemType" onchange="$(this).next('input').val(this.options[this.selectedIndex].text);">
+                    <select id="priceVoList[$index].supplierContractPrice.itemType" 
+                    		name="priceVoList[$index].supplierContractPrice.itemType" 
+                    		onchange="$(this).next('input').val(this.options[this.selectedIndex].text);">
                         <option  value="">请选择</option>
                          <c:if test="${supplierContractVo.supplierInfo.supplierType eq 16}">
                         <c:forEach items="${dictTypeList}" var="type">
                             <option value="${type.id}">${type.value}</option>
                         </c:forEach></c:if>
                     </select>
-                    <input type="hidden" id="priceVoList[$index].supplierContractPrice.itemTypeName" name="priceVoList[$index].supplierContractPrice.itemTypeName" value="" />
+                    <input type="hidden" id="priceVoList[$index].supplierContractPrice.itemTypeName" 
+                    name="priceVoList[$index].supplierContractPrice.itemTypeName" 
+                    value="" />
                 </td>
+                <!--22 一级结算价 -->
+                <td><input type="text" id="priceVoList[$index].supplierContractPrice.contractPrice" style="width: 40px;" 
+                		name="priceVoList[$index].supplierContractPrice.contractPrice" 
+                		value="0.0" />元</td>
+                <!--22 一级销售价 -->	
+                <td><input type="text" id="priceVoList[$index].supplierContractPrice.contractSale" style="width: 40px;" 
+                		name="priceVoList[$index].supplierContractPrice.contractSale" 
+                		value="0.0" />元</td>
+               
                 <td id="secondLevelPrice_$index">
                     <table>
                         <thead>
                             <tr>
                                 <td width="20%">线路品牌</td>
-                                <td width="8%">成本价</td>
-                                <td width="8%">销售价</td>
+                                <td width="8%">结算价</td>
+                                <td width="8%">采购价</td>
                                 <td width="7%">操作</td>
                             </tr>
                         </thead>
@@ -934,6 +995,19 @@
                     </table>
                     <a href="javascript:void(0);" onclick="addSecLevelPriceInfoRow('$index', 'secondLevelPriceRow_$index', 'secondLevelPriceData');" class="def">添加</a>
                 </td>
+                 <!--66 方向 -->
+                 <td>
+                	<label >
+                			<input type="radio" id="priceVoList[$index].supplierContractPrice.receivablePayable" 
+                				name="priceVoList[$index].supplierContractPrice.receivablePayable" 
+                				value="0" />
+                				<span>应收</span></label>
+					<label >
+						<input type="radio" id="priceVoList[$index].supplierContractPrice.receivablePayable" 
+							name="priceVoList[$index].supplierContractPrice.receivablePayable" 
+							value="1" />
+							<span>应付</span></label>
+                 </td>
                 <td>
                     <textarea id="priceVoList[$index].supplierContractPrice.note" class="control-row4 input-large"  style="text-align:center;" name="priceVoList[$index].supplierContractPrice.note" ></textarea>
                 </td>
@@ -1008,7 +1082,7 @@
                 <input id="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.salePrice" style="width: 40px;" type="text" name="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.salePrice" value="0" /> 元
             </td>
             <td width="10%">
-                <a class="def" href="javascript:void(0)" onclick="deleteSecondLevelPrice(this, '$index');">删除</a>
+                <a class="def" href="javascript:void(0)" onclick="deleteSecondLevelPrice(this, '$index',0);">删除</a>
             </td>
         </tr>
         </tbody>
@@ -1045,8 +1119,8 @@
             } else if('temp' == '${deliveryType}'){
                 //console.log($deliveryPriceTable.html());
                 $('#priceTable').html($deliveryPriceTable.html());
-                addPriceInfoRow('DeliveryPriceRow', 'DeliveryPriceData');
-                addSecLevelPriceInfoRow('0', 'secondLevelPriceRow_0', 'secondLevelPriceData');
+                //addPriceInfoRow('DeliveryPriceRow', 'DeliveryPriceData');
+                //addSecLevelPriceInfoRow('0', 'secondLevelPriceRow_0', 'secondLevelPriceData');
             }else if (supplierType == '${FLEET}') {
                 $('#priceTable').html($fleetPriceTable.html());
 //                    addPriceInfoRow('fleetPriceRow', 'fleetPriceData');
@@ -1072,6 +1146,6 @@
         });
     });
 </script>
-<script src="<%=ctx %>/assets/js/web-js/contract_edit.js"></script>
+
 </body>
 </html>

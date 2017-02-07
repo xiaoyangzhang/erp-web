@@ -92,6 +92,19 @@
 	    			</div>
 	    			
 	    		</dd>
+	    		
+	    		<dd class="inl-bl">
+	    			<div class="dd_left">锁单状态:</div>
+	    			<div class="dd_right grey">
+	    				<select name="stateLockType" id="stateLockType">
+	    					<option value="">全部</option>
+	    					<option value="0">未锁</option>
+	    					<option value="1">已锁</option>
+	    				</select>
+	    			</div>
+	    			
+	    		</dd>
+	    		
 	    		<dd class="inl-bl">
 	    			<div class="dd_right">
 	    				<button type="button" onclick="searchBtn();" class="button button-primary button-small">搜索</button>

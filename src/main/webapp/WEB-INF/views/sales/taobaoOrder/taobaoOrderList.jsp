@@ -14,13 +14,13 @@
 	<script src="<%=staticPath %>/assets/js/jqgrid/js/i18n/grid.locale-cn.js"></script>
 	<script src="<%=staticPath %>/assets/js/jqgrid/js/jquery.jqGrid.min.js"></script>
 <script type="text/javascript">
-	$(function() {
-		var vars={
-   			 dateFrom : $.currentMonthFirstDay2(-3),
-   		 	dateTo : $.currentMonthLastDay()
-   		 	};
-		 $("input[name='startTime']").val(vars.dateFrom);
-		 //$("input[name='endTime']").val(vars.dateTo ); 
+$(function() {
+	var vars={
+			 dateFrom : $.currentMonthFirstDay(),
+		 	dateTo : $.currentMonthLastDay()
+		 	};
+	 $("input[name='startTime']").val(vars.dateFrom);
+	 //$("input[name='endTime']").val(vars.dateTo ); 
 });
 </script>
 <script type="text/javascript" src="<%=ctx%>/assets/js/web-js/sales/taobaoOrderList.js"></script>
@@ -107,7 +107,10 @@ document.onkeydown = function (e) {
 								</c:forEach>
 							</select><input name="productName" id="productName" type="text" 　placeholder="请输入产品名称" style="width: 121px;"/>
 						</li>
-						
+						<li class="text">产品品牌:</li>
+						<li><input name="productBrandName" id="productBrandName" type="text" /> </li>
+						</ul>
+						<ul>
 						<li class="text">状态:</li><li> <select name="stateFinance" id="stateFinance">
 								<option value="">审核状态</option>
 								<option value="0">未审核</option>
@@ -222,6 +225,7 @@ function toOperatorExcel(){
 			+"&saleOperatorIds="+$("#saleOperatorIds").val()
 			+"&productBrandId="+$("#productBrandId").val()
 			+"&productName="+$("#productName").val() 
+			+"&productBrandName="+$("#productBrandName").val()
 			+"&page="+$("#orderPage").val()
 			+"&pageSize="+$("#orderPageSize").val());
 }
@@ -299,7 +303,7 @@ var opGrid = {
 					,'endTime':$("#endTime").val(), 'groupCode':$("#groupCode").val()
 					,'receiveMode':$("#receiveMode").val(),'buyerNick':$("#buyerNick").val(),'supplierName':$("#supplierName").val()
 					,'guestName':$("#guestName").val(),'mobile':$("#mobile").val()
-					,'orderNo':$("#dicIds").val(),'orgIds':$("#orgIds").val()
+					,'orderNo':$("#dicIds").val(),'orgIds':$("#orgIds").val(),'productBrandName':$("#productBrandName").val()
 					,'operType':$("#operType").val(),'saleOperatorIds':$("#saleOperatorIds").val()
 					,'productBrandId':$("#productBrandId").val(),'productName':$("#productName").val()
 					,'stateFinance':$("#stateFinance").val(),'orderLockState':$("#orderLockState").val()

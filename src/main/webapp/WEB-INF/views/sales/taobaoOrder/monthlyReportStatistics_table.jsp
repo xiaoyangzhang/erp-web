@@ -10,14 +10,15 @@
 		<tr>
 			<th style="width: 2%">序号<i class="w_table_split"></i></th>
 			<th style="width: 7%">团号<i class="w_table_split"></i></th>
-			<th style="width: 5%">日期<i class="w_table_split"></i></th>
+			<th style="width: 5%">出团日期<i class="w_table_split"></i></th>
+			<th style="width: 5%">离团日期<i class="w_table_split"></i></th>
 			<th style="width: 11%">产品名称<i class="w_table_split"></i></th>
-			<th style="width: 8%">商家名称<i class="w_table_split"></i></th>
-			<th style="width: 11%">供应商名称<i class="w_table_split"></i></th>
+			<th style="width: 6%">商家名称<i class="w_table_split"></i></th>
+			<th style="width: 10%">供应商名称<i class="w_table_split"></i></th>
 			<th style="width: 4%">业务类型<i class="w_table_split"></i></th>
 			<th style="width: 6%">客人信息<i class="w_table_split"></i></th>
-			<th style="width: 3%">成人数<i class="w_table_split"></i></th>
-			<th style="width: 3%">儿童数<i class="w_table_split"></i></th>
+			<th style="width: 2%">成人数<i class="w_table_split"></i></th>
+			<th style="width: 2%">儿童数<i class="w_table_split"></i></th>
 			<th style="width: 4%">客服<i class="w_table_split"></i></th>
 			<th style="width: 4%">计调<i class="w_table_split"></i></th>
 			<th style="width: 3%">应收<i class="w_table_split"></i></th>
@@ -38,7 +39,8 @@
 				<td>${v.count}</td>
 				<td>${orders.groupCode}</td>
 				<td>${orders.dateStart}</td>
-				<td>${orders.productName}</td>
+				<td>${orders.dateEnd}</td>
+				<td>【${orders.productBrandName}】${orders.productName}</td>
 				<td>${orders.businessName}</td>
 				<td>${orders.supplierName}</td>
 				<td><c:forEach items="${typeList}" var="v" varStatus="vs">
@@ -76,7 +78,7 @@
 				</tbody>
 				<tfoot>
 			<tr class="footer1">
-				<td colspan="8" style="text-align: right">本页合计:</td>
+				<td colspan="9" style="text-align: right">本页合计:</td>
 				<td><fmt:formatNumber value="${sumAdult}" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${sumChild}" pattern="#.##"/></td>
 				<td></td>
@@ -103,9 +105,12 @@
 <SCRIPT type="text/javascript">
 function toExportWord(){
 	window.location = "getOrders.do?startTime=${parameter.startTime}&endTime=${parameter.endTime}"+
+	"&dateType=${parameter.dateType}"+
+	"&groupMode=${parameter.groupMode}"+
 	"&orderMode=${parameter.orderMode}"+
 	"&orderNo=${parameter.orderNo}"+
 	"&supplierName=${parameter.supplierName}"+
+	"&productBrandName=${parameter.productBrandName}"+
 	"&productName=${parameter.productName}"+
 	"&operType=${parameter.operType}"+
 	"&operatorIds=${parameter.operatorIds}"+

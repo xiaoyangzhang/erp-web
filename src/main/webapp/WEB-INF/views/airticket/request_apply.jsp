@@ -96,8 +96,13 @@ function doAction(action, id){
 		</dd>
 		<dd class="inl-bl"><div class="dd_left">申请状态：</div>
 		<div class="dd_right grey">
-			<select name="airApplyState"><option value=""></option>
-			<option value="N">未申请</option><option value="Y">已申请</option></select></div></dd>
+			<select name="airApplyState">
+				<option value="">全部</option>
+				<option value="N">未申请</option>
+				<option value="Y">已申请</option>
+			</select>
+		</div>
+		</dd>
 		<dd class="inl-bl"><div class="dd_left">订单号：</div>
 		<div class="dd_right grey"><input name="orderNo" type="text" style="width:90px;"/></div></dd>
 		<dd class="inl-bl"><div class="dd_left">产品：</div>

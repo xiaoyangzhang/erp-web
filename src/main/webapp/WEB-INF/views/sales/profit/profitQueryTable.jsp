@@ -6,12 +6,13 @@
 <table class="w_table" style="margin-left: 0px">
 	<colgroup> 
 		<col width="4%"/>
+		<col width="7%"/>
 		<col width="6%"/>
-		<col width="6%"/>
-		<col width="15%"/>
-		<col width="14%"/>
+		<col />
+		<col width="8%"/>
 		<col width="9%"/>
 		<col width="6%"/>
+		<col width="5%"/>
 		<col width="5%"/>
 		<col width="5%"/>
 		<col width="5%"/>
@@ -34,6 +35,7 @@
 			<th>销售<i class="w_table_split"></i></th>
 			<th>计调<i class="w_table_split"></i></th>
 			<th>收入<i class="w_table_split"></i></th>
+			<th>其它收入<i class="w_table_split"></i></th>
 			<th>预算<i class="w_table_split"></i></th>
 			<th>毛利<i class="w_table_split"></i></th>
 			<th>团状态<i class="w_table_split"></i></th>
@@ -64,19 +66,15 @@
               <td>
               	<fmt:formatNumber value="${gl.income}" type="currency" pattern="#.##"/>
               </td>
+               <td>
+              	<fmt:formatNumber value="${gl.qdtotal}" type="currency" pattern="#.##"/>
+              </td> 
               <td>
               	<font color="blue">
 					<c:if test="${optMap['EDIT'] }">
-						 <c:if test="${gl.stateFinance ==0 }">
 							<span style="cursor:pointer" class="price" onclick="changePrice(this,${gl.id})">
 								<fmt:formatNumber value="${gl.budget}" type="currency" pattern="#.##"/>	
 							</span>
-						</c:if>
-					</c:if>
-					<c:if test="${gl.stateFinance ==1}">
-						<span style="cursor:pointer" class="price">
-								<fmt:formatNumber value="${gl.budget}" type="currency" pattern="#.##"/>	
-						</span>
 					</c:if>
 				</font>
 				<c:if test="${!optMap['EDIT'] }">
@@ -103,6 +101,7 @@
 			<c:set var="sum_child" value="${sum_child+gl.numChild}" />
 			<c:set var="sum_guide" value="${sum_guide+gl.numGuide}" />
 			<c:set var="sum_income" value="${sum_income+gl.income}" />
+			<c:set var="sum_qdtotal" value="${sum_qdtotal+gl.qdtotal}" />
 			<c:set var="sum_budget" value="${sum_budget+gl.budget}" />
        	</c:forEach>
 	</tbody>
@@ -119,6 +118,7 @@
 		    <td></td>
          	<td></td>
 			<td><fmt:formatNumber value="${sum_income}" type="currency" pattern="#.##"/></td>
+			<td><fmt:formatNumber value="${sum_qdtotal }" type="currency" pattern="#.##"/></td>
 			<td id="curTotal"><fmt:formatNumber value="${sum_budget}" type="currency" pattern="#.##"/></td>
 			<td><fmt:formatNumber value="${sum_income-sum_budget}" type="currency" pattern="#.##"/></td>
 			<td></td>
@@ -136,6 +136,7 @@
 		    <td></td>
          	<td></td>
 			<td><fmt:formatNumber value="${groupOrder.totalIncome}" type="currency" pattern="#.##"/></td>
+			<td><fmt:formatNumber value="${groupOrder.totalQdtotal}" type="currency" pattern="#.##"/></td>
 			<td id="total"><fmt:formatNumber value="${groupOrder.totalBudget}" type="currency" pattern="#.##"/></td>
 			<td><fmt:formatNumber value="${groupOrder.totalIncome-groupOrder.totalBudget}" type="currency" pattern="#.##"/></td>
 			<td></td>

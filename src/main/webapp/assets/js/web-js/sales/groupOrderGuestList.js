@@ -24,27 +24,32 @@ var opGrid = {
 		}else{
 			$('#pageSize').val(rowListNum);
 		}
+	
 		var params = {'startTime':$("#startTime").val()
-			, 'endTime':$("#endTime").val()
-			, 'supplierName':$("#supplierName").val()
-			, 'groupCode':$("#groupCode").val()
-			,'receiveMode':$("#receiveMode").val()
-			,'orgNames':$("#orgNames").val()
-			,'orgIds':$("#orgIds").val()
-			,'saleOperatorName':$("#saleOperatorName").val()
-			,'saleOperatorIds':$("#saleOperatorIds").val()
-
-			,'productName':$("#productName").val()
-			,'remark':$("#remark").val()
-			,'operType':$("#operType").val()
-			,'guestName':$("#guestName").val()
-			,'gender':$("#gender").val()
-			,'ageFirst':$("#ageFirst").val()
-			,'ageSecond':$("#ageSecond").val()
-			,'nativePlace':$("#nativePlace").val()
-			,'pageSize':$("#pageSize").val()
-			,'userRightType':$("#userRightType").val()
-		};
+				, 'endTime':$("#endTime").val()
+				,'receiveMode':$("#receiveMode").val()
+				, 'groupCode':$("#groupCode").val()
+				, 'supplierName':$("#supplierName").val()
+				
+				,'orgIds':$("#orgIds").val()
+				,'orgNames':$("#orgNames").val()
+				,'operType':$("#operType").val()
+				,'saleOperatorIds':$("#saleOperatorIds").val()
+				,'saleOperatorName':$("#saleOperatorName").val()
+				
+				,'orderNo':$("#dicIds").val()
+				,'remark':$("#remark").val()
+				,'page':$("#page").val()
+				,'pageSize':$("#pageSize").val()
+				,'userRightType':$("#userRightType").val()
+				
+				,'guestName':$("#guestName").val()
+				,'gender':$("#gender").val()
+				,'ageFirst':$("#ageFirst").val()
+				,'ageSecond':$("#ageSecond").val()
+				,'nativePlace':$("#nativePlace").val()
+				
+			};
 		return params;
 	},
 	formatPerson:function(cellValue, options, rowObject){
@@ -143,7 +148,7 @@ function toPickUpExcel(){
 	var saleOperatorIds=$('#saleOperatorIds').val();
 	var saleOperatorName=$('#saleOperatorName').val();
 
-	var orderMode=$('#dicIds').val();
+	var orderNo=$('#dicIds').val();
 	var remark=$('#remark').val();
 	var page=$('#page').val();
 	var pageSize=$('#pageSize').val();
@@ -165,7 +170,7 @@ function toPickUpExcel(){
 		+"&operType="+operType
 		+"&saleOperatorIds="+saleOperatorIds
 		+"&saleOperatorName="+saleOperatorName
-		+"&orderMode="+orderMode
+		+"&orderNo="+orderNo
 		+"&remark="+remark
 		+"&page="+page
 		+"&pageSize="+pageSize
@@ -192,7 +197,7 @@ function toInsuranceExcel(){
 	var saleOperatorIds=$('#saleOperatorIds').val();
 	var saleOperatorName=$('#saleOperatorName').val();
 
-	var orderMode=$('#dicIds').val();
+	var orderNo=$('#dicIds').val();
 	var remark=$('#remark').val();
 	var page=$('#page').val();
 	var pageSize=$('#pageSize').val();
@@ -214,7 +219,7 @@ function toInsuranceExcel(){
 		+"&operType="+operType
 		+"&saleOperatorIds="+saleOperatorIds
 		+"&saleOperatorName="+saleOperatorName
-		+"&orderMode="+orderMode
+		+"&orderNo="+orderNo
 		+"&remark="+remark
 		+"&page="+page
 		+"&pageSize="+pageSize
@@ -241,7 +246,7 @@ function toGuestListExcel(){
 		+"&operType="+$("#operType").val()
 		+"&saleOperatorIds="+$("#saleOperatorIds").val()
 		+"&saleOperatorName="+$("#saleOperatorName").val()
-		+"&orderMode="+$("#dicIds").val()
+		+"&orderNo="+$("#dicIds").val()
 		+"&remark="+$("#remark").val()
 		+"&page="+$("#page").val()
 		+"&pageSize="+$("#pageSize").val()

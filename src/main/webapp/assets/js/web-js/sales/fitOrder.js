@@ -509,9 +509,6 @@ function recCertifNum(count){
 					dataType: 'json',
 					async: false,
 					success: function (data) {
-						/*if(data && data.success == true){
-							alert(22);
-						}*/
 						if(data && data.success == false){
 							layer.open({
 								type : 2,
@@ -521,6 +518,7 @@ function recCertifNum(count){
 								area: ['720px', '460px'],
 								content: '../guest/getGuestOrderInfo.htm?guestCertificateNum='+guestCertificateNum+'&orderId='+orderId
 							});
+							$("input[name='groupOrderGuestList["+count+"].certificateNum").after("<span style='color:red'></br>已参过团</span>");
 						}
 						
 					}
@@ -657,8 +655,65 @@ function toSaveSeatInCoach(strr) {
 	$("#bbb").hide();
 }
 
+function getIdCardInfo(){
+	
+	var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+	var idAry = [];
+	var str = $("#batchInputText").val();
+	
+	
+	var strs = new Array();
+	strs = str.split("\n");
+	for (var i = 0; i < strs.length; i++) {
+		
+		if (strs[i] != "") {
+			var infos = new Array();
+			var va = strs[i].toString().replace("\n", "").replace(/，/g, ",").replace(/。/g, ",");			
+			infos = va.split(",");
+			if(infos.length >= 2){
+		        infos[1]= infos[1].trim();
+				if(reg.test(infos[1]) === true) {
+					idAry.push(infos[1]);
+				}
+	        }
+		}
+	}
 
-
+	if (idAry.length <= 0){
+		return [];
+	}
+	
+	//发送请求，检查该身份证号是否有参团信息  JSON.stringify(idAry)
+	/*var guestCertificateNum = $("input[name='groupOrderGuestList["+count+"].certificateNum']").val();*/
+	var orderId = $("input[name='groupOrder.id']").val();
+	$.ajax({
+		type: "post",
+		cache: false,
+		url : "../guest/guestCertificateNumValidateList.htm",
+		data : {guestCertificateNum:idAry.join(),orderId:orderId},
+		dataType: 'json',
+		async: false,
+		success: function (data) {
+			$.each(data, function(index, item) {
+				console.log(item.cNum);
+				if(item.certificateNum == $(".certificateNum").val() && item.cNum == 1){
+					//若该身份证号存在参团信息，则给出提示信息
+					$(".certificateNum").after("<span style='color:red'></br>已参过团</span>");
+				}
+			})
+			
+			/*if(data && data.success == false){
+				$.each(data.item, function(index, item){
+					var certificate = item.
+				})
+				$certificateNum = $("input[name*='.certificateNum']");
+				if ($certificateNum.val() == '1')
+					$certificateNum.after("<span style='color:red'></br>已参过团</span>");
+			}*/
+			
+		}
+	});
+}
 function toSubmit(strName) {
 	var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
 	var html = $("#guest_template").html();
@@ -717,7 +772,6 @@ function toSubmit(strName) {
 					var va = strs[i].toString().replace("\n", "").replace(/，/g,
 							",").replace(/。/g, ",");
 					infos = va.split(",");
-					
 					if (infos.length != 3 && infos.length != 2) {
 						$.warn("第" + eval(i + 1) + "行输入格式有误！");
 						return false ;
@@ -746,8 +800,6 @@ function toSubmit(strName) {
 								type="1" ;					
 							}
 							if(infos.length==2){
-								
-								
 								var count = $("#"+strName+"Data").children('tr').length;
 								html = template('guest_template', {index : count});
 								$("#"+strName+"Data").append(html);
@@ -761,6 +813,24 @@ function toSubmit(strName) {
 								$("select[name='groupOrderGuestList["+count+"].type").val(type);
 								$("input[name='groupOrderGuestList["+count+"].nativePlace").val(data.birthPlace);
 								$("input[name='groupOrderGuestList["+count+"].certificateNum").val(infos[1]);
+								//发送请求，检查该身份证号是否有参团信息
+								var guestCertificateNum = $("input[name='groupOrderGuestList["+count+"].certificateNum']").val();
+								var orderId = $("input[name='groupOrder.id']").val();
+								$.ajax({
+									type: "post",
+									cache: false,
+									url : "../guest/guestCertificateNumValidate.htm",
+									data : {guestCertificateNum :guestCertificateNum,orderId:orderId},
+									dataType: 'json',
+									async: false,
+									success: function (data) {
+										if(data && data.success == false){
+											//若该身份证号存在参团信息，则给出提示信息
+											$("input[name='groupOrderGuestList["+count+"].certificateNum").after("<span style='color:red'></br>已参过团</span>");
+										}
+										
+									}
+								});
 								$("input[name='groupOrderGuestList["+count+"].age']").change(
 										function(e) {
 									if($(this).val().trim()<12){
@@ -785,6 +855,24 @@ function toSubmit(strName) {
 								$("select[name='groupOrderGuestList["+count+"].type").val(type);
 								$("input[name='groupOrderGuestList["+count+"].nativePlace").val(data.birthPlace);
 								$("input[name='groupOrderGuestList["+count+"].certificateNum").val(infos[1]);
+								//发送请求，检查该身份证号是否有参团信息
+								var guestCertificateNum = $("input[name='groupOrderGuestList["+count+"].certificateNum']").val();
+								var orderId = $("input[name='groupOrder.id']").val();
+								$.ajax({
+									type: "post",
+									cache: false,
+									url : "../guest/guestCertificateNumValidate.htm",
+									data : {guestCertificateNum :guestCertificateNum,orderId:orderId},
+									dataType: 'json',
+									async: false,
+									success: function (data) {
+										if(data && data.success == false){
+											//若该身份证号存在参团信息，则给出提示信息
+											$("input[name='groupOrderGuestList["+count+"].certificateNum").after("<span style='color:red'></br>已参过团</span>");
+										}
+										
+									}
+								});
 								$("input[name='groupOrderGuestList["+count+"].mobile").val(infos[2]);
 								$("input[name='groupOrderGuestList["+count+"].age']").change(
 										function(e) {
@@ -837,6 +925,7 @@ function toSubmit(strName) {
 			}
 
 	$("#bi").hide();
+	//getIdCardInfo();
 }
 function changeNum(){
 	var numAdultBeforEdit = $("#numAdultBeforEdit").val();  //修改前的团人数(成人）

@@ -322,8 +322,8 @@
             <thead>            	
 	            <tr>
 	                <th>项目<i class="w_table_split"></i></th>
-	                <th>协议价<i class="w_table_split"></i></th>
-	                <th>销售价<i class="w_table_split"></i></th>
+	                <th>结算价<i class="w_table_split"></i></th>
+	                <th>采购价<i class="w_table_split"></i></th>
 	                <th>减免政策<i class="w_table_split"></i></th>
 	                <th>备注<i class="w_table_split"></i></th>
 	                <th>操作</th>
@@ -387,15 +387,21 @@
     	<button type="button" onclick="addPriceInfoRow('DeliveryPriceRow', 'DeliveryPriceData');" class="button button-primary button-small" >添加</button>
         <table cellspacing="0" class="w_table">
         	<colgroup>
-        		<col width="15%" />
-        		<col width="50%" />
-        		<col width="25%" />
+        		<col width="10%" />
+        		<col width="8%" />
+        		<col width="8%" />
+        		<col width="35%" />
+        		<col width="10%" />
+        		<col width="10%" />
         		<col width="10%" />
         	</colgroup>
             <thead>            
 	            <tr>
 	                <th>项目<i class="w_table_split"></i></th>
+	                <th>结算价<i class="w_table_split"></i></th>
+	                <th>采购价<i class="w_table_split"></i></th>
 	                <th>二级协议价<i class="w_table_split"></i></th>
+	                <th>方向<i class="w_table_split"></i></th>
 	                <th>备注<i class="w_table_split"></i></th>
 	                <th>操作</th>
 	            </tr>
@@ -422,8 +428,8 @@
 	            <tr>
 	                <th>类别<i class="w_table_split"></i></th>
 	                <%--<th>房型<i class="w_table_split"></i></th>--%>
-	                <th>协议价<i class="w_table_split"></i></th>
-	                <th>销售价<i class="w_table_split"></i></th>
+	                <th>结算价<i class="w_table_split"></i></th>
+	                <th>采购价<i class="w_table_split"></i></th>
 	                <th>减免政策<i class="w_table_split"></i></th>
 	                <th>备注<i class="w_table_split"></i></th>
 	                <th>操作</th>
@@ -533,8 +539,8 @@
                         <thead>
                             <tr>
                                 <td width="20%">线路品牌</td>
-                                <td width="8%">成本价</td>
-                                <td width="8%">销售价</td>
+                                <td width="8%">结算价</td>
+                                <td width="8%">采购价</td>
                                 <td width="7%">操作</td>
                             </tr>
                         </thead>
@@ -569,13 +575,21 @@
                     </select>
                     <input type="hidden" id="priceVoList[$index].supplierContractPrice.itemTypeName" name="priceVoList[$index].supplierContractPrice.itemTypeName" value="" />
                 </td>
+                 <!--22 一级结算价 -->
+                <td><input type="text" id="priceVoList[$index].supplierContractPrice.contractPrice" style="width: 40px;" 
+                		name="priceVoList[$index].supplierContractPrice.contractPrice" 
+                		value="0.0" />元</td>
+                <!--22 一级销售价 -->	
+                <td><input type="text" id="priceVoList[$index].supplierContractPrice.contractSale" style="width: 40px;" 
+                		name="priceVoList[$index].supplierContractPrice.contractSale" 
+                		value="0.0" />元</td>
                 <td id="secondLevelPrice_$index">
                     <table>
                         <thead>
                             <tr>
                                 <td width="20%">线路品牌</td>
-                                <td width="8%">成本价</td>
-                                <td width="8%">销售价</td>
+                                <td width="8%">结算价</td>
+                                <td width="8%">采购价</td>
                                 <td width="7%">操作</td>
                             </tr>
                         </thead>
@@ -585,6 +599,19 @@
                     </table>
                     <a href="javascript:void(0);" onclick="addSecLevelPriceInfoRow('$index', 'secondLevelPriceRow_$index', 'secondLevelPriceData');" class="def">添加</a>
                 </td>
+                 <!--66 方向 -->
+                 <td>
+                	<label >
+                			<input type="radio" id="priceVoList[$index].supplierContractPrice.receivablePayable" 
+                				name="priceVoList[$index].supplierContractPrice.receivablePayable" 
+                				value="0" />
+                				<span>应收</span></label>
+					<label >
+						<input type="radio" id="priceVoList[$index].supplierContractPrice.receivablePayable" 
+							name="priceVoList[$index].supplierContractPrice.receivablePayable" 
+							value="1" />
+							<span>应付</span></label>
+                 </td>
                 <td>
                     <textarea id="priceVoList[$index].supplierContractPrice.note" class="control-row4 input-large"  style="text-align:center;" name="priceVoList[$index].supplierContractPrice.note" ></textarea>
                 </td>
