@@ -5478,7 +5478,7 @@ public class GroupOrderController extends BaseController {
 		 * 第个三表格
 		 */
 		Map<String, Object> map2 = new HashMap<String, Object>();
-		map2.put("remarkInternal", tourGroup.getRemarkInternal());
+		map2.put("remarkInternal", 1==tourGroup.getBizId()?tourGroup.getRemarkInternal():tourGroup.getRemark());
 		map2.put("deliveryDetail", deliveryDetail);
 		try {
 			export.export(params1);

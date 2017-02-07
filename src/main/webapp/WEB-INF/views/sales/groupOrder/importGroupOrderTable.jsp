@@ -17,7 +17,9 @@
 			<th style="width: 7%">人数<i class="w_table_split"></i></th>
 			<th>产品名称<i class="w_table_split"></i></th>
 			<%--<th style="width:7%">创建时间<i class="w_table_split"></i></th>--%>
-			<th style="width: 7%">操作<i class="w_table_split"></i> <a class="button button-rounded button-tinier" href="javascript:showImportSetting();">导入</a>
+			<th style="width: 7%">操作<i class="w_table_split"></i> 
+			  <input id="opCheckAll" type="checkbox" onclick="opCheckAll(this);"/>
+			  <a class="button button-rounded button-tinier" href="javascript:showImportSetting();">导入</a>
 			</th>
 		</tr>
 	</thead>
@@ -34,7 +36,7 @@
 				<td style="text-align: left;">【${gl.productBrandName}】${gl.productName}</td>
 				<%--<td>${gl.createTime}</td>--%>
 				<td id="${gl.id}"><c:if test="${gl.state==0}">
-						<input type="checkbox" onclick="selectChecked(this,'${gl.pushSupplierName}');" />
+						<input name="checkList" type="checkbox" onclick="selectChecked(this,'${gl.pushSupplierName}');" />
 					</c:if> <c:if test="${gl.state!=0}">已导入</c:if></td>
 			</tr>
 		</c:forEach>
@@ -200,9 +202,22 @@
         }
     }
     
+    /**
+     * 全选/反选
+     * @param obj 全选check对象
+     */
+    function opCheckAll(obj) {
+        var checkList = $("input[name='checkList']");
+        if (obj.checked) {
+            checkList.attr("checked", true);
+        } else {
+            checkList.attr("checked", false);
+        }
+    }
+    
     function showImportSetting() {
         var items = $("#orderItems");
-        var itemsChecked = items.find("input[type='checkbox']");
+        var itemsChecked = items.find("input[name='checkList']");
         var dataArray = [];
         itemsChecked.each(function () {
             if ($(this).attr("checked")) {

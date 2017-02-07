@@ -31,7 +31,7 @@
 					<col width="25%" />
 					<col width="20%" />
 					<thead>
-						<th>天数1111</th>
+						<th>天数</th>
 						<th>行程</th>
 						<th>餐饮</th>
 						<th>酒店</th>

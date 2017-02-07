@@ -653,6 +653,7 @@ function toTaoBaoOperatorExcel(){
 			+"&saleOperatorIds="+$("#saleOperatorIds").val()
 			+"&productBrandId="+$("#productBrandId").val()
 			+"&productName="+$("#productName").val() 
+			+"&productBrandName="+$("#productBrandName").val() 
 			+"&page="+$("#orderPage").val()
 			+"&pageSize="+$("#orderPageSize").val());
 }
@@ -675,6 +676,7 @@ function toTaoBaoSummaryTable(){
 			+"&saleOperatorIds="+$("#saleOperatorIds").val()
 			+"&productBrandId="+$("#productBrandId").val()
 			+"&productName="+$("#productName").val() 
+			+"&productBrandName="+$("#productBrandName").val()
 			+"&page="+$("#orderPage").val()
 			+"&pageSize="+$("#orderPageSize").val());
 }

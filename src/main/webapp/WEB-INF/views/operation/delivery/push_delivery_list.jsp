@@ -185,13 +185,45 @@
         $("#saleOperatorIds").val("");
 
     }
+    
+    /**
+     * 全选/反选
+     * @param obj 全选check对象
+     */
+    function opCheckAll(obj) {
+        var checkList = $("input[name='checkList']");
+        if (obj.checked) {
+            checkList.attr("checked", true);
+        } else {
+            checkList.attr("checked", false);
+        }
+    }
 
     function push(groupId, bookingId, toAppKey) {
         var loadIndex = layer.load(1, {shade: [0.5, '#fff']});
 
         var $platAuth = $("#platAuth");
         var paStr = $platAuth.val().split(",");
-
+	
+		var $checkList = $("input[name='checkList']");
+        
+        var pushParam = "";
+        if ($checkList.length > 15) {
+            layer.alert("推送数据不能大于15条");
+            $("#opCheckAll").attr("checked", false);
+            $checkList.attr("checked", false);
+            return;
+        }
+        $checkList.each(function () {
+            if (this.checked) {
+                if (pushParam !== "") {
+                    pushParam += "#";
+                }
+                pushParam += $(this).attr('varGroupId') + "," + $(this).attr('varBookingId')
+                        + "," + $(this).attr('varAppKey');
+            }
+        });
+        
         layer.open({
             type: 1,
             title: '选择平台',
@@ -206,6 +238,7 @@
                     type: "post",
                     url: "../booking/pushRemoteSave.do",
                     data: {
+                    	"pushParam": pushParam,
                         "groupId": groupId,
                         "bookingId": bookingId,
                         "fromAppKey": paStr[0],

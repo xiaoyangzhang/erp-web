@@ -47,7 +47,7 @@
 		<c:if test="${optMap['YDAP_EAT'] and groupCanEdit }">
 			<a class="button button-primary button-small"
 				href="javascript:void(0)"
-				onclick="newWindow('新增餐饮订单','<%=ctx %>/booking/toAddEat?groupId=${groupId }')">新增</a>&nbsp;&nbsp;&nbsp;</c:if>
+				onclick="newWindow('新增餐饮订单','<%=ctx %>/booking/toAddEat?groupId=${groupId }&isShow=${isShow }')">新增</a>&nbsp;&nbsp;&nbsp;</c:if>
 		<a class="button button-primary button-small"
 			href="javascript:void(0)" onclick="refresh()">刷新</a>
 	</p>
@@ -153,8 +153,7 @@
 							onclick="printOrder(${booking.id})">打印</a> <c:if
 								test="${optMap['YDAP_EAT'] && (booking.stateFinance==null || booking.stateFinance==0 ) }">
 								<a class="def" href="javascript:void(0)"
-									onclick="newWindow('修改餐饮订单','<%=staticPath %>/booking/toAddEat?groupId=${booking.groupId }&bookingId=${booking.id}')">修改</a>
-							</c:if> <c:if test="${optMap['YDAP_EAT'] && booking.canDelete==true}">
+									onclick="newWindow('修改餐饮订单','<%=staticPath %>/booking/toAddEat?groupId=${booking.groupId }&bookingId=${booking.id}&isShow=${isShow }')">修改</a>							</c:if> <c:if test="${optMap['YDAP_EAT'] && booking.canDelete==true}">
 								<a class="def" href="javascript:void(0)"
 									onclick="del(this,'${booking.id}','${booking.supplierType}')">删除</a>
 							</c:if>

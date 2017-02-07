@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.dal.sys.po.SysBizConfig;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -133,7 +134,12 @@ public class BookingSupplierController extends BaseController {
 		model.addAttribute("page", page);
 //		Integer bizId = WebUtils.getCurBizId(request);
 //		getOrgAndUserTreeJsonStr(model, bizId);
-
+		Map<String, Object> pm = WebUtils.getQueryParamters(request);
+		String isShow = (String) pm.get("isShow");
+		if(isShow == null){
+			isShow = "0";
+		}
+		model.addAttribute("isShow", Integer.valueOf(isShow));
 		return "/operation/supplier/hotel/supplier-list";
 		
 	}
@@ -145,6 +151,12 @@ public class BookingSupplierController extends BaseController {
 		model.addAttribute("page", page);
 //		Integer bizId = WebUtils.getCurBizId(request);
 //		getOrgAndUserTreeJsonStr(model, bizId);
+		Map<String, Object> pm = WebUtils.getQueryParamters(request);
+		String isShow = (String) pm.get("isShow");
+		if(isShow == null){
+			isShow = "0";
+		}
+		model.addAttribute("isShow", Integer.valueOf(isShow));
 		return "/operation/supplier/car/supplier-list";
 		
 	}
@@ -157,6 +169,12 @@ public class BookingSupplierController extends BaseController {
 		model.addAttribute("page", page);
 //		Integer bizId = WebUtils.getCurBizId(request);
 //		getOrgAndUserTreeJsonStr(model, bizId);
+		Map<String, Object> pm = WebUtils.getQueryParamters(request);
+		String isShow = (String) pm.get("isShow");
+		if(isShow == null){
+			isShow = "0";
+		}
+		model.addAttribute("isShow", Integer.valueOf(isShow));
 		return "/operation/supplier/eat/supplier-list";
 		
 	}
@@ -190,6 +208,12 @@ public class BookingSupplierController extends BaseController {
 		model.addAttribute("page", page);
 //		Integer bizId = WebUtils.getCurBizId(request);
 //		getOrgAndUserTreeJsonStr(model, bizId);
+		Map<String, Object> pm = WebUtils.getQueryParamters(request);
+		String isShow = (String) pm.get("isShow");
+		if(isShow == null){
+			isShow = "0";
+		}
+		model.addAttribute("isShow", Integer.valueOf(isShow));
 		return "/operation/supplier/sight/supplier-list";
 		
 	}
@@ -403,7 +427,7 @@ public class BookingSupplierController extends BaseController {
 	
 	@RequestMapping("hotelBookingInfo.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_HOTEL)
-	public String hotelBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+	public String hotelBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model,Integer isShow, Integer groupId) {
 		
 		bookingInfo(model, groupId, Constants.HOTEL);
 		// 酒店星级
@@ -411,6 +435,7 @@ public class BookingSupplierController extends BaseController {
 //				.getListByTypeCode(BasicConstants.GYXX_JDXJ);
 		List<DicInfo> jdxjList = saleCommonFacade.getHotelLevelListByTypeCode();
 		model.addAttribute("jdxjList", jdxjList);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/hotel/hotel-list-booking";
 		
 	}
@@ -426,7 +451,7 @@ public class BookingSupplierController extends BaseController {
 	 */
 	@RequestMapping("groupHotelBookingInfo.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_YDAP)
-	public String groupHotelBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+	public String groupHotelBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model,Integer isShow, Integer groupId) {
 		
 		bookingInfo(model, groupId, Constants.HOTEL);
 		// 酒店星级
@@ -436,6 +461,7 @@ public class BookingSupplierController extends BaseController {
 
 		model.addAttribute("jdxjList", jdxjList);
 		model.addAttribute("groupId", groupId);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/hotel/group-hotel-list-booking";
 		
 	}
@@ -484,8 +510,9 @@ public class BookingSupplierController extends BaseController {
 
 	@RequestMapping("eatBookingInfo.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_RESTANRANT)
-	public String eatBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+	public String eatBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model,Integer isShow, Integer groupId) {
 		bookingInfo(model, groupId, Constants.RESTAURANT);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/eat/eat-list-booking";
 	}
 	
@@ -500,8 +527,9 @@ public class BookingSupplierController extends BaseController {
 	 */
 	@RequestMapping("groupEatBookingInfo.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_YDAP)
-	public String groupEatBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+	public String groupEatBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model,Integer isShow, Integer groupId) {
 		bookingInfo(model, groupId, Constants.RESTAURANT);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/eat/group-eat-list-booking";
 	}
 	
@@ -521,8 +549,9 @@ public class BookingSupplierController extends BaseController {
 
 	@RequestMapping("sightBookingInfo.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_SCENIC)
-	public String sightBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+	public String sightBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model,Integer isShow, Integer groupId) {
 		bookingInfo(model, groupId, Constants.SCENICSPOT);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/sight/sight-list-booking";
 		
 	}
@@ -538,8 +567,9 @@ public class BookingSupplierController extends BaseController {
 	 */
 	@RequestMapping("groupSightBookingInfo.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_YDAP)
-	public String groupSightBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+	public String groupSightBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model,Integer isShow, Integer groupId) {
 		bookingInfo(model, groupId, Constants.SCENICSPOT);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/sight/group-sight-list-booking";
 	}
 	
@@ -680,13 +710,14 @@ public class BookingSupplierController extends BaseController {
 	 */
 	@RequestMapping("carBookingInfo.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_CAR)
-	public String bookingInf(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+	public String bookingInf(HttpServletRequest request, HttpServletResponse response, ModelMap model,Integer isShow, Integer groupId) {
 		bookingInfo2(model, groupId, Constants.FLEET);
 		// 车辆型号
 //		List<DicInfo> ftcList = dicService
 //				.getListByTypeCode(Constants.FLEET_TYPE_CODE);
 		List<DicInfo> ftcList = saleCommonFacade.getCarListByTypeCode();
 		model.addAttribute("ftcList", ftcList);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/car/car-list-booking";
 	}
 	
@@ -701,7 +732,7 @@ public class BookingSupplierController extends BaseController {
 	 */
 	@RequestMapping("groupCarBookingInfo.htm")
 	@RequiresPermissions(PermissionConstants.JDGL_YDAP)
-	public String groupCarBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId) {
+	public String groupCarBookingInfo(HttpServletRequest request, HttpServletResponse response, ModelMap model,Integer isShow, Integer groupId) {
 		bookingInfo2(model, groupId, Constants.FLEET);
 		// 车辆型号
 //		List<DicInfo> ftcList = dicService
@@ -709,6 +740,7 @@ public class BookingSupplierController extends BaseController {
 		List<DicInfo> ftcList = saleCommonFacade.getCarListByTypeCode();
 
 		model.addAttribute("ftcList", ftcList);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/car/group-car-list-booking";
 	}
 	
@@ -1045,7 +1077,7 @@ public class BookingSupplierController extends BaseController {
 
 	@RequestMapping("toAddHotel")
 	//@RequiresPermissions(PermissionConstants.JDGL_HOTEL)
-	public String toAddBookHotel(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId, Integer bookingId, Integer editType) {
+	public String toAddBookHotel(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId,Integer isShow, Integer bookingId, Integer editType) {
 		Integer bizId = WebUtils.getCurBizId(request);
 		toAddSupplier(model, groupId, bookingId, bizId);
 		model.addAttribute("supplierType", Constants.HOTEL);
@@ -1058,13 +1090,15 @@ public class BookingSupplierController extends BaseController {
 		//根据参数判断价格是否可以编辑
 		String canEditPrice = WebUtils.getBizConfigValue(request, "BOOKING_HOTEL_EDITPRICE");
 		model.addAttribute("canEditPrice", canEditPrice);
-		
+		SysBizConfig sysBizConfig = sysBizConfigService.findByItemValue(bizId, Constants.ITEM_CODE);
+		model.addAttribute("sysBizConfig", sysBizConfig);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/hotel/hotel-add";
 	}
 	
 	@RequestMapping("toAddCar")
 	//@RequiresPermissions(PermissionConstants.JDGL_CAR)
-	public String toAddBookCar(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId, Integer bookingId) {
+	public String toAddBookCar(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId, Integer bookingId,Integer isShow) {
 		Integer bizId = WebUtils.getCurBizId(request);
 		toAddSupplier(model, groupId, bookingId, bizId);
 		model.addAttribute("supplierType", Constants.FLEET);
@@ -1072,7 +1106,9 @@ public class BookingSupplierController extends BaseController {
 //		List<DicInfo> CarTypes = dicService.getListByTypeCode(Constants.FLEET_TYPE_CODE);
 		List<DicInfo> CarTypes = saleCommonFacade.getCarListByTypeCode();
 		model.addAttribute("carTypes", CarTypes);
-		
+		SysBizConfig sysBizConfig = sysBizConfigService.findByItemValue(bizId, Constants.ITEM_CODE);
+		model.addAttribute("sysBizConfig", sysBizConfig);
+		model.addAttribute("isShow", isShow);
 		
 		return "operation/supplier/car/car-add";
 	}
@@ -1109,14 +1145,16 @@ public class BookingSupplierController extends BaseController {
 
 	@RequestMapping("toAddSight")
 	//@RequiresPermissions(PermissionConstants.JDGL_SCENIC)
-	public String toAddBookSight(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId, Integer bookingId) {
+	public String toAddBookSight(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId, Integer bookingId,Integer isShow) {
 		Integer bizId = WebUtils.getCurBizId(request);
 		toAddSupplier(model, groupId, bookingId, bizId);
 		model.addAttribute("supplierType", Constants.SCENICSPOT);
 		//景区类型
 		//List<DicInfo> sightTypes = dicService.getListByTypeCode(Constants.SCENICSPOT_TYPE_CODE);
 		//model.addAttribute("sightTypes", sightTypes);
-		
+		SysBizConfig sysBizConfig = sysBizConfigService.findByItemValue(bizId, Constants.ITEM_CODE);
+		model.addAttribute("sysBizConfig", sysBizConfig);
+		model.addAttribute("isShow", isShow);
 		
 		return "operation/supplier/sight/sight-add";
 	}
@@ -1187,7 +1225,7 @@ public class BookingSupplierController extends BaseController {
 
 	@RequestMapping("toAddEat")
 	//@RequiresPermissions(PermissionConstants.JDGL_RESTANRANT)
-	public String toAddBookEat(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId, Integer bookingId) {
+	public String toAddBookEat(HttpServletRequest request, HttpServletResponse response, ModelMap model, Integer groupId,Integer isShow, Integer bookingId) {
 		Integer bizId = WebUtils.getCurBizId(request);
 		toAddSupplier(model, groupId, bookingId, bizId);
 		model.addAttribute("supplierType", Constants.RESTAURANT);
@@ -1195,21 +1233,23 @@ public class BookingSupplierController extends BaseController {
 //		List<DicInfo> resTypes = dicService.getListByTypeCode(Constants.RESTAURANT_TYPE_CODE);
 		List<DicInfo> resTypes = saleCommonFacade.getEatListByTypeCode();
 		model.addAttribute("resTypes", resTypes);
-		
+		SysBizConfig sysBizConfig = sysBizConfigService.findByItemValue(bizId, Constants.ITEM_CODE);
+		model.addAttribute("sysBizConfig", sysBizConfig);
+		model.addAttribute("isShow", isShow);
 		
 		return "operation/supplier/eat/eat-add";
 	}
 
 	@RequestMapping("/hotelList.do")
 	@RequiresPermissions(PermissionConstants.JDGL_HOTEL)
-	public String hotelList2(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroupVO group) {
-		return queryHotelSupplierList(request, response, model, group, Constants.HOTEL);
+	public String hotelList2(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroupVO group,Integer isShow) {
+		return queryHotelSupplierList(request, response, model, group, Constants.HOTEL,isShow);
 		
 	}
 	
 	private String queryHotelSupplierList(HttpServletRequest request,
 	                                      HttpServletResponse response, ModelMap model, TourGroupVO tourGroup,
-	                                      Integer hotel) {
+	                                      Integer hotel,Integer isShow) {
 		
 		model.addAttribute("tourGroup", tourGroup);
 		model.addAttribute("pageNum", tourGroup.getPage());
@@ -1277,26 +1317,27 @@ public class BookingSupplierController extends BaseController {
 		}
 		model.addAttribute("pageBean", pageBean);
 		model.addAttribute("supplierType", Constants.HOTEL);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/hotel/supplier-list-table";
 	}
 
 	@RequestMapping("/carList.do")
 	@RequiresPermissions(PermissionConstants.JDGL_CAR)
-	public String carList2(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroupVO group) {
-		return queryFleetSupplierList(request, response, model, group);
+	public String carList2(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroupVO group,Integer isShow) {
+		return queryFleetSupplierList(request, response, model, group,isShow);
 		
 	}
 
 	@RequestMapping("/eatList.do")
 	@RequiresPermissions(PermissionConstants.JDGL_RESTANRANT)
-	public String eatList2(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroupVO group) {
-		return queryRestaurntSupplierList(request, response, model, group, Constants.RESTAURANT);
+	public String eatList2(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroupVO group,Integer isShow) {
+		return queryRestaurntSupplierList(request, response, model, group, Constants.RESTAURANT,isShow);
 		
 	}
 	
 	private String queryRestaurntSupplierList(HttpServletRequest request,
 	                                          HttpServletResponse response, ModelMap model, TourGroupVO tourGroup,
-	                                          Integer restaurant) {
+	                                          Integer restaurant,Integer isShow) {
 		model.addAttribute("tourGroup", tourGroup);
 		model.addAttribute("pageNum", tourGroup.getPage());
 		PageBean pageBean = new PageBean();
@@ -1343,6 +1384,7 @@ public class BookingSupplierController extends BaseController {
 		
 		model.addAttribute("pageBean", pageBean);
 		model.addAttribute("supplierType", Constants.RESTAURANT);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/eat/supplier-list-table";
 	}
 
@@ -1463,14 +1505,14 @@ public class BookingSupplierController extends BaseController {
 
 	@RequestMapping("/sightList.do")
 	@RequiresPermissions(PermissionConstants.JDGL_SCENIC)
-	public String sightList2(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroupVO group) {
-		return querySightSupplierList(request, response, model, group, Constants.SCENICSPOT);
+	public String sightList2(HttpServletRequest request, HttpServletResponse response, ModelMap model, TourGroupVO group,Integer isShow) {
+		return querySightSupplierList(request, response, model, group, Constants.SCENICSPOT,isShow);
 		
 	}
 	
 	private String querySightSupplierList(HttpServletRequest request,
 	                                      HttpServletResponse response, ModelMap model, TourGroupVO tourGroup,
-	                                      Integer scenicspot) {
+	                                      Integer scenicspot,Integer isShow) {
 		model.addAttribute("tourGroup", tourGroup);
 		model.addAttribute("pageNum", tourGroup.getPage());
 		PageBean pageBean = new PageBean();
@@ -1515,6 +1557,7 @@ public class BookingSupplierController extends BaseController {
 		
 		model.addAttribute("pageBean", pageBean);
 		model.addAttribute("supplierType", Constants.SCENICSPOT);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/sight/supplier-list-table";
 	}
 
@@ -1847,7 +1890,7 @@ public class BookingSupplierController extends BaseController {
 	 */
 	@RequestMapping("viewSupplier.do")
 	public String viewSupplier(ModelMap model, Integer groupId, HttpServletRequest request, Integer supplierId,
-	                           Integer bookingId) {
+	                           Integer bookingId,Integer isShow) {
 		Integer bizId = WebUtils.getCurBizId(request);
 		BookingSupplierResult result = bookingSupplierFacade.viewSupplier(groupId,bookingId);
 		BookingSupplier supplier = result.getBookingSupplier();
@@ -1866,11 +1909,12 @@ public class BookingSupplierController extends BaseController {
 		//从字典中查询结算方式
 //		List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
 		List<DicInfo> cashTypes = saleCommonFacade.getSettleWayListByTypeCode(bizId);
-
+		SysBizConfig sysBizConfig = sysBizConfigService.findByItemValue(bizId, Constants.ITEM_CODE);
+		model.addAttribute("sysBizConfig", sysBizConfig);
 		model.addAttribute("groupId", groupId);
 		
 		model.addAttribute("flag", 1);
-
+		model.addAttribute("isShow", isShow);
 		model.addAttribute("cashTypes", cashTypes);
 		model.addAttribute("bookingId", bookingId);
 		if (supplier != null) {
@@ -1942,7 +1986,7 @@ public class BookingSupplierController extends BaseController {
 	}
 
 	private String queryFleetSupplierList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model,
-	                                      TourGroupVO tourGroup) {
+	                                      TourGroupVO tourGroup,Integer isShow) {
 		// 根据供应商类型查询当前登录商家所属的供应商
 		model.addAttribute("tourGroup", tourGroup);
 		model.addAttribute("pageNum", tourGroup.getPage());
@@ -2017,6 +2061,7 @@ public class BookingSupplierController extends BaseController {
 		}
 		model.addAttribute("pageBean", pageBean);
 		model.addAttribute("supplierType", Constants.FLEET);
+		model.addAttribute("isShow", isShow);
 		return "operation/supplier/car/supplier-list-table";
 	}
 	

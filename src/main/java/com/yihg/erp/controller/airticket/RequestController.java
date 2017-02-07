@@ -192,6 +192,7 @@ public class RequestController extends BaseController {
 
 		String confirm = (String)request.getParameter("confirm"); // used for show confirmation page of request.
 		model.addAttribute("confirm", confirm);
+		model.addAttribute("stateFinance", result.getBo().getGroupOrder().getStateFinance());
 		return resourceBo;
 	}
 	

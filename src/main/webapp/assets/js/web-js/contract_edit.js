@@ -79,8 +79,10 @@ $(function(){
                 dataType : 'json',
                 async : false,
                 success : function(data) {
-                    if (data.success) {
-                        $.success('操作成功');
+                    if (data.success == true) {
+                        $.success('操作成功11',function(){
+                        	location.reload();
+                        });
                         //BUI.Message.Alert('', 'success');
                         //top.topManager.reloadPage('edit_contract');
                         //top.topManager.reloadPage('view_contract_list');
@@ -212,7 +214,7 @@ var deletePrice = function(el){
  * @param el
  * @param findex
  */
-var deleteSecondLevelPrice = function(el, findex){
+var deleteSecondLevelPrice = function(el, findex, extPriceId){
     var p = $(el).parent('td').parent('tr');
     var siblings = p.siblings();
     p.remove();
@@ -227,7 +229,11 @@ var deleteSecondLevelPrice = function(el, findex){
             $(this).attr('id', $(this).attr('id').replace(/priceVoList\[\d+].priceExtVoList\[\d+]/g, 'priceVoList[' + findex + '].priceExtVoList[' + index + ']'));
             $(this).attr('name', $(this).attr('name').replace(/priceVoList\[\d+].priceExtVoList\[\d+]/g, 'priceVoList[' + findex + '].priceExtVoList[' + index + ']'));
         });
+        
     });
+    if(extPriceId !='' && extPriceId != '0'){
+    	delPriceExtRow(extPriceId);
+    }
 };
 
 function selectAttachment(el){
@@ -242,4 +248,25 @@ function selectAttachment(el){
             $(el).prev('.addImg').append(addhtml);
         }
     });
+}
+
+function delPriceExtRow(extId){
+	$.ajax({
+		type:"post",
+		url:path+"/contract/delPriceExtRow.do",
+		data:{priceExtId:extId},
+		dataType:"json",
+		success:function(data){
+			if (data.success == true) {
+            	$.success("删除成功",function(){
+            		location.reload();
+            	});
+            }else{
+				$.error("删除失败");
+			}
+		},
+		error:function(data,msg){
+			$.error("删除失败" + msg);
+		}
+	});
 }

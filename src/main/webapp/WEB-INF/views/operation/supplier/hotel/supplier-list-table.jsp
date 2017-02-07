@@ -84,7 +84,7 @@
 				                  	<td>
 				                  	<c:if test="${groupInfo.groupState eq 1}">
 				                  			<c:if test="${optMap['EDIT'] }">
-				                  			<a class="def" href="javascript:void(0)" onclick="newWindow('新增酒店订单','<%=staticPath %>/booking/toAddHotel?groupId=${groupInfo.groupId }')">新增</a>
+				                  			<a class="def" href="javascript:void(0)" onclick="newWindow('新增酒店订单','<%=staticPath %>/booking/toAddHotel?&groupId=${groupInfo.groupId }&isShow=${isShow }')">新增</a>
 				                  			</c:if>
 				                  		</c:if>
 				                  		<c:if test="${groupInfo.bookSupplierName!=null }">
@@ -147,7 +147,8 @@ function groupPreview(groupId){
  
  function loadData(containerId, groupId, supplierType){
 	 
-	 $("#"+containerId).load("hotelBookingInfo.htm?groupId="+groupId);
+	 var isShow = "${isShow}";
+	 $("#"+containerId).load("hotelBookingInfo.htm?groupId="+groupId+"&isShow="+isShow);
 	
  }
  

@@ -10,7 +10,7 @@
 		<c:if test="${optMap['YDAP_SIGHT'] and groupCanEdit }">
 			<a class="button button-primary button-small"
 				href="javascript:void(0)"
-				onclick="newWindow('新增门票订单','<%=ctx %>/booking/toAddSight?groupId=${groupId }')">新增</a>&nbsp;&nbsp;&nbsp;</c:if>
+				onclick="newWindow('新增门票订单','<%=ctx %>/booking/toAddSight?groupId=${groupId }&isShow=${isShow }')">新增</a>&nbsp;&nbsp;&nbsp;</c:if>
 		<a class="button button-primary button-small"
 			href="javascript:void(0)" onclick="refresh()">刷新</a>
 	</p>
@@ -115,7 +115,7 @@
 								onclick="printOrder(${booking.id})">打印</a> <c:if
 									test="${optMap['YDAP_SIGHT'] && (booking.stateFinance==null || booking.stateFinance==0 ) }">
 									<a class="def" href="javascript:void(0)"
-										onclick="newWindow('修改门票订单','<%=staticPath %>/booking/toAddSight?groupId=${booking.groupId }&bookingId=${booking.id}&supplierId=${booking.supplierId }')">修改</a>
+										onclick="newWindow('修改门票订单','<%=staticPath %>/booking/toAddSight?groupId=${booking.groupId }&bookingId=${booking.id}&supplierId=${booking.supplierId }&isShow=${isShow }')">修改</a>
 								</c:if> <c:if test="${optMap['YDAP_SIGHT'] && booking.canDelete==true}">
 									<a class="def" href="javascript:void(0)"
 										onclick="del(this,'${booking.id}','${booking.supplierType}')">删除</a>

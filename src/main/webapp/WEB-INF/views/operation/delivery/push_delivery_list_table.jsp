@@ -5,9 +5,18 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ include file="/WEB-INF/include/path.jsp"%>
     <table cellspacing="0" cellpadding="0" class="w_table" > 
-	<col width="5%" /><col width="10%" /><col width="8%" /><col width="5%" /><col width="" />
-	<col width="15%" /><col width="5%" /><col width="5%" /><col width="8%" /><col width="5%" />
-	<col width="5%" /><col width="5%" />
+	<col width=""/>
+    <col width=""/>
+    <col width=""/>
+    <col width=""/>
+    <col width=""/>
+    <col width=""/>
+    <col width=""/>
+    <col width=""/>
+    <col width=""/>
+    <col width=""/>
+    <col width=""/>
+    <col width=""/>
           <thead>
           	<tr>
           		<th>序号<i class="w_table_split"></i></th>
@@ -19,7 +28,8 @@
           		<th>地接社<i class="w_table_split"></i></th>
           		<th>人数<i class="w_table_split"></i></th>
           		<th>状态<i class="w_table_split"></i></th>       		
-          		<th>操作</th>
+          		<th>操作&nbsp;&nbsp;<input id="opCheckAll" type="checkbox" onclick="opCheckAll(this);"/>
+            		<a class="button button-rounded button-tinier" href="javascript:void(0)" onclick="push();">推送</a></th>
           	</tr>
           </thead>
           <tbody> 
@@ -28,16 +38,18 @@
 	              <td class="serialnum">
 	                ${status.count }	                	
 	              </td>
-	              <td style="text-align: left">
-	              <c:choose>
-	                  <c:when test="${groupInfo.groupMode < 1}">
-	                      <a class="def" href="javascript:void(0)" onclick="newWindow('查看散客团信息','<%=ctx %>/fitGroup/toFitGroupInfo.htm?groupId=${groupInfo.groupId}&operType=0')">${groupInfo.groupCode}</a></td>
-	                  </c:when>
-	                  <c:otherwise>
-	                      <a class="def" href="javascript:void(0)" onclick="newWindow('查看定制团信息','<%=ctx %>/teamGroup/toEditTeamGroupInfo.htm?groupId=${groupInfo.groupId }&operType=0')">${groupInfo.groupCode}</a></td> 
-	                  </c:otherwise>
-                  </c:choose>
-	              </td> 
+				  <td style="text-align: left">
+					  <c:choose>
+						  <c:when test="${groupInfo.groupMode < 1}">
+						  <a class="def" href="javascript:void(0)"
+						     onclick="newWindow('查看散客团信息','<%=ctx %>/fitGroup/toFitGroupInfo.htm?groupId=${groupInfo.groupId}&operType=0')">${groupInfo.groupCode}</a></td>
+						  </c:when>
+						  <c:otherwise>
+						  <a class="def" href="javascript:void(0)"
+						     onclick="newWindow('查看定制团信息','<%=ctx %>/teamGroup/toEditTeamGroupInfo.htm?groupId=${groupInfo.groupId }&operType=0')">${groupInfo.groupCode}</a></td>
+						  </c:otherwise>
+					</c:choose>
+				  </td>
                   <td><fmt:formatDate value="${groupInfo.dateStart}" pattern="yyyy-MM-dd"/> </td> 
                   <td><c:if test='${groupInfo.groupMode < 1}'>散客</c:if><c:if test='${groupInfo.groupMode > 0}'>团队</c:if></td>
                   <td style="text-align: left">【${groupInfo.productBrandName}】${groupInfo.productName}</td>
@@ -49,8 +61,8 @@
                       <c:if test="${groupInfo.pushStatus == 1}"><font color="red">已推送</font></c:if>
                   </td>
                   <td>
-                      <a class="def" href="javascript:void(0)" onclick="push(${groupInfo.groupId},
-                      ${groupInfo.bookingId},${groupInfo.driverName});">推送</a>
+                      <input name="checkList" type="checkbox" varGroupId="${groupInfo.groupId}"
+                       varBookingId="${groupInfo.bookingId}" varAppKey="${groupInfo.driverName}"/>
                   </td>
              </tr>
              <c:set var="sum_adult" value="${sum_adult+groupInfo.adultCount }" />

@@ -28,10 +28,10 @@
 			
 			<th >数量<i class="w_table_split"></i></th>
 			<th >免数<i class="w_table_split"></i></th>
-			<th >成本价<i class="w_table_split"></i></th>
-			<th >成本额<i class="w_table_split"></i></th>
-			<th >销售价<i class="w_table_split"></i></th>
-			<th >销售额<i class="w_table_split"></i></th>
+			<th >结算价<i class="w_table_split"></i></th>
+			<th >结算额<i class="w_table_split"></i></th>
+			<th >采购价<i class="w_table_split"></i></th>
+			<th >采购额<i class="w_table_split"></i></th>
 			<th >利润<i class="w_table_split"></i></th>
 		</tr>
 		
@@ -72,7 +72,7 @@
 				<td><fmt:formatNumber value="${v.itemTotal}" pattern="#.##" type="currency"/></td>
 				<td><fmt:formatNumber value="${v.saleItemPrice  }" pattern="#.##" type="currency"/></td>
 				<td><fmt:formatNumber value="${v.totalSale}" pattern="#.##" type="currency"/></td>
-				<td><fmt:formatNumber value="${v.totalSale-v.itemTotal}" pattern="#.##" type="currency"/></td>
+				<td><fmt:formatNumber value="${v.itemTotal-v.totalSale}" pattern="#.##" type="currency"/></td>
 			</tr>
 			<c:set var="sum_totalCount" value="${sum_totalCount+v.itemTotal}" />
 			<c:set var="sum_totalSale" value="${sum_totalSale+v.totalSale}" />
@@ -92,7 +92,7 @@
 			<td ><fmt:formatNumber value="${sum_totalCount}" pattern="#.##" type="currency"/></td>
 			<td ></td>
 			<td ><fmt:formatNumber value="${sum_totalSale}" pattern="#.##" type="currency"/></td>
-			<td ><fmt:formatNumber value="${sum_totalSale-sum_totalCount}" pattern="#.##" type="currency"/></td>
+			<td ><fmt:formatNumber value="${sum_totalCount-sum_totalSale}" pattern="#.##" type="currency"/></td>
 		</tr>
 
 		<tr class="footer2">
