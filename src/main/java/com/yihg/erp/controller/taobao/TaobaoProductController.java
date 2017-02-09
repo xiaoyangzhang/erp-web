@@ -18,13 +18,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.yihg.erp.contant.TaobaoConstants;
 import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.utils.HttpUtil;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.dal.product.po.TaobaoProduct;
+import com.yimayhd.erpcenter.dal.product.po.TaobaoProductSkus;
 import com.yimayhd.erpcenter.dal.product.po.TaobaoStock;
 import com.yimayhd.erpcenter.dal.product.po.TaobaoStockDate;
 import com.yimayhd.erpcenter.dal.product.po.TaobaoStockLog;
+import com.yimayhd.erpcenter.dal.product.vo.TaobaoProductVo;
+import com.yimayhd.erpcenter.dal.sales.client.taobao.pojo.TaobaoSKU;
 import com.yimayhd.erpcenter.facade.tj.client.service.TaobaoProductFacade;
 
 @Controller
@@ -164,7 +170,7 @@ public class TaobaoProductController extends BaseController {
 	public String addTaobaoProduct(HttpServletRequest request,Integer stockId,
 			ModelMap model){
 		//model.addAttribute("stockId", stockId);
-		return "taoBao/taoBaoProductList";
+		return "taoBao/linkTaobaoProductList";
 	}
 	
 	
@@ -173,7 +179,7 @@ public class TaobaoProductController extends BaseController {
 	public String findTaoBaoProduct(HttpServletRequest request, ModelMap model,
 			Integer pageSize, Integer page) throws ParseException {
 		Map<String,Object> psBean  = WebUtils.getQueryParamters(request);
-		model.addAttribute("pageBean", taoBaoProductFacade.findTaoBaoProduct(psBean, pageSize, page));	
+		model.addAttribute("pageBean", taoBaoProductFacade.findTaoBaoProduct(psBean, pageSize, page,WebUtils.getCurBizId(request)));	
 		return "taoBao/taoBaoProductTable";
 		
 	}
@@ -207,9 +213,9 @@ public class TaobaoProductController extends BaseController {
 	 */
 	@RequestMapping(value = "saveStockProBinding.do")
 	@ResponseBody
-	public String saveStockProBinding(HttpServletRequest request,String productId,
+	public String saveStockProBinding(HttpServletRequest request,String tpsId,
 			Integer stockId,ModelMap model){
-		return JSON.toJSONString(taoBaoProductFacade.saveStockProBinding( productId, stockId, model));
+		return JSON.toJSONString(taoBaoProductFacade.saveStockProBinding( tpsId, stockId, model));
 	}
 	
 	/**
@@ -222,9 +228,9 @@ public class TaobaoProductController extends BaseController {
 	 */
 	@RequestMapping(value = "deleteTaoBaoStockProduct.do")
 	@ResponseBody
-	public String deleteTaoBaoStockProduct(HttpServletRequest request,String productId,
+	public String deleteTaoBaoStockProduct(HttpServletRequest request,String tpsId,
 			Integer stockId,ModelMap model){
-		taoBaoProductFacade.deleteTaoBaoStockProduct(productId, stockId, model);
+		taoBaoProductFacade.deleteTaoBaoStockProduct(tpsId, stockId, model);
 		Map<String,Object> map = new HashMap<String,Object>();
 		map.put("success", 1);
 		return JSON.toJSONString(map);
@@ -277,5 +283,57 @@ public class TaobaoProductController extends BaseController {
 			Integer id,ModelMap model){
 		return JSON.toJSONString(taoBaoProductFacade.deleteTaoBaoStockProduct( id, model));
 	}
+	
+    @RequestMapping("/syncProductSku.do")
+    @ResponseBody
+    public String syncProductSku(String numIid,String productId,String myStoreId) {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("numIid", numIid);
+        map.put("authClient", myStoreId);
+        
+        String response = HttpUtil.doPost(TaobaoConstants.TAOBAO_API_URL + "/taoBaoProducts/skuList.do", map);
+
+        String productSku = JSONObject.parseObject(response).getJSONObject("item_seller_get_response")
+                .getJSONObject("item").toString();
+
+        // TODO 后续功能
+        TaobaoSKU ss = JSONObject.parseObject(productSku, TaobaoSKU.class);
+        if(("").equals(ss.getProperty_alias())){
+        	return errorJson("该产品套餐为空");
+        };
+        String[] ary = ss.getProperty_alias().split("\\;");
+        
+        taoBaoProductFacade.syncProductSku(ary,ss,productId);
+                    
+        return successJson();
+    }
+    
+    @RequestMapping("addTaobaoSku.htm")
+	public String addTaobaoSku(HttpServletRequest request,
+			HttpServletResponse reponse, ModelMap model, Integer skuId) {
+    	if(skuId > 0){
+    		Map<String, Object> map = taoBaoProductFacade.addTaobaoSku(skuId);
+	    	model.addAttribute("tp", map.get("tp"));
+	    	model.addAttribute("tps", map.get("tps"));
+    	}
+		return "taoBao/addTaobaoSku";
+	}
+    
+    @RequestMapping("saveTaobaoSku.do")
+    @ResponseBody
+    public String saveTaobaoSku(HttpServletRequest request, TaobaoProductVo vo,Model model) throws ParseException {
+    	Integer skuId=0;
+    	TaobaoProduct tp=new TaobaoProduct();
+    	TaobaoProductSkus tps=new TaobaoProductSkus();
+		tp.setOuterId(vo.getOuterId());
+		tp.setTitle(vo.getTitle());
+		tp.setMyStoreId(vo.getMyStoreId());
+		
+		tps.setPidName(vo.getPidName());
+		
+		skuId = taoBaoProductFacade.saveTaobaoSku(vo,tp,tps,skuId);
+		
+    	return successJson("skuId", skuId + "");
+    }
 
 }

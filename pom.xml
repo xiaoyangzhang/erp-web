@@ -537,6 +537,11 @@
 			<artifactId>erpcenterFacade-dataAnalysis-client</artifactId>
 			<version>0.3.6-SNAPSHOT</version>
 		</dependency>
+		<dependency>  
+		    <groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterDAL-sales-client</artifactId>
+			<version>0.3.6-SNAPSHOT</version>
+		</dependency>
 		 <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-websocket</artifactId>
