@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.yimayhd.erpcenter.dal.sys.po.SysBizConfig;
+import com.yimayhd.erpcenter.facade.sys.service.SysBizConfigFacade;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -115,7 +116,8 @@ public class BookingSupplierController extends BaseController {
 	private SysPlatformOrgFacade sysPlatformOrgFacade;
 	@Autowired
 	private DicFacade dicFacade;
-	
+	@Autowired
+	private SysBizConfigFacade sysBizConfigFacade;
 	@ModelAttribute
 	public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
 //		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
@@ -1090,7 +1092,7 @@ public class BookingSupplierController extends BaseController {
 		//根据参数判断价格是否可以编辑
 		String canEditPrice = WebUtils.getBizConfigValue(request, "BOOKING_HOTEL_EDITPRICE");
 		model.addAttribute("canEditPrice", canEditPrice);
-		SysBizConfig sysBizConfig = sysBizConfigService.findByItemValue(bizId, Constants.ITEM_CODE);
+		SysBizConfig sysBizConfig = sysBizConfigFacade.findByItemValue(bizId, Constants.ITEM_CODE);
 		model.addAttribute("sysBizConfig", sysBizConfig);
 		model.addAttribute("isShow", isShow);
 		return "operation/supplier/hotel/hotel-add";
@@ -1106,7 +1108,7 @@ public class BookingSupplierController extends BaseController {
 //		List<DicInfo> CarTypes = dicService.getListByTypeCode(Constants.FLEET_TYPE_CODE);
 		List<DicInfo> CarTypes = saleCommonFacade.getCarListByTypeCode();
 		model.addAttribute("carTypes", CarTypes);
-		SysBizConfig sysBizConfig = sysBizConfigService.findByItemValue(bizId, Constants.ITEM_CODE);
+		SysBizConfig sysBizConfig = sysBizConfigFacade.findByItemValue(bizId, Constants.ITEM_CODE);
 		model.addAttribute("sysBizConfig", sysBizConfig);
 		model.addAttribute("isShow", isShow);
 		
@@ -1152,7 +1154,7 @@ public class BookingSupplierController extends BaseController {
 		//景区类型
 		//List<DicInfo> sightTypes = dicService.getListByTypeCode(Constants.SCENICSPOT_TYPE_CODE);
 		//model.addAttribute("sightTypes", sightTypes);
-		SysBizConfig sysBizConfig = sysBizConfigService.findByItemValue(bizId, Constants.ITEM_CODE);
+		SysBizConfig sysBizConfig = sysBizConfigFacade.findByItemValue(bizId, Constants.ITEM_CODE);
 		model.addAttribute("sysBizConfig", sysBizConfig);
 		model.addAttribute("isShow", isShow);
 		
@@ -1233,7 +1235,7 @@ public class BookingSupplierController extends BaseController {
 //		List<DicInfo> resTypes = dicService.getListByTypeCode(Constants.RESTAURANT_TYPE_CODE);
 		List<DicInfo> resTypes = saleCommonFacade.getEatListByTypeCode();
 		model.addAttribute("resTypes", resTypes);
-		SysBizConfig sysBizConfig = sysBizConfigService.findByItemValue(bizId, Constants.ITEM_CODE);
+		SysBizConfig sysBizConfig = sysBizConfigFacade.findByItemValue(bizId, Constants.ITEM_CODE);
 		model.addAttribute("sysBizConfig", sysBizConfig);
 		model.addAttribute("isShow", isShow);
 		
@@ -1909,7 +1911,7 @@ public class BookingSupplierController extends BaseController {
 		//从字典中查询结算方式
 //		List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
 		List<DicInfo> cashTypes = saleCommonFacade.getSettleWayListByTypeCode(bizId);
-		SysBizConfig sysBizConfig = sysBizConfigService.findByItemValue(bizId, Constants.ITEM_CODE);
+		SysBizConfig sysBizConfig = sysBizConfigFacade.findByItemValue(bizId, Constants.ITEM_CODE);
 		model.addAttribute("sysBizConfig", sysBizConfig);
 		model.addAttribute("groupId", groupId);
 		

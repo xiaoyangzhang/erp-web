@@ -920,9 +920,9 @@ public class TaobaoController extends BaseController {
 	 */
 	@RequestMapping("monthlyReportStatisticsByYMG.htm")
 	public String monthlyReportStatisticsByYMG(HttpServletRequest request, HttpServletResponse reponse, ModelMap model) {
-		model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
+		model.addAttribute("orgJsonStr", sysPlatformOrgFacade.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
 		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
+				sysPlatformEmployeeFacade.getComponentOrgUserTreeJsonStr(WebUtils.getCurBizId(request)));
 		// List<DicInfo> typeList =
 		// dicService.getListByTypeCode(BasicConstants.SALES_TEAM_TYPE,
 		// WebUtils.getCurBizId(request));
@@ -3681,7 +3681,7 @@ public class TaobaoController extends BaseController {
 		pageBean.setParameter(pm);
 		pageBean.setPage(1);
 		pageBean.setPageSize(10000);
-		pageBean = taobaoOrderService.selectTaobaoOrder(pageBean, WebUtils.getCurBizId(request));
+		pageBean = taobaoFacade.selectTaobaoOrder(pageBean, WebUtils.getCurBizId(request));
 		List<PlatTaobaoTrade> orders = pageBean.getResult();
 		String path = "";
 
@@ -3851,7 +3851,7 @@ public class TaobaoController extends BaseController {
 		pageBean.setParameter(pm);
 		pageBean.setPage(1);
 		pageBean.setPageSize(10000);
-		pageBean = taobaoOrderService.selectPresellTaobaoOrderListPage(pageBean, WebUtils.getCurBizId(request));
+		pageBean = taobaoFacade.selectPresellTaobaoOrderListPage(pageBean, WebUtils.getCurBizId(request));
 		List<PlatTaobaoTrade> orders = pageBean.getResult();
 		String path = "";
 
