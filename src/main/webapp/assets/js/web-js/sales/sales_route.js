@@ -21,41 +21,41 @@ var SalesRoute = function SalesRoute(dataConstruct){
          * 早中晚餐自动补全“√”和“×”
          */
         $(".bldd").each(function(){
-    		$(this).autocomplete({
-    			  source: function( request, response ) {
-    				  var name=encodeURIComponent(request.term);
-    				  $.ajax({
-    					  type : "post",
-    					  url : "../route/getNameList.do",
-    					  data : {
-    						  name : name
-    					  },
-    					  dataType : "json",
-    					  success : function(data){
-    						  if(data && data.success == 'true'){
-    							  response($.map(data.result,function(v){
-    								  return {
-    									  label : v.name,
-    									  value : v.name
-    								  }
-    							  }));
-    						  }
-    					  },
-    					  error : function(data,msg){
-    					  }
-    				  });
-    			  },
-    			  focus: function(event, ui) {
-    				    $(".adress_input_box li.result").removeClass("selected");
-    				    $("#ui-active-menuitem")
-    				        .closest("li")
-    				        .addClass("selected");
-    				},
-    			  minLength : 0,
-    			  autoFocus : true,
-    			  delay : 300
-    		});
-    	});
+            $(this).autocomplete({
+                source: function( request, response ) {
+                    var name=encodeURIComponent(request.term);
+                    $.ajax({
+                        type : "get",
+                        url : "../route/getNameList.do",
+                        data : {
+                            name : name
+                        },
+                        dataType : "json",
+                        success : function(data){
+                            if(data && data.success == 'true'){
+                                response($.map(data.result,function(v){
+                                    return {
+                                        label : v.name,
+                                        value : v.name
+                                    }
+                                }));
+                            }
+                        },
+                        error : function(data,msg){
+                        }
+                    });
+                },
+                focus: function(event, ui) {
+                    $(".adress_input_box li.result").removeClass("selected");
+                    $("#ui-active-menuitem")
+                        .closest("li")
+                        .addClass("selected");
+                },
+                minLength : 0,
+                autoFocus : true,
+                delay : 300
+            });
+        });
     });
 
     //行程天数删除事件
@@ -81,7 +81,9 @@ var SalesRoute = function SalesRoute(dataConstruct){
                 }
 
             });
+            $("#groupOrder_dateEnd").val(SalesRoute.timeByDateCalculate(i + 1));
         });
+
     });
 
     //交通添加事件
@@ -184,11 +186,12 @@ SalesRoute.prototype.dayAdd = function(data){
     if(!data){
         html = template('day_template', {dayNum : count});
         this.$content.append(html);
-        
+        $("#groupOrder_dateEnd").val(SalesRoute.timeByDateCalculate(count));
     }else{
         html = template('day_template', {dayNum : count, id:data.id,routeDesp : data.routeDesp,
             routeTip : data.routeTip, breakfast : data.breakfast, lunch : data.lunch, supper : data.supper, hotelName : data.hotelName});
         this.$content.append(html);
+        $("#groupOrder_dateEnd").val(SalesRoute.timeByDateCalculate(count));
     }
 };
 

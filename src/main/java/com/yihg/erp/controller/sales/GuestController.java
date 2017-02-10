@@ -262,6 +262,41 @@ public class GuestController extends BaseController {
 			return successJson() ;
 		}
 	}
+
+	/**
+	 * 批量导入时，验证客人是否有参团历史
+	 * @param request
+	 * @param model
+	 * @param guestCertificateNum
+	 * @return
+	 */
+	@RequestMapping(value="/guestCertificateNumValidateList.htm")
+	@ResponseBody
+	public String guestCertificateNumValidateList(String guestCertificateNum,Integer orderId){
+		//Set<Integer> locOrderIdSet = new HashSet<Integer>();
+		Map<String, Object> map = null;
+		List<Map<String,Object>> list = new ArrayList<Map<String,Object>>();
+		String[] orderIdsArr = guestCertificateNum.split(",");
+		for (String orderIdStr : orderIdsArr) {
+			List<GroupOrderGuest> guests = groupOrderGuestService.getGuestByGuestCertificateNum(orderIdStr,orderId);
+			map = new HashMap<String, Object>();
+			if(guests.size()>0){
+				map.put("certificateNum", orderIdStr);
+				map.put("cNum", 1);
+			}else{
+				map.put("certificateNum", 0);
+				map.put("cNum", 0);
+			}
+			list.add(map);
+
+
+		}
+
+		return JSONArray.toJSONString(list) ;
+
+	}
+
+
 	/**
 	 * 获取参团信息
 	 * @param request
