@@ -13,7 +13,9 @@ import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
 import com.yimayhd.erpcenter.dal.sys.constants.Constants;
+import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToNotGroupListDTO;
 import com.yimayhd.erpcenter.facade.sales.result.GuestResult;
+import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToNotGroupListResult;
 import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
 import com.yimayhd.erpcenter.facade.sales.service.GuestFacade;
 import org.slf4j.Logger;
@@ -274,7 +276,7 @@ public class GuestController extends BaseController {
 	@ResponseBody
 	public String guestCertificateNumValidateList(String guestCertificateNum,Integer orderId){
 		//Set<Integer> locOrderIdSet = new HashSet<Integer>();
-		Map<String, Object> map = null;
+		/*Map<String, Object> map = null;
 		List<Map<String,Object>> list = new ArrayList<Map<String,Object>>();
 		String[] orderIdsArr = guestCertificateNum.split(",");
 		for (String orderIdStr : orderIdsArr) {
@@ -290,9 +292,12 @@ public class GuestController extends BaseController {
 			list.add(map);
 
 
-		}
-
-		return JSONArray.toJSONString(list) ;
+		}*/
+		ToNotGroupListDTO toNotGroupListDTO = new ToNotGroupListDTO();
+		toNotGroupListDTO.setGuestCertificateNum(guestCertificateNum);
+		toNotGroupListDTO.setOrderId(orderId);
+		ToNotGroupListResult toNotGroupListResult = groupOrderFacade.guestCertificateNumValidateList(toNotGroupListDTO);
+		return JSONArray.toJSONString(toNotGroupListResult.getList()) ;
 
 	}
 

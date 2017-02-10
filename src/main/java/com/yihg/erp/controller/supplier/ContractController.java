@@ -429,6 +429,14 @@ public class ContractController extends BaseController{
         }
 
     }
+
+    @RequestMapping(value = "/delPriceExtRow.do", method = RequestMethod.POST)
+    @ResponseBody
+    public String delPriceExtRow(HttpServletRequest request,Integer priceExtId){
+        contractService.delPriceExtRow(priceExtId);
+        return successJson();
+    }
+
     /**
      * 复制供应商协议
      * @param request
