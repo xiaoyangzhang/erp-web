@@ -270,5 +270,8 @@
 	<dubbo:reference id="basicCommonFacade"
 					 interface="org.erpcenterFacade.common.client.service.BasicCommonFacade" owner="ly" version="${dubbo.version}"
 					 timeout="${dubbo.timeout}" />
+	<dubbo:reference id="ticketCenterFacade"
+					 interface="com.yimayhd.erpcenter.facade.ticket.service.TicketCenterFacade" owner="ly" version="${dubbo.version}"
+					 timeout="${dubbo.timeout}" />
 
 </beans>

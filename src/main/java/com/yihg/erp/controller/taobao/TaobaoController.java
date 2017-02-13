@@ -3681,7 +3681,10 @@ public class TaobaoController extends BaseController {
 		pageBean.setParameter(pm);
 		pageBean.setPage(1);
 		pageBean.setPageSize(10000);
-		pageBean = taobaoFacade.selectTaobaoOrder(pageBean, WebUtils.getCurBizId(request));
+		TaobaoOriginalOrderTableDTO dto = new TaobaoOriginalOrderTableDTO();
+		dto.setPageBean(pageBean);
+		dto.setBizId(WebUtils.getCurBizId(request));
+		pageBean = taobaoFacade.taobaoOriginalOrder_table(dto);
 		List<PlatTaobaoTrade> orders = pageBean.getResult();
 		String path = "";
 
@@ -3851,8 +3854,11 @@ public class TaobaoController extends BaseController {
 		pageBean.setParameter(pm);
 		pageBean.setPage(1);
 		pageBean.setPageSize(10000);
-		pageBean = taobaoFacade.selectPresellTaobaoOrderListPage(pageBean, WebUtils.getCurBizId(request));
-		List<PlatTaobaoTrade> orders = pageBean.getResult();
+		PresellTaobaoOriginalOrderDTO dto = new PresellTaobaoOriginalOrderDTO();
+		dto.setPageBean(pageBean);
+		dto.setBizId(WebUtils.getCurBizId(request));
+		PresellTaobaoOriginalOrderDTO result = taobaoFacade.presellTaobaoOriginalOrder_table(dto);
+		List<PlatTaobaoTrade> orders = result.getPageBean().getResult();
 		String path = "";
 
 		try {

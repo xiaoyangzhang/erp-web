@@ -1,33 +1,43 @@
 package com.yihg.erp.controller.operation;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.util.TypeUtils;
+import com.yihg.erp.aop.RequiresPermissions;
+import com.yihg.erp.common.BizSettingCommon;
+import com.yihg.erp.contant.BizConfigConstant;
 import com.yihg.erp.contant.OpenPlatformConstannt;
+import com.yihg.erp.contant.PermissionConstants;
+import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.controller.images.utils.DateUtil;
 import com.yihg.erp.utils.MD5Util;
+import com.yihg.erp.utils.SysConfig;
+import com.yihg.erp.utils.WebUtils;
+import com.yihg.erp.utils.WordReporter;
+import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.common.util.NumberUtil;
 import com.yimayhd.erpcenter.dal.basic.constant.BasicConstants;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDeliveryPrice;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplierDetail;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.*;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatAuth;
-import com.yimayhd.erpcenter.dal.sys.po.PlatformOrgPo;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
+import com.yimayhd.erpcenter.facade.basic.service.DicFacade;
+import com.yimayhd.erpcenter.facade.operation.result.BookingDeliveryResult;
+import com.yimayhd.erpcenter.facade.operation.result.ResultSupport;
+import com.yimayhd.erpcenter.facade.operation.result.WebResult;
+import com.yimayhd.erpcenter.facade.operation.service.BookingDeliveryFacade;
+import com.yimayhd.erpcenter.facade.supplier.service.ContractFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatAuthFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
 import com.yimayhd.erpcenter.facade.sys.service.SysPlatformOrgFacade;
+import com.yimayhd.erpresource.dal.constants.Constants;
+import com.yimayhd.erpresource.dal.exception.ClientException;
 import com.yimayhd.erpresource.dal.po.SupplierContractPrice;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -55,40 +65,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.util.TypeUtils;
-import com.yihg.erp.aop.RequiresPermissions;
-import com.yihg.erp.common.BizSettingCommon;
-import com.yihg.erp.contant.BizConfigConstant;
-import com.yihg.erp.contant.PermissionConstants;
-import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.controller.images.utils.DateUtil;
-import com.yihg.erp.utils.SysConfig;
-import com.yihg.erp.utils.WebUtils;
-import com.yihg.erp.utils.WordReporter;
-import com.yihg.mybatis.utility.PageBean;
-import com.yimayhd.erpcenter.common.util.NumberUtil;
-import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery;
-import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDeliveryPrice;
-import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
-import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplierDetail;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderGuest;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrintPo;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderTransport;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRequirement;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
-import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
-import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
-import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
-import com.yimayhd.erpcenter.facade.operation.result.BookingDeliveryResult;
-import com.yimayhd.erpcenter.facade.operation.result.ResultSupport;
-import com.yimayhd.erpcenter.facade.operation.result.WebResult;
-import com.yimayhd.erpcenter.facade.operation.service.BookingDeliveryFacade;
-import com.yimayhd.erpcenter.facade.operation.service.BookingSupplierFacade;
-import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
-import com.yimayhd.erpresource.dal.constants.Constants;
-import com.yimayhd.erpresource.dal.exception.ClientException;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 
 @Controller
@@ -113,6 +95,10 @@ public class BookingDeliveryController extends BaseController {
     private SysPlatAuthFacade sysPlatAuthFacade;
     @Autowired
     private BasicCommonFacade basicCommonFacade;
+    @Autowired
+    private DicFacade dicFacade;
+    @Autowired
+    private ContractFacade contractFacade;
     @ModelAttribute
     public void getOrgAndUserTreeJsonStr(ModelMap model, HttpServletRequest request) {
 //        model.addAttribute("orgJsonStr", orgService.getComponentOrgTreeJsonStr(WebUtils.getCurBizId(request)));
@@ -423,7 +409,7 @@ public class BookingDeliveryController extends BaseController {
                                                   ModelMap model,Integer supplierId,Integer isShow,String dateArrival){
         int bizId = WebUtils.getCurBizId(request);
         //获取项目信息
-        List<DicInfo> typeList = dicService.getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
+        List<DicInfo> typeList = dicFacade.getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
         model.addAttribute("typeList", typeList);
         model.addAttribute("supplierId", supplierId);
         model.addAttribute("isShow", isShow);
@@ -443,7 +429,7 @@ public class BookingDeliveryController extends BaseController {
                                             Integer itemType,String productName,Integer supplierId,Integer page,Integer pageSize,Integer isShow,String dateArrival){
         int bizId = WebUtils.getCurBizId(request);
         //获取项目信息
-        List<DicInfo> typeList = dicService.getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
+        List<DicInfo> typeList = dicFacade.getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
         SupplierContractPrice scpBean = new SupplierContractPrice();
         scpBean.setItemType(itemType);
         scpBean.setProductName(productName);
@@ -462,7 +448,7 @@ public class BookingDeliveryController extends BaseController {
             pageBean.setPageSize(pageSize);
         }
         pageBean.setParameter(scpBean);
-        pageBean = contractService.findBasePriceListPage(pageBean,supplierId,WebUtils.getCurBizId(request));
+        pageBean = contractFacade.findBasePriceListPage(pageBean,supplierId,WebUtils.getCurBizId(request));
         model.addAttribute("pageBean", pageBean);
         model.addAttribute("isShow", isShow);
         return "/operation/delivery/delivery-base-add-table";
