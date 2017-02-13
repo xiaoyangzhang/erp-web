@@ -114,6 +114,15 @@ public class TjGroupController {
 		return "tj/GroupProfitList";
 	}
 	
+	@RequestMapping("GroupProfitList1.htm")
+	public String GroupProfitList1(HttpServletRequest request, HttpServletResponse reponse, ModelMap model){
+		Integer bizId = WebUtils.getCurBizId(request);
+		TjSearchResult result = tjGroupFacade.GroupProfitList(bizId);
+		model.addAttribute("orgJsonStr", result.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", result.getOrgUserJsonStr());
+		model.addAttribute("bizId", bizId); // 过滤B商家
+		return "tj/GroupProfitList1";
+	}
 
 	@RequestMapping(value = "/GroupProfitList_Post.do")
 	public String GroupProfitList_get(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, TourGroupVO group){
@@ -171,6 +180,420 @@ public class TjGroupController {
 		model.addAttribute("pageTotalTj", this.getPageTotal(result.getPageBean().getResult()));
 		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" <br/>打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		return "tj/tjGroupProfitList-print";
+	}
+	@RequestMapping("toGroupProfitPrint1.htm")
+	public String toGroupProfitPrint1(HttpServletRequest request, HttpServletResponse reponse, ModelMap model,TourGroupVO group){
+		/*if (StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = group.getOrgIds().split(",");
+			for (String orgIdStr : orgIdArr) {
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+			String salesOperatorIds = "";
+			for (Integer usrId : set) {
+				salesOperatorIds += usrId + ",";
+			}
+			if (!salesOperatorIds.equals("")) {
+				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
+			}
+		}
+		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
+		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
+			pm.put("operatorId", group.getSaleOperatorIds());
+		}
+		Integer bizId = WebUtils.getCurBizId(request);
+		String dataUser = WebUtils.getDataUserIdString(request); //数据权限
+		pm.put("dataUser", dataUser);
+
+		PageBean<TJGroupProfit> pageBean = new PageBean<TJGroupProfit>();
+		pageBean.setPageSize(100000);
+		pageBean.setPage(1);
+		pageBean.setParameter(pm);
+
+		pageBean = tjService.selectGroupProfitListPageOu(pageBean, bizId, dataUser);
+		//pageBean = tjService.selectGroupProfitListPage(pageBean);
+		this.addOrderDetail2(pageBean);*/
+
+		TjSearchDTO tjSearchDTO = new TjSearchDTO();
+		tjSearchDTO.setBizId(WebUtils.getCurBizId(request));
+		tjSearchDTO.setGroup(group);
+		tjSearchDTO.setPm(WebUtils.getQueryParamters(request));
+		tjSearchDTO.setDataUserIdString(WebUtils.getDataUserIdString(request));
+		SelectShopProjectListResult result = tjGroupFacade.toGroupProfitPrint(tjSearchDTO);
+
+
+		String imgPath = bizSettingCommon.getMyBizLogo(request);
+		model.addAttribute("imgPath", imgPath);
+		model.addAttribute("page",  result.getPageBean());
+		model.addAttribute("pageTotalTj", this.getPageTotal(result.getPageBean().getResult()));
+		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" <br/>打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+		return "tj/tjGroupProfitList-print1";
+	}
+
+	@RequestMapping(value = "/getGroupProfitExcl1.do")
+	@ResponseBody
+	public void getGroupProfitExcl1(HttpServletRequest request,HttpServletResponse response, ModelMap model,TourGroupVO group){
+		if (StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())) {
+			Set<Integer> set = new HashSet<Integer>();
+			String[] orgIdArr = group.getOrgIds().split(",");
+			for (String orgIdStr : orgIdArr) {
+				set.add(Integer.valueOf(orgIdStr));
+			}
+			set = tjFacade.getUserIdListByOrgIdList(set, WebUtils.getCurBizId(request));
+			String salesOperatorIds = "";
+			for (Integer usrId : set) {
+				salesOperatorIds += usrId + ",";
+			}
+			if (!salesOperatorIds.equals("")) {
+				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length() - 1));
+			}
+		}
+		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
+		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
+			pm.put("operatorId", group.getSaleOperatorIds());
+		}
+		Integer bizId = WebUtils.getCurBizId(request);
+		String dataUser = WebUtils.getDataUserIdString(request); //数据权限
+		pm.put("dataUser", dataUser);
+
+		PageBean<TJGroupProfit> pageBean = new PageBean<TJGroupProfit>();
+		pageBean.setPageSize(100000);
+		pageBean.setPage(1);
+		pageBean.setParameter(pm);
+
+		pageBean = tjGroupFacade.selectGroupProfitListPageOu(pageBean, bizId, dataUser);
+
+		//pageBean = tjService.selectGroupProfitListPage(pageBean);
+		this.addOrderDetailExcl(pageBean);
+
+		TJGroupProfit all = this.getPageTotal(pageBean.getResult());
+
+		List list = pageBean.getResult();
+		String path ="";
+
+		try {
+			String url = request.getSession().getServletContext()
+					.getRealPath("/template/excel/groupProfit1.xlsx");
+			FileInputStream input = new FileInputStream(new File(url));  //读取的文件路径
+	        XSSFWorkbook wb = new XSSFWorkbook(new BufferedInputStream(input));
+	        CellStyle cellStyle = wb.createCellStyle();
+	        cellStyle.setWrapText(true);
+	        cellStyle.setBorderBottom(CellStyle.BORDER_THIN); //下边框
+	        cellStyle.setBorderLeft(CellStyle.BORDER_THIN);//左边框
+	        cellStyle.setBorderTop(CellStyle.BORDER_THIN);//上边框
+	        cellStyle.setBorderRight(CellStyle.BORDER_THIN);//右边框
+	        cellStyle.setAlignment(CellStyle.ALIGN_CENTER_SELECTION); // 居中
+
+	        CellStyle styleLeft = wb.createCellStyle();
+	        styleLeft.setWrapText(true);
+	        styleLeft.setBorderBottom(CellStyle.BORDER_THIN); //下边框
+	        styleLeft.setBorderLeft(CellStyle.BORDER_THIN);//左边框
+	        styleLeft.setBorderTop(CellStyle.BORDER_THIN);//上边框
+	        styleLeft.setBorderRight(CellStyle.BORDER_THIN);//右边框
+	        styleLeft.setAlignment(CellStyle.ALIGN_LEFT); // 居左
+
+	        CellStyle styleRight = wb.createCellStyle();
+	        styleRight.setWrapText(true);
+	        styleRight.setBorderBottom(CellStyle.BORDER_THIN); //下边框
+	        styleRight.setBorderLeft(CellStyle.BORDER_THIN);//左边框
+	        styleRight.setBorderTop(CellStyle.BORDER_THIN);//上边框
+	        styleRight.setBorderRight(CellStyle.BORDER_THIN);//右边框
+	        styleRight.setAlignment(CellStyle.ALIGN_RIGHT); // 居右
+			Sheet sheet = wb.getSheetAt(0) ; //获取到第一个sheet
+			Row row = null;
+			Cell cc = null ;
+			// 遍历集合数据，产生数据行
+	        Iterator<Map<String,Object>> it = list.iterator();
+		    int index = 0;
+		    while (it.hasNext()){
+		    	TJGroupProfit tJGroupProfit = (TJGroupProfit)it.next() ;
+
+		       //从第四行开始，前三行分别为标题和列明
+		       row = sheet.createRow(index+3);
+		       //第一列：序号
+		       cc = row.createCell(0);
+		       cc.setCellValue(index+1);
+		       cc.setCellStyle(cellStyle);
+
+		       //第二列：团号
+		       cc = row.createCell(1);
+		       cc.setCellValue(tJGroupProfit.getGroupCode()==null?"":tJGroupProfit.getGroupCode());
+		       cc.setCellStyle(cellStyle);
+
+		       //第三列：团期
+		       cc = row.createCell(2);
+		       String start = tJGroupProfit.getDateStart()==null?"":dt.format(tJGroupProfit.getDateStart());
+		       String end = tJGroupProfit.getDateEnd()==null?"":dt.format(tJGroupProfit.getDateEnd());
+		       cc.setCellValue(start+"/"+end);
+		       cc.setCellStyle(styleLeft);
+
+		       //第四列：人数
+		       cc = row.createCell(3);
+		       cc.setCellValue(tJGroupProfit.getTotalAdult()+"大"+tJGroupProfit.getTotalChild()+"小"+tJGroupProfit.getTotalGuide()+"陪");
+		       cc.setCellStyle(styleLeft);
+
+		       //第五列：产品线路
+		       cc = row.createCell(4);
+		       cc.setCellValue("【"+tJGroupProfit.getProductBrandName()+"】"+tJGroupProfit.getProductName());
+		       cc.setCellStyle(styleLeft);
+		       //第六列：组团社
+		       cc = row.createCell(5);
+	    	   cc.setCellValue(tJGroupProfit.getOrderDetails());
+		       cc.setCellStyle(cellStyle);
+		       //第七列：地接社
+		       cc = row.createCell(6);
+		       cc.setCellValue(StringUtils.isBlank(tJGroupProfit.getDeliveryNames()) || StringUtils.isEmpty(tJGroupProfit.getDeliveryNames())?"":tJGroupProfit.getDeliveryNames().replaceAll("<br/>", "\r\n"));
+		       cc.setCellStyle(cellStyle);
+		       //第八列：计调
+		       cc = row.createCell(7);
+		       cc.setCellValue(tJGroupProfit.getOperatorName());
+		       cc.setCellStyle(cellStyle);
+		       //第九列：团费
+		       cc = row.createCell(8);
+			   BigDecimal incomeOrder = tJGroupProfit.getIncomeOrder() != null ? new BigDecimal(tJGroupProfit.getIncomeOrder().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(incomeOrder));
+		       cc.setCellStyle(cellStyle);
+		       //第十列：其他收入
+		       cc = row.createCell(9);
+			   BigDecimal incomeOther = tJGroupProfit.getIncomeOther() != null ? new BigDecimal(tJGroupProfit.getIncomeOther().toString()) : new BigDecimal(0);
+			   cc.setCellValue(df.format(incomeOther));
+			   cc.setCellStyle(cellStyle);
+		      /* //第十一列：购物收入
+		       cc = row.createCell(10);
+			   BigDecimal incomeShop = tJGroupProfit.getIncomeShop() != null ? new BigDecimal(tJGroupProfit.getIncomeShop().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(incomeShop));
+		       cc.setCellStyle(cellStyle);*/
+		       //第十二列：地接
+		       cc = row.createCell(10);
+			   BigDecimal expenseTravelagency = tJGroupProfit.getExpenseTravelagency() != null ? new BigDecimal(tJGroupProfit.getExpenseTravelagency().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(expenseTravelagency));
+		       cc.setCellStyle(cellStyle);
+		       //第十三列：房费
+		       cc = row.createCell(11);
+		       BigDecimal expenseHotel = tJGroupProfit.getExpenseHotel() != null ? new BigDecimal(tJGroupProfit.getExpenseHotel().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(expenseHotel));
+		       cc.setCellStyle(cellStyle);
+		       //第十四列：餐费
+		       cc = row.createCell(12);
+			   BigDecimal expenseRestaurant = tJGroupProfit.getExpenseRestaurant() != null ? new BigDecimal(tJGroupProfit.getExpenseRestaurant().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(expenseRestaurant));
+		       cc.setCellStyle(cellStyle);
+		       //第十五列：车费
+		       cc = row.createCell(13);
+		       BigDecimal expenseFleet = tJGroupProfit.getExpenseFleet() != null ? new BigDecimal(tJGroupProfit.getExpenseFleet().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(expenseFleet));
+		       cc.setCellStyle(cellStyle);
+		       //第十六列：门票
+		       cc = row.createCell(14);
+		       BigDecimal expenseScenicspot = tJGroupProfit.getExpenseScenicspot() != null ? new BigDecimal(tJGroupProfit.getExpenseScenicspot().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(expenseScenicspot));
+		       cc.setCellStyle(cellStyle);
+		       //第十七列：机票
+		       cc = row.createCell(15);
+		       BigDecimal expenseAirticket = tJGroupProfit.getExpenseAirticket() != null ? new BigDecimal(tJGroupProfit.getExpenseAirticket().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(expenseAirticket));
+		       cc.setCellStyle(cellStyle);
+		       //第十八列：火车票
+		       cc = row.createCell(16);
+		       BigDecimal expenseTrainticket = tJGroupProfit.getExpenseTrainticket() != null ? new BigDecimal(tJGroupProfit.getExpenseTrainticket().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(expenseTrainticket));
+		       cc.setCellStyle(cellStyle);
+		       //第十九列：保险
+		       cc = row.createCell(17);
+		       BigDecimal expenseInsurance = tJGroupProfit.getExpenseInsurance() != null ? new BigDecimal(tJGroupProfit.getExpenseInsurance().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(expenseInsurance));
+		       cc.setCellStyle(cellStyle);
+		       //第二十列：其他支出
+		       cc = row.createCell(18);
+		       BigDecimal expenseOther = tJGroupProfit.getExpenseOther() != null ? new BigDecimal(tJGroupProfit.getExpenseOther().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(expenseOther));
+		       cc.setCellStyle(cellStyle);
+		       //第二十一列：总收入
+		       cc = row.createCell(19);
+		       BigDecimal totalIncome = tJGroupProfit.getTotalIncome() != null ? new BigDecimal(tJGroupProfit.getTotalIncome().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(totalIncome));
+		       cc.setCellStyle(cellStyle);
+		       //第二十二列：总成本
+		       cc = row.createCell(20);
+		       BigDecimal totalExpense = tJGroupProfit.getTotalExpense() != null ? new BigDecimal(tJGroupProfit.getTotalExpense().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(totalExpense));
+		       cc.setCellStyle(cellStyle);
+		       //第二十三列：毛利
+		       cc = row.createCell(21);
+		       BigDecimal totalProfit = tJGroupProfit.getTotalProfit() != null ? new BigDecimal(tJGroupProfit.getTotalProfit().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(totalProfit));
+		       cc.setCellStyle(cellStyle);
+		       //第24列：人均毛利
+		       cc = row.createCell(22);
+		       BigDecimal profitPerGuest = tJGroupProfit.getProfitPerGuest() != null ? new BigDecimal(tJGroupProfit.getProfitPerGuest().toString()) : new BigDecimal(0);
+		       cc.setCellValue(df.format(profitPerGuest));
+		       cc.setCellStyle(cellStyle);
+
+		       index++;
+
+		    }
+		    BigDecimal totalAdult=new BigDecimal(0);
+		    BigDecimal totalChild=new BigDecimal(0);
+		    BigDecimal totalGuide=new BigDecimal(0);
+		    BigDecimal iIncomeOrder=new BigDecimal(0);
+		    BigDecimal incomeOther=new BigDecimal(0);
+		    BigDecimal incomeShop=new BigDecimal(0);
+		    BigDecimal expenseTravelagency=new BigDecimal(0);
+		    BigDecimal expenseHotel=new BigDecimal(0);
+		    BigDecimal expenseRestaurant=new BigDecimal(0);
+		    BigDecimal expenseFleet=new BigDecimal(0);
+		    BigDecimal expenseScenicspot=new BigDecimal(0);
+
+		    BigDecimal expenseAirticket=new BigDecimal(0);
+		    BigDecimal expenseTrainticket=new BigDecimal(0);
+		    BigDecimal expenseInsurance=new BigDecimal(0);
+		    BigDecimal expenseOther=new BigDecimal(0);
+		    BigDecimal totalIncome=new BigDecimal(0);
+		    BigDecimal totalExpense=new BigDecimal(0);
+		    BigDecimal totalProfit=new BigDecimal(0);
+		    BigDecimal profitPerGuest=new BigDecimal(0);
+
+		    if(null!=all){
+		    	if(null!=all.getTotalAdult()){
+					totalAdult = new BigDecimal(all.getTotalAdult());
+				}
+				if(null!=all.getTotalChild()){
+					totalChild = new BigDecimal(all.getTotalChild());
+				}
+				if(null!=all.getTotalGuide()){
+					totalGuide = new BigDecimal(all.getTotalGuide());
+				}
+		    	if(null!=all.getIncomeOrder()){
+		    		iIncomeOrder = new BigDecimal(all.getIncomeOrder().toString());
+				}
+				if(null!=all.getIncomeOther()){
+					incomeOther = new BigDecimal(all.getIncomeOther().toString());
+				}
+				if(null!=all.getIncomeShop()){
+					incomeShop = new BigDecimal(all.getIncomeShop().toString());
+				}
+				if(null!=all.getExpenseTravelagency()){
+					expenseTravelagency = new BigDecimal(all.getExpenseTravelagency().toString());
+				}
+				if(null!=all.getExpenseHotel()){
+					expenseHotel = new BigDecimal(all.getExpenseHotel().toString());
+				}
+				if(null!=all.getExpenseRestaurant()){
+					expenseRestaurant = new BigDecimal(all.getExpenseRestaurant().toString());
+				}
+				if(null!=all.getExpenseFleet()){
+					expenseFleet = new BigDecimal(all.getExpenseFleet().toString());
+				}
+				if(null!=all.getExpenseScenicspot()){
+					expenseScenicspot = new BigDecimal(all.getExpenseScenicspot().toString());
+				}
+				if(null!=all.getExpenseAirticket()){
+					expenseAirticket = new BigDecimal(all.getExpenseAirticket().toString());
+				}
+				if(null!=all.getExpenseTrainticket()){
+					expenseTrainticket = new BigDecimal(all.getExpenseTrainticket().toString());
+				}
+				if(null!=all.getExpenseInsurance()){
+					expenseInsurance = new BigDecimal(all.getExpenseInsurance().toString());
+				}
+				if(null!=all.getExpenseOther()){
+					expenseOther = new BigDecimal(all.getExpenseOther().toString());
+				}
+				if(null!=all.getTotalIncome()){
+					totalIncome = new BigDecimal(all.getTotalIncome().toString());
+				}
+				if(null!=all.getTotalExpense()){
+					totalExpense = new BigDecimal(all.getTotalExpense().toString());
+				}
+				if(null!=all.getTotalProfit()){
+					totalProfit = new BigDecimal(all.getTotalProfit().toString());
+				}
+				if(null!=all.getProfitPerGuest()){
+					profitPerGuest = new BigDecimal(all.getProfitPerGuest().toString());
+				}
+
+			}
+		    row = sheet.createRow(index+3); //加合计行
+		    cc = row.createCell(0);
+		    cc = row.createCell(1);
+		    cc = row.createCell(2);
+		    cc.setCellValue("合计：");
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(3);
+		    cc.setCellValue(totalAdult.toString()+"大"+totalChild.toString()+"小"+totalGuide.toString()+"陪");
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(4);
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(5);
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(6);
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(7);
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(8);
+		    cc.setCellValue(df.format(iIncomeOrder));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(9);
+		    cc.setCellValue(df.format(incomeOther));
+		    cc.setCellStyle(styleRight);
+		  /*  cc = row.createCell(10);
+		    cc.setCellValue(df.format(incomeShop));
+		    cc.setCellStyle(styleRight);*/
+		    cc = row.createCell(10);
+		    cc.setCellValue(df.format(expenseTravelagency));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(11);
+		    cc.setCellValue(df.format(expenseHotel));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(12);
+		    cc.setCellValue(df.format(expenseRestaurant));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(13);
+		    cc.setCellValue(df.format(expenseFleet));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(14);
+		    cc.setCellValue(df.format(expenseScenicspot));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(15);
+		    cc.setCellValue(df.format(expenseAirticket));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(16);
+		    cc.setCellValue(df.format(expenseTrainticket));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(17);
+		    cc.setCellValue(df.format(expenseInsurance));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(18);
+		    cc.setCellValue(df.format(expenseOther));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(19);
+		    cc.setCellValue(df.format(totalIncome.subtract(incomeShop)));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(20);
+		    cc.setCellValue(df.format(totalExpense));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(21);
+		    cc.setCellValue(df.format(totalProfit.subtract(incomeShop)));
+		    cc.setCellStyle(styleRight);
+		    cc = row.createCell(22);
+		    cc.setCellValue(df.format(profitPerGuest));
+		    cc.setCellStyle(styleRight);
+
+		    CellRangeAddress region = new CellRangeAddress(index+4, index+5, 0, 13) ;
+		    sheet.addMergedRegion(region) ;
+		    row = sheet.createRow(index+4); //打印信息
+		    cc = row.createCell(0);
+		    cc.setCellValue("打印人："+WebUtils.getCurUser(request).getName()+" 打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+			path=request.getSession().getServletContext().getRealPath("/")+ "/download/" + System.currentTimeMillis() + ".xlsx";
+			FileOutputStream out = new FileOutputStream(path);
+	    	wb.write(out);
+	    	out.close();
+	    	wb.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		download(path, response,"tjGroupProfit.xlsx");
 	}
 	/**
 	 * 单团利润统计导出excl

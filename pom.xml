@@ -79,7 +79,7 @@
 		<facade-finance-client.version>0.3.6-SNAPSHOT</facade-finance-client.version>
 		<facade-operation-client.version>0.3.6-SNAPSHOT</facade-operation-client.version>
 		<facade-finance-client.version>0.3.6-SNAPSHOT</facade-finance-client.version>
-		<facade-supplier-client.version>0.3.6-SNAPSHOT</facade-supplier-client.version>
+		<facade-supplier-client.version>0.3.7-SNAPSHOT</facade-supplier-client.version>
 		<facade-dataAnalysis-client.version>0.3.6-SNAPSHOT</facade-dataAnalysis-client.version>
 	</properties>
 

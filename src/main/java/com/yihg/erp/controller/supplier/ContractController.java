@@ -433,7 +433,7 @@ public class ContractController extends BaseController{
     @RequestMapping(value = "/delPriceExtRow.do", method = RequestMethod.POST)
     @ResponseBody
     public String delPriceExtRow(HttpServletRequest request,Integer priceExtId){
-        contractService.delPriceExtRow(priceExtId);
+        contractFacade.delPriceExtRow(priceExtId);
         return successJson();
     }
 
