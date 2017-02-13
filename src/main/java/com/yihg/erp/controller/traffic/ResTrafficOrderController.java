@@ -46,7 +46,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/resOrder")
-public class resTrafficOrderController extends BaseController{
+public class ResTrafficOrderController extends BaseController{
 	
 	@Autowired
 	private BizSettingCommon settingCommon;
@@ -268,18 +268,15 @@ public class resTrafficOrderController extends BaseController{
 		pageBean = result.getPageBean();
 		Map<String, BigDecimal> map_sum = result.getMap();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-	public void toOrderPreview(HttpServletRequest request, HttpServletResponse response, Integer pageSize, Integer page,Model model)
-			throws ParseException {
 
-		ToNotGroupListDTO var1 = new ToNotGroupListDTO();
-		var1.setPmBean( WebUtils.getQueryParamters(request));
-		var1.setBizId(WebUtils.getCurBizId(request));
-		var1.setUserIdSet(WebUtils.getDataUserIdSet(request));
-		ToNotGroupListResult toNotGroupListResult = groupOrderFacade.toOrderPreview(var1);
-		PageBean<GroupOrder> pageBean = toNotGroupListResult.getPageBean();
-		HashMap<String, BigDecimal> map_sum = toNotGroupListResult.getMap_sum();
+//		ToNotGroupListDTO var1 = new ToNotGroupListDTO();
+//		var1.setPmBean( WebUtils.getQueryParamters(request));
+//		var1.setBizId(WebUtils.getCurBizId(request));
+//		var1.setUserIdSet(WebUtils.getDataUserIdSet(request));
+//		ToNotGroupListResult toNotGroupListResult = groupOrderFacade.toOrderPreview(var1);
+//		PageBean<GroupOrder> pageBean = toNotGroupListResult.getPageBean();
+//		HashMap<String, BigDecimal> map_sum = toNotGroupListResult.getMap_sum();
 
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		String path = "";
 		try {
 			String url = request.getSession().getServletContext().getRealPath("/template/excel/trafficOrderManageList.xlsx");
