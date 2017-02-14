@@ -19,8 +19,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.yihg.erp.contant.BizConfigConstant;
+import com.yihg.erp.utils.ObjectUtils;
 import com.yimayhd.erpcenter.dal.sys.po.UserSession;
 import com.yimayhd.erpcenter.facade.dataanalysis.client.result.*;
+import com.yimayhd.erpcenter.facade.supplier.service.SupplierFacade;
 import com.yimayhd.erpresource.dal.constants.BasicConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -36,6 +38,7 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.service.BasicCommonFacade;
 import org.erpcenterFacade.common.client.service.CommonFacade;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.erpcenterFacade.common.client.service.SaleCommonFacade;
@@ -134,7 +137,10 @@ public class QueryController extends BaseController {
 
 	@Autowired
 	private FinanceFacade financeFacade;
-
+	@Autowired
+	private BasicCommonFacade basicCommonFacade;
+    @Autowired
+	private SupplierFacade supplierFacade;
 //	@Autowired
 //	private CommonFacade commonFacade;
 	@ModelAttribute
@@ -3467,6 +3473,7 @@ public class QueryController extends BaseController {
 
 		Map paramters = WebUtils.getQueryParamters(request);
 		paramters.put("djType", djType);
+		paramters.put("bizId", WebUtils.getCurBizId(request));
 		if (null == paramters.get("start_min")
 				&& null == paramters.get("start_max")) {
 			Calendar c = Calendar.getInstance();
@@ -3481,43 +3488,42 @@ public class QueryController extends BaseController {
 			// condition.setEndTime(c.getTime()+"");
 
 		}
-		if (StringUtils.isNotBlank((String) paramters.get("orgIds"))) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = ((String) paramters.get("orgIds")).split(",");
-			for (String orgIdStr : orgIdArr) {
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			List<PlatformOrgPo> orgList = orgService.getOrgListByIdSet(
-					WebUtils.getCurBizId(request), set);
-			StringBuilder sb = new StringBuilder();
-			for (PlatformOrgPo orgPo : orgList) {
-				sb.append(orgPo.getName() + ",");
-			}
-			// condition.setOrgNames(sb.substring(0, sb.length()-1));
-			paramters.put("orgNames", sb.substring(0, sb.length() - 1));
-
-		}
-		// 如果计调不为null，查询计调名字
-		if (StringUtils.isNotBlank((String) paramters.get("saleOperatorIds"))) {
-			Set<Integer> set = new HashSet<Integer>();
-			String[] userIdArr = ((String) paramters.get("saleOperatorIds"))
-					.split(",");
-			for (String userIdStr : userIdArr) {
-				set.add(Integer.valueOf(userIdStr));
-			}
-			List<PlatformEmployeePo> empList = platformEmployeeService
-					.getEmpList(WebUtils.getCurBizId(request), set);
-			StringBuilder sb = new StringBuilder();
-			for (PlatformEmployeePo employeePo : empList) {
-				sb.append(employeePo.getName() + "");
-			}
-			// condition.setSaleOperatorName(sb.substring(0, sb.length()-1));
-			paramters.put("saleOperatorName", sb.substring(0, sb.length() - 1));
-
-		}
-		modelMap.addAttribute("parameters", paramters);
-		List<DicInfo> cashTypes = null;
-		cashTypes = dicService.getListByTypeCode(BasicConstants.PRODUCT_DES,WebUtils.getCurBizId(request));
+//		if (StringUtils.isNotBlank((String) paramters.get("orgIds"))) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = ((String) paramters.get("orgIds")).split(",");
+//			for (String orgIdStr : orgIdArr) {
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			List<PlatformOrgPo> orgList = orgService.getOrgListByIdSet(
+//					WebUtils.getCurBizId(request), set);
+//			StringBuilder sb = new StringBuilder();
+//			for (PlatformOrgPo orgPo : orgList) {
+//				sb.append(orgPo.getName() + ",");
+//			}
+//			// condition.setOrgNames(sb.substring(0, sb.length()-1));
+//			paramters.put("orgNames", sb.substring(0, sb.length() - 1));
+//
+//		}
+//		// 如果计调不为null，查询计调名字
+//		if (StringUtils.isNotBlank((String) paramters.get("saleOperatorIds"))) {
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] userIdArr = ((String) paramters.get("saleOperatorIds"))
+//					.split(",");
+//			for (String userIdStr : userIdArr) {
+//				set.add(Integer.valueOf(userIdStr));
+//			}
+//			List<PlatformEmployeePo> empList = platformEmployeeService
+//					.getEmpList(WebUtils.getCurBizId(request), set);
+//			StringBuilder sb = new StringBuilder();
+//			for (PlatformEmployeePo employeePo : empList) {
+//				sb.append(employeePo.getName() + "");
+//			}
+//			// condition.setSaleOperatorName(sb.substring(0, sb.length()-1));
+//			paramters.put("saleOperatorName", sb.substring(0, sb.length() - 1));
+//
+//		}
+		modelMap.addAttribute("parameters", queryFacade.saleDeliveryDetailList(paramters));
+		List<DicInfo> cashTypes = basicCommonFacade.getListByTypeCode(BasicConstants.PRODUCT_DES,WebUtils.getCurBizId(request));
 		modelMap.addAttribute("cashTypes", cashTypes);
 		return "queries/sale-delivery-detail-list";
 	}
@@ -9084,7 +9090,7 @@ public class QueryController extends BaseController {
 	public String queryBookingDetailProfit(HttpServletRequest request,
 										   HttpServletResponse response, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
+		List<DicInfo> cashTypes = basicCommonFacade.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
 		model.addAttribute("bizId", bizId);
 		model.addAttribute("cashType", cashTypes);
 
@@ -9106,7 +9112,7 @@ public class QueryController extends BaseController {
 	public String queryBookingDetailProfit2(HttpServletRequest request,
 											HttpServletResponse response, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
+		List<DicInfo> cashTypes = basicCommonFacade.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
 		model.addAttribute("bizId", bizId);
 		model.addAttribute("cashType", cashTypes);
 		Map<String, Object> pmRequest = WebUtils.getQueryParamters(request);
@@ -9126,7 +9132,7 @@ public class QueryController extends BaseController {
 	public String querySupplierCarDetail(HttpServletRequest request,
 										 HttpServletResponse response, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
+		List<DicInfo> cashTypes = basicCommonFacade.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
 		model.addAttribute("bizId", bizId);
 		model.addAttribute("cashType", cashTypes);
 		model.addAttribute("include","1");
@@ -9136,7 +9142,7 @@ public class QueryController extends BaseController {
 	public String querySupplierCarDetail2(HttpServletRequest request,
 										  HttpServletResponse response, ModelMap model) {
 		Integer bizId = WebUtils.getCurBizId(request);
-		List<DicInfo> cashTypes = dicService.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
+		List<DicInfo> cashTypes = basicCommonFacade.getListByTypeCode(BasicConstants.GYXX_JSFS, bizId);
 		model.addAttribute("bizId", bizId);
 		model.addAttribute("cashType", cashTypes);
 		model.addAttribute("include","0");
@@ -9175,7 +9181,7 @@ public class QueryController extends BaseController {
 			supplierParams.put("supplierType",Constants.FLEET);
 			supplierParams.put("className",className);
 			//获取供应商id集合
-			List<Integer> ids = supplierSerivce.getSupplierIds(supplierParams);
+			List<Integer> ids =supplierFacade.getSupplierIds(supplierParams);
 			if(null != ids && ids.size() > 0){
 				supplierIdsOtherMap.put("classNameSupplierIds",ids);
 			}else{
@@ -9186,13 +9192,23 @@ public class QueryController extends BaseController {
 		}
 
 		@SuppressWarnings("rawtypes")
-		PageBean pb = commonQuery(request,supplierIdsOtherMap,model, sl, page, pageSize, svc);
-
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setSvc(svc);
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
 		// 总计查询
+//		if (StringUtils.isNotBlank(ssl)) {
+//			Map<String, Object> pm = (Map<String, Object>) pb.getParameter();
+//			pm.put("parameter", pm);
+//			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
+//		}
 		if (StringUtils.isNotBlank(ssl)) {
-			Map<String, Object> pm = (Map<String, Object>) pb.getParameter();
-			pm.put("parameter", pm);
-			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
+			queryDTO.setSsl(ssl);
+			queryDTO.setPageBean(pb);
+			model.addAttribute("sum",queryFacade.commonQuerySum(queryDTO) );
 		}
 
 		return rp;
@@ -9212,13 +9228,24 @@ public class QueryController extends BaseController {
 
 
 		@SuppressWarnings("rawtypes")
-		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
-
+//		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
+ 		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setSvc(svc);
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
 		// 总计查询
+//		if (StringUtils.isNotBlank(ssl)) {
+//			Map<String, Object> pm = (Map<String, Object>) pb.getParameter();
+//			pm.put("parameter", pm);
+//			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
+//		}
 		if (StringUtils.isNotBlank(ssl)) {
-			Map<String, Object> pm = (Map<String, Object>) pb.getParameter();
-			pm.put("parameter", pm);
-			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
+			queryDTO.setSsl(ssl);
+			queryDTO.setPageBean(pb);
+			model.addAttribute("sum",queryFacade.commonQuerySum(queryDTO) );
 		}
 
 		return rp;
@@ -9237,15 +9264,25 @@ public class QueryController extends BaseController {
 
 
 		@SuppressWarnings("rawtypes")
-		PageBean pb = commonQuery(request, model, sl, page, pageSize, svc);
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(pageSize);
+		queryDTO.setSvc(svc);
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
 
 		// 总计查询
+//		if (StringUtils.isNotBlank(ssl)) {
+//			Map<String, Object> pm = (Map<String, Object>) pb.getParameter();
+//			pm.put("parameter", pm);
+//			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
+//		}
 		if (StringUtils.isNotBlank(ssl)) {
-			Map<String, Object> pm = (Map<String, Object>) pb.getParameter();
-			pm.put("parameter", pm);
-			model.addAttribute("sum", getCommonService(svc).queryOne(ssl, pm));
+			queryDTO.setSsl(ssl);
+			queryDTO.setPageBean(pb);
+			model.addAttribute("sum",queryFacade.commonQuerySum(queryDTO) );
 		}
-
 		return rp;
 	}
 
@@ -9253,7 +9290,13 @@ public class QueryController extends BaseController {
 	public String saleDeliveryDetailPreview(HttpServletRequest request,
 											HttpServletResponse reponse, ModelMap model, String sl, String ssl,
 											String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(100000);
+		queryDTO.setSvc(svc);
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 
@@ -9279,8 +9322,14 @@ public class QueryController extends BaseController {
 	public void saleDeliveryExportExcel(HttpServletRequest request,
 										HttpServletResponse response, ModelMap model, String sl,
 										String ssl, String rp, Integer page, Integer pageSize, String svc) {
-		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
-
+//		PageBean pb = commonQuery(request, model, sl, page, 10000, svc);
+		QueryDTO queryDTO = new QueryDTO();
+		queryDTO.setSl(sl);
+		queryDTO.setPage(page);
+		queryDTO.setPageSize(100000);
+		queryDTO.setSvc(svc);
+		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
+		PageBean pb  = queryResult.getPageBean();
 		String path = "";
 		BigDecimal total = new BigDecimal(0);
 		BigDecimal totalCash = new BigDecimal(0);
