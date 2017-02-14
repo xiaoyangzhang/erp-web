@@ -13,24 +13,30 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.yihg.erp.common.YihgTemplateFreemarkerService;
-import com.yihg.erp.utils.ObjectUtils;
-import com.yimayhd.erpcenter.dal.sales.client.finance.po.InfoBean;
-import com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade;
-import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
-import com.yimayhd.erpresource.dal.constants.Constants;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.SheetUtil;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
@@ -38,13 +44,61 @@ import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yimayhd.erpcenter.facade.finance.query.*;
-import org.yimayhd.erpcenter.facade.finance.result.*;
+import org.yimayhd.erpcenter.facade.finance.query.AduditStatisticsListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.AuditCommDTO;
+import org.yimayhd.erpcenter.facade.finance.query.AuditDTO;
+import org.yimayhd.erpcenter.facade.finance.query.AuditListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.AuditShopDTO;
+import org.yimayhd.erpcenter.facade.finance.query.CheckBillDTO;
+import org.yimayhd.erpcenter.facade.finance.query.DiatributeBillDTO;
+import org.yimayhd.erpcenter.facade.finance.query.ExportTravelListTableDTO;
+import org.yimayhd.erpcenter.facade.finance.query.FinAuditDTO;
+import org.yimayhd.erpcenter.facade.finance.query.IncomeJoinTableListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.IncomeOrPayDTO;
+import org.yimayhd.erpcenter.facade.finance.query.PayDTO;
+import org.yimayhd.erpcenter.facade.finance.query.PushWapListTableDTO;
+import org.yimayhd.erpcenter.facade.finance.query.QueryCommissionDeductionDTO;
+import org.yimayhd.erpcenter.facade.finance.query.QueryCommissionGrantDTO;
+import org.yimayhd.erpcenter.facade.finance.query.QuerySettleCommissionDTO;
+import org.yimayhd.erpcenter.facade.finance.query.QuerySettleListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.QueryShopCommissionStatsDTO;
+import org.yimayhd.erpcenter.facade.finance.query.ReceiveOrderListSelectDTO;
+import org.yimayhd.erpcenter.facade.finance.query.SaveDistributeBillDTO;
+import org.yimayhd.erpcenter.facade.finance.query.SaveVerifyBillDTO;
+import org.yimayhd.erpcenter.facade.finance.query.SettleListPageDTO;
+import org.yimayhd.erpcenter.facade.finance.query.SettleSealListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.StatementCheckPreviewDTO;
+import org.yimayhd.erpcenter.facade.finance.query.SubjectSummaryDTO;
+import org.yimayhd.erpcenter.facade.finance.query.ToBookingShopVerifyListDTO;
+import org.yimayhd.erpcenter.facade.finance.query.UnsealDTO;
+import org.yimayhd.erpcenter.facade.finance.query.VerifyBillDTO;
+import org.yimayhd.erpcenter.facade.finance.result.CheckBillResult;
+import org.yimayhd.erpcenter.facade.finance.result.CommissionDeductionResult;
+import org.yimayhd.erpcenter.facade.finance.result.DiatributeBillResult;
+import org.yimayhd.erpcenter.facade.finance.result.ExportTravelListTableResult;
+import org.yimayhd.erpcenter.facade.finance.result.IncomeOrPaytResult;
+import org.yimayhd.erpcenter.facade.finance.result.QueryCommissionGrantResult;
+import org.yimayhd.erpcenter.facade.finance.result.QueryPushWapListTableResult;
+import org.yimayhd.erpcenter.facade.finance.result.QuerySettleCommissionResult;
+import org.yimayhd.erpcenter.facade.finance.result.QuerySettleListResult;
+import org.yimayhd.erpcenter.facade.finance.result.QueryShopCommissionStatsResult;
+import org.yimayhd.erpcenter.facade.finance.result.ReceiveOrderListSelectResult;
+import org.yimayhd.erpcenter.facade.finance.result.ResultSupport;
+import org.yimayhd.erpcenter.facade.finance.result.SettleCommissionListResult;
+import org.yimayhd.erpcenter.facade.finance.result.SettleListPageResult;
+import org.yimayhd.erpcenter.facade.finance.result.SettleSealListResult;
+import org.yimayhd.erpcenter.facade.finance.result.StatementCheckPreviewResult;
+import org.yimayhd.erpcenter.facade.finance.result.SubjectSummaryResult;
+import org.yimayhd.erpcenter.facade.finance.result.ToBookingShopVerifyListlResult;
+import org.yimayhd.erpcenter.facade.finance.result.TourGroupDetiailsResult;
+import org.yimayhd.erpcenter.facade.finance.result.VerifyBillResult;
+import org.yimayhd.erpcenter.facade.finance.result.ViewShopCommissionStatsListResult;
 import org.yimayhd.erpcenter.facade.finance.service.FinanceFacade;
 
 import com.alibaba.fastjson.JSON;
@@ -52,15 +106,21 @@ import com.alibaba.fastjson.util.TypeUtils;
 import com.yihg.erp.aop.PostHandler;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
+import com.yihg.erp.common.YihgTemplateFreemarkerService;
 import com.yihg.erp.contant.PermissionConstants;
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.DateUtils;
+import com.yihg.erp.utils.ObjectUtils;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.erp.utils.WordReporter;
 import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.common.util.NumberUtil;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinanceCommission;
 import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePay;
+import com.yimayhd.erpcenter.dal.sales.client.finance.po.InfoBean;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingDelivery;
+import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingShop;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplier;
 import com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingSupplierDetail;
@@ -69,6 +129,9 @@ import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrderPrice;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
 import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.facade.sales.service.TourGroupFacade;
+import com.yimayhd.erpcenter.facade.sys.service.SysPlatformEmployeeFacade;
+import com.yimayhd.erpresource.dal.constants.Constants;
 import com.yimayhd.erpresource.dal.constants.SupplierConstant;
 
 /**
@@ -986,6 +1049,15 @@ public class FinanceController extends BaseController {
 		model.addAllAttributes(financeFacade.queryAuditViewInfo(groupId, bizId));
 		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" 打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		return "finance/audit-group-list-print";
+	}
+	
+	@RequestMapping(value = "auditGroupListPrintYMC.htm")
+	public String auditGroupListPrintYMC(HttpServletRequest request,
+			HttpServletResponse reponse, ModelMap model, Integer groupId) {
+		Integer bizId = WebUtils.getCurBizId(request);
+		model.addAllAttributes(financeFacade.queryAuditViewInfo(groupId, bizId));
+		model.addAttribute("printMsg", "打印人："+WebUtils.getCurUser(request).getName()+" 打印时间："+DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+		return "finance/audit-group-list-print-ymc";
 	}
 
 	/**
@@ -2405,6 +2477,318 @@ public class FinanceController extends BaseController {
 		return "finance/commission/shopCommissionDeductionStats-table";
 	}
 
+	/**
+	 * 导出佣金发放查询excel
+	 * @author zhaoxianlong
+	 * 
+	 * @param request
+	 * @param response
+	 * @param startTime
+	 * @param endTime
+	 * @param groupCode
+	 * @param carInfo
+	 * @param productBrandId
+	 * @param productName
+	 * @param orgIds
+	 * @param status
+	 * @param commProjectTypeCodes
+	 * @param lrStatus
+	 * @param saleOperatorIds
+	 * @param guideName
+	 * @param pageSize
+	 * @param page
+	 * @param model
+	 * @throws ParseException
+	 */
+	@RequestMapping(value = "toCommissionGrantExcel.do")
+    @ResponseBody
+    public void toCommissionGrantExcel(HttpServletRequest request, HttpServletResponse response, String startTime,
+            String endTime, String groupCode, String carInfo, Integer productBrandId, String productName, String orgIds,
+            Integer status, String commProjectTypeCodes, String lrStatus,String saleOperatorIds,String guideName,Integer pageSize, Integer page, Model model)
+            throws ParseException {
+		
+		QueryCommissionGrantDTO queryDTO = new QueryCommissionGrantDTO();
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setCarInfo(carInfo);
+		queryDTO.setCommProjectTypeCodes(commProjectTypeCodes);
+		queryDTO.setEndTime(endTime);
+		queryDTO.setGroupCode(groupCode);
+		queryDTO.setGuideName(guideName);
+		queryDTO.setLrStatus(lrStatus);
+		queryDTO.setOrgIds(orgIds);
+		queryDTO.setPage(1);
+		queryDTO.setPageSize(10000);
+		queryDTO.setParamters(WebUtils.getQueryParamters(request));
+		queryDTO.setProductBrandId(productBrandId);
+		queryDTO.setProductName(productName);
+		queryDTO.setSaleOperatorIds(saleOperatorIds);
+		queryDTO.setSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setStartTime(startTime);
+		queryDTO.setStatus(status);
+		
+		QueryCommissionGrantResult result = financeFacade.queryCommissionGrant(queryDTO);
+
+		
+		List<BookingGuide> lists = result.getPageBean().getResult();
+		
+		List<DicInfo> dicInfoList = result.getDicInfoList();
+		//总合计
+		Map<String, Object> map = result.getMap();
+		String path = "";
+        try {
+            String url = request.getSession().getServletContext()
+                    .getRealPath("/template/excel/commissionGrantTable.xlsx");
+            FileInputStream input = new FileInputStream(new File(url)); // 读取的文件路径
+            XSSFWorkbook wb = new XSSFWorkbook(new BufferedInputStream(input));
+            CellStyle cellStyle = wb.createCellStyle();
+            cellStyle.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+            cellStyle.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+            cellStyle.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+            cellStyle.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+            cellStyle.setAlignment(CellStyle.ALIGN_CENTER); // 居中
+            cellStyle.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+            cellStyle.setWrapText(true);
+
+            CellStyle styleLeft = wb.createCellStyle();
+            styleLeft.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+            styleLeft.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+            styleLeft.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+            styleLeft.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+            styleLeft.setAlignment(CellStyle.ALIGN_LEFT); // 居左
+            styleLeft.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+            styleLeft.setWrapText(true);
+
+            CellStyle styleRight = wb.createCellStyle();
+            styleRight.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+            styleRight.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+            styleRight.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+            styleRight.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+            styleRight.setAlignment(CellStyle.ALIGN_RIGHT); // 居右
+            styleRight.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+            styleRight.setWrapText(true);
+
+            Sheet sheet = wb.getSheetAt(0); // 获取到第一个sheet
+            Row row = null;
+            Cell cc = null;
+         // 合并行填充数据列
+			int createRow = 2;
+			//int num = 1;
+            int index = 0;
+            DecimalFormat df = new DecimalFormat("0.##");
+            for(BookingGuide bg : lists){
+            	List<FinanceCommission> commLsit = bg.getComms();
+            	for(FinanceCommission cb : commLsit){
+            		row = sheet.createRow(index + 2);
+            		cc = row.createCell(0);
+            		cc.setCellValue(index+1);
+            		cc.setCellStyle(cellStyle);
+            		
+            		cc = row.createCell(1);
+            		cc.setCellValue(bg.getGroupCode());// 团号
+            		cc.setCellStyle(styleLeft);
+            		
+            		cc = row.createCell(2);
+            		cc.setCellValue(bg.getGroup().getOperatorName());// 计调
+            		cc.setCellStyle(cellStyle);
+            		
+            		cc = row.createCell(3);
+            		cc.setCellValue(bg.getGuideName()); // 导游
+            		cc.setCellStyle(styleLeft);
+            		
+            		cc = row.createCell(4);
+            		cc.setCellValue(bg.getPersonNum()); // 带团人数
+            		cc.setCellStyle(cellStyle);
+            		
+            		cc = row.createCell(5);
+            		cc.setCellValue(bg.getBankAccount()); // 银行账号
+            		cc.setCellStyle(styleLeft);
+            		
+            		cc = row.createCell(6);
+            		cc.setCellValue("【" + bg.getGroup().getProductBrandName() + "】" + bg.getGroup().getProductName());// 产品
+            		cc.setCellStyle(styleLeft);
+            		
+            		/*List<FinanceCommission> commLsit = bg.getComms();
+	            	for(FinanceCommission cb : commLsit){*/
+            			for(DicInfo dic : dicInfoList){
+            				if((cb.getCommissionType()).equals(dic.getCode())){
+            					cc = row.createCell(7);
+            					cc.setCellValue(dic.getValue());// 项目
+            					cc.setCellStyle(cellStyle);
+            				}
+            				if(cb.getTotal().signum()>0){
+            					cc = row.createCell(8);
+            					cc.setCellValue("发放");// 类型
+            					cc.setCellStyle(cellStyle);
+            				}
+            				if(cb.getTotal().signum() <= 0){
+            					cc = row.createCell(8);
+            					cc.setCellValue("扣除");// 类型
+            					cc.setCellStyle(cellStyle);
+            				}
+            				
+            				cc = row.createCell(9);
+            				cc.setCellValue(df.format(cb.getTotal()).replace("-","")); // 金额
+            				cc.setCellStyle(cellStyle);
+            				
+            				cc = row.createCell(10);
+            				cc.setCellValue(df.format(cb.getTotalCash())); // 已付款
+            				cc.setCellStyle(cellStyle);
+            				
+            				cc = row.createCell(11);
+            				cc.setCellValue(df.format(cb.getTotal().subtract(cb.getTotalCash())).replace("-","")); // 未付款
+            				cc.setCellStyle(cellStyle);
+            				if(cb.getStateFinance()==0){
+            					cc = row.createCell(12);
+            					cc.setCellValue("未审核"); // 状态
+            					cc.setCellStyle(cellStyle);
+            				}
+            				if(cb.getStateFinance() ==1 ){
+            					cc = row.createCell(12);
+            					cc.setCellValue("已审核"); // 状态
+            					cc.setCellStyle(cellStyle);
+            					
+            				}
+            			}
+            		index++;
+            	}
+            	
+            	for (int i = 0; i < 12; i++) {
+					if (i != 7 && i != 8 && i != 9 && i != 10 && i != 11 ) {
+						CellRangeAddress region = new CellRangeAddress(createRow,createRow + commLsit.size() - 1, i, i);
+						sheet.addMergedRegion(region);
+						cc = SheetUtil.getCellWithMerges(sheet, createRow,i);
+						if (1 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (2 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (3 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (6 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (7 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (8 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (9 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (10 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (11 == i) {
+							cc.setCellStyle(styleLeft);
+						} else {
+							cc.setCellStyle(cellStyle);
+						}
+
+					}
+				}
+            	if (commLsit.size() == 0) {
+            		createRow = createRow + 1;
+            	} else {
+            		createRow = createRow + commLsit.size();
+            		
+            	}
+            	//num++;
+            }
+            //合计行
+            BigDecimal totalAmount = new BigDecimal(0);
+            BigDecimal allSumBudget = new BigDecimal(0);
+            BigDecimal allSumProfit = new BigDecimal(0);
+            if (null != map) {
+               
+                if (null != map.get("sum_total")) {
+                    totalAmount = new BigDecimal(map.get("sum_total").toString().replace("-",""));
+                }
+                if (null != map.get("sum_total_cash")) {
+                    allSumBudget = new BigDecimal(map.get("sum_total_cash").toString().replace("-",""));
+                }
+               
+                    allSumProfit = new BigDecimal(df.format(totalAmount.subtract(allSumBudget)));
+              
+            }
+
+            row = sheet.createRow(index + 2); // 加合计行
+            cc = row.createCell(0);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(1);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(2);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(3);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(4);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(5);
+            cc.setCellStyle(styleRight);
+            
+            cc = row.createCell(6);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(7);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(8);
+            cc.setCellValue("总合计：");
+            cc.setCellStyle(cellStyle);
+            
+            cc = row.createCell(9);
+            cc.setCellValue(totalAmount.toString());
+            cc.setCellStyle(cellStyle);
+            
+            cc = row.createCell(10);
+            cc.setCellValue(allSumBudget.toString());
+            cc.setCellStyle(cellStyle);
+
+            cc = row.createCell(11);
+            cc.setCellValue(allSumProfit.toString());
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(12);
+            cc.setCellStyle(styleRight);
+
+
+          /*  CellRangeAddress region = new CellRangeAddress(pageBean.getResult().size() + 5,
+                    pageBean.getResult().size() + 5, 0, 10);
+            sheet.addMergedRegion(region);*/
+            
+           /* row = sheet.createRow(pageBean.getResult().size() + 5);
+            cc = row.createCell(0);
+            cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName() + " 打印时间："
+                    + DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));*/
+            path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
+                    + ".xlsx";
+            FileOutputStream out = new FileOutputStream(path);
+            wb.write(out);
+            out.close();
+            wb.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String fileName = "";
+        try {
+            fileName = new String("佣金发放查询.xlsx".getBytes("UTF-8"), "iso-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        download(path, fileName, request, response);
+		        
+	}
+
+	 
+	/**
+	 * 搜索（佣金发放查询）
+	 * @param request
+	 * @param model
+	 * @param pageSize
+	 * @param page
+	 * @param group
+	 * @return
+	 */
 	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/queryShopCommissionStats2.do")
 	public String toShopStatisticsList2(HttpServletRequest request,
@@ -2432,6 +2816,314 @@ public class FinanceController extends BaseController {
 		return "finance/commission/viewShopCommissionStats-table";
 	}
 	
+	
+	/**
+	 * * 导出Excle佣金扣除查询
+	 * @author zhaoxianlong
+	 * 
+	 * @param request
+	 * @param response
+	 * @param startTime
+	 * @param endTime
+	 * @param groupCode
+	 * @param carInfo
+	 * @param productBrandId
+	 * @param productName
+	 * @param orgIds
+	 * @param status
+	 * @param commProjectTypeCodes
+	 * @param lrStatus
+	 * @param saleOperatorIds
+	 * @param guideName
+	 * @param pageSize
+	 * @param page
+	 * @param model
+	 * @throws ParseException
+	 */
+	@RequestMapping(value = "toCommissionDeductionExcel.do")
+    @ResponseBody
+    public void toCommissionDeductionExcel(HttpServletRequest request, HttpServletResponse response, String startTime,
+            String endTime, String groupCode, String carInfo, Integer productBrandId, String productName, String orgIds,
+            Integer status, String commProjectTypeCodes, String lrStatus,String saleOperatorIds,String guideName,Integer pageSize, Integer page, Model model)
+            throws ParseException {
+		
+		System.out.println("》》》》进入导出佣金扣除查询《《《《");
+		QueryCommissionDeductionDTO queryDTO = new QueryCommissionDeductionDTO();
+		queryDTO.setBizId(WebUtils.getCurBizId(request));
+		queryDTO.setCarInfo(carInfo);
+		queryDTO.setCommProjectTypeCodes(commProjectTypeCodes);
+		queryDTO.setEndTime(endTime);
+		queryDTO.setGroupCode(groupCode);
+		queryDTO.setGuideName(guideName);
+		queryDTO.setLrStatus(lrStatus);
+		queryDTO.setOrgIds(orgIds);
+		queryDTO.setPage(1);
+		queryDTO.setPageSize(10000);
+		queryDTO.setParamters(WebUtils.getQueryParamters(request));
+		queryDTO.setProductBrandId(productBrandId);
+		queryDTO.setProductName(productName);
+		queryDTO.setSaleOperatorIds(saleOperatorIds);
+		queryDTO.setSet(WebUtils.getDataUserIdSet(request));
+		queryDTO.setStartTime(startTime);
+		queryDTO.setStatus(status);
+		
+		CommissionDeductionResult result = financeFacade.queryCommissionDeduction(queryDTO);
+		
+		List<BookingGuide> lists = result.getPageBean().getResult();
+
+		List<DicInfo> dicInfoList = result.getDicInfoList();
+		//总合计
+		Map<String, Object> map = result.getMap();
+		String path = "";
+        try {
+            String url = request.getSession().getServletContext()
+                    .getRealPath("/template/excel/commissionDeductionTable.xlsx");
+            FileInputStream input = new FileInputStream(new File(url)); // 读取的文件路径
+            XSSFWorkbook wb = new XSSFWorkbook(new BufferedInputStream(input));
+            CellStyle cellStyle = wb.createCellStyle();
+            cellStyle.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+            cellStyle.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+            cellStyle.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+            cellStyle.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+            cellStyle.setAlignment(CellStyle.ALIGN_CENTER); // 居中
+            cellStyle.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+            cellStyle.setWrapText(true);
+
+            CellStyle styleLeft = wb.createCellStyle();
+            styleLeft.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+            styleLeft.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+            styleLeft.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+            styleLeft.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+            styleLeft.setAlignment(CellStyle.ALIGN_LEFT); // 居左
+            styleLeft.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+            styleLeft.setWrapText(true);
+
+            CellStyle styleRight = wb.createCellStyle();
+            styleRight.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
+            styleRight.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
+            styleRight.setBorderTop(CellStyle.BORDER_THIN);// 上边框
+            styleRight.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+            styleRight.setAlignment(CellStyle.ALIGN_RIGHT); // 居右
+            styleRight.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+            styleRight.setWrapText(true);
+
+            Sheet sheet = wb.getSheetAt(0); // 获取到第一个sheet
+            Row row = null;
+            Cell cc = null;
+         // 合并行填充数据列
+			int createRow = 2;
+            int index = 0;
+            DecimalFormat df = new DecimalFormat("0.##");
+            for(BookingGuide bg : lists){
+            	List<FinanceCommission> commLsit = bg.getComms();
+                for(FinanceCommission cb : commLsit){
+                row = sheet.createRow(index + 2);
+                cc = row.createCell(0);
+                cc.setCellValue(index + 1);
+                cc.setCellStyle(cellStyle);
+
+               cc = row.createCell(1);
+                cc.setCellValue(bg.getGroupCode());// 团号
+                cc.setCellStyle(styleLeft);
+
+                cc = row.createCell(2);
+                cc.setCellValue(bg.getGroup().getOperatorName());// 计调
+                cc.setCellStyle(cellStyle);
+
+                cc = row.createCell(3);
+                cc.setCellValue(bg.getGuideName()); // 导游
+                cc.setCellStyle(styleLeft);
+                
+                cc = row.createCell(4);
+                cc.setCellValue(bg.getPersonNum()); // 带团人数
+                cc.setCellStyle(cellStyle);
+                
+                cc = row.createCell(5);
+                cc.setCellValue(bg.getBankAccount()); // 银行账号
+                cc.setCellStyle(styleLeft);
+                
+               cc = row.createCell(6);
+                cc.setCellValue("【" + bg.getGroup().getProductBrandName() + "】" + bg.getGroup().getProductName());// 产品
+                cc.setCellStyle(styleLeft);
+                
+                /*List<FinanceCommission> commLsit = bg.getComms();
+                for(FinanceCommission cb : commLsit){*/
+                	for(DicInfo dic : dicInfoList){
+                		if((cb.getCommissionType()).equals(dic.getCode())){
+                			cc = row.createCell(7);
+			                cc.setCellValue(dic.getValue());// 项目
+			                cc.setCellStyle(cellStyle);
+                		}
+                		if(cb.getTotal().signum()>0){
+                			cc = row.createCell(8);
+			                cc.setCellValue("发放");// 类型
+			                cc.setCellStyle(cellStyle);
+                		}
+                		if(cb.getTotal().signum() <= 0){
+                			cc = row.createCell(8);
+			                cc.setCellValue("扣除");// 类型
+			                cc.setCellStyle(cellStyle);
+                		}
+                		
+		                cc = row.createCell(9);
+		                cc.setCellValue(df.format(cb.getTotal()).replace("-","")); // 金额
+		                cc.setCellStyle(cellStyle);
+
+		                cc = row.createCell(10);
+		                cc.setCellValue(df.format(cb.getTotalCash())); // 已付款
+		                cc.setCellStyle(cellStyle);
+		                
+		                cc = row.createCell(11);
+		                cc.setCellValue(df.format(cb.getTotal().subtract(cb.getTotalCash())).replace("-","")); // 未付款
+		                cc.setCellStyle(cellStyle);
+		                if(cb.getStateFinance()==0){
+		                	cc = row.createCell(12);
+		                	cc.setCellValue("未审核"); // 状态
+		                	cc.setCellStyle(cellStyle);
+		                }
+		                if(cb.getStateFinance() ==1 ){
+		                	cc = row.createCell(12);
+		                	cc.setCellValue("已审核"); // 状态
+		                	cc.setCellStyle(cellStyle);
+		                	
+		                }
+                	}
+              	index++;
+                }
+                for (int i = 0; i < 12; i++) {
+					if (i != 7 && i != 8 && i != 9 && i != 10 && i != 11 ) {
+						CellRangeAddress region = new CellRangeAddress(createRow,createRow + commLsit.size() - 1, i, i);
+						sheet.addMergedRegion(region);
+						cc = SheetUtil.getCellWithMerges(sheet, createRow,i);
+						if (1 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (2 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (3 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (6 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (7 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (8 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (9 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (10 == i) {
+							cc.setCellStyle(styleLeft);
+						} else if (11 == i) {
+							cc.setCellStyle(styleLeft);
+						} else {
+							cc.setCellStyle(cellStyle);
+						}
+
+					}
+				}
+            	if (commLsit.size() == 0) {
+            		createRow = createRow + 1;
+            	} else {
+            		createRow = createRow + commLsit.size();
+            		
+            	}
+            }
+            //合计行
+            BigDecimal totalAmount = new BigDecimal(0);
+            BigDecimal allSumBudget = new BigDecimal(0);
+            BigDecimal allSumProfit = new BigDecimal(0);
+            if (null != map) {
+               
+                if (null != map.get("sum_total")) {
+                    totalAmount = new BigDecimal(map.get("sum_total").toString().replace("-",""));
+                }
+                if (null != map.get("sum_total_cash")) {
+                    allSumBudget = new BigDecimal(map.get("sum_total_cash").toString().replace("-",""));
+                }
+               
+                    allSumProfit = new BigDecimal(df.format(totalAmount.subtract(allSumBudget)));
+              
+            }
+
+            row = sheet.createRow(index + 2); // 加合计行
+            cc = row.createCell(0);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(1);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(2);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(3);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(4);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(5);
+            cc.setCellStyle(styleRight);
+            
+            cc = row.createCell(6);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(7);
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(8);
+            cc.setCellValue("总合计：");
+            cc.setCellStyle(cellStyle);
+            
+            cc = row.createCell(9);
+            cc.setCellValue(totalAmount.toString());
+            cc.setCellStyle(cellStyle);
+            
+            cc = row.createCell(10);
+            cc.setCellValue(allSumBudget.toString());
+            cc.setCellStyle(cellStyle);
+
+            cc = row.createCell(11);
+            cc.setCellValue(allSumProfit.toString());
+            cc.setCellStyle(styleRight);
+
+            cc = row.createCell(12);
+            cc.setCellStyle(styleRight);
+
+
+            /*CellRangeAddress region = new CellRangeAddress(pageBean.getResult().size() + 5,
+                    pageBean.getResult().size() + 5, 0, 10);
+            sheet.addMergedRegion(region);
+            
+            row = sheet.createRow(pageBean.getResult().size() + 5);
+            cc = row.createCell(0);
+            cc.setCellValue("打印人：" + WebUtils.getCurUser(request).getName() + " 打印时间："
+                    + DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));*/
+            path = request.getSession().getServletContext().getRealPath("/") + "/download/" + System.currentTimeMillis()
+                    + ".xlsx";
+            FileOutputStream out = new FileOutputStream(path);
+            wb.write(out);
+            out.close();
+            wb.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String fileName = "";
+        try {
+            fileName = new String("佣金扣除查询.xlsx".getBytes("UTF-8"), "iso-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        download(path, fileName, request, response);
+		        
+	}
+	/**
+	 * 佣金扣除查询
+	 * @param request
+	 * @param model
+	 * @param pageSize
+	 * @param page
+	 * @param group
+	 * @return
+	 */
 	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/queryShopCommissionDeductionStats2.do")
 	public String queryShopCommissionDeductionStats2(HttpServletRequest request,
