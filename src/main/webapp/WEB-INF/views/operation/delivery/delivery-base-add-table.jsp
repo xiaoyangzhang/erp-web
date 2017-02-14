@@ -24,8 +24,8 @@
 			<th>序号<i class="w_table_split"></i></th>
 			<th>项目<i class="w_table_split"></i></th>
 			<th>产品<i class="w_table_split"></i></th>
-			<th>结算价<i class="w_table_split"></i></th>
 			<c:if test="${isShow == 1 }"><th>采购价<i class="w_table_split"></i></th></c:if>
+			<th>结算价<i class="w_table_split"></i></th>
 			<th>数量<i class="w_table_split"></i></th>
 			<th>备注<i class="w_table_split"></i></th>
 			<!-- <th><input type="checkbox" onclick="checkAll(this)"/>操作</th> -->

@@ -178,8 +178,8 @@
 			             		<th>序号<i class="w_table_split"></i></th>
 			             		<th>项目<i class="w_table_split"></i></th>
 			             		<th>备注<i class="w_table_split"></i></th>
-			             		<th>结算价￥<i class="w_table_split"></i></th>
 			             		<c:if test="${isShow == 1 }"><th>采购价￥<i class="w_table_split"></i></th></c:if>
+			             		<th>结算价￥<i class="w_table_split"></i></th>
 			             		<th>次数<i class="w_table_split"></i></th>
 			             		<th>人数<i class="w_table_split"></i></th>		             		
 			             		<th>总金额￥<i class="w_table_split"></i></th>
