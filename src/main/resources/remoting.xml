@@ -203,6 +203,9 @@
 	<dubbo:reference id="verifyFacade"
 					 interface="org.yimayhd.erpcenter.facade.finance.service.VerifyFacade" owner="ly" version="${dubbo.version}"
 					 timeout="${dubbo.timeout}" />
+    <dubbo:reference id="ymgFacade"
+					 interface="org.yimayhd.erpcenter.facade.finance.service.YMGFacade" owner="ly" version="${dubbo.version}"
+					 timeout="${dubbo.timeout}" />
 	<dubbo:reference id="bookingComponentFacade"
 					 interface="com.yimayhd.erpcenter.facade.operation.service.BookingComponentFacade" owner="ly" version="${dubbo.version}"
 					 timeout="${dubbo.timeout}" />
