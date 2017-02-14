@@ -26,11 +26,11 @@
 			<input type="hidden" name="supplier_id" id="supplier_id" value="${parameters.supplier_id }"/>
 			<input type="hidden" name="page" id="page" />
 			<input type="hidden" name="pageSize" id="pageSize" />
-			<input type="hidden" name="sl" value="rdm.selectDeliveryCashDetailListPage" />
-			<input type="hidden" name="ssl" value="rdm.selectDeliveryCashDetailSum" />
+			<input type="hidden" name="sl" value="rdm.selectDeliveryCashDetailListPage2" />
+			<input type="hidden" name="ssl" value="rdm.selectDeliveryCashDetailSum2" />
 			<input type="hidden" name="rp" value="queries/sale-delivery-detail-list-table" />
 			<input type="hidden" name="djType" id="djType" value="${parameters.djType }"/>
-			<input name="limitSupplerIds" id="limitSupplerIds" type="hidden" lang="此值为商家限定-旅游集团财务要求:ou 1386,1390,1382" value="1379,1385,1388,1394,1378,1377,2307"/>
+			<input name="limitSupplerIds" id="limitSupplerIds" type="hidden" lang="此值为商家限定-旅游集团财务要求:ou 1386,1382" value="1379,1385,1388,1394,1378,1377,2307,1390"/>
 			<div class="p_container_sub" >
 			<div class="searchRow">
 				<ul>
