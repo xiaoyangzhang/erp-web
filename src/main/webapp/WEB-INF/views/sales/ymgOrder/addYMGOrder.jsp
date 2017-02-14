@@ -10,13 +10,13 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>增加淘宝散客团</title>
+<title>新增订单</title>
 <%@ include file="../../../include/top.jsp"%>
 <script type="text/javascript"
 	src="<%=ctx%>/assets/js/card/native-info.js"></script>
 <script type="text/javascript" src="<%=ctx%>/assets/js/card/card.js"></script>
 <script type="text/javascript"
-	src="<%=ctx%>/assets/js/web-js/sales/taobaoOrderList.js"></script>
+	src="<%=ctx%>/assets/js/web-js/sales/ymgOrderList.js"></script>
 <script type="text/javascript"
 	src="<%=ctx%>/assets/js/web-js/sales/changeAddShow.js"></script>
 <script type="text/javascript"
@@ -339,6 +339,7 @@ function showInfo(title,width,height,url){
 						<td>订单号：</td>
 						<td>
 						<input type="hidden" id="orderId" name="groupOrder.id" value="${vo.groupOrder.id}" />
+						<input type="hidden"  name="groupOrder.type" value="${vo.groupOrder.type}" />
 						<input type="text"name="groupOrder.orderNo" value="${vo.groupOrder.orderNo}"
 							readonly="readonly" placeholder="订单号系统自动生成" /></td>
 						<td></td>
@@ -365,12 +366,7 @@ function showInfo(title,width,height,url){
 						<td><input type="text" name="groupOrder.departureDate" id="groupOrder_departureDate"
 							class="Wdate"
 							onClick="WdatePicker({onpicking: function(dp){startDate=new Date(dp.cal.getNewDateStr()).getTime(); if($('#orderBusiness').val()==='stock'){$('#productBrandId').val('');$('#productBrandName').val('');$('#productId').val('');$('#stockCount').val('');$('#productName').val('');$('#groupOrder_numAdult').val(0);$('#groupOrder_numChild').val(0);} },dateFmt:'yyyy-MM-dd'})"
-							value="${vo.groupOrder.departureDate }" />
-							离团日期：
-							<input type="text" name="groupOrder.dateEnd" id="groupOrder_dateEnd"
-							class="Wdate"
-							onClick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'groupOrder_departureDate\')}',onpicked:pickedFunc})"
-							value="${vo.groupOrder.dateEnd }" /></td>
+							value="${vo.groupOrder.departureDate }" /></td>
 						<td><i class="red">* </i>业务类别：</td>
 								<td><select name="groupOrder.orderMode" id="orderMode" onchange="orderModeChange()">
 								<option value="-1">请选择</option>
@@ -431,12 +427,7 @@ function showInfo(title,width,height,url){
 						~ <input type="hidden" name="groupOrder.productId" id="productId"value="${vo.groupOrder.productId }" /> 
 						<input type="text" id="productName" name="groupOrder.productName"value="${vo.groupOrder.productName }" style="width: 300px" placeholder="产品名称" /> 
 						<span id="stockCount" style="color:red"></span>
-						<div class="tab-operate">
-							<a href="javascript:void(0)" class="btn-show">选择产品<span class="caret"></span></a>
-							<div class="btn-hide" id="asd">
-						  <a href="javascript:void(0)"onclick="importRoute();">模板选择</a>
-						  <a href="javascript:void(0)"onclick="stockOpt_TaobaoProduct();">库存选择</a>
-							</div></div>
+						<a href="javascript:void(0)"onclick="importRoute();">模板选择</a>
 					</td>		
 								<td>客源地：</td>
 						<td><input type="hidden" name="groupOrder.provinceName"class="IptText300" id="provinceName"value="${vo.groupOrder.provinceName }" /> 
@@ -492,17 +483,6 @@ function showInfo(title,width,height,url){
 	    			</c:if>
 					</tr>
 					
-					<c:if test="${vo.groupOrder.id == null }">
-					<tr>
-							<td class="red">成团方式：</td>
-							<td class="red">
-								<div class="dd_right"  id="a">
-		    					<label ><input type="radio" name="groupOrder.orderType" value="1" <c:if test="${vo.groupOrder.orderType != '0'}"> checked="checked" </c:if> /><span>不需并团</span></label>
-								<label ><input type="radio" name="groupOrder.orderType" value="0" <c:if test="${vo.groupOrder.orderType == 0 }"> checked="checked" </c:if> /><span>需要并团</span></label>
-		    					</div>
-		    				<div class="clear"></td>
-		    		</tr>		
-	    				</c:if>
 				</table>
 
 				<p class="p_paragraph_title">
@@ -1179,7 +1159,7 @@ function showInfo(title,width,height,url){
 				<div class="Footer" style="position:fixed;bottom:0px; right:0px; background-color: rgba(58,128,128,0.7);width: 100%;padding-bottom: 4px;margin-bottom:0px; text-align: center;">
 				    <c:if test="${see !=0 }">
 						<button type="submit" class="button button-primary button-small">保存</button>
-						<button type="button" onclick="importTaobaoOrder()" class="button button-primary button-small">淘宝订单导入</button>
+						<!-- <button type="button" onclick="importTaobaoOrder()" class="button button-primary button-small">淘宝订单导入</button> -->
 			        </c:if>
 			        <c:if test="${vo.groupOrder.id != null }">
                      <button class="button button-primary button-small" type="button" onclick="saveMsg();">发送消息</button>
@@ -1256,46 +1236,7 @@ function toPreview(bookingId,type){
 function toPreview1(bookingId){
 	window.open("../booking/bookingDetailPreview.htm?bookingId="+bookingId);
 }
-/* 加载页面时获取业务类别的值 */
-$(function(){
-	//默认组团社为【淘宝】
-	if ($("#supplierId").val()=='' || $("#supplierId").val()=='0'){
-		$("#supplierName").val('淘宝');
-		$("#supplierName_t").val('淘宝');
-		$("#supplierId").val('2490');
-	}
-	
-	var orderMode = $("#orderMode").val();
-	
-	if(orderMode==1476){
-		$('#wuliu_id').append('<a href="javascript:void(0);" id="addVisaId">物流</a>');
-		$("#wuliu_id").on("click","a", function() {
-			 var orderId = $("#orderId").val();
-			if(orderId != ""){
-				var bookingDateId = $("#bookingDateId").val();
-			    var orderMode = $("#orderMode").val();
-			    if( typeof(bookingDateId) == "undefined"){
-			    	bookingDateId="";
-			    }
-			    //alert("orderMode="+orderMode);
-			    layer.open({
-			  		type : 2,
-			  		title : '新增签证信息',
-			  		shadeClose : true,
-			  		shade : 0.5,
-			  		area: ['600px', '230px'],
-			  		content: '<%=path%>/taobao/visa.htm?orderMode='+orderMode+'&orderId='+orderId+'&bookingDate='+bookingDateId
-			  	});
-			}else{
-				$.error("请先保存信息！");
-			}
-			
-		  
-		});
-	  }else{
-		  $('#wuliu_id a').remove();
-	  };
-})
+
 function orderModeChange(){
 	/* 点击业务类别时获取选中的值，并添加点击事件 */
 	var orderMode = $("#orderMode").val();

@@ -129,6 +129,7 @@
 								<option value="NEW">未组单</option>
 								<option value="CONFIRM">已组单</option>
 								<option value="CANCEL">废弃</option>	
+								<option value="BEYOND">超出库存</option>
 							</select>
 						</li>
 						

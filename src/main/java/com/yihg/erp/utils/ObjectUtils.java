@@ -17,7 +17,7 @@ public class ObjectUtils {
 				e.printStackTrace();
 				num = null;
 			}
-
+			
 		}
 		return num;
 	}
@@ -27,7 +27,7 @@ public class ObjectUtils {
 		return num != null ? num : defauleNum;
 	}
 	public static  boolean isNull(Object src){
-		return src == null;
+		return src == null || "".equals(src.toString().trim());
 	}
 	public static String toString(Object src,String ... planStr){
 		if(!isNull(src)){

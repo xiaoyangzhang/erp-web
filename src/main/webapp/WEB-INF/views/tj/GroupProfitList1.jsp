@@ -146,7 +146,7 @@ function searchBtn() {
 
 
 function goToGroupStatistics(groupId, groupCode){
-	newWindow('团信息'+groupCode, '<%=staticPath%>/finance/auditGroupListPrint.htm?groupId='+groupId+'&isShow=true');
+	newWindow('团信息'+groupCode, '<%=staticPath%>/finance/auditGroupListPrintYMC.htm?groupId='+groupId+'&isShow=true');
 }
 
 function print(){

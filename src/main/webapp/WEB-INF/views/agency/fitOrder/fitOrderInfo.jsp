@@ -272,7 +272,7 @@
 						</td>
 					</tr>
 					<tr>
-						<td>客源类别：</td>
+						<td><i class="red">* </i>客源类别：</td>
 						<td>
 							<input type="hidden" name="groupOrder.sourceTypeName" class="IptText300" id="sourceTypeName" value="${vo.groupOrder.sourceTypeName }" />
 							<select name="groupOrder.sourceTypeId" id="sourceTypeCode">

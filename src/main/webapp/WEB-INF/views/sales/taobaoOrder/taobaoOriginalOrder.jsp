@@ -8,7 +8,7 @@
     <title>淘宝原始单</title>
     <%@ include file="../../../include/top.jsp" %>
     <SCRIPT type="text/javascript">
-    /* $(function () {
+       /*  $(function () {
             function setData() {
                 var curDate = new Date();
                 var startTime = curDate.getFullYear() + "-" + (curDate.getMonth() + 1) + "-01";
@@ -27,7 +27,7 @@
             }
             
             setData();
-        });*/
+        }); */
         
         
         function queryList(page, pagesize) {
@@ -205,6 +205,7 @@
                         <option value="NEW">未组单</option>
                         <option value="CONFIRM">已组单</option>
                         <option value="CANCEL">废弃</option>
+                        <option value="BEYOND">超出库存</option>
                         <option value="">全部</option>
                     </select></li>
                     <li class="text">产品名称</li>
