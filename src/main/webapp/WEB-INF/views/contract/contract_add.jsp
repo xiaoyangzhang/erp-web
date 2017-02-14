@@ -322,8 +322,8 @@
             <thead>            	
 	            <tr>
 	                <th>项目<i class="w_table_split"></i></th>
-	                <th>结算价<i class="w_table_split"></i></th>
 	                <th>采购价<i class="w_table_split"></i></th>
+	                <th>结算价<i class="w_table_split"></i></th>
 	                <th>减免政策<i class="w_table_split"></i></th>
 	                <th>备注<i class="w_table_split"></i></th>
 	                <th>操作</th>
@@ -398,8 +398,8 @@
             <thead>            
 	            <tr>
 	                <th>项目<i class="w_table_split"></i></th>
-	                <th>结算价<i class="w_table_split"></i></th>
 	                <th>采购价<i class="w_table_split"></i></th>
+	                <th>结算价<i class="w_table_split"></i></th>
 	                <th>二级协议价<i class="w_table_split"></i></th>
 	                <th>方向<i class="w_table_split"></i></th>
 	                <th>备注<i class="w_table_split"></i></th>
@@ -538,9 +538,10 @@
                     <table>
                         <thead>
                             <tr>
-                                <td width="20%">线路品牌</td>
-                                <td width="8%">结算价</td>
-                                <td width="8%">采购价</td>
+                                <td width="20%">线路品牌33</td>
+                                 <td width="10%">备注</td>
+                                <td width="12%">结算价</td>
+                                <td width="12%">采购价</td>
                                 <td width="7%">操作</td>
                             </tr>
                         </thead>
@@ -588,8 +589,9 @@
                         <thead>
                             <tr>
                                 <td width="20%">线路品牌</td>
-                                <td width="8%">结算价</td>
                                 <td width="8%">采购价</td>
+    					        <td width="8%">结算价</td>
+                                <td width="10%">备注</td>
                                 <td width="7%">操作</td>
                             </tr>
                         </thead>
@@ -670,6 +672,10 @@
                         </select>
                         <input type="hidden" id="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.brandName" name="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.brandName" value="" />
                     </td >
+                     <!-- 备注1 -->
+		            <td width="10%">
+		                <input id="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.remark" style="width: 90%;" type="text" name="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.remark" value="" /> 
+		            </td>
                     <td width="8%">
                         <input id="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.price" type="text" style="width: 40px;" value="0" name="priceVoList[$index].priceExtVoList[$secLevel].supplierContractPriceExt.price" /> 元
                     </td>

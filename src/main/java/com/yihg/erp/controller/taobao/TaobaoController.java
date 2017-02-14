@@ -246,6 +246,7 @@ public class TaobaoController extends BaseController {
 		model.addAttribute("lysfxmList", result.getLysfxmList());
 		model.addAttribute("jtfsList", result.getJtfsList());
 		model.addAttribute("typeList", result.getTypeList());
+		model.addAttribute("sourceTypeList", result.getSourceTypeList());
 		model.addAttribute("allProvince", result.getAllProvince());
 		model.addAttribute("config", config);
 		model.addAttribute("allowNum", result.getCount()); // 库存
@@ -302,6 +303,7 @@ public class TaobaoController extends BaseController {
 		model.addAttribute("jtfsList", result.getJtfsList());
 		model.addAttribute("zjlxList", result.getZjlxList());
 		model.addAttribute("typeList", result.getTypeList());
+		model.addAttribute("sourceTypeList", result.getSourceTypeList());
 		model.addAttribute("allProvince", result.getAllProvince());
 		model.addAttribute("lysfxmList", result.getLysfxmList());
 		model.addAttribute("config", config);
@@ -3746,6 +3748,7 @@ public class TaobaoController extends BaseController {
 			Iterator<PlatTaobaoTrade> it = orders.iterator();
 			int index = 0;
 			Double sumPayment=0.00;
+			String stateStr = "";
 			while (it.hasNext()) {
 				PlatTaobaoTrade order = it.next();
 				sumPayment += order.getPayment() == null ? 0 : Double.parseDouble(order.getPayment());
@@ -3778,7 +3781,16 @@ public class TaobaoController extends BaseController {
 				cc.setCellValue(order.getTradeFrom());
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(9);
-				cc.setCellValue(order.getMyState());
+				if ("NEW".equals(order.getMyState())) {
+					stateStr = "未组单";
+				} else if ("CONFIRM".equals(order.getMyState())) {
+					stateStr = "已组单";
+				}else if ("CANCEL".equals(order.getMyState())) {
+					stateStr = "废弃";
+				}else if ("BEYOND".equals(order.getMyState())) {
+					stateStr = "超出库存";
+				}
+				cc.setCellValue(stateStr);
 				cc.setCellStyle(cellStyle);
 				cc = row.createCell(10);
 				cc.setCellValue(order.getIsBrushSingle()  == 1 ? "是" : "否");

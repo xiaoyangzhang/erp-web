@@ -29,7 +29,6 @@
 				<input type="hidden" name="sys_itemValue" id="sys_itemValue" value="${sysBizConfig.itemValue  }" />
 				<input type="hidden" name="flag" id="flag" value="${flag }" />
 				<input type="hidden" name="isShow" id="isShow_id" value="${isShow }" />
-
 				<input type="hidden" name="supplierType" id="supplierType"
 					value="${supplierType }" />
 				<p class="p_paragraph_title">
@@ -150,10 +149,10 @@
 										<th>项目<i class="w_table_split"></i></th>
 										<th>日期<i class="w_table_split"></i></th>
 										<th>数量<i class="w_table_split"></i></th>
-										<th>结算价<i class="w_table_split"></i></th>
 										<c:if test="${sysBizConfig.itemValue eq 1 and isShow == 1}">
 											<th>采购价<i class="w_table_split"></i></th>
 										</c:if>
+										<th>结算价<i class="w_table_split"></i></th>
 										<th>免去数<i class="w_table_split"></i></th>
 										<th>金额<i class="w_table_split"></i></th>
 										<th><a href="javascript:void(0)" id="ticketBtn"
@@ -193,18 +192,18 @@
 									</c:if>
 								</tbody>
 								<tfoot>
-								<c:if test="${sysBizConfig.itemValue eq 0 or isShow == 0}">
-									<tr><td colspan="5" style="text-align: right;" class="fontBold">合计（￥）：</td>
-										<td id="sumPrice"><fmt:formatNumber value="${sum_price }" pattern="#.##" type="number"/></td>
-										<td></td>
-									</tr>
-								</c:if>
-								<c:if test="${sysBizConfig.itemValue eq 1 and isShow == 1}">
-									<tr><td colspan="6" style="text-align: right;" class="fontBold">合计（￥）：</td>
-										<td id="sumPrice"><fmt:formatNumber value="${sum_price }" pattern="#.##" type="number"/></td>
-										<td></td>
-									</tr>
-								</c:if>
+									<c:if test="${sysBizConfig.itemValue eq 0 or isShow == 0}">
+										<tr><td colspan="5" style="text-align: right;" class="fontBold">合计（￥）：</td>
+							            	<td id="sumPrice"><fmt:formatNumber value="${sum_price }" pattern="#.##" type="number"/></td>
+							            	<td></td>
+						            	</tr>
+					            	</c:if>
+					            	<c:if test="${sysBizConfig.itemValue eq 1 and isShow == 1}">
+										<tr><td colspan="6" style="text-align: right;" class="fontBold">合计（￥）：</td>
+							            	<td id="sumPrice"><fmt:formatNumber value="${sum_price }" pattern="#.##" type="number"/></td>
+							            	<td></td>
+						            	</tr>
+					            	</c:if>
 								</tfoot>
 							</table>
 						</div>
@@ -256,9 +255,11 @@
 <td>
 	<input type="text" name="itemPrice" id="itemPrice" value="0" class="input-w80" />
 </td>
-	<td class="td_saleItemPrice" style="display:none">
-		<input type="text" name="saleItemPrice" id="saleItemPrice_id"  onblur="changeTotal()" value="0" class="input-w80" />
-	</td>
+
+<td class="td_saleItemPrice" style="display:none">
+	<input type="text" name="saleItemPrice" id="saleItemPrice_id"  onblur="changeTotal()" value="0" class="input-w80" />
+</td>
+
 <td>
 <input type="text" id="itemNumMinus" name="itemNumMinus" value="0" class="input-w80" />
 </td>
@@ -271,12 +272,12 @@
 <script type="text/javascript" src="<%=staticPath %>/assets/js/json2.js"></script>
 <script type="text/javascript" src="<%=staticPath %>/assets/js/utils/float-calculate.js"></script>
 <script type="text/javascript">
-    function changeTotal(){
-        var saleItemPrice = $("#saleItemPrice").val();
-        var itemNum = $("#itemNum").val();
-        var sumSale1 = parseInt(saleItemPrice)*parseInt(itemNum);
-        $("#saleTotal").val(sumSale1);
-    }
+function changeTotal(){
+	var saleItemPrice = $("#saleItemPrice").val();
+	var itemNum = $("#itemNum").val();
+	var sumSale1 = parseInt(saleItemPrice)*parseInt(itemNum);
+	$("#saleTotal").val(sumSale1);
+}
 function showAdd(){
 	$("#ticketTblTr").append($("#ticketRow").html());
 	//填充下拉框
@@ -297,7 +298,7 @@ function bindEvent(isAdd){
 		
 		//绑定行计算
 		var itemPriceObj=$(this).find("input[name='itemPrice']");
-        var saleItemPriceObj=$(this).find("input[name='saleItemPrice']");
+		var saleItemPriceObj=$(this).find("input[name='saleItemPrice']");
 		var itemNumObj=$(this).find("input[name='itemNum']");
 		var itemNumMinusObj=$(this).find("input[name='itemNumMinus']");
 		var itemTotalObj=$(this).find("input[name='itemTotal']");
@@ -314,6 +315,7 @@ function bindEvent(isAdd){
 			
 			$("#sumPrice").html(calcSum());
 		})
+		
 		itemNumObj.removeAttr("onblur").blur(function(){
 			var itemPrice = itemPriceObj.val();
 			var itemNum = itemNumObj.val();
@@ -389,20 +391,20 @@ function bindEvent(isAdd){
 			        	if(data){
 			        		price={};
 			        		price.contractPrice = data.contractPrice;
-                            price.contractSale = data.contractSale;
-                            price.derateReach = data.derateReach;
-                            price.derateReduction = data.derateReduction;
-                            priceObj.val(data.contractPrice ? data.contractPrice:priceObj.val());
-                            salePriceObj.val(data.contractSale ? data.contractSale:salePriceObj.val());
-                            //协议
-                            if(price.derateReach && price.derateReduction){
-                                var vNum = numObj.val();
-                                var minusNum=parseInt((new Number(vNum)).div(new Number(price.derateReach))) * price.derateReduction;
-                                minusObj.val(minusNum);
-                            }
-                            var itemPrice = priceObj.val();
-                            var saleItemPrice = salePriceObj.val();
-                            var itemNum = numObj.val();
+			        		price.contractSale = data.contractSale;
+			        		price.derateReach = data.derateReach;
+			        		price.derateReduction = data.derateReduction;
+			        		priceObj.val(data.contractPrice ? data.contractPrice:priceObj.val());
+			        		salePriceObj.val(data.contractSale ? data.contractSale:salePriceObj.val());
+			        		//协议
+			        		if(price.derateReach && price.derateReduction){
+				        		var vNum = numObj.val();
+				        		var minusNum=parseInt((new Number(vNum)).div(new Number(price.derateReach))) * price.derateReduction;
+				        		minusObj.val(minusNum);			        			
+			        		}
+			        		var itemPrice = priceObj.val();	
+			        		var saleItemPrice = salePriceObj.val();	
+			    			var itemNum = numObj.val();
 			    			var itemNumMinus =minusObj.val();
 			    			var total =(new Number(itemPrice==''?'0':itemPrice)).mul((new Number(itemNum==''?'1':itemNum)).sub(new Number(itemNumMinus==''?'0':itemNumMinus)));
 			    			itemTotalObj.val(isNaN(total)? 0:total);	
@@ -492,7 +494,7 @@ $(function(){
 					type1Name:$(this).find("select[name='type1Id']").find("option:selected").text(),
 					itemDate:$(this).find("input[name='itemDate']").val(),itemNum:$(this).find("input[name='itemNum']").val(),
 					itemPrice:$(this).find("input[name='itemPrice']").val(),itemNumMinus:$(this).find("input[name='itemNumMinus']").val(),
-					itemTotal:$(this).find("input[name='itemTotal']").val()},saleItemPrice:$(this).find("input[name='saleItemPrice']").val());
+					itemTotal:$(this).find("input[name='itemTotal']").val(),saleItemPrice:$(this).find("input[name='saleItemPrice']").val()});
 			});
 			
 			var financeGuide = "";
@@ -561,15 +563,15 @@ $(function(){
 		}
 		showAdd();	
 		bindEvent(true);
-        var sys_itemValue = $("#sys_itemValue").val();
-        var isShow = $("#isShow_id").val();
-        if(sys_itemValue == 1 && isShow == 1){
-            $(".td_saleItemPrice").css('display','block')
-        }
-    })
+		
+		var sys_itemValue = $("#sys_itemValue").val();
+		var isShow = $("#isShow_id").val();
+		if(sys_itemValue == 1 && isShow == 1){
+			$(".td_saleItemPrice").css('display','block')
+		}	
+	})
 	});
 	bindEvent(false);
-})
 	
 	function selectTicket(){
 		layer.openSupplierLayer({
