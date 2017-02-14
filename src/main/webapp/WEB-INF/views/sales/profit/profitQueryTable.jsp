@@ -36,7 +36,7 @@
 			<th>计调<i class="w_table_split"></i></th>
 			<th>收入<i class="w_table_split"></i></th>
 			<th>其它收入<i class="w_table_split"></i></th>
-			<th>预算<i class="w_table_split"></i></th>
+			<th>其他<i class="w_table_split"></i></th>
 			<th>毛利<i class="w_table_split"></i></th>
 			<th>团状态<i class="w_table_split"></i></th>
 			<th>操作<i class="w_table_split"></i></th>

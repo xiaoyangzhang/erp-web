@@ -32,6 +32,7 @@
 					<a href="javascript:void(0)" onclick="tbStockDeleteBtn(${tbStock.id });">删除</a>
 					<a href="javascript:void(0)" onclick="tbStockProBindingBtn(${tbStock.id });">关联产品</a>
 					<a href="javascript:void(0)" onclick="tbStockBtn(${tbStock.id });">库存</a>
+					<a href="javascript:void(0)" onclick="stop(${tbStock.id });">停用</a>
 				</td>
 			</tr>
 		</c:forEach>
@@ -104,7 +105,22 @@ function tbStockDeleteBtn(obj){
 
 	});
 }
-
+function stop(obj){
+    $.confirm("确认停用该库存？",function(){
+        $.post("stop.do",{id:obj},function(data){
+            if(data.success == '1'){
+                $.success('停用成功！', function(){
+                    queryList();
+                });
+            }
+            if(data.error == 'logError'){
+                $.error("该条库存存在关联产品，不能删除！");
+            }
+        },"json");
+    },function(){
+        $.info('取消停用！');
+    });
+}
 </script>
 
 

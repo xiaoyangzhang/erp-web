@@ -54,8 +54,8 @@
 						</li> 
 						<li class="text">
 							<select id="select" name="select" style="width:80px;text-align: right;margin-left: 5px;">
-								<option value="0">计调</option>
 								<option value="1">销售</option>
+								<option value="0">计调</option>
 							</select>
 						</li>   		
 						<li class="text">
@@ -87,8 +87,17 @@
 						<ul>
 						<li class="text"> 业务类型:</li>
 						<li >
-							<input type="text" id="dicNames" readonly="readonly"  onclick="commonDicDlg()"/> 
+							<input type="text" id="dicNames" readonly="readonly"  onclick="commonDicDlg()" style="width:186px;"/>
 							<input type="hidden" name="orderNo" id="dicIds"  />
+						</li>
+
+							<li class="text"> 成本:</li>
+							<li>
+								<select name="budgetFlag" id="budgetFlag">
+									<option value="">全部</option>
+									<option value="0">为0</option>
+									<option value="1">不为0</option>
+								</select>
 						</li>
 						
 						<li style="padding-left:10px">
@@ -112,20 +121,11 @@ function commonDicDlg() {
 }
 
 function toProfitExcel(){
-	$("#toProfitExcelId").attr("href","toProfitExcel.do?startTime="+$("#tourGroupStartTime").val()
-			+"&endTime="+$("#tourGroupEndTime").val()
-			+"&groupCode="+$("#tourGroupGroupCode").val()
-			+"&supplierName="+$("#supplierName").val()
-			+"&receiveMode="+$("#receiveMode").val()
-			+"&orgIds="+$("#orgIds").val()
-			+"&select="+$("#select").val()
-			+"&saleOperatorIds="+$("#saleOperatorIds").val()
-			+"&productName="+$("#tourGroupProductName").val()
-			+"&provinceId="+$("#provinceCode").val()
-			+"&cityId="+$("#cityCode").val()
-			+"&orderNo="+$("#dicIds").val()
-			+"&page="+$("#page").val()
-			+"&pageSize="+$("#pageSize").val());
+    var formObj = $("#form");
+    formObj.attr("action","toProfitExcel.do");
+    formObj.attr("target","_blank");
+    formObj.submit();
+    formObj.attr("target","");
 }
 </script>
 </html>

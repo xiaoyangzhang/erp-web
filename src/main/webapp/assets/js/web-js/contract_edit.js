@@ -179,6 +179,10 @@ var addSecLevelPriceInfoRow = function(findex, elementId, templateId){
     if(brandName.length > 0){
         brandName.rules("add",{required : true});
     }
+    var remark = $("#priceVoList\\[" + findex + "\\]\\.priceExtVoList\\[" + count + "\\]\\.supplierContractPriceExt\\.remark");
+    if(remark.length > 0){
+        remark.rules("add",{required : true});
+    }
     var price = $("#priceVoList\\[" + findex + "\\]\\.priceExtVoList\\[" + count + "\\]\\.supplierContractPriceExt\\.price");
     if(price.length > 0){
         price.rules("add",{rangelength : [0,10], checkIntAndNum : true});

@@ -142,7 +142,10 @@ $(function(){
 					return;
 				}
 			}
-			
+            if($("#sourceTypeCode").val()==-1){
+                $.warn("请选择客源类别");
+                return;
+            }
 			if($("#supplierId").val()==''){
 				$.warn("不存在的组团社");
 				return;
