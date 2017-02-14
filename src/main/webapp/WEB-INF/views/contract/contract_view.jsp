@@ -472,8 +472,11 @@
                             <table>
                                 <thead>
                                 <tr>
-                                    <td>线路品牌</td>
-                                    <td>价格/元</td>
+                                    <td width="15%">线路品牌</td>
+                                    <td width="10%" >备注</td>
+                                    <td width="8%">采购价</td>
+                                    <td width="8%">结算价</td>
+                                    <!-- <td>价格/元</td> -->
                                     <%--<td>操作</td>--%>
                                 </tr>
                                 </thead>
@@ -494,9 +497,18 @@
                                                    name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.brandName"
                                                    value="${priceExtVo.supplierContractPriceExt.brandName}"/>
                                         </td>
+                                         <!-- 备注1 -->
+	                                    <td><input type="text" id="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.remark" style="width: 90%;"
+	                                               name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.remark"
+	                                               value="${priceExtVo.supplierContractPriceExt.remark}"/>
+	                                    </td>
                                         <td>
                                             <input id="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.price" type="text" readonly style="width: 40px;"
                                                    name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.price" value="${priceExtVo.supplierContractPriceExt.price}" /> 元
+                                        </td>
+                                        <td>
+                                            <input id="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.salePrice" type="text" readonly style="width: 40px;"
+                                                   name="priceVoList[${s.index}].priceExtVoList[${s2.index}].supplierContractPriceExt.salePrice" value="${priceExtVo.supplierContractPriceExt.salePrice}" /> 元
                                         </td>
                                         <%--<td>--%>
                                             <%--<a class="button button-rounded button-tinier" href="javascript:void(0)" onclick="deleteSecondLevelPrice(this, '${s.index}');">删除</a>--%>
@@ -543,6 +555,7 @@
         <%--</table>--%>
         <%--</div>--%>
     </c:when>
+    
     <c:when test="${HOTEL == supplierContractVo.supplierInfo.supplierType}">
         <div id="hotelPrice" style="display: none;">
             <%--<button type="button" onclick="addPriceInfoRow('hotelPriceRow', 'hotelPriceData');" class="button button-primary button-small">添加</button>--%>
@@ -559,7 +572,8 @@
                 <tr>
                     <th>类别<i class="w_table_split"></i></th>
                     <!-- <th>房型<i class="w_table_split"></i></th> -->
-                    <th>协议价<i class="w_table_split"></i></th>
+                    <th>采购价<i class="w_table_split"></i></th>
+                    <th>结算价<i class="w_table_split"></i></th>
                     <th>减免政策<i class="w_table_split"></i></th>
                     <th>备注<i class="w_table_split"></i></th>
                     <%--<th>操作</th>--%>
@@ -599,6 +613,11 @@
                             <input id="priceVoList[${s.index}].supplierContractPrice.contractPrice"  type="text" readonly style="width: 40px;"
                                    name="priceVoList[${s.index}].supplierContractPrice.contractPrice"
                                    value="${priceVo.supplierContractPrice.contractPrice}"  /> 元
+                        </td>
+                        <td>
+                            <input id="priceVoList[${s.index}].supplierContractPrice.contractSale"  type="text" readonly style="width: 40px;"
+                                   name="priceVoList[${s.index}].supplierContractPrice.contractSale"
+                                   value="${priceVo.supplierContractPrice.contractSale}"  /> 元
                         </td>
                         <td>
                             满 <input id="priceVoList[${s.index}].supplierContractPrice.derateReach" type="text" readonly style="width: 40px;"
@@ -659,7 +678,8 @@
                 <thead>
                 <tr>
                     <th>项目<i class="w_table_split"></i></th>
-                    <th>协议价<i class="w_table_split"></i></th>
+                    <th>采购价<i class="w_table_split"></i></th>
+                    <th>结算价<i class="w_table_split"></i></th>
                     <th>减免政策<i class="w_table_split"></i></th>
                     <th>备注<i class="w_table_split"></i></th>
                     <%--<th>操作</th>--%>
@@ -698,6 +718,10 @@
                         <td>
                             <input id="priceVoList[${s.index}].supplierContractPrice.contractPrice" type="text" readonly style="width: 40px;"
                                    name="priceVoList[${s.index}].supplierContractPrice.contractPrice" value="${priceVo.supplierContractPrice.contractPrice}" /> 元
+                        </td>
+                         <td>
+                            <input id="priceVoList[${s.index}].supplierContractPrice.contractSale" type="text" readonly style="width: 40px;"
+                                   name="priceVoList[${s.index}].supplierContractPrice.contractSale" value="${priceVo.supplierContractPrice.contractSale}" /> 元
                         </td>
                         <td>
                             满 <input id="priceVoList[${s.index}].supplierContractPrice.derateReach" type="text" readonly style="width: 40px;"

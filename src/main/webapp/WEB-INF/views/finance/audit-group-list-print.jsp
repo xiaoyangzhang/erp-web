@@ -142,17 +142,17 @@ $(document).ready(function() {
 						</dd>
 						<dd class="inl-bl w-300">
 							<div class="dd_left">收入：</div>
-							<div class="dd_right"><fmt:formatNumber value="${group.total_income + group.total_income_shop }" pattern="#.##"/>元</div>
+							<div class="dd_right"><fmt:formatNumber value="${group.total_income }" pattern="#.##"/>元</div>
 							<div class="clear"></div>
 						</dd>
 						<dd class="inl-bl w-300">
 							<div class="dd_left">支出：</div>
-							<div class="dd_right"><fmt:formatNumber value="${group.total_cost }" pattern="#.##"/>元</div>
+							<div class="dd_right"><fmt:formatNumber value="${group.total_cost-group.total_commls }" pattern="#.##"/>元</div>
 							<div class="clear"></div>
 						</dd>
 						<dd class="inl-bl w-300">
 							<div class="dd_left">单团利润：</div>
-							<c:set var="totalProfit" value="${group.total_profit + group.total_income_shop }" />
+							<c:set var="totalProfit" value="${group.total_profit +group.total_commls }" />
 							<div class="dd_right"><fmt:formatNumber value="${totalProfit }" pattern="#.##"/>元</div>
 							<div class="clear"></div>
 						</dd>
@@ -174,7 +174,7 @@ $(document).ready(function() {
 					</h2>					
 					<div id="order"	class="p_container_sub"></div>
 				</c:if>
-				<c:if test="${shop.count > 0}">
+				<%--<c:if test="${shop.count > 0}">
 					<h2>
 						<label>购物</label>
 					</h2>
@@ -186,7 +186,7 @@ $(document).ready(function() {
 						<label>佣金</label>
 					</h2>
 					<div id="comm" class="p_container_sub"></div>
-				</c:if>
+				</c:if>--%>
 				
 				<c:if test="${otherin.count > 0}">
 					<h2>
@@ -226,7 +226,7 @@ $(document).ready(function() {
 			${printMsg }
 			<div class="print NoPrint">
 				<c:if test="${reqpm.isPrint ne true}">
-  					<a class="button  button-primary button-small mr-20" href="<%=staticPath%>/finance/auditGroupListPrint.htm?groupId=${reqpm.groupId }&isPrint=true" target="_blank">打印预览</a>
+  					<a class="button  button-primary button-small mr-20" href="<%=staticPath%>/finance/auditGroupListPrintYMC.htm?groupId=${reqpm.groupId }&isPrint=true" target="_blank">打印预览</a>
  					<%-- 导出 --%>
 					<a target="_blank" href="<%=staticPath%>/finance/queryAuditGroupExcelList.htm?groupId=${reqpm.groupId }&isPrint=true"
 					   class="button button-primary button-small">导出到Excel</a>

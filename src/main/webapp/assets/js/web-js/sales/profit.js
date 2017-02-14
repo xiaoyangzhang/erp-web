@@ -138,13 +138,9 @@ function queryList(page,pagesize) {
 }
 
 function setData(){
-		var curDate=new Date();
-		var startTime=curDate.getFullYear()+"-"+(curDate.getMonth()+1)+"-01";
-		$("#tourGroupStartTime").val(startTime);
-		var new_date = new Date(curDate.getFullYear(),curDate.getMonth()+1,1);                  
-		var endDate=(new Date(new_date.getTime()-1000*60*60*24)).getDate();
-		var endTime=curDate.getFullYear()+"-"+(curDate.getMonth()+1)+"-"+endDate;
-		$("#tourGroupEndTime").val(endTime);			
+    var vars={ dateFrom : $.currentMonthFirstDay(), dateTo : $.currentMonthLastDay() };
+    !$("#tourGroupStartTime").val() && $("#tourGroupStartTime").val(vars.dateFrom);
+    !$("#tourGroupEndTime").val() && $("#tourGroupEndTime").val(vars.dateTo );
 }
 
 $(function() {

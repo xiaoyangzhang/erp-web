@@ -48,9 +48,8 @@
 			<input type="hidden" name="editType" id="editType" value="${editType }"/>
 			<input type="hidden" name="stateFinance" id="stateFinance" value="${supplier.stateFinance }"/>
 			<input type="hidden" name="sys_itemValue" id="sys_itemValue" value="${sysBizConfig.itemValue  }" />
-
+			
 			<input type="hidden" name="isShow" id="isShow_id" value="${isShow }"/>
-
 			<p class="p_paragraph_title">
 				<b>预订酒店</b>
 			</p>
@@ -174,12 +173,11 @@
 								<!-- <th>房型<i class="w_table_split"></i></th> -->
 								<th>入住日期<i class="w_table_split"></i></th>
 								<th>数量/间<i class="w_table_split"></i></th>
-								<th>结算价<i class="w_table_split"></i></th>
 								<c:if test="${sysBizConfig.itemValue eq 1 and isShow == 1}">
 									<th>采购价<i class="w_table_split"></i></th>
 								</c:if>
+								<th>结算价<i class="w_table_split"></i></th>
 								<th>免去数<i class="w_table_split"></i></th>
-
 								<th>金额<i class="w_table_split"></i></th>
 								<th>备注<i class="w_table_split"></i></th>
 								<th>
@@ -228,8 +226,7 @@
 										</td>
 										<c:if test="${sysBizConfig.itemValue eq 1 and isShow == 1}">
 											<td>
-												<input type="text" name="saleItemPrice" id="saleItemPrice"
-													   value="<fmt:formatNumber value="${detail.saleItemPrice}" pattern="#.##" type="number"/>" class="input-w80" />
+											  <input type="text" name="saleItemPrice" id="saleItemPrice" value='<fmt:formatNumber value="${detail.saleItemPrice}" pattern="#.##" type="number" />' class="input-w80" />
 											</td>
 										</c:if>
 										<td>
@@ -258,22 +255,22 @@
 							</c:if>
 							</tbody>
 							<tfoot>
-							<c:if test="${sysBizConfig.itemValue eq 0 or isShow == 0}">
-								<tr>
-									<td colspan="5" style="text-align: right;" class="fontBold">合计（￥）：</td>
-									<td id="sumPrice"><fmt:formatNumber value="${sum_price }" pattern="#.##" type="number"/></td>
-									<td></td>
-									<td></td>
-								</tr>
-							</c:if>
-							<c:if test="${sysBizConfig.itemValue eq 1 and isShow == 1}">
-								<tr>
-									<td colspan="6" style="text-align: right;" class="fontBold">合计（￥）：</td>
-									<td id="sumPrice"><fmt:formatNumber value="${sum_price }" pattern="#.##" type="number"/></td>
-									<td></td>
-									<td></td>
-								</tr>
-							</c:if>
+								<c:if test="${sysBizConfig.itemValue eq 0 or isShow == 0}">
+									<tr>
+										<td colspan="5" style="text-align: right;" class="fontBold">合计（￥）：</td>
+										<td id="sumPrice"><fmt:formatNumber value="${sum_price }" pattern="#.##" type="number"/></td>
+										<td></td>
+										<td></td>
+									</tr>
+								</c:if>
+								<c:if test="${sysBizConfig.itemValue eq 1 and isShow == 1}">
+									<tr>
+										<td colspan="6" style="text-align: right;" class="fontBold">合计（￥）：</td>
+										<td id="sumPrice"><fmt:formatNumber value="${sum_price }" pattern="#.##" type="number"/></td>
+										<td></td>
+										<td></td>
+									</tr>
+								</c:if>
 							</tfoot>
 						</table>
 					</div>
@@ -366,9 +363,10 @@
 			//绑定行计算
 			var itemPriceObj = $(this).find("input[name='itemPrice']");
 			var itemNumObj = $(this).find("input[name='itemNum']");
-            var saleItemPriceObj = $(this).find("input[name='saleItemPrice']");
+			var saleItemPriceObj = $(this).find("input[name='saleItemPrice']");
 			var itemNumMinusObj = $(this).find("input[name='itemNumMinus']");
 			var itemTotalObj = $(this).find("input[name='itemTotal']");
+			
 			itemPriceObj.removeAttr("onblur").blur(function () {
 				var itemPrice = itemPriceObj.val();
 				if (itemPrice == '' || isNaN(itemPrice)) {
@@ -462,13 +460,12 @@
 							if (data) {
 								price = {};
 								price.contractPrice = data.contractPrice;
-                                price.contractSale = data.contractSale;
-                                price.derateReach = data.derateReach;
-                                price.derateReduction = data.derateReduction;
-                                priceObj.val(data.contractPrice ? data.contractPrice : priceObj.val());
-                                salePriceObj.val(data.contractSale ? data.contractSale : salePriceObj.val());
-
-                                price.note = data.note;
+								price.contractSale = data.contractSale;
+								price.derateReach = data.derateReach;
+								price.derateReduction = data.derateReduction;
+								priceObj.val(data.contractPrice ? data.contractPrice : priceObj.val());
+								salePriceObj.val(data.contractSale ? data.contractSale : salePriceObj.val());
+								price.note = data.note;
 
 								minusObj.val(0);
 								//协议
@@ -484,8 +481,8 @@
 								}
 
 								var itemPrice = priceObj.val();
+								var saleItemPrice = salePriceObj.val();
 								var itemNum = numObj.val();
-                                var saleItemPrice = salePriceObj.val();
 								var itemNumMinus = minusObj.val();
 								var total = (new Number(itemPrice == '' ? '0' : itemPrice)).mul((new Number(itemNum == '' ? '1' : itemNum)).sub(new Number(itemNumMinus == '' ? '0' : itemNumMinus)));
 								itemTotalObj.val(isNaN(total) ? 0 : total);
@@ -494,7 +491,7 @@
 								price = null;
 								<c:if test="${canEditPrice==0}">								
 									itemPriceObj.val(0);
-                                saleItemPriceObj.val(0);
+									saleItemPriceObj.val(0);
 									itemNumMinusObj.val(0);
 									itemTotalObj.val(0);
 									noteObj.val('');
@@ -616,7 +613,7 @@
 						itemNumMinus: $(this).find("input[name='itemNumMinus']").val(),
 						itemTotal: $(this).find("input[name='itemTotal']").val(),
 						itemBrief: $(this).find("textarea[name='itemBrief']").val(),
-                        saleItemPrice:$(this).find("input[name='saleItemPrice']").val(),
+						saleItemPrice:$(this).find("input[name='saleItemPrice']").val(),
 						fangDiaoLuRu: fangDiaoLuRu
 					});
 				});
@@ -689,16 +686,15 @@
 				layer.msg("请先选择酒店 ");
 				return;
 			}
-
 			showAdd();
 			bindEvent(false);
-
 			changeRoomType();
-            var sys_itemValue = $("#sys_itemValue").val();
-            var isShow = $("#isShow_id").val();
-            if(sys_itemValue == 1 && isShow == 1){
-                $(".td_saleItemPrice").css('display','block')
-            }
+			
+			var sys_itemValue = $("#sys_itemValue").val();
+			var isShow = $("#isShow_id").val();
+			if(sys_itemValue == 1 && isShow == 1){
+				$(".td_saleItemPrice").css('display','block')
+			}	
 		});
 		bindEvent(false);
 	});

@@ -137,6 +137,7 @@
                             title: msg_title.val(),
                             info: msg_info.val() ,
                             ids: operatorIds.val(),
+                            names: operatorName.val(),
                             msgType: 0
                         }, function(data){
                             if(data.success){

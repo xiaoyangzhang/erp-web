@@ -359,7 +359,7 @@
 		<dependency>
 			<groupId>com.yimayhd.erpresource</groupId>
 			  <artifactId>erpresourceDAL-client</artifactId>
-			  <version>0.2.0-SNAPSHOT</version>
+			  <version>0.3.1-SNAPSHOT</version>
 		</dependency>
  		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
@@ -489,23 +489,23 @@
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterDAL-product-client</artifactId>
-			<version>0.3.6-SNAPSHOT</version>
+			<version>0.3.7-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-sys-client</artifactId>
-			<version>0.3.6-SNAPSHOT</version>
+			<version>0.3.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterDAL-sys-client</artifactId>
-			<version>0.3.6-SNAPSHOT</version>
+			<version>0.3.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpresource</groupId>
 			<artifactId>erpresourceDAL-client</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
+			<version>0.3.1-SNAPSHOT</version>
 		</dependency>  
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
@@ -515,32 +515,37 @@
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-sales-client</artifactId>
-			<version>0.3.6-SNAPSHOT</version>
+			<version>0.3.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-basic-client</artifactId>
-			<version>0.3.6-SNAPSHOT</version>
+			<version>0.3.7-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.yimayhd.erpcenter</groupId>
+			<artifactId>erpcenterDAL-basic-client</artifactId>
+			<version>0.3.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-tj-client</artifactId>
-			<version>0.3.6-SNAPSHOT</version>
+			<version>0.3.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-ticket-client</artifactId>
-			<version>0.3.6-SNAPSHOT</version>
+			<version>0.3.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>  
 		    <groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterFacade-dataAnalysis-client</artifactId>
-			<version>0.3.6-SNAPSHOT</version>
+			<version>0.3.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>  
 		    <groupId>com.yimayhd.erpcenter</groupId>
 			<artifactId>erpcenterDAL-sales-client</artifactId>
-			<version>0.3.6-SNAPSHOT</version>
+			<version>0.3.7-SNAPSHOT</version>
 		</dependency>
 		 <dependency>
             <groupId>org.springframework</groupId>

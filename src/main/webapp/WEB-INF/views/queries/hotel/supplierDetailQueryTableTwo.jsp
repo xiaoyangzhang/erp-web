@@ -28,10 +28,10 @@
 			
 			<th >数量<i class="w_table_split"></i></th>
 			<th >免数<i class="w_table_split"></i></th>
+			<th >成本价<i class="w_table_split"></i></th>
+			<th >成本金额<i class="w_table_split"></i></th>
 			<th >结算价<i class="w_table_split"></i></th>
-			<th >成本额<i class="w_table_split"></i></th>
-			<th >采购价<i class="w_table_split"></i></th>
-			<th >销售额<i class="w_table_split"></i></th>
+			<th >结算金额<i class="w_table_split"></i></th>
 			<th >利润<i class="w_table_split"></i></th>
 		</tr>
 		
@@ -52,7 +52,15 @@
                   		
                   		</c:otherwise>
                   	</c:choose>
-                  	
+                  	<c:if test="${v.supplierType == 3}">
+	                  	<a class="def" href="javascript:void(0)" onclick="newWindow('修改酒店订单','<%=staticPath %>/booking/toAddHotel?groupId=${v.groupId }&bookingId=${v.id}&isShow=1')">修改</a>
+                  	</c:if>
+                  	<c:if test="${v.supplierType == 2}">
+	                  	<a class="def" href="javascript:void(0)" onclick="newWindow('修改餐饮订单','<%=staticPath %>/booking/toAddEat?groupId=${v.groupId }&bookingId=${v.id}&isShow=1')">修改</a>
+                  	</c:if>
+                  	<c:if test="${v.supplierType == 5}">
+	                  	<a class="def" href="javascript:void(0)" onclick="newWindow('修改门票订单','<%=ctx %>/booking/toAddSight?groupId=${v.groupId }&bookingId=${v.id}&supplierId=${v.supplierId }&isShow=1')">修改</a>
+                  	</c:if>
 				</td>
 				<td>${v.productBrandName }-${v.productName }</td>
 				<td>${v.totalAdult }+${v.totalChild }+${v.totalGuide }</td>
@@ -72,7 +80,17 @@
 				<td><fmt:formatNumber value="${v.itemTotal}" pattern="#.##" type="currency"/></td>
 				<td><fmt:formatNumber value="${v.saleItemPrice  }" pattern="#.##" type="currency"/></td>
 				<td><fmt:formatNumber value="${v.totalSale}" pattern="#.##" type="currency"/></td>
-				<td><fmt:formatNumber value="${v.itemTotal-v.totalSale}" pattern="#.##" type="currency"/></td>
+				<%-- <td><fmt:formatNumber value="${v.totalSale-v.itemTotal}" pattern="#.##" type="currency"/></td> --%>
+				
+				<c:if test="${v.supplierType == 3}">
+                	<td><fmt:formatNumber value="${v.totalSale-v.itemTotal}" pattern="#.##" type="currency"/></td>
+               	</c:if>
+               	<c:if test="${v.supplierType == 2}">
+                	<td><fmt:formatNumber value="${v.itemTotal - v.totalSale}" pattern="#.##" type="currency"/></td>
+               	</c:if>
+               	<c:if test="${v.supplierType == 5}">
+                	<td><fmt:formatNumber value="${v.totalSale-v.itemTotal}" pattern="#.##" type="currency"/></td>
+               	</c:if>
 			</tr>
 			<%-- <c:set var="sum_totalCount" value="${sum_totalCount+v.itemTotal}" />
 			<c:set var="sum_totalSale" value="${sum_totalSale+v.totalSale}" />
@@ -86,6 +104,8 @@
 			
 			<c:set var="sum_saleItemPrice" value="${sum_saleItemPrice+v.saleItemPrice}" />
 			<c:set var="sum_totalSale" value="${sum_totalSale+v.totalSale}" />
+			
+			<c:set var="supplierTypeSet" value="${v.supplierType}" />
 					
 		</c:forEach>
 	</tbody>
@@ -100,7 +120,18 @@
 			<td ><fmt:formatNumber value="${sum_itemTotal}" pattern="#.##" type="currency"/></td>
 			<td ><fmt:formatNumber value="${sum_saleItemPrice}" pattern="#.##" type="currency"/></td>
 			<td ><fmt:formatNumber value="${sum_totalSale}" pattern="#.##" type="currency"/></td>
-			<td ><fmt:formatNumber value="${sum_itemTotal - sum_totalSale}" pattern="#.##" type="currency"/></td>
+			<%-- <td ><fmt:formatNumber value="${sum_totalSale-sum_itemTotal}" pattern="#.##" type="currency"/></td> --%>
+			<td >
+				<c:if test="${supplierTypeSet == 3}">
+	            	<fmt:formatNumber value="${sum_totalSale - sum_itemTotal}" pattern="#.##" type="currency"/>
+	           	</c:if>
+	           	<c:if test="${supplierTypeSet == 2}">
+	            	<fmt:formatNumber value="${sum_itemTotal - sum_totalSale}" pattern="#.##" type="currency"/>
+	           	</c:if>
+	           	<c:if test="${supplierTypeSet == 5}">
+	            	<fmt:formatNumber value="${sum_totalSale - sum_itemTotal}" pattern="#.##" type="currency"/>
+	           	</c:if>
+           	</td>
 		</tr>
 
 		<tr class="footer2">
@@ -113,7 +144,18 @@
 			<td ><fmt:formatNumber value="${sum.totalCount}" pattern="#.##" type="number"/></td>
 			<td ><fmt:formatNumber value="${sum.saleItemPrice}" pattern="#.##" type="number"/></td>
 			<td ><fmt:formatNumber value="${sum.totalSale}" pattern="#.##" type="number"/></td>
-			<td ><fmt:formatNumber value="${sum.totalProfit}" pattern="#.##" type="number"/></td>
+			<%-- <td ><fmt:formatNumber value="${sum.totalProfit}" pattern="#.##" type="number"/></td> --%>
+			<td >
+				<c:if test="${supplierTypeSet == 3}">
+	            	<fmt:formatNumber value="${sum.totalSale - sum.totalCount}" pattern="#.##" type="number"/>
+	           	</c:if>
+	           	<c:if test="${supplierTypeSet == 2}">
+	            	<fmt:formatNumber value="${sum.totalCount - sum.totalSale}" pattern="#.##" type="number"/>
+	           	</c:if>
+	           	<c:if test="${supplierTypeSet == 5}">
+	            	<fmt:formatNumber value="${sum.totalSale - sum.totalCount}" pattern="#.##" type="number"/>
+	           	</c:if>
+           </td>
 		</tr>
 	</tbody>
 </table>
