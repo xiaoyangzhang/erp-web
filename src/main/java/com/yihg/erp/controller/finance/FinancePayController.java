@@ -1,45 +1,37 @@
 package com.yihg.erp.controller.finance;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.alibaba.fastjson.JSON;
+import com.yihg.erp.aop.PostHandler;
+import com.yihg.erp.controller.BaseController;
+import com.yihg.erp.utils.WebUtils;
+import com.yihg.mybatis.utility.PageBean;
+import com.yimayhd.erpcenter.dal.basic.constant.BasicConstants;
+import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
+import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePay;
+import com.yimayhd.erpcenter.dal.sales.client.finance.po.FinancePayDetail;
+import com.yimayhd.erpcenter.dal.sales.client.sales.vo.TourGroupVO;
+import com.yimayhd.erpcenter.dal.sys.constants.Constants;
+import com.yimayhd.erpcenter.dal.sys.po.PlatformEmployeePo;
+import com.yimayhd.erpcenter.facade.supplier.service.SupplierFacade;
+import com.yimayhd.erpresource.dal.constants.SupplierConstant;
 import org.apache.commons.lang.StringUtils;
+import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
+import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.service.BasicCommonFacade;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yimayhd.erpcenter.facade.finance.result.FinancePayResult;
+import org.yimayhd.erpcenter.facade.finance.service.FinancePayDetailFacade;
+import org.yimayhd.erpcenter.facade.finance.service.FinancePayFacade;
 
-import com.alibaba.fastjson.JSON;
-import com.yihg.basic.api.DicService;
-import com.yihg.basic.contants.BasicConstants;
-import com.yihg.basic.po.DicInfo;
-import com.yihg.erp.aop.PostHandler;
-import com.yihg.erp.controller.BaseController;
-import com.yihg.erp.utils.WebUtils;
-import com.yihg.finance.api.FinancePayDetailService;
-import com.yihg.finance.api.FinancePayService;
-import com.yihg.finance.po.FinancePay;
-import com.yihg.finance.po.FinancePayDetail;
-import com.yihg.mybatis.utility.PageBean;
-import com.yihg.sales.vo.TourGroupVO;
-import com.yihg.supplier.api.SupplierService;
-import com.yihg.supplier.constants.Constants;
-import com.yihg.supplier.constants.SupplierConstant;
-import com.yihg.sys.api.PlatformEmployeeService;
-import com.yihg.sys.api.PlatformOrgService;
-import com.yihg.sys.po.PlatformEmployeePo;
-import com.yihg.sys.po.SysBizBankAccount;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
 
 /**
  * 财务收付款
@@ -50,8 +42,17 @@ import com.yihg.sys.po.SysBizBankAccount;
 @RequestMapping(value = "/financePay")
 public class FinancePayController extends BaseController {
 	
-	
-	
+
+	@Autowired
+	private BasicCommonFacade basicCommonFacade;
+	@Autowired
+	private FinancePayFacade financePayFacade;
+	@Autowired
+	private SupplierFacade supplierFacade;
+	@Autowired
+	private ProductCommonFacade productCommonFacade;
+	@Autowired
+	private FinancePayDetailFacade financePayDetailFacade;
 	/**
 	 * 财务-收款页面,原来FinanceController中的请求incomeRecordList.htm不在使用
 	 * @param request
@@ -62,8 +63,8 @@ public class FinancePayController extends BaseController {
 	@RequestMapping("incomePayRecord.htm")
 	public String incomePayRecordList(HttpServletRequest request,HttpServletResponse reponse, ModelMap model){
 		//获取支付方式
-		List<DicInfo> payTypeList = dicService .getListByTypeCode(BasicConstants.CW_ZFFS);
-		model.addAttribute("payTypeList", payTypeList);
+
+		model.addAttribute("payTypeList", basicCommonFacade .getListByTypeCode(BasicConstants.CW_ZFFS));
 		return "finance/incomePay/income-pay-list";
 	}
 	
@@ -94,11 +95,12 @@ public class FinancePayController extends BaseController {
 		pms.put("set", WebUtils.getDataUserIdSet(request));
 		pageBean.setParameter(pms);
 		//获取收款数据
-		pageBean = financePayService.loadIncomePayRecordListPage(pageBean, WebUtils.getCurBizId(request));
+//		pageBean = financePayService.loadIncomePayRecordListPage(pageBean, WebUtils.getCurBizId(request));
 		//获取收款总计
-		Map<String, Object> fp = financePayService.loadIncomePayRecordTotal(pageBean, WebUtils.getCurBizId(request));
-		model.addAttribute("pageBean", pageBean);
-		model.addAttribute("fp", fp);
+//		Map<String, Object> fp = financePayService.loadIncomePayRecordTotal(pageBean, WebUtils.getCurBizId(request));
+		FinancePayResult result = financePayFacade.loadIncomePayRecordListPage(pageBean, WebUtils.getCurBizId(request));
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("fp", result.getResultMap());
 		return "finance/incomePay/income-pay-table";
 	}
 	
@@ -109,7 +111,7 @@ public class FinancePayController extends BaseController {
 	public String incomeAdd(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer payId) {
 		//支付方式
-		List<DicInfo> payTypeList = dicService
+		List<DicInfo> payTypeList = basicCommonFacade
 				.getListByTypeCode(BasicConstants.CW_ZFFS);
 		model.addAttribute("payTypeList", payTypeList);
 		Integer biz_id = WebUtils.getCurBizId(request);
@@ -122,7 +124,7 @@ public class FinancePayController extends BaseController {
 			model.addAttribute("operatePerson", employee.getName());
 		}
 		if (payId != null) {
-			model.addAttribute("pay", financePayService.selectPayById(payId));
+			model.addAttribute("pay", financePayFacade.selectPayById(payId));
 		}else{
 			model.addAttribute("currDate", new Date());
 		}
@@ -144,7 +146,7 @@ public class FinancePayController extends BaseController {
 			HttpServletResponse reponse, ModelMap model, Integer sid) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("success", "true");
-		map.put("accountList", supplierService.selectBankBySupplierId(sid));
+		map.put("accountList", supplierFacade.selectBankBySupplierId(sid));
 		return JSON.toJSONString(map);
 	}
 	
@@ -170,11 +172,11 @@ public class FinancePayController extends BaseController {
 		if(isInsert){
 			financePay.setType(0);  //供应商订单付款
 			//插入收款信息，并返回插入的ID
-			supplier_id = financePayService.insertIncomePay(financePay);
+			supplier_id = financePayFacade.insertIncomePay(financePay);
 		}else{
 			//更新收款信息，并返回插入的ID
 			supplier_id = financePay.getId();
-			financePayService.updateIncomePay(financePay);
+			financePayFacade.updateIncomePay(financePay);
 		}
 		Map<String, Object> map = new HashMap<String, Object>();
         map.put("supplierId", supplier_id);
@@ -192,11 +194,11 @@ public class FinancePayController extends BaseController {
 	@RequestMapping(value = "incomeOrderPayAddList.htm")
 	public String incomeOrderPayAddList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model) {
-		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new  DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		DepartmentTuneQueryResult queryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", queryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", queryResult.getOrgUserJsonStr());
 		return "finance/incomePay/income-pay-order-list";
 	}
 	
@@ -225,28 +227,29 @@ public class FinancePayController extends BaseController {
 		}
 		
 		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
+//		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = group.getOrgIds().split(",");
+//			for(String orgIdStr : orgIdArr){
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds="";
+//			for(Integer usrId : set){
+//				salesOperatorIds+=usrId+",";
+//			}
+//			if(!salesOperatorIds.equals("")){
+//				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+//			}
+//		}
+		String salesOperatorIds = productCommonFacade.setSaleOperatorIds(group.getSaleOperatorIds(),group.getOrgIds(),WebUtils.getCurBizId(request));
 		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
+		if(StringUtils.isNotEmpty(salesOperatorIds)){
 			pm.put("saleOperatorIds", group.getSaleOperatorIds());
 		}
 		pm.put("set", WebUtils.getDataUserIdSet(request));
 		pageBean.setParameter(pm);
-		pageBean = financePayService.loadIncomePayAddTableListPage(pageBean, WebUtils.getCurBizId(request));
+		pageBean = financePayFacade.loadIncomePayAddTableListPage(pageBean, WebUtils.getCurBizId(request));
 		model.addAttribute("pageBean", pageBean);
 		model.addAttribute("size", pageBean.getResult().size());
 		return "finance/incomePay/income-pay-order-list-table";
@@ -262,7 +265,7 @@ public class FinancePayController extends BaseController {
 	@RequestMapping(value = "loadOrderPayTable.do")
 	public String loadOrderPayTable(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model,String ids,Integer supplierType,String payId){
-		Map<String, Object> mapObj= financePayService.findOrderToIncomePayList(ids, supplierType, payId);
+		Map<String, Object> mapObj= financePayFacade.findOrderToIncomePayList(ids, supplierType, payId);
 		model.addAttribute("list", mapObj);
 		return "finance/incomePay/income-pay-list-table";
 		
@@ -282,27 +285,27 @@ public class FinancePayController extends BaseController {
 			ModelMap model, Integer supplierType,Integer payId,String details){
 		
 		List<FinancePayDetail> fPDetails = JSON.parseArray(details, FinancePayDetail.class);
-		if(fPDetails != null && fPDetails.size() > 0){
-			boolean isInsert = payId == null ? true : false; 
-			for (FinancePayDetail fpd : fPDetails) {
-				fpd.setPayId(payId);
-				if(isInsert){
-					financePayDetailService.insertFinancePayDetail(fpd);
-				}else {
-					FinancePayDetail detailBean = financePayDetailService.selectByPayIdAndLocOrderId(payId, fpd.getLocOrderId());
-					if(detailBean != null){
-						detailBean.setCash(fpd.getCash());
-						financePayDetailService.updateFinancePayDetail(detailBean);
-					}else{
-						financePayDetailService.insertFinancePayDetail(fpd);
-					}
-				}
-			}
-			
-			//汇总，到业务表的total_cash
-			financePayService.batchUpdateTotalCash(payId, supplierType);
-		}
-		
+//		if(fPDetails != null && fPDetails.size() > 0){
+//			boolean isInsert = payId == null ? true : false;
+//			for (FinancePayDetail fpd : fPDetails) {
+//				fpd.setPayId(payId);
+//				if(isInsert){
+//					financePayDetailService.insertFinancePayDetail(fpd);
+//				}else {
+//					FinancePayDetail detailBean = financePayDetailService.selectByPayIdAndLocOrderId(payId, fpd.getLocOrderId());
+//					if(detailBean != null){
+//						detailBean.setCash(fpd.getCash());
+//						financePayDetailService.updateFinancePayDetail(detailBean);
+//					}else{
+//						financePayDetailService.insertFinancePayDetail(fpd);
+//					}
+//				}
+//			}
+//
+//			//汇总，到业务表的total_cash
+//			financePayService.batchUpdateTotalCash(payId, supplierType);
+//		}
+		financePayFacade.batchUpdateTotalCash(payId,supplierType,fPDetails);
 		return successJson();
 	}
 	
@@ -322,7 +325,7 @@ public class FinancePayController extends BaseController {
 		if (employee != null) {
 			model.addAttribute("operatePerson", employee.getName());
 		}
-		model.addAttribute("pay", financePayService.loadByPrimaryKey(payId));
+		model.addAttribute("pay", financePayFacade.loadByPrimaryKey(payId));
 		return "finance/incomePay/income-pay-view";
 	}
 	
@@ -340,7 +343,7 @@ public class FinancePayController extends BaseController {
 	@ResponseBody
 	public String deletePayDetailOrder(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model,Integer orderId,Integer payId){
-		financePayDetailService.deleteByPayIdAndOrder(payId, orderId);
+		financePayDetailFacade.deleteByPayIdAndOrder(payId, orderId);
 		return successJson();
 	}
 	
@@ -362,7 +365,7 @@ public class FinancePayController extends BaseController {
         for (String orderIdStr : orderIdsArr) {
         	locOrderIdSet.add(Integer.valueOf(orderIdStr));
         }
-		financePayDetailService.batchDeleteByPayIdLocOrderId(payId, locOrderIdSet);
+		financePayDetailFacade.batchDeleteByPayIdLocOrderId(payId, locOrderIdSet);
 		return successJson();
 	}
 	
@@ -375,8 +378,9 @@ public class FinancePayController extends BaseController {
 	public String deleteFinancePay(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer id) {
 		try { 
-			financePayService.deletePayById(id);
-			financePayDetailService.deleteByPayId(id);
+//			financePayService.deletePayById(id);
+//			financePayDetailService.deleteByPayId(id);
+			financePayFacade.deletePayById(id);
 			return successJson("msg", "操作成功");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -394,7 +398,7 @@ public class FinancePayController extends BaseController {
 	@RequestMapping("paymentRecord.htm")
 	public String PaymentRecordList(HttpServletRequest request,HttpServletResponse reponse, ModelMap model){
 		//获取支付方式
-		List<DicInfo> payTypeList = dicService .getListByTypeCode(BasicConstants.CW_ZFFS);
+		List<DicInfo> payTypeList = basicCommonFacade .getListByTypeCode(BasicConstants.CW_ZFFS);
 		model.addAttribute("payTypeList", payTypeList);
 		return "finance/incomePay/payment-list";
 	}
@@ -426,11 +430,12 @@ public class FinancePayController extends BaseController {
 		pms.put("set", WebUtils.getDataUserIdSet(request));
 		pageBean.setParameter(pms);
 		//获取收款数据
-		pageBean = financePayService.loadIncomePayRecordListPage(pageBean, WebUtils.getCurBizId(request));
+//		pageBean = fi.loadIncomePayRecordListPage(pageBean, WebUtils.getCurBizId(request));
 		//获取收款总计
-		Map<String, Object> fp = financePayService.loadIncomePayRecordTotal(pageBean, WebUtils.getCurBizId(request));
-		model.addAttribute("pageBean", pageBean);
-		model.addAttribute("fp", fp);
+//		Map<String, Object> fp = financePayService.loadIncomePayRecordTotal(pageBean, WebUtils.getCurBizId(request));
+		FinancePayResult result = financePayFacade.loadIncomePayRecordListPage(pageBean, WebUtils.getCurBizId(request));
+		model.addAttribute("pageBean", result.getPageBean());
+		model.addAttribute("fp", result.getResultMap());
 		return "finance/incomePay/payment-table";
 	}
 	
@@ -441,7 +446,7 @@ public class FinancePayController extends BaseController {
 	public String paymentAdd(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model, Integer payId) {
 		//支付方式
-		List<DicInfo> payTypeList = dicService
+		List<DicInfo> payTypeList = basicCommonFacade
 				.getListByTypeCode(BasicConstants.CW_ZFFS);
 		model.addAttribute("payTypeList", payTypeList);
 		Integer biz_id = WebUtils.getCurBizId(request);
@@ -454,7 +459,7 @@ public class FinancePayController extends BaseController {
 			model.addAttribute("operatePerson", employee.getName());
 		}
 		if (payId != null) {
-			model.addAttribute("pay", financePayService.selectPayById(payId));
+			model.addAttribute("pay", financePayFacade.selectPayById(payId));
 		}else{
 			model.addAttribute("currDate", new Date());
 		}
@@ -477,7 +482,7 @@ public class FinancePayController extends BaseController {
 		if (employee != null) {
 			model.addAttribute("operatePerson", employee.getName());
 		}
-		model.addAttribute("pay", financePayService.loadByPrimaryKey(payId));
+		model.addAttribute("pay", financePayFacade.loadByPrimaryKey(payId));
 		return "finance/incomePay/payment-view";
 	}
 	
@@ -491,11 +496,11 @@ public class FinancePayController extends BaseController {
 	@RequestMapping(value = "paymentOrderPayAddList.htm")
 	public String paymentOrderPayAddList(HttpServletRequest request,
 			HttpServletResponse reponse, ModelMap model) {
-		Integer bizId = WebUtils.getCurBizId(request);
-		model.addAttribute("orgJsonStr",
-				orgService.getComponentOrgTreeJsonStr(bizId));
-		model.addAttribute("orgUserJsonStr",
-				platformEmployeeService.getComponentOrgUserTreeJsonStr(bizId));
+		DepartmentTuneQueryDTO departmentTuneQueryDTO = new  DepartmentTuneQueryDTO();
+		departmentTuneQueryDTO.setBizId(WebUtils.getCurBizId(request));
+		DepartmentTuneQueryResult queryResult = productCommonFacade.departmentTuneQuery(departmentTuneQueryDTO);
+		model.addAttribute("orgJsonStr", queryResult.getOrgJsonStr());
+		model.addAttribute("orgUserJsonStr", queryResult.getOrgUserJsonStr());
 		return "finance/incomePay/payment-order-list";
 	}
 	
@@ -524,28 +529,29 @@ public class FinancePayController extends BaseController {
 		}
 		
 		//如果人员为空并且部门不为空，则取部门下的人id
-		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
-			Set<Integer> set = new HashSet<Integer>();
-			String[] orgIdArr = group.getOrgIds().split(",");
-			for(String orgIdStr : orgIdArr){
-				set.add(Integer.valueOf(orgIdStr));
-			}
-			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
-			String salesOperatorIds="";
-			for(Integer usrId : set){
-				salesOperatorIds+=usrId+",";
-			}
-			if(!salesOperatorIds.equals("")){
-				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
-			}
-		}
+//		if(StringUtils.isBlank(group.getSaleOperatorIds()) && StringUtils.isNotBlank(group.getOrgIds())){
+//			Set<Integer> set = new HashSet<Integer>();
+//			String[] orgIdArr = group.getOrgIds().split(",");
+//			for(String orgIdStr : orgIdArr){
+//				set.add(Integer.valueOf(orgIdStr));
+//			}
+//			set = platformEmployeeService.getUserIdListByOrgIdList(WebUtils.getCurBizId(request), set);
+//			String salesOperatorIds="";
+//			for(Integer usrId : set){
+//				salesOperatorIds+=usrId+",";
+//			}
+//			if(!salesOperatorIds.equals("")){
+//				group.setSaleOperatorIds(salesOperatorIds.substring(0, salesOperatorIds.length()-1));
+//			}
+//		}
+		String salesOperatorIds = productCommonFacade.setSaleOperatorIds(group.getSaleOperatorIds(),group.getOrgIds(),WebUtils.getCurBizId(request));
 		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
-		if(null!=group.getSaleOperatorIds() && !"".equals(group.getSaleOperatorIds())){
+		if(StringUtils.isNotEmpty(salesOperatorIds)){
 			pm.put("saleOperatorIds", group.getSaleOperatorIds());
 		}
 		pm.put("set", WebUtils.getDataUserIdSet(request));
 		pageBean.setParameter(pm);
-		pageBean = financePayService.loadIncomePayAddTableListPage(pageBean, WebUtils.getCurBizId(request));
+		pageBean = financePayFacade.loadIncomePayAddTableListPage(pageBean, WebUtils.getCurBizId(request));
 		model.addAttribute("pageBean", pageBean);
 		model.addAttribute("size", pageBean.getResult().size());
 		return "finance/incomePay/payment-order-list-table";
@@ -573,11 +579,11 @@ public class FinancePayController extends BaseController {
 		if(isInsert){
 			financePay.setType(0);  //供应商订单付款
 			//插入收款信息，并返回插入的ID
-			supplier_id = financePayService.insertIncomePay(financePay);
+			supplier_id = financePayFacade.insertIncomePay(financePay);
 		}else{
 			//更新收款信息，并返回插入的ID
 			supplier_id = financePay.getId();
-			financePayService.updateIncomePay(financePay);
+			financePayFacade.updateIncomePay(financePay);
 		}
 		Map<String, Object> map = new HashMap<String, Object>();
         map.put("supplierId", supplier_id);
@@ -591,26 +597,27 @@ public class FinancePayController extends BaseController {
 			ModelMap model, Integer supplierType,Integer payId,String details){
 		
 		List<FinancePayDetail> fPDetails = JSON.parseArray(details, FinancePayDetail.class);
-		if(fPDetails != null && fPDetails.size() > 0){
-			boolean isInsert = payId == null ? true : false; 
-			for (FinancePayDetail fpd : fPDetails) {
-				fpd.setPayId(payId);
-				if(isInsert){
-					financePayDetailService.insertFinancePayDetail(fpd);
-				}else {
-					FinancePayDetail detailBean = financePayDetailService.selectByPayIdAndLocOrderId(payId, fpd.getLocOrderId());
-					if(detailBean != null){
-						detailBean.setCash(fpd.getCash());
-						financePayDetailService.updateFinancePayDetail(detailBean);
-					}else{
-						financePayDetailService.insertFinancePayDetail(fpd);
-					}
-				}
-			}
-			
-			//汇总，到业务表的total_cash
-			financePayService.batchUpdateTotalCash(payId, supplierType);
-		}
+//		if(fPDetails != null && fPDetails.size() > 0){
+//			boolean isInsert = payId == null ? true : false;
+//			for (FinancePayDetail fpd : fPDetails) {
+//				fpd.setPayId(payId);
+//				if(isInsert){
+//					financePayDetailService.insertFinancePayDetail(fpd);
+//				}else {
+//					FinancePayDetail detailBean = financePayDetailService.selectByPayIdAndLocOrderId(payId, fpd.getLocOrderId());
+//					if(detailBean != null){
+//						detailBean.setCash(fpd.getCash());
+//						financePayDetailService.updateFinancePayDetail(detailBean);
+//					}else{
+//						financePayDetailService.insertFinancePayDetail(fpd);
+//					}
+//				}
+//			}
+//
+//			//汇总，到业务表的total_cash
+//			financePayService.batchUpdateTotalCash(payId, supplierType);
+//		}
+		financePayFacade.batchUpdateTotalCash(payId,supplierType,fPDetails);
 		
 		return successJson();
 	}
