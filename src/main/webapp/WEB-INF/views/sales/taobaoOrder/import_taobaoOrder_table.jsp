@@ -40,8 +40,9 @@
 				<td style="text-align:left;">${fn:escapeXml(orders.sellerMemo)}</td>
 				<td><c:if test="${orders.myState=='NEW'}"><font color="green">未组单</c:if> 
 						<c:if test="${orders.myState=='CONFIRM'}">已组单</c:if> 
-						<c:if test="${orders.myState=='CANCEL'}"><font color="red">废弃</c:if> </td>
-				<td><input type="checkbox"  id="orderId"  name="orderId" <c:if test="${orders.myState=='CONFIRM'}"> disabled="disabled"</c:if> value="${orders.id}" /></td>
+						<c:if test="${orders.myState=='CANCEL'}"><font color="red">废弃</c:if> 
+						<c:if test="${orders.myState=='BEYOND'}">超出库存</c:if> </td>
+				<td><input type="checkbox"  id="orderId"  name="orderId" <c:if test="${orders.myState=='CONFIRM' || orders.myState=='CANCEL' || orders.myState=='BEYOND'}"> disabled="disabled"</c:if> value="${orders.id}" /></td>
 				</tr>
 				<c:set var="sumTotal" value="${sumTotal + orders.payment }"/>
 				

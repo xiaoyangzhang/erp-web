@@ -116,6 +116,7 @@ function toExportWord(){
 	"&operatorIds=${parameter.operatorIds}"+
 	"&groupCode=${parameter.groupCode}"+
 	"&receiveMode=${parameter.receiveMode}"+
+	"&deliveryName=${parameter.deliveryName}"+
 	"&saleOperatorIds=${parameter.saleOperatorIds}";
 }
 </SCRIPT>
