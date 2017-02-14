@@ -13,49 +13,48 @@ var SalesRoute = function SalesRoute(dataConstruct){
     if(typeof dataConstruct == 'function'){
         dataConstruct.call(this);
     }
-
     //行程天数添加事件
-    $(".proAdd_btn").on('click', function(){
+    $(".proAdd_btn").off().on('click', function(){
         self.dayAdd();
         /**
          * 早中晚餐自动补全“√”和“×”
          */
         $(".bldd").each(function(){
-            $(this).autocomplete({
-                source: function( request, response ) {
-                    var name=encodeURIComponent(request.term);
-                    $.ajax({
-                        type : "get",
-                        url : "../route/getNameList.do",
-                        data : {
-                            name : name
-                        },
-                        dataType : "json",
-                        success : function(data){
-                            if(data && data.success == 'true'){
-                                response($.map(data.result,function(v){
-                                    return {
-                                        label : v.name,
-                                        value : v.name
-                                    }
-                                }));
-                            }
-                        },
-                        error : function(data,msg){
-                        }
-                    });
-                },
-                focus: function(event, ui) {
-                    $(".adress_input_box li.result").removeClass("selected");
-                    $("#ui-active-menuitem")
-                        .closest("li")
-                        .addClass("selected");
-                },
-                minLength : 0,
-                autoFocus : true,
-                delay : 300
-            });
-        });
+    		$(this).autocomplete({
+    			  source: function( request, response ) {
+    				  var name=encodeURIComponent(request.term);
+    				  $.ajax({
+    					  type : "get",
+    					  url : "../route/getNameList.do",
+    					  data : {
+    						  name : name
+    					  },
+    					  dataType : "json",
+    					  success : function(data){
+    						  if(data && data.success == 'true'){
+    							  response($.map(data.result,function(v){
+    								  return {
+    									  label : v.name,
+    									  value : v.name
+    								  }
+    							  }));
+    						  }
+    					  },
+    					  error : function(data,msg){
+    					  }
+    				  });
+    			  },
+    			  focus: function(event, ui) {
+    				    $(".adress_input_box li.result").removeClass("selected");
+    				    $("#ui-active-menuitem")
+    				        .closest("li")
+    				        .addClass("selected");
+    				},
+    			  minLength : 0,
+    			  autoFocus : true,
+    			  delay : 300
+    		});
+    	});
     });
 
     //行程天数删除事件
@@ -83,7 +82,7 @@ var SalesRoute = function SalesRoute(dataConstruct){
             });
             $("#groupOrder_dateEnd").val(SalesRoute.timeByDateCalculate(i + 1));
         });
-
+        
     });
 
     //交通添加事件

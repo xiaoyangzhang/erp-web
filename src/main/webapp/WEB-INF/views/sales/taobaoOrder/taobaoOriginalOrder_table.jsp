@@ -43,12 +43,15 @@
 				<td><c:if test="${orders.myState=='NEW'}">未组单</c:if> 
 						<c:if test="${orders.myState=='CONFIRM'}">已组单</c:if> 
 						<c:if test="${orders.myState=='CANCEL'}">废弃</c:if> 
+						<c:if test="${orders.myState=='BEYOND'}">超出库存</c:if> 
 				</td>
 				<td>
 				    <c:if test="${orders.isBrushSingle==0}">否</c:if>
                     <c:if test="${orders.isBrushSingle==1}"><font color="red">是</font></c:if> 
                 </td>
-				<td><input type="checkbox" name="idss" value="${orders.id}" vars="${orders.tid}"  <c:if test="${orders.tid}">checked</c:if>/></td>
+				<td>
+				    <input type="checkbox" name="idss" value="${orders.id}" vars="${orders.tid}" 
+				        myState="${orders.myState}" <c:if test="${orders.tid}">checked</c:if>/></td>
 				</tr>
 				<c:set var="sumTotal" value="${sumTotal + orders.payment }"/>
 				
@@ -63,7 +66,9 @@
 				<td><fmt:formatNumber value="${sumTotal}" pattern="#.##"/></td>
 				<td></td>
 				<td></td>
-                <td colspan="2"><a class="def" href="javascript:void(0)" onclick="addTaobaoOrder()">组单</a></td>
+                <td colspan="2">
+                    <a class="def" href="javascript:void(0);" onclick="addTaobaoOrder();">组单</a>
+                </td>
 			</tr>
 		</tbody>
 </table>
@@ -74,19 +79,35 @@
 	<jsp:param value="${pageBean.totalCount }" name="tn"/>
 </jsp:include>
 
-<SCRIPT type="text/javascript">
-	function  addTaobaoOrder(){
+<script type="text/javascript">
+	function addTaobaoOrder() {
 		var retVal = [];
-		$("input[type='checkbox']").each(function(){
-				if ($(this).prop("checked")){
-					retVal.push($(this).val())
-				}
+		var myState = [];
+		$("input[type='checkbox']").each(function() {
+			if ($(this).prop("checked")) {
+			    retVal.push($(this).val());
+			    myState.push($(this).attr("myState"));
+			}
 		});
-		//alert(retVal);
+		
+		if (retVal.length === 0) {
+			alert("请选择要组单的订单");
+			return;
+		}
+		
+		if (myState.length > 0) {
+			for(var i = 0; i < myState.length; i++) {
+				if (myState[i] !== "NEW") {
+					alert("未组单状态才能组单！");
+					return;
+				}
+			}
+		}
+		
 		newWindow('新增操作单',"<%=staticPath %>/taobao/addNewTaobaoOrder.htm?retVal="+retVal);
 	}
 	
 	function lookGroup(id){
 		newWindow('查看订单','taobao/toEditTaobaoOrder.htm?id='+id+'&see=0')
 	}
-</SCRIPT>
+</script>

@@ -5,11 +5,13 @@
 
 <%@ include file="../../../include/path.jsp" %>
 <table cellspacing="0" cellpadding="0" class="w_table">
+
 <col width="3%" />
 <col width="9%" />
 <col />
 <col width="5%" />
 <col width="4%" />
+
 <col width="10%" />
 <col width="6%" />
 <col width="5%" />
@@ -19,7 +21,9 @@
 <col width="4%" />
 <col width="4%" />
 <col width="4%" />
+<col width="4%" />
 <col width="5%" />
+
 <col width="4%" />
 <col width="5%" />
 <col width="5%" />
@@ -41,14 +45,11 @@
 			
 			
 			<th >数量<i class="w_table_split"></i></th>
-			<!-- <th >免数<i class="w_table_split"></i></th> -->
 			<th >结算价<i class="w_table_split"></i></th>
-			<!-- <th >成本额<i class="w_table_split"></i></th> -->
-			<!--<th >采购价<i class="w_table_split"></i></th>-->
-			<!-- <th >销售额<i class="w_table_split"></i></th> -->
-			<!--<th >利润<i class="w_table_split"></i></th>-->
+			<th >成本价<i class="w_table_split"></i></th>
 			<th >计调费<i class="w_table_split"></i></th>
 			<th >计调费备注<i class="w_table_split"></i></th>
+			
 			<th >其他利润<i class="w_table_split"></i></th>
 			<th >其他利润备注<i class="w_table_split"></i></th>
 			<th>利润<i class="w_table_split"></th>
@@ -71,26 +72,22 @@
                   		
                   		</c:otherwise>
                   	</c:choose>
-                  	
+                  	<a class="def" href="javascript:void(0)" onclick="newWindow('修改车辆订单','<%=staticPath %>/booking/toAddCar?groupId=${v.groupId}&bookingId=${v.bookingId}&isShow=1')">修改</a>
 				</td>
 				<td style="text-align: left;">【${v.productBrandName }】${v.productName }</td>
 				<td>${v.totalAdult }+${v.totalChild }+${v.totalGuide }</td>
 				<td>${v.operatorName}</td>
 
 				<td style="text-align: left">${v.supplierName}</td>
-				
-				
 				<td ><fmt:formatDate value="${v.itemDate }"
 						pattern="yyyy-MM-dd" /></td>
 				<td>${v.cashType}</td>
 				<td>${v.type1Name }</td>
 				<td>${v.remark }</td>
+				
 				<td><fmt:formatNumber value="${v.itemNum }" pattern="#.#" type="number"/></td>
-				<%-- <td><fmt:formatNumber value="${v.itemNumMinus }" pattern="#.#" type="number"/></td> --%>
 				<td><fmt:formatNumber value="${v.itemPrice-v.financeTotal}" pattern="#.##" type="currency"/></td>
-				<%-- <td><fmt:formatNumber value="${v.itemTotal}" pattern="#.##" type="currency"/></td> --%>
-				<%--<td><fmt:formatNumber value="${v.itemPrice-v.financeTotal  }" pattern="#.##" type="currency"/></td>--%>
-				<%-- <td><fmt:formatNumber value="${v.totalSale}" pattern="#.##" type="currency"/></td> --%>
+				<td><fmt:formatNumber value="${v.itemPrice-v.financeTotal-v.carProfitTotal-v.carProfitTotal2}" pattern="#.##" type="currency"/></td>
 				<td><fmt:formatNumber value="${v.carProfitTotal}" pattern="#.##" type="currency"/></td>
 				<td>
 					<c:if test="${v.carPayType eq '0'}">
@@ -100,6 +97,8 @@
 						手续费
 					</c:if>	
 				</td>
+				
+				
 				<td><fmt:formatNumber value="${v.carProfitTotal2}" pattern="#.##" type="currency"/></td>
 				<td>
 					<c:if test="${v.carPayType2 eq '1'}">
@@ -117,15 +116,17 @@
 				</td>
 				<td><fmt:formatNumber value="${v.carProfitTotal2+v.carProfitTotal}" pattern="#.##" type="currency"/></td>
 			</tr>
+			<!-- 数量 -->
 			<c:set var="sum_totalNum" value="${sum_totalNum+v.itemNum }" />
+			<!-- 结算价 -->
 			<c:set var="sum_totalItemPrice" value="${sum_totalItemPrice+ v.itemPrice-v.financeTotal}" />
+			<!--成本价 -->
+			<c:set var="sum_totalSalePrice" value="${sum_totalSalePrice+(v.itemPrice-v.financeTotal-v.carProfitTotal-v.carProfitTotal2)}" />
+			<!-- 计调费 -->
 			<c:set var="sum_carProfitTotal" value="${sum_carProfitTotal+v.carProfitTotal }" />
+			<!--其他利润-->
 			<c:set var="sum_carProfitTotal2" value="${sum_carProfitTotal2+v.carProfitTotal2}" />
-			<%--<c:set var="sum_totalSalePrice" value="${sum_totalSalePrice+(v.itemPrice-v.financeTotal)}" />--%>
-			<%-- <c:set var="sum_totalCount" value="${sum_totalCount+v.itemTotal}" />
-			<c:set var="sum_totalSale" value="${sum_totalSale+v.totalSale}" />
-			<c:set var="sum_totalNumMinus" value="${sum_totalNumMinus+v.itemNumMinus}" />  --%>
-					
+			
 		</c:forEach>
 	</tbody>
 	<tfoot>
@@ -133,7 +134,7 @@
 			<td colspan="10" style="text-align: right;">合计：</td>
 			<td ><fmt:formatNumber value="${sum_totalNum}" pattern="#.##" type="currency"/></td>
 			<td ><fmt:formatNumber value="${sum_totalItemPrice}" pattern="#.##" type="currency"/></td>
-			<%--<td ><fmt:formatNumber value="${sum_totalSalePrice}" pattern="#.##" type="currency"/></td>  --%>
+			<td ><fmt:formatNumber value="${sum_totalSalePrice}" pattern="#.##" type="currency"/></td>
 			<td><fmt:formatNumber value="${sum_carProfitTotal}" pattern="#.##" type="currency"/></td>
 			<td>&nbsp;</td>
 			<td><fmt:formatNumber value="${sum_carProfitTotal2}" pattern="#.##" type="currency"/></td>
@@ -143,11 +144,16 @@
 
 		<tr class="footer2">
 			<td colspan="10" style="text-align: right;">总计：</td>
+			<!-- 数量 -->
 			<td ><fmt:formatNumber value="${sum.totalNum}" pattern="#.##" type="currency"/></td>
+			<!-- 结算价 -->
 			<td ><fmt:formatNumber value="${sum.costPrice}" pattern="#.##" type="currency"/></td> 
-			<%--<td ><fmt:formatNumber value="${sum.salePrice}" pattern="#.##" type="currency"/></td>  --%>
+			<!-- 成本价 -->
+			<td ><fmt:formatNumber value="${sum.salePrice}" pattern="#.##" type="currency"/></td>
+			<!-- 计调费 -->
 			<td ><fmt:formatNumber value="${sum.carProfitTotal}" pattern="#.##" type="currency"/></td> 
 			<td>&nbsp;</td>
+			<!--其他利润 -->
 			<td ><fmt:formatNumber value="${sum.carProfitTotal2}" pattern="#.##" type="currency"/></td> 
 			<td>&nbsp;</td>
 			<td ><fmt:formatNumber value="${sum.carProfitTotal2+sum.carProfitTotal}" pattern="#.##" type="currency"/></td> 
