@@ -9,9 +9,7 @@ import com.yihg.mybatis.utility.PageBean;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
 import com.yimayhd.erpcenter.dal.sys.po.UserSession;
-import com.yimayhd.erpcenter.facade.sales.query.grouporder.ToNotGroupListDTO;
 import com.yimayhd.erpcenter.facade.sales.result.QueryResAdminOrderResult;
-import com.yimayhd.erpcenter.facade.sales.result.grouporder.ToNotGroupListResult;
 import com.yimayhd.erpcenter.facade.sales.service.GroupOrderFacade;
 import com.yimayhd.erpcenter.facade.tj.client.query.LockListTableDTO;
 import com.yimayhd.erpcenter.facade.tj.client.query.TrafficOrderDTO;
@@ -40,7 +38,6 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,8 +53,6 @@ public class ResTrafficOrderController extends BaseController{
 	@Autowired
 	private GroupOrderFacade groupOrderFacade;
 
-	@Autowired
-	private GroupOrderFacade groupOrderFacade;
 	
 	@RequestMapping("resGroupOrderList.htm")
 	public String loadGroupOrderInfo(HttpServletRequest request, ModelMap model){

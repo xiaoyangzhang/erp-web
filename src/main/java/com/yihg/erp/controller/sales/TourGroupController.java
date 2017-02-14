@@ -4471,12 +4471,14 @@ public class TourGroupController extends BaseController {
 				cc = row.createCell(10);
 				cc.setCellValue(df.format(orderBean.getIncome()));// 收入
 				cc.setCellStyle(cellStyle);
-
 				cc = row.createCell(11);
+				cc.setCellValue(df.format(orderBean.getQdtotal()));// 其他收入
+				cc.setCellStyle(cellStyle);
+				cc = row.createCell(12);
 				cc.setCellValue(df.format(orderBean.getBudget()));// 成本
 				cc.setCellStyle(cellStyle);
 
-				cc = row.createCell(12);
+				cc = row.createCell(13);
 				cc.setCellValue(df.format(orderBean.getIncome().subtract(orderBean.getBudget())));// 毛利
 				cc.setCellStyle(cellStyle);
 
@@ -4520,13 +4522,16 @@ public class TourGroupController extends BaseController {
 			cc.setCellValue(
 					groupOrderProfit.getTotalIncome() == null ? 0 : groupOrderProfit.getTotalIncome().doubleValue());
 			cc.setCellStyle(cellStyle);
-
 			cc = row.createCell(11);
+			cc.setCellValue(
+					groupOrderProfit.getQdtotal() == null ? 0 : groupOrderProfit.getQdtotal().doubleValue());
+			cc.setCellStyle(cellStyle);
+			cc = row.createCell(12);
 			cc.setCellValue(
 					groupOrderProfit.getTotalBudget() == null ? 0 : groupOrderProfit.getTotalBudget().doubleValue());
 			cc.setCellStyle(cellStyle);
 
-			cc = row.createCell(12);
+			cc = row.createCell(13);
 			cc.setCellValue(
 					(groupOrderProfit.getTotalIncome().subtract(groupOrderProfit.getTotalBudget())).doubleValue());
 			cc.setCellStyle(cellStyle);

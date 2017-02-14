@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpcenter.dal.product.po.*;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,11 +25,7 @@ import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.HttpUtil;
 import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
-import com.yimayhd.erpcenter.dal.product.po.TaobaoProduct;
 import com.yimayhd.erpcenter.dal.product.po.TaobaoProductSkus;
-import com.yimayhd.erpcenter.dal.product.po.TaobaoStock;
-import com.yimayhd.erpcenter.dal.product.po.TaobaoStockDate;
-import com.yimayhd.erpcenter.dal.product.po.TaobaoStockLog;
 import com.yimayhd.erpcenter.dal.product.vo.TaobaoProductVo;
 import com.yimayhd.erpcenter.dal.sales.client.taobao.pojo.TaobaoSKU;
 import com.yimayhd.erpcenter.facade.tj.client.service.TaobaoProductFacade;
@@ -336,4 +333,18 @@ public class TaobaoProductController extends BaseController {
     	return successJson("skuId", skuId + "");
     }
 
+	@RequestMapping(value = "stop.do")
+	@ResponseBody
+	public String stop(HttpServletRequest request,Integer id, ModelMap model) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		//判断是否存在订单信息
+		List<TaobaoStockProduct> count = taoBaoStockService.findStockProductStockIdHavePSI(id);
+		if (count != null && count.size()>0) {
+			map.put("error", "logError");
+		} else {
+			taoBaoStockService.updateState(id, -1);
+			map.put("success", 1);
+		}
+		return JSON.toJSONString(map);
+	}
 }

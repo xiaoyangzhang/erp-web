@@ -129,7 +129,11 @@ $(function(){
 						return ;
 						
 					}
-					
+
+                    if($("#sourceTypeCode").val()==-1){
+                        $.warn("请选择客源类别");
+                        return;
+                    }
 					var isSales = $("#agencyIsSales").val();
 					var options = {
 						url : '../agencyTeam/saveTeamGroupInfo.do',

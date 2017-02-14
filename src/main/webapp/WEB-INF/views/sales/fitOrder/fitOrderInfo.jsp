@@ -232,7 +232,7 @@
 							<input type="hidden" name="groupOrder.operatorId" id="operatorId" value="${vo.groupOrder.operatorId}"></td>
 					</tr>
 					<tr>
-						<td>客源类别：</td>
+						<td><i class="red">* </i>客源类别：</td>
 						<td>
 							<input type="hidden" name="groupOrder.sourceTypeName" class="IptText300" id="sourceTypeName" value="${vo.groupOrder.sourceTypeName }" />
 							<select name="groupOrder.sourceTypeId" id="sourceTypeCode">
@@ -243,7 +243,7 @@
 								</c:forEach>
 							</select>
 						</td>
-						<td>客源地：</td>
+						<td><i class="red">* </i>客源地：</td>
 						<td>
 							<input type="hidden" name="groupOrder.provinceName" class="IptText300" id="provinceName" value="${vo.groupOrder.provinceName }" />
 							<select name="groupOrder.provinceId" id="provinceCode">

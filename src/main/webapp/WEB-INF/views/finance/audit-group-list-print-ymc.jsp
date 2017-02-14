@@ -77,15 +77,16 @@ function loadList() {
 	</c:if>
 	
 	data.feeType = "sup";
+	console.log(sup.length);
 	for(var i = 0; i < sup.length; i++){
 		var item = sup[i];
+		console.log(item);
 		data.supType = item.id;
 		data.sl = "fin.selectSupplierList";
 		data.rp = "finance/audit/income-supplier-listView";
 		$("#sup"+ item.index).load("<%=staticPath%>/finance/querySettleList.htm", data);
 	}
 }
-
 $(document).ready(function() {
 	loadList();
 });
@@ -142,7 +143,7 @@ $(document).ready(function() {
 						</dd>
 						<dd class="inl-bl w-300">
 							<div class="dd_left">收入：</div>
-							<div class="dd_right"><fmt:formatNumber value="${group.total_income }" pattern="#.##"/>元</div>
+							<div class="dd_right"><fmt:formatNumber value="${group.total_income}" pattern="#.##"/>元</div>
 							<div class="clear"></div>
 						</dd>
 						<dd class="inl-bl w-300">
@@ -152,7 +153,7 @@ $(document).ready(function() {
 						</dd>
 						<dd class="inl-bl w-300">
 							<div class="dd_left">单团利润：</div>
-							<c:set var="totalProfit" value="${group.total_profit +group.total_commls }" />
+							<c:set var="totalProfit" value="${group.total_profit+group.total_commls }" />
 							<div class="dd_right"><fmt:formatNumber value="${totalProfit }" pattern="#.##"/>元</div>
 							<div class="clear"></div>
 						</dd>
@@ -174,7 +175,7 @@ $(document).ready(function() {
 					</h2>					
 					<div id="order"	class="p_container_sub"></div>
 				</c:if>
-				<%--<c:if test="${shop.count > 0}">
+				<%-- <c:if test="${shop.count > 0}">
 					<h2>
 						<label>购物</label>
 					</h2>
@@ -186,7 +187,7 @@ $(document).ready(function() {
 						<label>佣金</label>
 					</h2>
 					<div id="comm" class="p_container_sub"></div>
-				</c:if>--%>
+				</c:if> --%>
 				
 				<c:if test="${otherin.count > 0}">
 					<h2>
