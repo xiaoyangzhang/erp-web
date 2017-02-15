@@ -2,11 +2,13 @@ package com.yihg.erp.controller.ticketCenter;
 
 import com.yihg.erp.controller.BaseController;
 import com.yihg.erp.utils.MD5Util;
+import com.yihg.erp.utils.WebUtils;
 import com.yihg.mybatis.utility.PageBean;
 
 import com.yimayhd.erpcenter.dal.product.po.TrafficRes;
 import com.yimayhd.erpcenter.dal.product.po.TrafficResProduct;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
+import com.yimayhd.erpcenter.dal.sales.client.sales.po.ResOrder;
 import com.yimayhd.erpcenter.dal.sys.po.SysBizInfo;
 import com.yimayhd.erpcenter.facade.ticket.result.WebResult;
 import com.yimayhd.erpcenter.facade.ticket.service.TicketCenterFacade;
@@ -453,6 +455,28 @@ public class TicketCenterController extends BaseController {
 //        trafficResService.updateStockOrStockDisable(vo.getGroupOrder().getExtResId());
 //        ticketCenterFacade.save
 //        return successJson("groupId", orderId + "");
+        ResOrder resOrder = new ResOrder();
+        resOrder.setAdultPrice(adultPrice);
+        resOrder.setBizId(bizId);
+        resOrder.setBadyPrice(badyPrice);
+        resOrder.setChildPrice(childPrice);
+        resOrder.setDepartureDate(departureDate);
+        resOrder.setEmployeeId(employeeId);
+        resOrder.setEmployeeName(employeeName);
+        resOrder.setMappingSupplierId(mappingSupplierId);
+        resOrder.setNumAdult(numAdult);
+        resOrder.setNumBady(numBady);
+        resOrder.setNumChild(numChild);
+        resOrder.setOrgId(orgId);
+        resOrder.setType(type);
+        resOrder.setTrpId(trpId);
+        resOrder.setTotalPrice(totalPrice);
+        resOrder.setResId(resId);
+        resOrder.setRemark(remark);
+        resOrder.setProductId(productId);
+        WebResult<Map<String, Object>> webResult = ticketCenterFacade.saveResOrderToWX(resOrder);
+        return  successJson("groupId",webResult.getValue().get("groupId")+"");
+
     }
     
     

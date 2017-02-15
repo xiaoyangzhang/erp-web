@@ -60,7 +60,7 @@
 	</bean>
 
 	<bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape" />
-	<bean id="yihgTemplateFreemarkerService" class="com.yihg.common.YihgTemplateFreemarkerService">
+	<bean id="yihgTemplateFreemarkerService" class="com.yihg.erp.common.YihgTemplateFreemarkerService">
 		<property name="freeMarkerConfigurer" ref="freemarkerConfig"/>
 	</bean>
 	<!-- 配置freeMarker视图解析器 -->

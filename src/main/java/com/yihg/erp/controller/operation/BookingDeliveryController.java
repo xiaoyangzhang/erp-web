@@ -391,7 +391,7 @@ public class BookingDeliveryController extends BaseController {
             pageBean.setPageSize(pageSize);
         }
         pageBean.setParameter(scpBean);
-        pageBean = contractService.findJoinPriceListPage(pageBean,supplierId,WebUtils.getCurBizId(request));
+        pageBean = contractFacade.findJoinPriceListPage(pageBean,supplierId,WebUtils.getCurBizId(request));
         model.addAttribute("pageBean", pageBean);
         model.addAttribute("isShow", isShow);
         return "/operation/delivery/delivery-subjoin-add-table";
@@ -493,35 +493,35 @@ public class BookingDeliveryController extends BaseController {
 
     private void loadBookingDeliveryInfo(HttpServletRequest request, ModelMap model, Integer gid, Integer bid) {
         int bizId = WebUtils.getCurBizId(request);
-        List<DicInfo> typeList = dicService
-                .getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
-        model.addAttribute("typeList", typeList);
-
-        TourGroup groupInfo = tourGroupService.selectByPrimaryKey(gid);
-        List<GroupRoute> routeList = routeService.selectByGroupId(gid);
-        if (groupInfo.getGroupMode() < 1) {
-            List<GroupOrder> orderList = orderService.selectOrderByGroupId(gid);
-            if (orderList != null && orderList.size() > 0) {
-                for (GroupOrder order : orderList) {
-                    SupplierInfo supplierInfo = supplierSerivce.selectBySupplierId(order.getSupplierId());
-                    if (supplierInfo != null) {
-                        order.setSupplierName(supplierInfo.getNameFull());
-                    }
-                }
-            }
-            model.addAttribute("orderList", orderList);
-        }
-        model.addAttribute("group", groupInfo);
-        /*if(groupInfo!=null && routeList!=null){
-            for(GroupRoute route : routeList){
-				route.setGroupDate(DateUtils.addDays(groupInfo.getDateStart(), route.getDayNum()));
-			}
-		}*/
-        model.addAttribute("routeList", routeList);
-        if (bid != null) {
-            BookingDelivery delivery = deliveryService.loadBookingInfoById(bid);
-            model.addAttribute("booking", delivery);
-        }
+//        List<DicInfo> typeList = dicService
+//                .getListByTypeCode(BasicConstants.XMFY_DJXM, bizId);
+//        model.addAttribute("typeList", typeList);
+//
+//        TourGroup groupInfo = tourGroupService.selectByPrimaryKey(gid);
+//        List<GroupRoute> routeList = routeService.selectByGroupId(gid);
+//        if (groupInfo.getGroupMode() < 1) {
+//            List<GroupOrder> orderList = orderService.selectOrderByGroupId(gid);
+//            if (orderList != null && orderList.size() > 0) {
+//                for (GroupOrder order : orderList) {
+//                    SupplierInfo supplierInfo = supplierSerivce.selectBySupplierId(order.getSupplierId());
+//                    if (supplierInfo != null) {
+//                        order.setSupplierName(supplierInfo.getNameFull());
+//                    }
+//                }
+//            }
+//            model.addAttribute("orderList", orderList);
+//        }
+//        model.addAttribute("group", groupInfo);
+//        /*if(groupInfo!=null && routeList!=null){
+//            for(GroupRoute route : routeList){
+//				route.setGroupDate(DateUtils.addDays(groupInfo.getDateStart(), route.getDayNum()));
+//			}
+//		}*/
+//        model.addAttribute("routeList", routeList);
+//        if (bid != null) {
+//            BookingDelivery delivery = deliveryService.loadBookingInfoById(bid);
+//            model.addAttribute("booking", delivery);
+//        }
     }
     
     @RequestMapping("delivery.htm")
@@ -1697,7 +1697,7 @@ public class BookingDeliveryController extends BaseController {
         group.setBizId(WebUtils.getCurBizId(request));
         pageBean.setParameter(group);
 
-        pageBean = bookingDeliveryFacade.pushListTable(pageBean, WebUtils.getCurBizId(request)).getValue();
+        pageBean = bookingDeliveryFacade.pushListTable(pageBean, WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request)).getValue();
 
         model.addAttribute("pageBean", pageBean);
         return "/operation/delivery/push_delivery_list_table";

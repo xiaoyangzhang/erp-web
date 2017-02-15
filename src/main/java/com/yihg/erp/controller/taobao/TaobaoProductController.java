@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.yimayhd.erpcenter.dal.product.po.*;
 import com.yimayhd.erpcenter.facade.tj.client.result.WebResult;
+import com.yimayhd.erpcenter.facade.tj.client.service.TaobaoFacade;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -37,6 +38,8 @@ public class TaobaoProductController extends BaseController {
 	
 	@Autowired
 	private TaobaoProductFacade taoBaoProductFacade;
+	@Autowired
+	private TaobaoFacade taobaoFacade;
 	
 	@RequestMapping(value = "/stockLogDetails.do")
 	public String stockLogDetails(HttpServletRequest request, Integer stockDateId,String stockDate,
@@ -346,7 +349,7 @@ public class TaobaoProductController extends BaseController {
 //			taoBaoStockService.updateState(id, -1);
 //			map.put("success", 1);
 //		}
-		WebResult<Map<String, Object>> result = taoBaoProductFacade.findStockProductStockIdHavePSIAndUpdateState(id,-1);
+		WebResult<Map<String, Object>> result = taobaoFacade.findStockProductStockIdHavePSIAndUpdateState(id,-1);
 		return JSON.toJSONString(result.getValue());
 	}
 }
