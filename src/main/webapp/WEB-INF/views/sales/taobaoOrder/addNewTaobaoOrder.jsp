@@ -1266,8 +1266,8 @@ $(function(){
 	}
 	
 	var orderMode = $("#orderMode").val();
-	
-	if(orderMode==1476){
+    var orderModetext=$("#orderMode").find("option:selected").text();
+    if(orderModetext=='签证'){
 		$('#wuliu_id').append('<a href="javascript:void(0);" id="addVisaId">物流</a>');
 		$("#wuliu_id").on("click","a", function() {
 			 var orderId = $("#orderId").val();
@@ -1298,8 +1298,8 @@ $(function(){
 })
 function orderModeChange(){
 	/* 点击业务类别时获取选中的值，并添加点击事件 */
-	var orderMode = $("#orderMode").val();
-	if(orderMode==1476){
+    var orderModetext=$("#orderMode").find("option:selected").text();
+    if(orderModetext=='签证'){
 		$('#wuliu_id').append('<a href="javascript:void(0);" id="addVisaId">物流</a>');
 		$("#wuliu_id").on("click","a", function() {
 	    var orderId = $("#orderId").val();
@@ -1332,7 +1332,7 @@ function orderModeChange(){
 	var curOrgId = '${OrgId}';
 	<c:if test="${vo.groupOrder.id == null }">
 		if (lang != ''){
-			if(lang.indexOf(curOrgId+'@SK,')!=-1){
+			if(lang.indexOf('SK,')!=-1){
 				$("input[name='groupOrder.orderType']").get(1).checked=true; 
 			}else{
 				$("input[name='groupOrder.orderType']").get(0).checked=true; 
@@ -1347,10 +1347,10 @@ function orderModeChange(){
 						var opAry = ary[i].split('$');
 						for (var j=0; j<opAry.length; j ++){
 							var idAry = opAry[j].split('@');
-							if (idAry[0] == curOrgId){
-								$("#operatorName").val(idAry[1]);
-								$("#operatorId").val(idAry[2]);
-							}
+                            if (idAry.length > 1 ){
+                                $("#operatorName").val(idAry[0]);
+                                $("#operatorId").val(idAry[1]);
+                            }
 						}
 						
 					}

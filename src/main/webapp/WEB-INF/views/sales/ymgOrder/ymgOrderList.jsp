@@ -204,9 +204,33 @@ document.onkeydown = function (e) {
 	</div>
 </div>
 <script type="text/javascript">
-function  addNewSpecialGroup(){
-	newWindow('新增订单','taobao/addNewTaobaoOrder.htm');
-}
+    function delYmgGroup(id,orderType){
+        $.confirm("确认删除吗？", function() {
+            if(orderType>0){
+                $.getJSON("../groupOrder/delTaobaoGroupOrder.do?id=" + id, function(data) {
+                    if (data.success) {
+                        $.success('操作成功',function(){
+                            searchBtn();
+                        });
+                    }else {
+                        $.warn(data.msg);
+                    }
+                });
+            }else{
+                $.getJSON("../agencyFit/delGroupOrder.do?id=" + id, function(data) {
+                    if (data.success) {
+                        $.success('操作成功',function(){
+                            searchBtn();
+                        });
+                    }else {
+                        $.warn(data.msg);
+                    }
+                });
+            }
+        }, function() {
+            $.info('取消删除');
+        });
+    }
 
 function commonDicDlg() {
 	$.dicItemDlg('SALES_TEAM_TYPE','dicNames','dicIds');
@@ -330,7 +354,7 @@ var opGrid = {
 					ops+='<a href="javascript:void(0);" onclick="changeorderLockState('+rowObject.id+')" class="def">提交给计调</a>';
 				}
 				if(rowObject.orderLockState != 2 && rowObject.stateFinance !=1 && rowObject.totalCash=='0.0000' && rowObject.groupState!=3 && rowObject.groupState!=4) {
-					ops+='<a href="javascript:void(0);" onclick="delGroup('+rowObject.id+')" class="def">删除</a>';	
+					ops+='<a href="javascript:void(0);" onclick="delYmgGroup('+rowObject.id+')" class="def">删除</a>';
 				}
 				/* '<a href="javascript:void(0);" onclick="changeGroupState('+rowObject.groupId+','+rowObject.groupState+')" class="def">状态</a>' +
 				'</div>' +

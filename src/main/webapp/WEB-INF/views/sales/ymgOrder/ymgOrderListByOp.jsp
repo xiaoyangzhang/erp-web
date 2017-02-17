@@ -179,6 +179,29 @@ document.onkeydown = function (e) {
 function goLogStock(orderId) {
 	showInfo("计调操作单日志","950px","550px","<%=staticPath%>/basic/singleList.htm?tableName=group_order&tableId=" + orderId);
 }
+/**
+ * 跳到信息编辑页面
+ */
+function editOrderGroupInfo(){
+    var groupId = $("#modalgroupId").val();
+    var groupState = $("#modalGroupState").val();
+    $.getJSON("../groupOrder/editOrderGroupInfo.do?id=" + groupId +"&groupState="+groupState, function(data) {
+        if (data.success) {
+            $.success('操作成功',function(){
+                layer.close(stateIndex);
+                refershPage();
+
+            });
+
+        }
+    });
+}
+
+function refershPage(){
+    var pageSize=$("#orderPageSize").val();
+    var page=$("#orderPage").val();
+    queryList(page, pageSize);
+}
 
 function showInfo(title, width, height, url) {
 	layer.open({
