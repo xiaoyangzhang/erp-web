@@ -62,10 +62,10 @@
 								<fmt:formatDate value="${groupInfo.dateEnd}" pattern="MM-dd" />
 							</td>
 							<td>
-								<c:if test="${groupInfo.totalBaby==0 }">
+								<c:if test="${groupInfo.totalBaby==0 or groupInfo.totalBaby==null }">
 									${groupInfo.totalAdult}+${groupInfo.totalChild}+${groupInfo.totalGuide}
 								</c:if>
-								<c:if test="${groupInfo.totalBaby!=0 }">${groupInfo.totalAdult}+${groupInfo.totalChild}<span style="color: red;">(${groupInfo.totalBaby })</span>+${groupInfo.totalGuide}</c:if>
+								<c:if test="${groupInfo.totalBaby > 0 }">${groupInfo.totalAdult}+${groupInfo.totalChild}<span style="color: red;">(${groupInfo.totalBaby })</span>+${groupInfo.totalGuide}</c:if>
 							</td>
 							<td>${groupInfo.operatorName}</td>
 							<td>${groupInfo.groupStatus}</td>
