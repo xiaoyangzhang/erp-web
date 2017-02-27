@@ -51,11 +51,11 @@
 				<td>${item.operator_name}</td>
 				<td>${item.guide_name}</td>
 				<td>
-					<c:set var="itemTotal" value="${item.total + item.comm_total}" />
+					<c:set var="itemTotal" value="${item.total + item.comm_total + item.comm_deduction_total}" />
 					<fmt:formatNumber value="${itemTotal}" pattern="#.##"/>
 				</td>
 				<td>
-					<c:set var="itemTotalCash" value="${item.total_cash + item.comm_total_cash}" />
+					<c:set var="itemTotalCash" value="${item.total_cash + item.comm_total_cash + item.comm_deduction_total_cash}" />
 					<fmt:formatNumber value="${itemTotalCash }" pattern="#.##"/>
 				</td>
 				<td>
