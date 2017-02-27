@@ -9136,8 +9136,8 @@ public class QueryController extends BaseController {
 		Map paramters = WebUtils.getQueryParamters(request);
 
 		// 如果选择了【省份】作为查询条件
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("bizId", paramters.get("bizId"));
+//		Map<String, Object> map = new HashMap<String, Object>();
+//		map.put("bizId", paramters.get("bizId"));
 
 		//获取供应商类别
 		String className = ObjectUtils.toString(paramters.get("className"));
@@ -9163,6 +9163,7 @@ public class QueryController extends BaseController {
 		queryDTO.setPage(page);
 		queryDTO.setPageSize(pageSize);
 		queryDTO.setSvc(svc);
+		queryDTO.setParameters(paramters);
 		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
 		PageBean pb  = queryResult.getPageBean();
 		// 总计查询
@@ -9176,7 +9177,7 @@ public class QueryController extends BaseController {
 			queryDTO.setPageBean(pb);
 			model.addAttribute("sum",queryFacade.commonQuerySum(queryDTO) );
 		}
-
+		model.addAttribute("pageBean", pb);
 		return rp;
 	}
 
