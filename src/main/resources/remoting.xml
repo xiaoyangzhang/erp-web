@@ -252,7 +252,7 @@
 
 	<dubbo:reference id="taobaoFacade"
 					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TaobaoFacade" owner="ly" version="${dubbo.version}"
-					 timeout="${dubbo.timeout}" />
+					 timeout="50000" />
 
 	<dubbo:reference id="tJFacade"
 					 interface="com.yimayhd.erpcenter.facade.tj.client.service.TJFacade" owner="ly" version="${dubbo.version}"

@@ -3921,7 +3921,7 @@ public class QueryController extends BaseController {
 		getNumAndOrderDTO.setSsl(ssl);
 		getNumAndOrderDTO.setSvc(svc);
 
-		getNumAndOrderDTO.setParamters(WebUtils.getQueryParamters(request));
+//		getNumAndOrderDTO.setParamters(WebUtils.getQueryParamters(request));
 
 		GetNumAndOrderResult result = dataAnalysisFacade.getSupplierOrder(getNumAndOrderDTO);
 		model.addAttribute("sum", result.getSum());
@@ -7795,9 +7795,11 @@ public class QueryController extends BaseController {
 		queryDTO.setRp(rp);
 		queryDTO.setSl(sl);
 		queryDTO.setSsl(ssl);
+		queryDTO.setParameters(WebUtils.getQueryParamters(request));
 		QueryResult queryResult = queryFacade.settleListPage(queryDTO);
 		model.addAttribute("guideMap", queryResult.getGuideMap());
 		model.addAttribute("sum", queryResult.getSum());
+		model.addAttribute("pageBean", queryResult.getPageBean());
 		return "queries/groupProfit/settle-list-table";
 	}
 

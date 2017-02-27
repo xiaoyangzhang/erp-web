@@ -3252,7 +3252,7 @@ public class TaobaoController extends BaseController {
         taobaoOrderListByOpDTO.setDataUserIdSets(WebUtils.getDataUserIdSet(request));
         
         taobaoOrderListByOpDTO=taobaoFacade.productProfitStatistics_table(taobaoOrderListByOpDTO);
-        model.addAttribute("pageBean", taobaoOrderListByOpDTO.getPage());
+        model.addAttribute("pageBean", taobaoOrderListByOpDTO.getPageBean());
         model.addAttribute("typeList", taobaoOrderListByOpDTO.getTypeList());
         
         return "sales/taobaoOrder/ProductProfitStatistics_table";
