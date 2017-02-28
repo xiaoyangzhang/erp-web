@@ -333,7 +333,7 @@ public class TaobaoController extends BaseController {
 		dto.setMyBizCode(settingCommon.getMyBizCode(request));
 		//FIXME 页面没有传递这个参数
 
-		dto.setGroupMode(GroupMode);
+//		dto.setGroupMode(GroupMode);
 		dto.setVo(vo);
 		Integer orderId = 0;
 //		GroupOrder go = null;
@@ -344,7 +344,7 @@ public class TaobaoController extends BaseController {
 		GroupOrder go=new GroupOrder();
 		if(vo.getGroupOrder().getId() != null){
 
-			com.yimayhd.erpcenter.facade.tj.client.result.WebResult<Map<String, Object>> result = taobaoFacade.getSaveSpecialGroupNeed(vo.getGroupOrder().getId());
+			WebResult<Map<String, Object>> result = taobaoFacade.getSaveSpecialGroupNeed(vo.getGroupOrder().getId());
 			go = (GroupOrder) result.getValue().get("go");
 			 incomeList = (List<GroupOrderPrice>) result.getValue().get("incomeList");
 			 guestList = (List<GroupOrderGuest>) result.getValue().get("guestList");
