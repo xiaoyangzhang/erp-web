@@ -165,9 +165,9 @@
 					<dd>
 					<%-- <c:if test="${orderLockSwitch eq 1 && groupOrder.orderLockState eq 1}"> --%>
 						<a href="javascript:void(0);"
-							class="button button-primary button-small" onclick="toMergeGroup(${orderLockSwitch})">新增并团</a>
+							class="button button-primary button-small" onclick="toMergeGroup()">新增并团</a>
 						<a href="javascript:void(0);"
-							class="button button-primary button-small" onclick="insertGroupByList(${orderLockSwitch})">加入团</a>
+							class="button button-primary button-small" onclick="insertGroupByList()">加入团</a>
 					<%-- </c:if> --%>
 					</dd>
 				</dl>
@@ -367,5 +367,79 @@ function changeType(id,type){
 	}, function() {
 		$.info('取消更改');
 	});
-}
+
+    function insertGroupByList(){
+
+        var chk_value = [];
+        $("input[name='chkFitOrder']:checked").each(function() {
+            chk_value.push($(this).val());
+        });
+
+        if (chk_value.length == 0) {
+            $.error('请先选择散客订单再进行加入团操作');
+            return;
+        }
+
+        $.get("../agencyFit/beforeInsertGroup.htm?ids="+chk_value, function(data){
+            if(data.success){
+                var win=0;
+                layer.open({
+                    type : 2,
+                    title : '选择散客团',
+                    closeBtn : false,
+                    area : [ '900px', '500px' ],
+                    shadeClose : true,
+                    content : '../agencyFit/getInsertFitGroupList.htm?tid='+chk_value[0],
+                    btn: ['确定', '取消'],
+                    success:function(layero, index){
+                        win = window[layero.find('iframe')[0]['name']];
+                    },
+                    yes: function(index){
+                        var code = win.getCode();
+                        $.post("../agencyFit/insertGroupMany.do", { ids: chk_value.toString(), code: code }, function(data){
+                            if(data.success){
+                                $.success('操作成功',function(){
+                                    searchBtn();
+                                    layer.close(index);
+                                })
+                            }else{
+                                $.error(data.msg);
+                            }
+                        },"json");
+
+
+
+                    },cancel: function(index){
+                        layer.close(index);
+                    }
+                });
+
+            }else{
+                $.error(data.msg);
+            }
+        },"json");
+
+    }
+    function toMergeGroup(){
+
+        var chk_value = [];
+        $("input[name='chkFitOrder']:checked").each(function() {
+            chk_value.push($(this).val());
+        });
+
+        if (chk_value.length == 0) {
+            $.error('请先选择散客订单再进行并团操作');
+            return;
+        }
+
+        $.getJSON("../agencyFit/judgeMergeGroup.htm?ids=" + chk_value, function(data) {
+            if (data.success) {
+                newWindow('散客并团','fitOrder/toMergeGroup.htm?ids=' + chk_value);
+            } else {
+                $.error(data.msg);
+            }
+        });
+
+
+    }
 </script>
