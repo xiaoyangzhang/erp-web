@@ -140,6 +140,7 @@ table,table tr th,table tr td{border-color: #000;}
 							</c:forEach>
 						</tbody>
 					</table>
+					<%--${po.guests.size()}--%>
 				</td>
 				<td width="13%">${po.remark }</td>
 				</tr>

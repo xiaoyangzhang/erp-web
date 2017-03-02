@@ -276,12 +276,12 @@
 </html>
 
 <script type="text/javascript">
-(function(){
+/*(function(){
 	//防止多个帐号登录同一个浏览器时 用户操作数据会串掉
 	$(document).on("mouseover",function(e){
 		if ($.cookie("YIHG_ERP_USER_SESSION") != yihg_erp_web_config["yihg_erp_user_token"]){
 			window.location.href="../login.htm";
 		}
 	});
-})();
+})();*/
 </script>
