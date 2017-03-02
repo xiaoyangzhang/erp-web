@@ -9203,6 +9203,7 @@ public class QueryController extends BaseController {
 		queryDTO.setPage(page);
 		queryDTO.setPageSize(pageSize);
 		queryDTO.setSvc(svc);
+		queryDTO.setParameters(paramters);
 		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
 		PageBean pb  = queryResult.getPageBean();
 		// 总计查询
@@ -9216,7 +9217,7 @@ public class QueryController extends BaseController {
 			queryDTO.setPageBean(pb);
 			model.addAttribute("sum",queryFacade.commonQuerySum(queryDTO) );
 		}
-
+			model.addAttribute("pageBean",pb);
 		return rp;
 	}
 
@@ -9238,6 +9239,7 @@ public class QueryController extends BaseController {
 		queryDTO.setPage(page);
 		queryDTO.setPageSize(pageSize);
 		queryDTO.setSvc(svc);
+		queryDTO.setParameters(paramters);
 		QueryResult queryResult = queryFacade.commonQuery(queryDTO);
 		PageBean pb  = queryResult.getPageBean();
 
@@ -9252,6 +9254,7 @@ public class QueryController extends BaseController {
 			queryDTO.setPageBean(pb);
 			model.addAttribute("sum",queryFacade.commonQuerySum(queryDTO) );
 		}
+		model.addAttribute("pageBean",pb);
 		return rp;
 	}
 
