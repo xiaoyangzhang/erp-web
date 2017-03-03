@@ -312,7 +312,7 @@ public class SpecialGroupController extends BaseController {
 		String imgPath = bizSettingCommon.getMyBizLogo(request);
 		model.addAttribute("imgPath", imgPath);
 		return "sales/specialGroup/special-group-print";
-		
+
 	}
 	@RequestMapping(value = "getSpecialGroup.do")
 	public String getSpecialGroup(HttpServletRequest request,

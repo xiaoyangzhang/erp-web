@@ -106,7 +106,7 @@ $(function(){
 						<input name="orgIds" id="orgIds" stag="orgIds" value="${groupOrder.orgIds }" type="hidden" value=""/>	
 					</li>
 					<li class="text"> 客源类型:</li>
-					<li > <select name="sourceTypeName" id="sourceTypeName" style="width:184px;">
+					<li > <select name="sourceTypeId" id="sourceTypeId" style="width:184px;">
 								<option value="-1">全部</option>
 								<c:forEach items="${sourceTypeList }" var="typeName">
 								<option value="${typeName.id }">${typeName.value }</option>

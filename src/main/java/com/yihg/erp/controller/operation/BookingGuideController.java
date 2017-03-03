@@ -1031,10 +1031,10 @@ public class BookingGuideController extends BaseController {
 		String realPath = "" ;
 		String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
-		com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup tourGroup = null ;
-		com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide bookingGuide = null ;
+		TourGroup tourGroup = null ;
+		BookingGuide bookingGuide = null ;
 		// 查询导游信息
-		List<com.yimayhd.erpcenter.dal.sales.client.operation.po.BookingGuide> guides = null;
+		List<BookingGuide> guides = null;
 		String guideString = "" ;
 		String guestGuideString = "" ;
 		String guestIsLeaderString ="" ;
@@ -1045,7 +1045,7 @@ public class BookingGuideController extends BaseController {
 		Map<String, Object> map0 = new HashMap<String, Object>();
 		List<com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupGuidePrintPo> ggpp = null ;
 		if(num==3){
-			result = bookingGuideFacade.getGroupRouteInfo(id);
+			result = bookingGuideFacade.getGuideRouteInfo(id);
 //			tourGroup = tourGroupService.selectByPrimaryKey(id);
 //			guides = bookingGuideService.selectGuidesByGroupId(id);
 			tourGroup = result.getTourGroup();

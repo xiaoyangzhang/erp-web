@@ -2165,7 +2165,19 @@ public class TourGroupController extends BaseController {
 			priceList.add(priceTotalMap);
 		}
 
-
+ /* 银行信息 */
+//		List<SysBizBankAccount> sysBizBankAccountList = bizBankAccountService
+//				.getListByBizId(WebUtils.getCurBizId(request));
+		List<SysBizBankAccount> sysBizBankAccountList = toPreviewResult.getSysBizBankAccountList();
+		List<Map<String, String>> sbba = new ArrayList<Map<String, String>>();
+		for (SysBizBankAccount sysBizBankAccount : sysBizBankAccountList) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("bankName", sysBizBankAccount.getBankName());
+			map.put("accountName", sysBizBankAccount.getAccountName());
+			map.put("bankAccount", sysBizBankAccount.getBankAccount());
+			map.put("accountNo", sysBizBankAccount.getAccountNo());
+			sbba.add(map);
+		}
 		// 客人信息
 
 		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
@@ -2190,13 +2202,13 @@ public class TourGroupController extends BaseController {
 		List<GroupRequirement> grogShopList = toPreviewResult.getGrogShopList();
 		// 根据散客订单统计接机信息
 		List<GroupOrderTransport> groupOrderTransports = toPreviewResult.getGroupOrderTransports();
-		if (null != grogShopList && grogShopList.size() > 0) {
+		if (!CollectionUtils.isEmpty(grogShopList)) {
 			map6.put("hotelNum", getHotelNum(grogShopList));
 		} else {
 			map6.put("hotelNum", "");
 		}
 		if(agency!=1){
-			if (null != groupOrderTransports && groupOrderTransports.size() > 0) {
+			if (!CollectionUtils.isEmpty(groupOrderTransports)) {
 				map6.put("upAndOff", "接机：" + getAirInfo(groupOrderTransports, 0)
 						+ "\n" + "送机：" + getAirInfo(groupOrderTransports, 1) + "\n"
 						+ "省内交通：" + getSourceType(groupOrderTransports));
@@ -2206,6 +2218,7 @@ public class TourGroupController extends BaseController {
 		}
 		map6.put("Remark", groupOrder.getRemark());
 		map6.put("Service", groupOrder.getServiceStandard());
+		map6.put("bankCount", getBankInfo(request));
 		try {
 			export.export(params1);
 			export.export(map0, 0);
@@ -2217,11 +2230,13 @@ public class TourGroupController extends BaseController {
 				export.export(priceList, 3);
 			}
 
-			if (groupOrder.getOrderType() != 1 && agency!=1) {
+			if (groupOrder.getOrderType() != 1 && agency != 1) {
 				export.export(guestList, 4);
-				export.export(map6, 5);
+				export.export(sbba, 5);
+				export.export(map6, 6);
 			} else {
-				export.export(map6, 4);
+				export.export(sbba, 4);
+				export.export(map6, 5);
 			}
 			export.generate(url);
 		} catch (Exception e) {
@@ -2901,6 +2916,7 @@ public class TourGroupController extends BaseController {
 			priceTotalMap.put("total", " ");
 			priceList.add(priceTotalMap);
 		}
+
 		/**
 		 * 客人信息
 		 */
@@ -2919,6 +2935,16 @@ public class TourGroupController extends BaseController {
 			map.put("place", (guests.get(x).getNativePlace() == null ? ""
 					: guests.get(x).getNativePlace()));
 			guestList.add(map);
+		}
+		List<Map<String, String>> sbba = new ArrayList<Map<String, String>>();
+		List<SysBizBankAccount> sysBizBankAccountList = toPreviewResult.getSysBizBankAccountList();
+		for (SysBizBankAccount sysBizBankAccount : sysBizBankAccountList) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("bankName", sysBizBankAccount.getBankName());
+			map.put("accountName", sysBizBankAccount.getAccountName());
+			map.put("bankAccount", sysBizBankAccount.getBankAccount());
+			map.put("accountNo", sysBizBankAccount.getAccountNo());
+			sbba.add(map);
 		}
 
 		Map<String, Object> map5 = new HashMap<String, Object>();
@@ -2947,9 +2973,11 @@ public class TourGroupController extends BaseController {
 			export.export(priceList, 2, true);
 			if (groupOrder.getOrderType() != 1) {
 				export.export(guestList, 3);
-				export.export(map5, 4);
+				export.export(sbba, 4);
+				export.export(map5, 5);
 			} else {
-				export.export(map5, 3);
+				export.export(sbba, 3);
+				export.export(map5, 4);
 			}
 
 			export.generate(url);
@@ -5734,14 +5762,14 @@ public class TourGroupController extends BaseController {
 
 		model.addAttribute("supplier", toSKChargePreviewResult.getSupplier());
 		model.addAttribute("groupId", groupId);
-		model.addAttribute("supplierId", supplierId);
+		model.addAttribute("supplierId", toSKChargePreviewResult.getSupplierList().get(0).getId());
 		model.addAttribute("guide", getGuides(toSKChargePreviewResult.getGuides()));
 		Collections.reverse(toSKChargePreviewResult.getGopps());
 		model.addAttribute("gopps", toSKChargePreviewResult.getGopps());
 		model.addAttribute("vos", toSKChargePreviewResult.getVos());
 		model.addAttribute("guides", toSKChargePreviewResult.getGuides());
 		// model.addAttribute("groupRouteDayVOs", groupRouteDayVOs);
-		model.addAttribute("supplierList", toSKChargePreviewResult.getSupplier());
+		model.addAttribute("supplierList", toSKChargePreviewResult.getSupplierList());
 		model.addAttribute("po", toSKChargePreviewResult.getPo());
 		model.addAttribute("imgPath", bizSettingCommon.getMyBizLogo(request));
 		model.addAttribute("tour", toSKChargePreviewResult.getTour());
