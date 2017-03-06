@@ -2673,8 +2673,13 @@ public class TaobaoController extends BaseController {
 					BigDecimal total = (BigDecimal) map.get("total");
 
 					cc = row.createCell(15);
-					cc.setCellValue(df.format(total.divide(new BigDecimal(sumAC),2, RoundingMode.HALF_UP)));//金额
-					cc.setCellStyle(cellStyle);
+					if (sumAC > 0) {
+						cc.setCellValue(df.format(total.divide(new BigDecimal(sumAC), 2, RoundingMode.HALF_UP)));// 金额
+						cc.setCellStyle(cellStyle);
+					} else {
+						cc.setCellValue(0);// 金额
+						cc.setCellStyle(cellStyle);
+					}
 
 					index++;
 				}

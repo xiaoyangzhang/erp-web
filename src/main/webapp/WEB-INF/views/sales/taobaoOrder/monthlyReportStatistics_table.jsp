@@ -92,7 +92,7 @@
 				<td><fmt:formatNumber value="${sumCost}" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${sumCostCash}" pattern="#.##"/></td>
 				<td><fmt:formatNumber value="${sumCostBalance}" pattern="#.##"/></td>
-				<td><fmt:formatNumber value="${sumGroupCost}" pattern="#.##"/></td>
+				<td><fmt:formatNumber value="${sumTotal-sumCost}" pattern="#.##"/></td>
 			</tr>
 			</tfoot>
 </table>

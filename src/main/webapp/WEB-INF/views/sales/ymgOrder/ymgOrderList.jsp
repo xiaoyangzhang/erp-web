@@ -217,7 +217,7 @@ document.onkeydown = function (e) {
                     }
                 });
             }else{
-                $.getJSON("../agencyFit/delGroupOrder.do?id=" + id, function(data) {
+                $.getJSON("../agencyFit/delYmgGroupOrder.do?id=" + id, function(data) {
                     if (data.success) {
                         $.success('操作成功',function(){
                             searchBtn();

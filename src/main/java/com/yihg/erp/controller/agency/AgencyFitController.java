@@ -1016,4 +1016,58 @@ public class AgencyFitController extends BaseController {
 		return "agency/fitOrder/impNotGroupOrder";
 	}
 
+	/**
+	 * 删除订单信息(逻辑删) 操作单版
+	 *    用于散客团的删除，需要还库存
+	 * @param request
+	 * @param reponse
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value = "delYmgGroupOrder.do")
+	@ResponseBody
+	public String delYmgGroupOrder(HttpServletRequest request,
+								   HttpServletResponse reponse, Integer id) {
+//		if (airTicketRequestService.doesOrderhaveRequested(
+//				WebUtils.getCurBizId(request), id)) {
+//			return errorJson("删除订单前请先取消机票申请。");
+//		}
+//		GroupOrder groupOrder = groupOrderService.findById(id);
+//		groupOrder.setState(-1);
+//		groupOrderService.updateGroupOrder(groupOrder);
+//
+//		try {
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//
+//			if(groupOrder.getType()==0){ //预留
+//				productStockService.updateReserveCount(groupOrder.getProductId(), sdf.parse(groupOrder.getDepartureDate()),-(groupOrder.getNumAdult() + groupOrder.getNumChild()));
+//
+//			}else{
+//
+//
+//				productStockService.updateStockCount(groupOrder.getProductId(),
+//						sdf.parse(groupOrder.getDepartureDate()),
+//						-(groupOrder.getNumAdult() + groupOrder.getNumChild()));
+//
+//			}
+//			if(groupOrder.getGroupId()!=null){    									// 判断是否成团，团中有无订单，若无订单删除团。
+//				List<GroupOrder> list =groupOrderService.selectSubOrderList(groupOrder.getGroupId());
+//				if(list==null || list.size()<1){
+//					TourGroup tourGroup=tourGroupService.selectByPrimaryKey(groupOrder.getGroupId());
+//					tourGroup.setGroupState(-1);
+//					tourGroupService.updateByPrimaryKeySelective(tourGroup);
+//				}
+//				financeService.calcTourGroupAmount(groupOrder.getGroupId());
+//			}
+//		} catch (Exception e) {
+//			return errorJson("更新库存失败！");
+//		}
+		ResultSupport resultSupport = agencyFitFacade.delYmgGroupOrder(WebUtils.getCurBizId(request),id);
+		if (!resultSupport.isSuccess()) {
+			return  errorJson(resultSupport.getResultMsg());
+		}
+		return successJson();
+	}
+
+
 }
