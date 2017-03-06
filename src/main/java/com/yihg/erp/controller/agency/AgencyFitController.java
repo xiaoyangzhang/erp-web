@@ -1,32 +1,5 @@
 package com.yihg.erp.controller.agency;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.erpcenterFacade.common.client.query.BrandQueryDTO;
-import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
-import org.erpcenterFacade.common.client.result.BrandQueryResult;
-import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
-import org.erpcenterFacade.common.client.result.RegionResult;
-import org.erpcenterFacade.common.client.service.ProductCommonFacade;
-import org.erpcenterFacade.common.client.service.SaleCommonFacade;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.google.gson.Gson;
 import com.yihg.erp.aop.RequiresPermissions;
 import com.yihg.erp.common.BizSettingCommon;
@@ -43,7 +16,6 @@ import com.yimayhd.erpcenter.dal.product.po.ProductRemark;
 import com.yimayhd.erpcenter.dal.product.vo.ProductGroupVo;
 import com.yimayhd.erpcenter.dal.sales.client.constants.Constants;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupOrder;
-import com.yimayhd.erpcenter.dal.sales.client.sales.po.GroupRoute;
 import com.yimayhd.erpcenter.dal.sales.client.sales.po.TourGroup;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.FitOrderVO;
 import com.yimayhd.erpcenter.dal.sales.client.sales.vo.MergeGroupOrderVO;
@@ -53,6 +25,27 @@ import com.yimayhd.erpcenter.facade.sales.result.AgencyOrderResult;
 import com.yimayhd.erpcenter.facade.sales.result.ResultSupport;
 import com.yimayhd.erpcenter.facade.sales.result.WebResult;
 import com.yimayhd.erpcenter.facade.sales.service.AgencyFitFacade;
+import org.erpcenterFacade.common.client.query.BrandQueryDTO;
+import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
+import org.erpcenterFacade.common.client.result.BrandQueryResult;
+import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
+import org.erpcenterFacade.common.client.result.RegionResult;
+import org.erpcenterFacade.common.client.service.ProductCommonFacade;
+import org.erpcenterFacade.common.client.service.SaleCommonFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Controller
 @RequestMapping(value = "/agencyFit")
@@ -1062,9 +1055,15 @@ public class AgencyFitController extends BaseController {
 //		} catch (Exception e) {
 //			return errorJson("更新库存失败！");
 //		}
-		ResultSupport resultSupport = agencyFitFacade.delYmgGroupOrder(WebUtils.getCurBizId(request),id);
-		if (!resultSupport.isSuccess()) {
-			return  errorJson(resultSupport.getResultMsg());
+		ResultSupport resultSupport = null;
+		try {
+			resultSupport = agencyFitFacade.delYmgGroupOrder(WebUtils.getCurBizId(request),id);
+			if (!resultSupport.isSuccess()) {
+				return  errorJson(resultSupport.getResultMsg());
+			}
+		} catch (ParseException e) {
+			log.error("删除ymg订单失败，error={}",e);
+			return errorJson("系统异常");
 		}
 		return successJson();
 	}
