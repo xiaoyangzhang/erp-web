@@ -48,7 +48,7 @@ div{ font-size:10pt !important; }
 				<tr>
 					<th width="10%">产品</th>
 					
-					<td colspan="3" >【${params1.product_brand }】${params1.product_name }</td>
+					<td colspan="3" >【${map0.product_brand }】${map0.product_name }</td>
 					
 				</tr>
 				

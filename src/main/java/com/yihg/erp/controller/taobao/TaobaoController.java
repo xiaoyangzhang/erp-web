@@ -511,8 +511,8 @@ public class TaobaoController extends BaseController {
 		pm.put("myStoreId",authClient);
 		pm.put("curUserName",WebUtils.getCurrentUserSession(request).getName());
 		
-		pm.put("startMin",pm.get("startMin")+" 00:00:00");
-		pm.put("startMax",pm.get("startMax")+" 23:59:59");
+//		pm.put("startMin",pm.get("startMin")+" 00:00:00");
+//		pm.put("startMax",pm.get("startMax")+" 23:59:59");
 		
 		pageBean.setParameter(pm);
 		dto.setPageBean(pageBean);
