@@ -766,7 +766,7 @@ public class ResTrafficController extends BaseController{
 		}else{
 			pageBean.setPageSize(pageSize);
 		}
-		pageBean.setPage(page);
+//		pageBean.setPage(page);
 		Map<String,Object> pm  = WebUtils.getQueryParamters(request);
 		pageBean.setParameter(pm);
 //		pageBean=trafficResService.selectAirTicketProfitListPage(pageBean);
