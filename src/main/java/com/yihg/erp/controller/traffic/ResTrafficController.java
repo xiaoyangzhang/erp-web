@@ -861,7 +861,7 @@ public class ResTrafficController extends BaseController{
 		}else{
 			pageBean.setPageSize(pageSize);
 		}
-		pageBean.setPage(page);
+//		pageBean.setPage(page);
 		pageBean.setParameter(groupOrder);
 //		pageBean=groupOrderService.selectRoomExtrabedListPage(pageBean, WebUtils.getCurBizId(request));
 //
@@ -870,13 +870,14 @@ public class ResTrafficController extends BaseController{
 		model.addAttribute("sum", result.getMap());
 		model.addAttribute("pageBean", result.getPageBean());
 
-		TrafficResDTO var1 = new TrafficResDTO();
-		var1.setBizId(WebUtils.getCurBizId(request));
-		var1.setPage(page);
-		var1.setPageSize(pageSize);
-		TrafficAddResOrderResult trafficAddResOrderResult = resTrafficFacade.resRoomExtrabed_table(var1);
-		model.addAttribute("sum", trafficAddResOrderResult.getSumRoomExtrabed());
-		model.addAttribute("pageBean", trafficAddResOrderResult.getPageBean());
+//		TrafficResDTO var1 = new TrafficResDTO();
+//		var1.setBizId(WebUtils.getCurBizId(request));
+//		var1.setPage(page);
+//		var1.setPageSize(pageSize);
+//		var1.setPm();
+//		TrafficAddResOrderResult trafficAddResOrderResult = resTrafficFacade.resRoomExtrabed_table(var1);
+//		model.addAttribute("sum", trafficAddResOrderResult.getSumRoomExtrabed());
+//		model.addAttribute("pageBean", trafficAddResOrderResult.getPageBean());
 		return "resTraffic/resRoomExtrabed_table";
 	}
 
