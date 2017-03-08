@@ -779,12 +779,12 @@ public class ResTrafficController extends BaseController{
 //		pageBean.setResult(trafficRes);
 		pageBean = resTrafficFacade.selectAirTicketProfitList(pageBean);
 		model.addAttribute("pageBean", pageBean);
-		TrafficResDTO var1 = new TrafficResDTO();
-		var1.setPage(page);
-		var1.setPageSize(pageSize);
-		var1.setPm(WebUtils.getQueryParamters(request));
-		TrafficAddResOrderResult trafficAddResOrderResult = resTrafficFacade.airTicketProfit_table(var1);
-		model.addAttribute("pageBean", trafficAddResOrderResult.getPageBean());
+//		TrafficResDTO var1 = new TrafficResDTO();
+//		var1.setPage(page);
+//		var1.setPageSize(pageSize);
+//		var1.setPm(WebUtils.getQueryParamters(request));
+//		TrafficAddResOrderResult trafficAddResOrderResult = resTrafficFacade.airTicketProfit_table(var1);
+//		model.addAttribute("pageBean", trafficAddResOrderResult.getPageBean());
 
 		return "resTraffic/airTicketProfit_table";
 	}
