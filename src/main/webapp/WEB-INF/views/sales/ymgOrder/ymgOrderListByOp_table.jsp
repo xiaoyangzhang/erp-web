@@ -367,7 +367,7 @@ function changeType(id,type){
 	}, function() {
 		$.info('取消更改');
 	});
-
+}
     function insertGroupByList(){
 
         var chk_value = [];
