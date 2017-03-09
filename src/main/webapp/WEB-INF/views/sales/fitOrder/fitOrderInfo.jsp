@@ -1212,7 +1212,7 @@ $(function() {
 			  source: function( request, response ) {
 				  var name=encodeURIComponent(request.term);
 				  $.ajax({
-					  type : "get",
+					  type : "post",
 					  url : "<%=ctx%>/route/getNameList.do",
 					  data : {
 						  name : name
