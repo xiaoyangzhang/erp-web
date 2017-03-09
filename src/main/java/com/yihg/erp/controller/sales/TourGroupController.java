@@ -3914,6 +3914,7 @@ public class TourGroupController extends BaseController {
 					guestMap.put("sguestName", (guests.get(i).getName() == null ? "" : guests.get(i).getName()));
 					guestMap.put("scerNum",(guests.get(i).getCertificateNum() == null ? ""
 							: guests.get(i).getCertificateNum()));
+//					guestList.add(guestMap);
 				}
 				index++;
 			}
