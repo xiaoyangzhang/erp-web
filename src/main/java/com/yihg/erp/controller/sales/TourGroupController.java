@@ -13,10 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yihg.mybatis.utility.PageBean;
-import com.yimayhd.erpcenter.common.contants.BasicConstants;
 import com.yimayhd.erpcenter.dal.basic.po.DicInfo;
-import com.yimayhd.erpcenter.dal.basic.po.RegionInfo;
-import com.yimayhd.erpcenter.dal.product.constans.Constants;
 
 import com.yimayhd.erpcenter.dal.product.po.TrafficRes;
 import com.yimayhd.erpcenter.facade.basic.service.RegionFacade;
@@ -3790,10 +3787,10 @@ public class TourGroupController extends BaseController {
 	 * 旅游综合保障计划投保书
 	 * 
 	 * @param request
-	 * @param orderId
+	 * @param groupId
 	 * @return
 	 */
-	public String saleInsurance(HttpServletRequest request, Integer orderId) {
+	public String saleInsurance(HttpServletRequest request, Integer groupId) {
 		/*String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
 		GroupOrder groupOrder = groupOrderService.selectByPrimaryKey(orderId);
@@ -3849,8 +3846,9 @@ public class TourGroupController extends BaseController {
 
 		String url = request.getSession().getServletContext().getRealPath("/")
 				+ "/download/" + System.currentTimeMillis() + ".doc";
-		ToPreviewResult toPreviewResult = tourGroupFacade.saleInsurance(orderId, WebUtils.getCurBizId(request));
-		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		ToPreviewResult toPreviewResult = tourGroupFacade.saleInsurance(groupId, WebUtils.getCurBizId(request));
+//		GroupOrder groupOrder = toPreviewResult.getGroupOrder();
+		TourGroup tg = toPreviewResult.getTourGroup();
 		List<GroupOrderGuest> guests = toPreviewResult.getGuests();
 		GroupRoute groupRoute=toPreviewResult.getGroupRoute();
 		String realPath = request.getSession().getServletContext()
@@ -3863,23 +3861,23 @@ public class TourGroupController extends BaseController {
 		}
 		Map<String, Object> map0 = new HashMap<String, Object>();
 		map0.put("company", WebUtils.getCurBizInfo(request).getName()); // 当前单位
-		map0.put("groupCode", groupOrder.getTourGroup().getGroupCode());
+		map0.put("groupCode", tg.getGroupCode());
 //		map0.put("person",(groupOrder.getNumAdult()+groupOrder.getNumChild()+groupOrder.getNumGuide())+ "");
 //		map0.put("child", groupOrder.getNumChild()+ "");
 //		map0.put("departureDate", groupOrder.getDepartureDate());
-		map0.put("person",(groupOrder.getTourGroup().getTotalAdult()+groupOrder.getTourGroup().getTotalChild()+groupOrder.getTourGroup().getTotalGuide())+ "");
-		map0.put("child", groupOrder.getNumChild()+ "");
-		map0.put("departureDate", DateUtils.format(groupOrder.getTourGroup().getDateStart()));
+		map0.put("person",(tg.getTotalAdult() + tg.getTotalChild() + tg.getTotalGuide()) + "");
+		map0.put("child", tg.getTotalChild()+ "");
+		map0.put("departureDate", DateUtils.format(tg.getDateStart()));
 		map0.put("maxDay",groupRoute.getMaxDay() );
 		map0.put("numDay",groupRoute.getNumDay()+"");
 		map0.put("numNig",(groupRoute.getNumDay()-1)+"");
 //		map0.put("total", groupOrder.getTotal()+"");
-		map0.put("total", groupOrder.getTourGroup().getTotalIncome()+"");
+		map0.put("total", tg.getTotalIncome()+"");
 		map0.put("printTime", DateUtils.format(new Date()));
 		map0.put("operator",WebUtils.getCurUser(request).getName());
 		map0.put("opTel",WebUtils.getCurUser(request).getMobile());
 //		map0.put("guide", groupOrder.getNumGuide()+ "");
-		map0.put("guide", groupOrder.getTourGroup().getTotalIncome()+ "");
+		map0.put("guide", tg.getTotalGuide()+ "");
 
 		List<Map<String, String>> guestList = new ArrayList<Map<String, String>>();
 		Map<String, String> guestMap = null;

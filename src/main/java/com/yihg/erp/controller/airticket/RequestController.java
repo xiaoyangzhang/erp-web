@@ -203,6 +203,11 @@ public class RequestController extends BaseController {
 		TicketListResult result = requestFacade.ticketList(bizId, id);
 		model.addAttribute("resource", result.getResourceBo());
 		model.addAttribute("boList", result.getBoList());
+		try {
+			System.out.println(result.getResourceBo().getLegHtml());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 		return "airticket/ticket_list";
 	}
 	
