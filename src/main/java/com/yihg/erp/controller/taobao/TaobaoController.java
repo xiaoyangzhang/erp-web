@@ -3202,7 +3202,7 @@ public class TaobaoController extends BaseController {
     	  Integer bizId = WebUtils.getCurBizId(request);
     	  TaobaoOrderListByOpDTO taobaoOrderListByOpDTO =new TaobaoOrderListByOpDTO();
     	  taobaoOrderListByOpDTO.setBizId(bizId);
-    	  taobaoFacade.productProfitStatistics(taobaoOrderListByOpDTO);
+    	  taobaoOrderListByOpDTO=taobaoFacade.productProfitStatistics(taobaoOrderListByOpDTO);
           model.addAttribute("typeList", taobaoOrderListByOpDTO.getTypeList());
           model.addAttribute("orgJsonStr", taobaoOrderListByOpDTO.getOrgJsonStr());
           model.addAttribute("orgUserJsonStr",taobaoOrderListByOpDTO.getOrgUserJsonStr());
