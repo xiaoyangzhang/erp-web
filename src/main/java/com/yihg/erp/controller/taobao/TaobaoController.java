@@ -2288,6 +2288,7 @@ public class TaobaoController extends BaseController {
 		int bizId = WebUtils.getCurBizId(request);
 		addSivaInfoDTO.setBizId(bizId);
 		addSivaInfoDTO.setOrderId(orderId);
+		addSivaInfoDTO.setBookingDate(bookingDate);
 		AddSivaInfoDTO result = taobaoFacade.addSivaInfo(addSivaInfoDTO);
 
 		GroupOrder orderBean = result.getOrderBean();
