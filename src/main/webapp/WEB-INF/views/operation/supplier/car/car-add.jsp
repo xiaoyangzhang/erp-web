@@ -672,10 +672,11 @@ $(function(){
 			content : '<%=ctx%>/component/supplierList.htm?supplierType=4',
 			btn: ['确定', '取消'],
 			success:function(layero, index){
-				win = window[layero.find('iframe')[0]['name']];
+			    //win = window[layero.find('iframe')[0]['name']];
 			},
-			yes: function(index){
+			yes: function(index,lo){
 				//manArr返回的是联系人对象的数组
+                var win = lo.find('iframe')[0].contentWindow;
 				var arr = win.getChkedSupplier(); 				
 				if(arr.length==0){
 					$.warn("请选择车队 ");

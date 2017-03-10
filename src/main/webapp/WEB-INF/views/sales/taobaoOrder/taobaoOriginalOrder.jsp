@@ -217,7 +217,8 @@
                     <li><select name="isBrushSingle" id="isBrushSingle">
                         <option value=""  <c:if test="${isBrushSingle==''}">selected </c:if>>全部</option>
                         <option value="1" <c:if test="${isBrushSingle=='1'}">selected </c:if>>淘宝</option>
-                        <option value="0" <c:if test="${isBrushSingle=='0'}">selected </c:if>>正常下单</option>
+                        <option value="0" <c:if test="${isBrushSingle=='0'||isBrushSingle==null}">selected </c:if>>正常下单</option>
+
                     </select></li>
                     
                     <li class="text">店铺</li>
