@@ -751,7 +751,7 @@ public class QueryController extends BaseController {
 		 toOrdersPreviewDTO.setBizId(WebUtils.getCurBizId(request));
 		 toOrdersPreviewDTO.setParameters(parameters);
 		 toOrdersPreviewDTO.setUserIdSet(WebUtils.getDataUserIdSet(request));
-		 vo.setEndTime(null);
+//		 vo.setEndTime(null);
 		 pageBean.setParameter(vo);
 		 ToPaymentPreviewResult result = dataAnalysisFacade.toPaymentPreview(pageBean,toOrdersPreviewDTO);
 		 StringBuilder sb = new StringBuilder();
