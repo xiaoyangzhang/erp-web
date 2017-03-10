@@ -174,19 +174,19 @@ $(document).ready(function() {
 					</h2>					
 					<div id="order"	class="p_container_sub"></div>
 				</c:if>
-				<%--<c:if test="${shop.count > 0}">
+				<c:if test="${shop.count > 0}">
 					<h2>
 						<label>购物</label>
 					</h2>
 					<div id="shop" class="p_container_sub"></div>
 				</c:if>
-				
+
 				<c:if test="${comm.count > 0}">
 					<h2>
 						<label>佣金</label>
 					</h2>
 					<div id="comm" class="p_container_sub"></div>
-				</c:if>--%>
+				</c:if>
 				
 				<c:if test="${otherin.count > 0}">
 					<h2>

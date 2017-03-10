@@ -676,7 +676,7 @@ $(function(){
 			},
 			yes: function(index,lo){
 				//manArr返回的是联系人对象的数组
-//				frame.length;
+//				alert(frames[0].parent.location);
                 var win = lo.find('iframe')[0].contentWindow;
 				var arr = win.getChkedSupplier(); 				
 				if(arr.length==0){
