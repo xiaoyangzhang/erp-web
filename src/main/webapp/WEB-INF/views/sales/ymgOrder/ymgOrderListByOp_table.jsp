@@ -95,6 +95,7 @@
 					<c:if test="${groupOrder.groupState==2}"><span class="log_action delete">已废弃</span></c:if>
 					<c:if test="${groupOrder.groupState==3}"><span class="log_action update">已审核</span></c:if>
 					<c:if test="${groupOrder.groupState==4}"><span class="log_action fuchsia">已封存</span></c:if></c:if>
+				  <c:if test="${groupOrder.orderLockState == 3}"><span style="color:green">已锁单</span></c:if>
               </td>	
 
               <td>${groupOrder.saleOperatorName}</td>
@@ -109,7 +110,7 @@
 						  <c:if test="${groupOrder.orderLockState ne 0}">
 							  
 		              	  	  <!-- '1是锁单状态，0是解锁状态，默认0',\\'财务状态(0未审核、1已审核)' -->
-		              	      <c:if test="${groupOrder.stateFinance ne 1 and groupOrder.orderLockState ne 3}">
+		              	      <c:if test="${groupOrder.stateFinance ne 1 }">
 		              	  			<a href="javascript:void(0);" onclick="newWindow('编辑订单','ymg/toEditYMGOrder.htm?id=${groupOrder.id}&see=2')" class="def">编辑</a>
 			              	  	  <c:if test="${CHANGE_PRICE}">
 			              	  			<a href="javascript:void(0);" onclick="changePrice(${groupOrder.id})" class="def">改价格</a>
@@ -126,6 +127,12 @@
 						  </c:if>
 						  <c:if test="${groupOrder.orderLockState == 2 and groupOrder.stateFinance ne 1}">
 							<a href="javascript:void(0);" onclick="goBackOrderLockStateByOp(${groupOrder.id})" class="def">退回</a>
+						  </c:if>
+							  <c:if test="${groupOrder.orderLockState == 2}">
+								  <a href="javascript:void(0);" onclick="lockOrder(${groupOrder.id})" class="def">锁单</a>
+							  </c:if>
+							  <c:if test="${groupOrder.orderLockState == 3}">
+								  <a href="javascript:void(0);" onclick="unLockOrder(${groupOrder.id})" class="def">解锁</a>
 						  </c:if>
 						</c:if>
 						<c:if test="${groupOrder.type==0}">
@@ -264,7 +271,35 @@ function goBackOrderLockStateByOp(orderId){
 	$.info('操作取消！');
 	})
 }
+function lockOrder(orderId){
+    $.confirm("是否确认锁单？",  function(){
+        $.getJSON("../taobao/updateLockStateToFinance.do?orderId=" + orderId, function(data) {
+            if (data.success) {
+                $.success('操作成功',function(){
+                    layer.close(stateIndex);
+                    refershPage();
+                });
+            }
+        });
+    }, function(){
+        $.info('操作取消！');
+    })
+}
 
+function unLockOrder(orderId){
+    $.confirm("是否确认解锁？",  function(){
+        $.getJSON("../taobao/changeorderLockStateByOp.do?orderId=" + orderId, function(data) {
+            if (data.success) {
+                $.success('操作成功',function(){
+                    layer.close(stateIndex);
+                    refershPage();
+                });
+            }
+        });
+    }, function(){
+        $.info('操作取消！');
+    })
+}
 function changePrice(orderId){
 	layer.open({
 		type : 2,

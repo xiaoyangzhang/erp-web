@@ -137,12 +137,13 @@ document.onkeydown = function (e) {
 								<option value="0">未提交</option>
 								<option value="1">接收中</option>
 								<option value="2">已接收</option>
+							<option value="3">已锁单</option>
 							</select>
 						</li>
 						<li style="padding-left:10px">
 							<button id="order_btn_key" type="button" onclick="searchBtn()" class="button button-primary button-small">查询</button>
-							<a href="javascript:void(0);" id="toTaoBaoOperatorExcelId" target="_blank" onclick="toTaoBaoOperatorExcel()" class="button button-primary button-small">导出到Excel</a>
-							<a href="javascript:void(0);" id="toTaoBaoSummaryTableId" target="_blank" onclick="toTaoBaoSummaryTable()" class="button button-primary button-small">导出简表</a>
+							<%--<a href="javascript:void(0);" id="toTaoBaoOperatorExcelId" target="_blank" onclick="toTaoBaoOperatorExcel()" class="button button-primary button-small">导出到Excel</a>
+							<a href="javascript:void(0);" id="toTaoBaoSummaryTableId" target="_blank" onclick="toTaoBaoSummaryTable()" class="button button-primary button-small">导出简表</a>--%>
 						</li>
 						<li class="clear"></li>
 					</ul>

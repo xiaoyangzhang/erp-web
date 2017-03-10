@@ -196,21 +196,6 @@ public class RequestController extends BaseController {
 		return resourceBo;
 	}
 	
-	@RequestMapping("ticketList.htm")
-	/* @RequiresPermissions(PermissionConstants.AIR_TICKET_RESOURCE) */
-	public String ticketList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer id){
-		Integer bizId = WebUtils.getCurBizId(request);
-		TicketListResult result = requestFacade.ticketList(bizId, id);
-		model.addAttribute("resource", result.getResourceBo());
-		model.addAttribute("boList", result.getBoList());
-		try {
-			System.out.println(result.getResourceBo().getLegHtml());
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return "airticket/ticket_list";
-	}
-	
 	@RequestMapping("add.htm")
 	public String addRequest(HttpServletRequest request, HttpServletResponse reponse, ModelMap model){
 		return "airticket/request_edit";
@@ -219,7 +204,7 @@ public class RequestController extends BaseController {
 	@RequestMapping("edit.htm")
 	/* @RequiresPermissions(PermissionConstants.AIR_TICKET_RESOURCE) */
 	public String editRequest(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer id){
-		
+
 		EditRequestResult result = requestFacade.editRequest(WebUtils.getCurBizId(request), id);
 		model.addAttribute("bo", result.getBo());
 		model.addAttribute("resourceBo", result.getResourceBo());
@@ -227,16 +212,31 @@ public class RequestController extends BaseController {
 		model.addAttribute("inTicketList", result.getInTicketList());
 		return "airticket/request_edit";
 	}
-	
+
 	/* 添加接送机信息  */
 	@RequestMapping(value = "pickUpGuest.htm")
 	public String pickUpGuest(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer id){
-		
+
 		PickUpGuestResult result = requestFacade.pickUpGuest(WebUtils.getCurBizId(request), id);
 		model.addAttribute("bo", result.getBo());
 		model.addAttribute("resourceBo", result.getResourceBo());
 		model.addAttribute("existingTransport", result.getExistingTransport());
 		return "airticket/pick_up_guest";
+	}
+
+	@RequestMapping("ticketList.htm")
+	/* @RequiresPermissions(PermissionConstants.AIR_TICKET_RESOURCE) */
+	public String ticketList(HttpServletRequest request, HttpServletResponse reponse, ModelMap model, Integer id){
+		Integer bizId = WebUtils.getCurBizId(request);
+		TicketListResult result = requestFacade.ticketList(bizId, id);
+		model.addAttribute("resource", result.getResourceBo());
+		model.addAttribute("boList", result.getBoList());
+//		try {
+//			System.out.println(result.getResourceBo().getLegHtml());
+//		} catch (ParseException e) {
+//			e.printStackTrace();
+//		}
+		return "airticket/ticket_list";
 	}
 
 	@RequestMapping("checkBookingSupplier.do")
