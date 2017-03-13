@@ -348,16 +348,16 @@ public class ContractController extends BaseController{
         return "contract/contract_list";
     }
 
-    @RequestMapping("/fleet-list.htm")
+    @RequestMapping("/{supplierId}/fleet-list.htm")
     public String fleetList(HttpServletRequest request,
                             SupplierContract supplierContract,
-                            PageBean<SupplierContract> pageBean,Integer supplierId,
+                            PageBean<SupplierContract> pageBean,@PathVariable("supplierId") String supplierId,
                             Model model){
         pageBean.setPageSize(supplierContract.getPageSize());
         pageBean.setPage(supplierContract.getPage());
         pageBean.setParameter(supplierContract);
         Integer bizId = WebUtils.getCurBizId(request);
-        WebResult<PageBean> webResult =contractFacade.fleetList(bizId, pageBean, supplierId);
+        WebResult<PageBean> webResult =contractFacade.fleetList(bizId, pageBean, Integer.valueOf(supplierId));
         pageBean =webResult.getValue();
         model.addAttribute("page", pageBean);
         model.addAttribute("supplierType", Constants.FLEET);

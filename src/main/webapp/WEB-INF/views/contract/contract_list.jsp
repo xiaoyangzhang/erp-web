@@ -74,13 +74,13 @@
           //  },'question');
         };
 
-        var deleteFleetContract = function(contractId, contractName){
+        var deleteFleetContract = function(supplierId,contractId, contractName){
             $.confirm('确认要删除协议么？',function(){
                 var dialog = this;
                 $.ajax({
                     type : "post",
                     cache : false,
-                    url : path + "/contract/" + contractId + "/fleet-delete.do",
+                    url : path + "/contract/"+ contractId + "/fleet-delete.do",
                     dataType : 'json',
                     success : function(data) {
                         if (data.success) {
@@ -146,7 +146,7 @@
 		<div class="searchRow">
             <c:choose>
                 <c:when test="${supplierType eq FLEET }">
-                    <form id="queryForm"  action="<%=path%>/contract/fleet-list.htm" method="post">
+                    <form id="queryForm"  action="<%=path%>/contract/${supplierId}/fleet-list.htm" method="post">
                         <input type="hidden" name="page" value="${page.page}" id="searchPage" />
                         <input type="hidden" name="pageSize" value="${page.pageSize}" id="searchPageSize" />
                         <ul>
@@ -270,8 +270,8 @@
                         <c:when test="${supplierType == FLEET}">
                             <a class="def" onclick="newWindow('查看协议', '<%=path%>/contract/${contract.id}/fleet-view.htm')" href="javascript:void(0);">查看</a>&nbsp;
                             <a class="def" onclick="newWindow('修改协议', '<%=path%>/contract/${contract.id}/fleet-edit.htm')" href="javascript:void(0);">修改</a>&nbsp;
-                            <a class="def" onclick="deleteFleetContract('${contract.id}', '${contract.contractName}');" href="javascript:void(0);">删除</a>
-                            <a class="def" onclick="copyContract('-1', '${contract.id}', '${contract.contractName}');" href="javascript:void(0);">复制</a>
+                            <a class="def" onclick="deleteFleetContract('${supplierId}','${contract.id}', '${contract.contractName}');" href="javascript:void(0);">删除</a>
+                            <a class="def" onclick="copyContract('${supplierId}', '${contract.id}', '${contract.contractName}');" href="javascript:void(0);">复制</a>
                             <%--<a class="def" onclick="copyFleetContract('${contract.id}', '${contract.contractName}');" href="javascript:void(0);">复制</a>--%>
                         </c:when>
                         <c:otherwise>
