@@ -4385,29 +4385,27 @@ public class TourGroupController extends BaseController {
 
 	@RequestMapping(value = "toProfitExcel.do")
 	@ResponseBody
-	public void toProfitExcel(HttpServletRequest request, HttpServletResponse response, String startTime,
-							  String endTime, String groupCode, String receiveMode, String orgIds, Integer select, String saleOperatorIds,
-							  String productName, String supplierName, Integer provinceId, Integer cityId, String orderNo, Model model)
+	public void toProfitExcel(HttpServletRequest request, HttpServletResponse response, GroupOrder order, Model model)
 			throws ParseException {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		GroupOrder groupOrder = new GroupOrder();
-		TourGroup tourGroup = new TourGroup();
-		tourGroup.setGroupCode(groupCode);
-		tourGroup.setStartTime(sdf.parse(startTime));
-		tourGroup.setEndTime(sdf.parse(endTime));
-		tourGroup.setProductName(productName);
-		groupOrder.setTourGroup(tourGroup);
-		groupOrder.setSupplierName(supplierName);
-		groupOrder.setReceiveMode(receiveMode);
-		groupOrder.setOrgIds(orgIds);
-		groupOrder.setSelect(select);
-		groupOrder.setSaleOperatorIds(saleOperatorIds);
-		groupOrder.setProvinceId(provinceId);
-		groupOrder.setCityId(cityId);
-		groupOrder.setOrderNo(orderNo);
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//		GroupOrder groupOrder = new GroupOrder();
+//		TourGroup tourGroup = new TourGroup();
+//		tourGroup.setGroupCode(groupCode);
+//		tourGroup.setStartTime(sdf.parse(startTime));
+//		tourGroup.setEndTime(sdf.parse(endTime));
+//		tourGroup.setProductName(productName);
+//		groupOrder.setTourGroup(tourGroup);
+//		groupOrder.setSupplierName(supplierName);
+//		groupOrder.setReceiveMode(receiveMode);
+//		groupOrder.setOrgIds(orgIds);
+//		groupOrder.setSelect(select);
+//		groupOrder.setSaleOperatorIds(saleOperatorIds);
+//		groupOrder.setProvinceId(provinceId);
+//		groupOrder.setCityId(cityId);
+//		groupOrder.setOrderNo(orderNo);
 
 
-		ToProfitExcelResult result = tourGroupFacade.toProfitExcel(groupOrder,WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
+		ToProfitExcelResult result = tourGroupFacade.toProfitExcel(order,WebUtils.getCurBizId(request),WebUtils.getDataUserIdSet(request));
 		PageBean<GroupOrder> pageBean = result.getPageBean();
 		GroupOrder staticInfo = result.getStaticInfo();
 		GroupOrder groupOrderProfit = result.getGroupOrderProfit();
