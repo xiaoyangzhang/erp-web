@@ -182,7 +182,7 @@ div{ font-size:10pt !important; }
 					<tr><td  style="font-weight: bold;" align="left" >用房</td>
 						<td style="font-weight: bold;" align="left">${HotelLevel }&nbsp;${hotelNum }</td></tr>
 						<tr><td  style="font-weight: bold;" align="left" >接送信息</td>
-						<td style="font-weight: bold;" align="left">${up }<br/>${off }<br/${trans} }</td></tr>
+						<td style="font-weight: bold;" align="left">${up }<br/>${off }<br/>${trans}</td></tr>
 				</tbody>
 			</table>
 			<table style="width: 100%; border-collapse: collapse; margin: 0px"

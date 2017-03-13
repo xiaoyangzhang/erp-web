@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yimayhd.erpresource.dal.constants.Constants;
 import org.erpcenterFacade.common.client.query.DepartmentTuneQueryDTO;
 import org.erpcenterFacade.common.client.result.DepartmentTuneQueryResult;
 import org.erpcenterFacade.common.client.service.ProductCommonFacade;
@@ -471,10 +472,14 @@ public class FinanceGuideController extends BaseController {
 		QuerySettleListPageDTO dto = new QuerySettleListPageDTO();
 		dto.setBizId(WebUtils.getCurBizId(request));
 		dto.setOrgIds(group.getOrgIds());
-		if(page != null){
+		if(page == null){
+			dto.setPage(1);
+		}else {
 			dto.setPage(page);
 		}
-		if(pageSize != null){
+		if(pageSize == null){
+			dto.setPageSize(Constants.PAGESIZE);
+		}else {
 			dto.setPageSize(pageSize);
 		}
 		dto.setParamters(WebUtils.getQueryParamters(request));

@@ -1244,6 +1244,7 @@ public class BookingDeliveryController extends BaseController {
         // 房量总计
         String total = "";
 //        if (groupInfo != null && groupInfo.getGroupMode() < 1) {
+        orderMapList = new ArrayList<Map<String, String>>();
         if (groupInfo != null) {
 //            for (GroupOrder order : orderList) {
         	for (GroupOrderPrintPo gopp : gopps) {
@@ -1303,7 +1304,7 @@ public class BookingDeliveryController extends BaseController {
 		 */
             //如果是散客团
             
-            orderMapList = new ArrayList<Map<String, String>>();
+
             int i = 1;
             for (GroupOrderPrintPo po : gopps) {
                 Map<String, String> map = new HashMap<String, String>();
@@ -1327,7 +1328,7 @@ public class BookingDeliveryController extends BaseController {
         //如果是定制团
         String hotelInfo = "", trafficInfo = "";
         if (groupInfo != null && groupInfo.getGroupMode() > 0) {
-            orderMapList = new ArrayList<Map<String, String>>();
+//            orderMapList = new ArrayList<Map<String, String>>();
 //            Map parameters = new HashMap();
 //            parameters.put("groupId", groupInfo.getId());
 //            parameters.put("supplierId", null);
